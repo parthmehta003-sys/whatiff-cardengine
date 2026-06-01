@@ -324,32 +324,31 @@ function bestComboSecond(
   const cats = (Object.keys(user.monthlySpend) as SpendCategory[]).filter(
     (c) => (user.monthlySpend[c] ?? 0) > 0
   );
-  let best: { card: RankedCard; gain: number } | null = null;
+  const monthlyFor = (cids: SpendCategory[]) =>
+    cids.reduce((s, c) => s + (user.monthlySpend[c] ?? 0), 0);
+  let best: { card: RankedCard; assignments: Record<string, SpendCategory[]>; gain: number } | null = null;
   for (const cand of pool) {
     if (cand.cardId === primary.cardId) continue;
-    // Two-card setup: each category earns from whichever card earns more on it.
+    // Build assignments first — needed for routed-spend fee waivers below.
+    const assignments: Record<string, SpendCategory[]> = {
+      [primary.cardId]: [], [cand.cardId]: [],
+    };
     let comboValue = 0;
     for (const cat of cats) {
       const p = primary.earn.perCategory[cat]?.guaranteed ?? 0;
       const c = cand.earn.perCategory[cat]?.guaranteed ?? 0;
       comboValue += Math.max(p, c) * 12;
+      assignments[c > p ? cand.cardId : primary.cardId].push(cat);
     }
-    const comboNet = comboValue - primary.effectiveAnnualFee - cand.effectiveAnnualFee;
+    // Fee waivers use routed spend (same basis as comboLabel) so the gate and display agree.
+    const primaryFee = effectiveAnnualFee(primary.meta, monthlyFor(assignments[primary.cardId]) * 12);
+    const candFee    = effectiveAnnualFee(cand.meta,    monthlyFor(assignments[cand.cardId])    * 12);
+    const comboNet = comboValue - primaryFee - candFee;
     const gain = comboNet - primary.netGuaranteedPerYear;
-    if (!best || gain > best.gain) best = { card: cand, gain };
+    if (!best || gain > best.gain) best = { card: cand, assignments, gain };
   }
   if (!best || best.gain < COMBO_MIN_GAIN) return null;
-
-  // Build category assignments for the winning pair.
-  const assignments: Record<string, SpendCategory[]> = {
-    [primary.cardId]: [], [best.card.cardId]: [],
-  };
-  for (const cat of cats) {
-    const p = primary.earn.perCategory[cat]?.guaranteed ?? 0;
-    const c = best.card.earn.perCategory[cat]?.guaranteed ?? 0;
-    assignments[c > p ? best.card.cardId : primary.cardId].push(cat);
-  }
-  return { card: best.card, assignments, gain: best.gain };
+  return best;
 }
 
 function comboLabel(
