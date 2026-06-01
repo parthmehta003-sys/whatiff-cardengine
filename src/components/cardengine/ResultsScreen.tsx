@@ -82,18 +82,44 @@ export const ResultsScreen: React.FC<Props> = ({
       )}
 
       {/* combo label */}
-      {result.combo && (
-        <div className="wf-res-combo">
-          <span className="wf-res-combo-tag">best combo</span>
-          {result.combo.label}
-        </div>
-      )}
+      {result.combo && (() => {
+        const combo = result.combo!;
+        const cardContrib = (c: RankedCard) => {
+          const cats = combo.assignments[c.cardId] ?? [];
+          return cats.reduce((s, cat) => s + (c.earn.perCategory[cat]?.guaranteed ?? 0) * 12, 0);
+        };
+        return (
+          <div className="wf-res-combo">
+            <span className="wf-res-combo-tag">best combo</span>
+            <div className="wf-combo-rows">
+              {result.recommended.map((c) => {
+                const cats = combo.assignments[c.cardId] ?? [];
+                const contrib = cardContrib(c);
+                return (
+                  <div key={c.cardId} className="wf-combo-row">
+                    <div className="wf-combo-card-name">{c.meta.name}</div>
+                    <div className="wf-combo-cats">{cats.join(' · ')}</div>
+                    <div className="wf-combo-contrib">{inr(contrib)}/yr on these</div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="wf-combo-total">
+              Combined value {inr(combo.combinedAnnualValue)}
+              <span className="wf-combo-sep">−</span>fees {inr(combo.combinedFees)}
+              <span className="wf-combo-sep">=</span>
+              <span className="wf-combo-net">{inr(combo.netPerYear)}</span>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* recommended cards */}
       <div className="wf-res-cards">
         {result.recommended.map((c, i) => (
           <RecommendationCard
             key={c.cardId}
+            isInCombo={!!result.combo}
             card={c}
             monthlySpend={monthlySpend}
             rank={i + 1}
@@ -247,6 +273,14 @@ const css = `
 .wf-ot-punch b{color:#34d399;font-weight:800}
 .wf-res-combo{background:#0a1410;border:1px solid #1a6b46;border-radius:12px;padding:13px 15px;font-size:13px;color:#e4e4e7;line-height:1.55}
 .wf-res-combo-tag{display:inline-block;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#34d399;border:1px solid #1a6b46;border-radius:4px;padding:2px 6px;margin-right:8px}
+.wf-combo-rows{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.wf-combo-row{display:grid;grid-template-columns:1fr auto;column-gap:12px;row-gap:1px}
+.wf-combo-card-name{font-size:13px;font-weight:700;color:#fafafa}
+.wf-combo-cats{font-size:11.5px;color:#71717a;grid-column:1}
+.wf-combo-contrib{font-size:12.5px;font-weight:600;color:#34d399;grid-row:1/3;align-self:center;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.wf-combo-total{margin-top:11px;padding-top:10px;border-top:1px solid #1a3d28;font-size:13px;color:#a1a1aa;display:flex;align-items:baseline;flex-wrap:wrap;gap:5px}
+.wf-combo-sep{color:#3f3f46;font-weight:700}
+.wf-combo-net{font-size:15px;font-weight:800;color:#10b981;font-variant-numeric:tabular-nums;margin-left:2px}
 .wf-res-cards{display:flex;flex-direction:column;gap:13px}
 .wf-res-insights{display:flex;flex-direction:column;gap:8px}
 .wf-insight{background:#0c0c0e;border:1px solid #2a2a30;border-radius:11px;padding:11px 14px;font-size:12.5px;color:#d4d4d8;line-height:1.55}

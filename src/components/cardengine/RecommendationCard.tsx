@@ -59,13 +59,15 @@ interface Props {
   hackLine?: string;
   /** invite path text for invite-only cards (replaces Apply). */
   inviteHowTo?: string;
+  /** true when this card is part of a two-card combo — changes net label to "on its own" */
+  isInCombo?: boolean;
 }
 
 const FOREX_BENCHMARK = 3.5;
 
 export const RecommendationCard: React.FC<Props> = ({
   card, monthlySpend, rank, imageUrl, applyUrl, forexPct,
-  isTravelPriority, devaluation, whyItWorks, whatToWatch, hack, intelligence, narrative, onKnowMore, hackLine, inviteHowTo,
+  isTravelPriority, devaluation, whyItWorks, whatToWatch, hack, intelligence, narrative, onKnowMore, hackLine, inviteHowTo, isInCombo,
 }) => {
   const [open, setOpen] = useState(false);
   const [hackOpen, setHackOpen] = useState(false);
@@ -134,7 +136,7 @@ export const RecommendationCard: React.FC<Props> = ({
         </div>
 
         <div className="wf-rec-net">
-          <div className="wf-rec-net-label">annual net</div>
+          <div className="wf-rec-net-label">{isInCombo ? 'on its own' : 'annual net'}</div>
           <div className="wf-rec-net-val">{inr(card.netGuaranteedPerYear)}</div>
           {card.annualUpside > 0 && (
             <div className="wf-rec-net-up">+{inr(card.annualUpside)} portal upside</div>
