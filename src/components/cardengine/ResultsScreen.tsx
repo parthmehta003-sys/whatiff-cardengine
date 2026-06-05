@@ -36,11 +36,13 @@ interface Props {
   liquidity?: Map<string, { aprAnnualPct: number | null; emiConversionAprPct: number | null }>;
   /** the user's selected priority tiers — surfaced (never re-ranks). */
   priorities?: Priorities;
+  /** return to the previous step (priorities) with all inputs preserved. */
+  onBack?: () => void;
   onRestart?: () => void;
 }
 
 export const ResultsScreen: React.FC<Props> = ({
-  result, monthlySpend, isTravelPriority, devaluations, hacks, intelligence, narratives, onKnowMore, insights, baselineNet, liquidity, priorities, onRestart,
+  result, monthlySpend, isTravelPriority, devaluations, hacks, intelligence, narratives, onKnowMore, insights, baselineNet, liquidity, priorities, onBack, onRestart,
 }) => {
   const t = result.transparency;
   const journeyA = result.journey === 'owns_cards';
@@ -275,7 +277,12 @@ export const ResultsScreen: React.FC<Props> = ({
         </details>
       )}
 
-      {onRestart && <button className="wf-res-restart" onClick={onRestart}>Start over</button>}
+      {(onBack || onRestart) && (
+        <div className="wf-res-nav">
+          {onBack && <button className="wf-res-back" onClick={onBack}>Back</button>}
+          {onRestart && <button className="wf-res-restart" onClick={onRestart}>Start over</button>}
+        </div>
+      )}
     </div>
   );
 };
@@ -421,7 +428,11 @@ const css = `
 .wf-fold .wf-res-runners,.wf-fold .wf-res-transp,.wf-fold .wf-res-apr{padding:0}
 .wf-fold .wf-res-transp{background:transparent;border:none;border-radius:0}
 .wf-fold .wf-res-apr .wf-apr{border:none;background:transparent;padding:0}
-.wf-res-restart{background:#1c1c20;border:1px solid #2a2a30;color:#c4c4c8;font-family:inherit;font-size:13px;font-weight:600;padding:11px;border-radius:10px;cursor:pointer;margin-top:6px}
+.wf-res-nav{display:flex;gap:8px;margin-top:6px}
+/* Back is the primary go-tweak-inputs action; Start over is the destructive secondary. Equal width,
+   Back reads at least as prominent (brighter text/border) so it doesn't feel subordinate. */
+.wf-res-back{flex:1;background:#1c1c20;border:1px solid #3f3f46;color:#fafafa;font-family:inherit;font-size:13px;font-weight:700;padding:11px;border-radius:10px;cursor:pointer}
+.wf-res-restart{flex:1;background:#141417;border:1px solid #2a2a30;color:#a1a1aa;font-family:inherit;font-size:13px;font-weight:600;padding:11px;border-radius:10px;cursor:pointer}
 `;
 
 export default ResultsScreen;
