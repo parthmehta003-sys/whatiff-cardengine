@@ -26,7 +26,7 @@ export interface PriorityEval {
 const FOREX_BENCHMARK = 3.5;  // % — "typical" forex markup; below this is meaningfully low
 
 /** Human label for a priority key (matches PrioritySelector). */
-const LABEL: Record<PriorityKey, string> = {
+export const LABEL: Record<PriorityKey, string> = {
   Cashback: 'Cashback', Travel: 'Travel', Dining: 'Dining', Fuel: 'Fuel',
   Online: 'Online shopping', Lounge: 'Lounge access', Movies: 'Movies',
   Rewards: 'Rewards/points', Forex: 'Low forex',
@@ -204,4 +204,50 @@ export function evaluatePriorities(
     out.push({ key, tier, status, line });
   }
   return out;
+}
+
+// ── Alternative finder for a missed TOP priority ─────────────────────────────
+
+export interface AlternativeForPriority {
+  key: PriorityKey;            // the unmet/partial top priority
+  card: RankedCard;            // the alternative that covers it
+  optimalNet: number;          // X — recommended setup net/yr
+  altNet: number;              // Y — alternative card net/yr
+  costOfSwitch: number;        // X − Y (cost of switching away from the spend-optimal setup)
+  line: string;                // the priority line for the alt card (e.g. "Cashback card")
+}
+
+/**
+ * Find an alternative card that covers the user's TOP priority when the recommended setup misses it.
+ * DISPLAY-ONLY — never re-ranks, never auto-adds; `ranked` is read-only. Fires only for an
+ * unmet/partial TOP priority (secondary / nice-to-have are flagged, never substituted).
+ * Returns null unless a net-POSITIVE card in `ranked` actually MEETS the priority.
+ */
+export function findAlternativeForMissedTop(
+  priorities: Priorities | undefined,
+  ranked: RankedCard[],
+  recommended: RankedCard[],
+  optimalNet: number,
+  spend: MonthlySpend
+): AlternativeForPriority | null {
+  const key = priorities?.top;
+  if (!key) return null;
+  // Only act when the TOP priority is missed against the recommended setup.
+  const setupStatus = evalPriorityForSetup(key, recommended, spend).status;
+  if (setupStatus === 'met') return null;
+  // Scan ranked (already best-net-first) for the highest-net card that MEETS it and is net-positive.
+  for (const c of ranked) {
+    if (c.netGuaranteedPerYear <= 0) continue;            // never surface a net-negative card
+    if (recommended.some((r) => r.cardId === c.cardId)) continue; // an alt to the setup, not itself
+    const ev = evalPriorityForCard(key, c, spend);
+    if (ev.status !== 'met') continue;                    // met-only — no weak/partial alternatives
+    return {
+      key, card: c,
+      optimalNet: Math.round(optimalNet),
+      altNet: Math.round(c.netGuaranteedPerYear),
+      costOfSwitch: Math.round(optimalNet - c.netGuaranteedPerYear),
+      line: ev.line,
+    };
+  }
+  return null;
 }
