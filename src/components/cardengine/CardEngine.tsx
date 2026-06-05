@@ -187,6 +187,7 @@ export const CardEngine: React.FC<Props> = ({ db }) => {
             baselineNet={baselineNet}
             liquidity={liquidity}
             priorities={priorities}
+            onBack={() => setStep('priorities')}
             onRestart={restart}
           />
         )}
