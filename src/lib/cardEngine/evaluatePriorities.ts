@@ -131,13 +131,12 @@ function evalLounge(meta: CardMeta, spend: MonthlySpend):
     } else if (userPeriodSpend >= threshold) {
       res = {
         status: 'met',
-        line: `Lounge — ${qty}, unlocked by your ${inr(userPeriodSpend)}/${tPeriod ?? 'month'} spend`,
+        line: `Lounge — ${qty}, unlocked — you spend ${inr(userPeriodSpend)}/${tPeriod ?? 'month'} vs ${inr(threshold)} needed`,
       };
     } else {
       res = {
         status: 'partial',
-        line: `Lounge — ${qty} but needs ${inr(threshold)}/${tPeriod ?? 'month'} ` +
-              `(you spend ${inr(userPeriodSpend)}) — you won't unlock it`,
+        line: `Lounge — ${qty}, needs ${inr(threshold)}/${tPeriod ?? 'month'}, you spend ${inr(userPeriodSpend)} — you won't unlock it`,
       };
     }
     if (better(res.status, best?.status)) best = res;
