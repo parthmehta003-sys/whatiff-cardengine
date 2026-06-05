@@ -296,7 +296,7 @@ const css = `
   color:#c4b5fd;font-size:11.5px;font-weight:600;display:flex;align-items:center;gap:8px;line-height:1.35}
 .wf-rec-ribbon-ic{color:#a78bfa;font-size:13px;flex:0 0 auto}
 .wf-rec-head{display:flex;gap:14px;align-items:flex-start}
-.wf-rec-img{flex:0 0 78px;width:78px;height:50px;border-radius:8px;overflow:hidden;
+.wf-rec-img{flex:0 0 140px;width:140px;height:88px;border-radius:10px;overflow:hidden;
   background:#18181b;border:1px solid #27272a;display:flex;align-items:center;justify-content:center}
 .wf-rec-img img{width:100%;height:100%;object-fit:cover}
 .wf-rec-img-ph{font-size:20px;font-weight:800;color:#3f3f46}
