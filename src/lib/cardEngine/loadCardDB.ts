@@ -7,7 +7,9 @@
  */
 
 import type { EarnRow, SpendCategory, CapPeriod, RowType } from './computeEarn';
-import type { CardMeta, CategoryStrength } from './rankCards';
+import type {
+  CardMeta, CategoryStrength, LoungeStructured, MovieStructured,
+} from './rankCards';
 
 // ── Raw JSON shapes (as emitted by build_card_db.py) ─────────────────────────
 interface RawCard {
@@ -18,6 +20,8 @@ interface RawCard {
   aprAnnualPct: number | null; interestFreeDaysRetail: number | null;
   emiConversionAprPct: number | null; cashAdvanceFee: string | null;
   pros: string | null; cons: string | null; tips: string | null;
+  loungeStructured?: LoungeStructured | null;
+  movieStructured?: MovieStructured | null;
 }
 interface RawEarn {
   cardId: string; ladderId: string | null; category: string; rowType: string;
@@ -131,6 +135,9 @@ export function loadCardDB(raw: RawDB): LoadedCardDB {
       inviteOnly: !!c.inviteOnly,
       pros: c.pros ?? null,
       cons: c.cons ?? null,
+      loungeStructured: c.loungeStructured ?? null,
+      movieStructured: c.movieStructured ?? null,
+      // rewardType derived below, once earn rows are indexed.
     };
   });
   const cardById = new Map(cards.map((c) => [c.cardId, c]));
@@ -192,6 +199,17 @@ export function loadCardDB(raw: RawDB): LoadedCardDB {
     if (!earnByCard.has(c.cardId)) {
       throw new CardDBError(`Card ${c.cardId} has no earn rows.`);
     }
+  }
+
+  // Derive rewardType strictly from existing earn-row redemption data (no guessing).
+  // A card is 'cashback' when most of its guaranteed (non-excluded) earning redeems as direct
+  // cash — rewardUnit 'cashback%' or redemptionRoute 'cashback'. Otherwise it's a points/rewards card.
+  for (const c of cards) {
+    const rows = (earnByCard.get(c.cardId) ?? []).filter((r) => !r.excluded);
+    const cashRows = rows.filter(
+      (r) => r.rewardUnit === 'cashback%' || r.redemptionRoute === 'cashback'
+    ).length;
+    c.rewardType = rows.length > 0 && cashRows * 2 >= rows.length ? 'cashback' : 'points';
   }
 
   // CategoryStrength

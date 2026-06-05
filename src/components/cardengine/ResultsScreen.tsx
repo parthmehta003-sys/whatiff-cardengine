@@ -6,8 +6,9 @@
  * All numbers come from the engine via RankResult. Pure presentation.
  */
 import React from 'react';
-import type { RankResult, RankedCard, CardMeta } from '../../lib/cardEngine/rankCards';
+import type { RankResult, RankedCard, CardMeta, Priorities } from '../../lib/cardEngine/rankCards';
 import type { MonthlySpend } from '../../lib/cardEngine/computeEarn';
+import { evaluatePriorities, type PriorityEval } from '../../lib/cardEngine/evaluatePriorities';
 import RecommendationCard, { DevaluationFlag } from './RecommendationCard';
 import AprEmiCalculator from './AprEmiCalculator';
 import type { SelectedHack, SurfacedInsight } from '../../lib/cardEngine/selectHacks';
@@ -33,11 +34,13 @@ interface Props {
   /** Journey B "leaving on the table" baseline: a typical/median eligible card's net. */
   baselineNet?: number;
   liquidity?: Map<string, { aprAnnualPct: number | null; emiConversionAprPct: number | null }>;
+  /** the user's selected priority tiers — surfaced (never re-ranks). */
+  priorities?: Priorities;
   onRestart?: () => void;
 }
 
 export const ResultsScreen: React.FC<Props> = ({
-  result, monthlySpend, isTravelPriority, devaluations, hacks, intelligence, narratives, onKnowMore, insights, baselineNet, liquidity, onRestart,
+  result, monthlySpend, isTravelPriority, devaluations, hacks, intelligence, narratives, onKnowMore, insights, baselineNet, liquidity, priorities, onRestart,
 }) => {
   const t = result.transparency;
   const journeyA = result.journey === 'owns_cards';
@@ -50,6 +53,10 @@ export const ResultsScreen: React.FC<Props> = ({
   const heroNet = comboHero ? result.combo!.netPerYear : top?.netGuaranteedPerYear;
   const onTable = !journeyA && heroNet != null && baselineNet != null
     ? Math.round(heroNet - baselineNet) : null;
+
+  // Priorities surfacing — checks the recommended setup against what the user said they cared about.
+  // Display-only: never re-ranks. Evaluated across the whole recommended setup (single card or combo).
+  const priorityEvals = evaluatePriorities(priorities, result.recommended, monthlySpend);
 
   return (
     <div className="wf-res">
@@ -162,6 +169,11 @@ export const ResultsScreen: React.FC<Props> = ({
         ))}
       </div>
 
+      {/* Your priorities — supports the recommendation (not a competing verdict) */}
+      {priorityEvals.length > 0 && (
+        <PrioritiesSection evals={priorityEvals} />
+      )}
+
       {/* cross-cutting insights */}
       {insights && insights.length > 0 && (
         <div className="wf-res-insights">
@@ -269,6 +281,39 @@ const RunnerRow: React.FC<{ c: RankedCard; journeyA?: boolean; accent?: string }
   </div>
 );
 
+// ── Your priorities section ──────────────────────────────────────────────────
+const TIER_META: Record<PriorityEval['tier'], { label: string; cls: string }> = {
+  top: { label: 'Top priority', cls: 'wf-pri-top' },
+  secondary: { label: 'Secondary', cls: 'wf-pri-secondary' },
+  niceToHave: { label: 'Nice to have', cls: 'wf-pri-nice' },
+};
+const STATUS_GLYPH: Record<PriorityEval['status'], string> = { met: '✓', partial: '⚠', unmet: '✗' };
+
+const PrioritiesSection: React.FC<{ evals: PriorityEval[] }> = ({ evals }) => {
+  const order: PriorityEval['tier'][] = ['top', 'secondary', 'niceToHave'];
+  return (
+    <div className="wf-pri">
+      <div className="wf-pri-head">How this addresses your priorities</div>
+      {order.map((tier) => {
+        const rows = evals.filter((e) => e.tier === tier);
+        if (rows.length === 0) return null;
+        const meta = TIER_META[tier];
+        return (
+          <div key={tier} className={'wf-pri-tier ' + meta.cls}>
+            <div className="wf-pri-tlabel">{meta.label}</div>
+            {rows.map((e) => (
+              <div key={e.key} className={'wf-pri-row wf-pri-' + e.status}>
+                <span className="wf-pri-glyph">{STATUS_GLYPH[e.status]}</span>
+                <span className="wf-pri-line">{e.line}</span>
+              </div>
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 const css = `
 .wf-res{font-family:'DM Sans',system-ui,sans-serif;max-width:560px;margin:0 auto;color:#e4e4e7;display:flex;flex-direction:column;gap:13px}
 .wf-res-verdict{background:#0a1f16;border:1px solid #1a6b46;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:9px}
@@ -311,6 +356,23 @@ const css = `
 .wf-insight-tag{display:inline-block;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#06b6d4;border:1px solid #155e6b;border-radius:4px;padding:1px 6px;margin-right:8px}
 .wf-res-flat{background:#0c0c0e;border:1px solid #2a2a30;border-radius:11px;padding:12px 14px;font-size:12.5px;color:#c4c4c8;line-height:1.5}
 .wf-res-sub{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#a1a1aa;margin-top:8px}
+/* Your priorities — a supporting panel, deliberately quieter than the recommendation cards. */
+.wf-pri{background:#0c0c0e;border:1px solid #232329;border-radius:12px;padding:15px 16px}
+.wf-pri-head{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#8b8b93;margin-bottom:12px}
+.wf-pri-tier{margin-bottom:12px}
+.wf-pri-tier:last-child{margin-bottom:0}
+.wf-pri-tlabel{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#6b6b73;margin-bottom:6px}
+.wf-pri-row{display:flex;align-items:baseline;gap:9px;padding:3px 0}
+.wf-pri-glyph{font-weight:800;font-size:13px;line-height:1.4;flex:none;width:14px}
+.wf-pri-line{font-size:13px;color:#d4d4d8;line-height:1.45}
+.wf-pri-met .wf-pri-glyph{color:#10b981}
+.wf-pri-partial .wf-pri-glyph{color:#f59e0b}
+.wf-pri-unmet .wf-pri-glyph{color:#71717a}
+.wf-pri-unmet .wf-pri-line{color:#a1a1aa}
+/* Top tier reads a touch stronger; secondary/nice progressively quieter. */
+.wf-pri-top .wf-pri-line{font-size:13.5px;color:#e4e4e7}
+.wf-pri-secondary .wf-pri-line{font-size:12.5px}
+.wf-pri-nice .wf-pri-tlabel,.wf-pri-nice .wf-pri-line{font-size:12px;color:#8b8b93}
 .wf-res-runners{display:flex;flex-direction:column;gap:7px}
 .wf-runner{display:flex;justify-content:space-between;align-items:center;background:#0e0e11;border:1px solid #2a2a30;border-radius:11px;padding:13px 15px}
 .wf-runner-name{font-size:14px;font-weight:600;color:#fafafa;display:flex;align-items:center;gap:7px}
