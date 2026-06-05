@@ -24,6 +24,35 @@ import {
 // Types
 // ────────────────────────────────────────────────────────────────────────────
 
+/** One lounge-access block (domestic / international / railway). null when the card has none. */
+export interface LoungeBlock {
+  visits: number | null;          // visits per visitPeriod; null when unlimited or unspecified
+  visitPeriod: string | null;     // 'month' | 'quarter' | 'year' | null
+  spendThreshold: number | null;  // ₹ to UNLOCK access in thresholdPeriod; 0/null = no condition
+  thresholdPeriod: string | null; // 'month' | 'quarter' | 'year' | null
+  unlimited: boolean;
+}
+
+/** Structured lounge access (from cardDB.json). Each block is null if the card lacks it. */
+export interface LoungeStructured {
+  domestic: LoungeBlock | null;
+  international: LoungeBlock | null;
+  railway: LoungeBlock | null;
+}
+
+/** Structured movie benefit (from cardDB.json). */
+export interface MovieStructured {
+  type: 'BOGO' | 'DISCOUNT' | 'ANNUAL_VALUE' | 'NONE';
+  valuePerUse: number | null;
+  frequency: string | null;       // 'per_month' | 'per_year' | ...
+  usesPerPeriod: number | null;
+  annualValue: number | null;
+  annualValueComputed: number | null; // ₹/yr value the engine should surface
+}
+
+/** Whether the card's guaranteed earning redeems as direct cashback or as points/rewards. */
+export type RewardType = 'cashback' | 'points';
+
 export interface CardMeta {
   cardId: string;
   ladderId: string;
@@ -42,6 +71,11 @@ export interface CardMeta {
   cons?: string | null;
   imageUrl?: string;
   applyUrl?: string;
+  /** Structured benefit data (display/priority layer only — never feeds ranking math). */
+  loungeStructured?: LoungeStructured | null;
+  movieStructured?: MovieStructured | null;
+  /** Derived in the loader from earn-row redemption data. Read-only display signal. */
+  rewardType?: RewardType;
 }
 
 /** 1-10 editorial scores from CATEGORY_STRENGTHS. Tiebreak only — never primary ranking. */

@@ -180,6 +180,7 @@ export const CardEngine: React.FC<Props> = ({ db }) => {
             onKnowMore={(cardId) => setKnowMoreCardId(cardId)}
             baselineNet={baselineNet}
             liquidity={liquidity}
+            priorities={priorities}
             onRestart={restart}
           />
         )}
