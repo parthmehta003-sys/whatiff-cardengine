@@ -8,7 +8,7 @@
 import React from 'react';
 import type { RankResult, RankedCard, CardMeta, Priorities } from '../../lib/cardEngine/rankCards';
 import type { MonthlySpend } from '../../lib/cardEngine/computeEarn';
-import { evaluatePriorities, type PriorityEval } from '../../lib/cardEngine/evaluatePriorities';
+import { evaluatePriorities, findAlternativeForMissedTop, LABEL, type PriorityEval } from '../../lib/cardEngine/evaluatePriorities';
 import RecommendationCard, { DevaluationFlag } from './RecommendationCard';
 import AprEmiCalculator from './AprEmiCalculator';
 import type { SelectedHack, SurfacedInsight } from '../../lib/cardEngine/selectHacks';
@@ -57,6 +57,10 @@ export const ResultsScreen: React.FC<Props> = ({
   // Priorities surfacing — checks the recommended setup against what the user said they cared about.
   // Display-only: never re-ranks. Evaluated across the whole recommended setup (single card or combo).
   const priorityEvals = evaluatePriorities(priorities, result.recommended, monthlySpend);
+  // When the TOP priority is missed, surface (display-only) a net-positive alternative that covers it.
+  const altForTop = findAlternativeForMissedTop(
+    priorities, result.ranked, result.recommended, heroNet ?? 0, monthlySpend
+  );
 
   return (
     <div className="wf-res">
@@ -172,6 +176,15 @@ export const ResultsScreen: React.FC<Props> = ({
       {/* Your priorities — supports the recommendation (not a competing verdict) */}
       {priorityEvals.length > 0 && (
         <PrioritiesSection evals={priorityEvals} />
+      )}
+
+      {/* Trade-off when the TOP priority is missed — informational, never re-ranks */}
+      {altForTop && (
+        <div className="wf-pri-alt">
+          Your optimal setup earns <b>{inr(altForTop.optimalNet)}</b>. The closest setup that covers{' '}
+          {LABEL[altForTop.key]} is <b>{altForTop.card.meta.name}</b>, earning {inr(altForTop.altNet)}{' '}
+          — that&rsquo;s <b>{inr(altForTop.costOfSwitch)} less</b>. Your call.
+        </div>
       )}
 
       {/* cross-cutting insights */}
@@ -373,6 +386,9 @@ const css = `
 .wf-pri-top .wf-pri-line{font-size:13.5px;color:#e4e4e7}
 .wf-pri-secondary .wf-pri-line{font-size:12.5px}
 .wf-pri-nice .wf-pri-tlabel,.wf-pri-nice .wf-pri-line{font-size:12px;color:#8b8b93}
+/* Missed-top-priority trade-off — an informational note, not a competing call to action. */
+.wf-pri-alt{background:#0c0c0e;border:1px solid #232329;border-left:2px solid #f59e0b;border-radius:10px;padding:12px 14px;font-size:12.5px;color:#c4c4c8;line-height:1.5}
+.wf-pri-alt b{color:#e4e4e7;font-weight:700}
 .wf-res-runners{display:flex;flex-direction:column;gap:7px}
 .wf-runner{display:flex;justify-content:space-between;align-items:center;background:#0e0e11;border:1px solid #2a2a30;border-radius:11px;padding:13px 15px}
 .wf-runner-name{font-size:14px;font-weight:600;color:#fafafa;display:flex;align-items:center;gap:7px}
