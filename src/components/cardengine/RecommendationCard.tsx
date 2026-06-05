@@ -16,6 +16,7 @@ import React, { useState } from 'react';
 import type { RankedCard } from '../../lib/cardEngine/rankCards';
 import type { SpendCategory } from '../../lib/cardEngine/computeEarn';
 import CardMathBreakdown from './CardMathBreakdown';
+import CardTile from './CardTile';
 
 const inr = (n: number) => '₹' + Math.round(n).toLocaleString('en-IN');
 
@@ -113,7 +114,7 @@ export const RecommendationCard: React.FC<Props> = ({
       {/* header: image + identity + net */}
       <div className="wf-rec-head">
         <div className="wf-rec-img">
-          {imageUrl ? <img src={imageUrl} alt={m.name} /> : <div className="wf-rec-img-ph">{m.bank?.[0] ?? '·'}</div>}
+          <CardTile cardName={m.name} issuer={m.bank} />
         </div>
 
         <div className="wf-rec-id">

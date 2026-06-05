@@ -26,6 +26,7 @@ import ProfileInput, { ProfileValues } from './ProfileInput';
 import PrioritySelector from './PrioritySelector';
 import ResultsScreen from './ResultsScreen';
 import ProsConsDetail from './ProsConsDetail';
+import CardTileGallery from './CardTileGallery';
 
 type Step = 'journey' | 'owned' | 'spend' | 'profile' | 'priorities' | 'results';
 
@@ -122,6 +123,11 @@ export const CardEngine: React.FC<Props> = ({ db }) => {
     if (nets.length < 3) return undefined;
     return nets[Math.floor(nets.length / 2)];
   }, [result]);
+
+  // DEV-ONLY: tile verification gallery, gated behind the #tiles hash. Remove once verified.
+  if (typeof window !== 'undefined' && window.location.hash === '#tiles') {
+    return <CardTileGallery cards={db.cards} />;
+  }
 
   return (
     <div className="wf-shell">
