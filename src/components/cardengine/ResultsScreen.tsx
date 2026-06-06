@@ -425,8 +425,9 @@ const css = `
 .wf-fold[open]>summary:after{transform:rotate(180deg)}
 .wf-fold[open]>summary{border-bottom:1px solid #1f1f23}
 .wf-fold>*:not(summary){padding:14px 16px}
-.wf-fold .wf-res-runners,.wf-fold .wf-res-transp,.wf-fold .wf-res-apr{padding:0}
-.wf-fold .wf-res-transp{background:transparent;border:none;border-radius:0}
+.wf-fold .wf-res-runners{padding:0}
+.wf-fold .wf-res-transp{background:transparent;border:none;border-radius:0;padding:14px 16px}
+.wf-fold .wf-res-apr{padding:14px 16px}
 .wf-fold .wf-res-apr .wf-apr{border:none;background:transparent;padding:0}
 .wf-res-nav{display:flex;gap:8px;margin-top:6px}
 /* Back is the primary go-tweak-inputs action; Start over is the destructive secondary. Equal width,
