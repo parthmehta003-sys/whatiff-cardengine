@@ -93,7 +93,6 @@ export const ProsConsDetail: React.FC<Props> = ({ cardName, rawPros, rawCons, on
         </div>
 
         <div className="wf-pcd-body">
-          <div className="wf-pcd-body-inner">
           {(tab === 'pros' ? pros : cons).length === 0 ? (
             <div className="wf-pcd-empty">No details listed.</div>
           ) : (
@@ -108,8 +107,6 @@ export const ProsConsDetail: React.FC<Props> = ({ cardName, rawPros, rawCons, on
               </details>
             ))
           )}
-          </div>
-          <div className="wf-pcd-fade" aria-hidden="true" />
         </div>
 
         <div className="wf-pcd-foot">
@@ -137,10 +134,10 @@ const css = `
   font-size:13px;font-weight:700;padding:10px;border-radius:9px;cursor:pointer;transition:.12s}
 .wf-pcd-tabs button.on.wf-pcd-tab-pro{background:#0a1410;border-color:#10b981;color:#34d399}
 .wf-pcd-tabs button.on.wf-pcd-tab-con{background:#1a1206;border-color:#b45309;color:#fbbf24}
-.wf-pcd-body{padding:14px 18px 0;overflow-y:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
-.wf-pcd-body-inner{display:flex;flex-direction:column;gap:8px;padding-bottom:14px}
-.wf-pcd-fade{position:sticky;bottom:0;height:40px;margin-top:-40px;flex-shrink:0;pointer-events:none;
-  background:linear-gradient(to bottom,transparent,#0c0c0e)}
+.wf-pcd-body{padding:14px 18px;overflow-y:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;
+  background:
+    linear-gradient(to bottom,transparent,#0c0c0e) 0 100%/100% 48px no-repeat local,
+    linear-gradient(to bottom,transparent,#0c0c0e) 0 100%/100% 48px no-repeat scroll}
 .wf-pcd-group{background:#111113;border:1px solid #1f1f23;border-radius:10px;overflow:hidden}
 .wf-pcd-group>summary{list-style:none;cursor:pointer;padding:12px 14px;font-size:12.5px;font-weight:700;
   text-transform:uppercase;letter-spacing:.03em;color:#e4e4e7;display:flex;align-items:center;
