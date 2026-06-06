@@ -36,6 +36,7 @@ interface Props { db: LoadedCardDB; }
 export const CardEngine: React.FC<Props> = ({ db }) => {
   const [step, setStep] = useState<Step>('journey');
   const [journey, setJourney] = useState<Journey>('new_card');
+  const [journeyChosen, setJourneyChosen] = useState(false);
   const [ownedIds, setOwnedIds] = useState<string[]>([]);
   const [spend, setSpend] = useState<MonthlySpend>({});
   const [profile, setProfile] = useState<ProfileValues | null>(null);
@@ -79,7 +80,7 @@ export const CardEngine: React.FC<Props> = ({ db }) => {
   }, [step, profile, spend, priorities, journey, ownedIds, db]);
 
   const restart = () => {
-    setStep('journey'); setOwnedIds([]); setSpend({}); setProfile(null); setPriorities({});
+    setStep('journey'); setJourneyChosen(false); setOwnedIds([]); setSpend({}); setProfile(null); setPriorities({});
   };
 
   // Hacks, insights, and the Journey-B "leaving on the table" baseline — derived from the result.
@@ -143,7 +144,10 @@ export const CardEngine: React.FC<Props> = ({ db }) => {
           <StepBar step={step} journey={journey} />
           <div className="wf-shell-body">
             {step === 'journey' && (
-              <JourneySelector onSelect={(j) => { setJourney(j); setStep(j === 'owns_cards' ? 'owned' : 'spend'); }} />
+              <JourneySelector
+                selectedJourney={journeyChosen ? journey : undefined}
+                onSelect={(j) => { setJourney(j); setJourneyChosen(true); setStep(j === 'owns_cards' ? 'owned' : 'spend'); }}
+              />
             )}
             {step === 'owned' && (
               <OwnedCardSelector

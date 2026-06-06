@@ -170,10 +170,10 @@ const css = `
 .wf-pcd-section{padding-bottom:20px}
 .wf-pcd-section:not(.first){border-top:1px solid #1a1a1e;padding-top:18px}
 
-/* Section heading */
+/* Section heading — indent matches item text (past the bullet) */
 .wf-pcd-sh{
   font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-  color:#52525b;margin-bottom:10px}
+  color:#52525b;margin-bottom:10px;padding-left:18px}
 
 /* Item rows */
 .wf-pcd-items{display:flex;flex-direction:column;gap:8px}

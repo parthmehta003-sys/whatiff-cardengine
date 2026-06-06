@@ -8,9 +8,12 @@
 import React from 'react';
 import type { Journey } from '../../lib/cardEngine/rankCards';
 
-interface Props { onSelect: (j: Journey) => void; }
+interface Props {
+  onSelect: (j: Journey) => void;
+  selectedJourney?: Journey;
+}
 
-export const JourneySelector: React.FC<Props> = ({ onSelect }) => (
+export const JourneySelector: React.FC<Props> = ({ onSelect, selectedJourney }) => (
   <div className="wf-js">
     <style>{css}</style>
     <div className="wf-js-kicker">WhatIff Card Engine</div>
@@ -20,14 +23,20 @@ export const JourneySelector: React.FC<Props> = ({ onSelect }) => (
     </p>
 
     <div className="wf-js-cards">
-      <button className="wf-js-card wf-js-b" onClick={() => onSelect('new_card')}>
+      <button
+        className={'wf-js-card wf-js-b' + (selectedJourney === 'new_card' ? ' selected' : '')}
+        onClick={() => onSelect('new_card')}
+      >
         <span className="wf-js-emoji">✦</span>
         <span className="wf-js-h">I want a new card</span>
         <span className="wf-js-d">First card, or adding one. We&rsquo;ll rank the best fits for your spend.</span>
         <span className="wf-js-go">Get matched →</span>
       </button>
 
-      <button className="wf-js-card wf-js-a" onClick={() => onSelect('owns_cards')}>
+      <button
+        className={'wf-js-card wf-js-a' + (selectedJourney === 'owns_cards' ? ' selected' : '')}
+        onClick={() => onSelect('owns_cards')}
+      >
         <span className="wf-js-emoji">↻</span>
         <span className="wf-js-h">I already have card(s)</span>
         <span className="wf-js-d">Are yours right for your spending — or are you leaving money on the table?</span>
@@ -46,10 +55,10 @@ const css = `
 .wf-js-sub{font-size:14px;color:#a1a1aa;line-height:1.55;margin:0 auto 28px;max-width:430px}
 .wf-js-cards{display:flex;flex-direction:column;gap:12px;text-align:left}
 .wf-js-card{display:flex;flex-direction:column;background:#0c0c0e;border:1px solid #1f1f23;border-radius:16px;
-  padding:20px;cursor:pointer;font-family:inherit;transition:border-color .15s,transform .1s,background .15s;position:relative}
+  padding:20px;cursor:pointer;font-family:inherit;transition:border-color .15s,transform .1s,background .15s,box-shadow .15s;position:relative}
 .wf-js-card:hover{transform:translateY(-2px)}
-.wf-js-b:hover{border-color:#10b981;background:#0a1410}
-.wf-js-a:hover{border-color:#8b5cf6;background:#100c1a}
+.wf-js-b:hover,.wf-js-b:active,.wf-js-b.selected{border-color:#10b981;background:#0a1410;box-shadow:0 0 0 1px #10b98133,0 0 14px #10b98122}
+.wf-js-a:hover,.wf-js-a:active,.wf-js-a.selected{border-color:#8b5cf6;background:#100c1a;box-shadow:0 0 0 1px #8b5cf633,0 0 14px #8b5cf622}
 .wf-js-emoji{font-size:22px;margin-bottom:10px}
 .wf-js-b .wf-js-emoji{color:#10b981}.wf-js-a .wf-js-emoji{color:#8b5cf6}
 .wf-js-h{font-size:18px;font-weight:700;color:#fafafa;margin-bottom:5px}
