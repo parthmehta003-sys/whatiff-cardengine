@@ -85,7 +85,7 @@ export interface CategoryStrength {
   Grocery: number; International: number; Overall: number;
 }
 
-export type FeeTolerance = 'ltf_only' | 'upto_1000' | 'upto_5000' | 'any';
+export type FeeTolerance = 'ltf_only' | 'upto_500' | 'upto_1000' | 'upto_5000' | 'above_5000';
 export type EmploymentType = 'salaried' | 'self_employed';
 
 export type PriorityKey =
@@ -199,7 +199,7 @@ const PRIORITY_TO_STRENGTH: Record<PriorityKey, keyof CategoryStrength | null> =
 // ────────────────────────────────────────────────────────────────────────────
 
 const FEE_TIER_LIMIT: Record<FeeTolerance, number> = {
-  ltf_only: 0, upto_1000: 1000, upto_5000: 5000, any: Infinity,
+  ltf_only: 0, upto_500: 500, upto_1000: 1000, upto_5000: 5000, above_5000: Infinity,
 };
 
 function incomeOk(meta: CardMeta, user: UserInput): boolean {

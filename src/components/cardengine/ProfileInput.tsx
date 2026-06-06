@@ -20,16 +20,17 @@ interface Props {
 }
 
 const FEE_OPTS: { key: FeeTolerance; label: string }[] = [
-  { key: 'ltf_only', label: 'Lifetime Free only' },
-  { key: 'upto_1000', label: 'Up to ₹1,000' },
-  { key: 'upto_5000', label: 'Up to ₹5,000' },
-  { key: 'any', label: 'Any fee' },
+  { key: 'ltf_only',   label: 'Free' },
+  { key: 'upto_500',   label: 'Up to ₹500' },
+  { key: 'upto_1000',  label: 'Up to ₹1,000' },
+  { key: 'upto_5000',  label: '₹1,000–₹5,000' },
+  { key: 'above_5000', label: '₹5,000+' },
 ];
 
 export const ProfileInput: React.FC<Props> = ({ initial, onContinue, onBack }) => {
   const [income, setIncome] = useState(initial?.inHandMonthlyIncome ?? 0);
   const [emp, setEmp] = useState<EmploymentType>(initial?.employmentType ?? 'salaried');
-  const [fee, setFee] = useState<FeeTolerance>(initial?.feeTolerance ?? 'any');
+  const [fee, setFee] = useState<FeeTolerance>(initial?.feeTolerance ?? 'above_5000');
   const [scoreKnown, setScoreKnown] = useState<boolean | null>(initial?.creditScore != null ? true : null);
   const [score, setScore] = useState(initial?.creditScore ?? 750);
 
@@ -56,7 +57,7 @@ export const ProfileInput: React.FC<Props> = ({ initial, onContinue, onBack }) =
       </div>
 
       <label className="wf-pf-l">Annual fee comfort</label>
-      <div className="wf-pf-seg wf-pf-seg4">
+      <div className="wf-pf-seg">
         {FEE_OPTS.map((o) => (
           <button key={o.key} className={fee === o.key ? 'on' : ''} onClick={() => setFee(o.key)}>{o.label}</button>
         ))}
@@ -104,8 +105,7 @@ const css = `
 .wf-pf-money input{flex:1;background:transparent;border:none;outline:none;color:#fafafa;font-family:inherit;
   font-size:16px;font-weight:600;padding:13px 0}
 .wf-pf-money input::-webkit-outer-spin-button,.wf-pf-money input::-webkit-inner-spin-button{-webkit-appearance:none}
-.wf-pf-seg{display:flex;gap:7px}
-.wf-pf-seg4{flex-wrap:wrap}
+.wf-pf-seg{display:flex;gap:7px;flex-wrap:wrap}
 .wf-pf-seg button{flex:1;min-width:fit-content;background:#111113;border:1px solid #27272a;color:#a1a1aa;
   font-family:inherit;font-size:13px;font-weight:600;padding:11px;border-radius:9px;cursor:pointer;transition:.15s;white-space:nowrap}
 .wf-pf-seg button.on{background:#0a1410;border-color:#10b981;color:#34d399}

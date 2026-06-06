@@ -20,10 +20,11 @@ const CAT_SHORT: Record<string, string> = {
 };
 
 const FEE_LABEL: Record<string, string> = {
-  ltf_only:   'Lifetime Free only',
+  ltf_only:   'Free',
+  upto_500:   'Up to ₹500',
   upto_1000:  'Up to ₹1,000',
-  upto_5000:  'Up to ₹5,000',
-  any:        'Any fee',
+  upto_5000:  '₹1,000–₹5,000',
+  above_5000: '₹5,000+',
 };
 
 const EMP_LABEL: Record<string, string> = {
