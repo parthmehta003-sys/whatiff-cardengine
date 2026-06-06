@@ -18,6 +18,7 @@ import type { MonthlySpend } from '../../lib/cardEngine/computeEarn';
 import type { DevaluationFlag } from './RecommendationCard';
 import { selectHackForCard, surfaceInsights, cardIntelligence, type SelectedHack } from '../../lib/cardEngine/selectHacks';
 import { buildCardNarrative, type CardNarrative } from '../../lib/cardEngine/cardNarrative';
+import { findAlternativeForMissedTop, type AlternativeForPriority } from '../../lib/cardEngine/evaluatePriorities';
 
 import JourneySelector from './JourneySelector';
 import OwnedCardSelector from './OwnedCardSelector';
@@ -83,16 +84,29 @@ export const CardEngine: React.FC<Props> = ({ db }) => {
     setStep('journey'); setJourneyChosen(false); setOwnedIds([]); setSpend({}); setProfile(null); setPriorities({});
   };
 
+  // Alt card for missed top priority — computed once here so memo loops can include it.
+  const altForTop = useMemo((): AlternativeForPriority | null => {
+    if (!result) return null;
+    const journeyA = result.journey === 'owns_cards';
+    const comboHero = !journeyA && !!result.combo;
+    const heroNet = comboHero ? result.combo!.netPerYear : (result.recommended[0]?.netGuaranteedPerYear ?? 0);
+    return findAlternativeForMissedTop(priorities, result.ranked, result.recommended, heroNet, spend);
+  }, [result, priorities, spend]);
+
   // Hacks, insights, and the Journey-B "leaving on the table" baseline — derived from the result.
   const totalMonthly = Object.values(spend).reduce((s, v) => s + (v ?? 0), 0);
   const hacks = useMemo(() => {
     if (!result) return {};
     const map: Record<string, SelectedHack | null> = {};
-    for (const c of result.recommended) {
+    const cards = [...result.recommended];
+    if (altForTop && !result.recommended.some((c) => c.cardId === altForTop.card.cardId)) {
+      cards.push(altForTop.card);
+    }
+    for (const c of cards) {
       map[c.cardId] = selectHackForCard(c.cardId, db.hacks, db.warnings, spend, totalMonthly);
     }
     return map;
-  }, [result, db.hacks, db.warnings, spend, totalMonthly]);
+  }, [result, altForTop, db.hacks, db.warnings, spend, totalMonthly]);
 
   const insights = useMemo(
     () => (result ? surfaceInsights(db.insights, spend, priorities) : []),
@@ -102,21 +116,29 @@ export const CardEngine: React.FC<Props> = ({ db }) => {
   const intelligence = useMemo(() => {
     if (!result) return {};
     const map: Record<string, { type: string; text: string; severity?: string | null }[]> = {};
-    for (const c of result.recommended) {
+    const cards = [...result.recommended];
+    if (altForTop && !result.recommended.some((c) => c.cardId === altForTop.card.cardId)) {
+      cards.push(altForTop.card);
+    }
+    for (const c of cards) {
       const items = cardIntelligence(c.cardId, db.warnings, db.intelligence);
       if (items.length) map[c.cardId] = items;
     }
     return map;
-  }, [result, db.warnings]);
+  }, [result, altForTop, db.warnings]);
 
   const narratives = useMemo(() => {
     if (!result) return {};
     const map: Record<string, CardNarrative> = {};
-    for (const c of result.recommended) {
+    const cards = [...result.recommended];
+    if (altForTop && !result.recommended.some((c) => c.cardId === altForTop.card.cardId)) {
+      cards.push(altForTop.card);
+    }
+    for (const c of cards) {
       map[c.cardId] = buildCardNarrative(c.meta, c.earn, spend, c.effectiveAnnualFee);
     }
     return map;
-  }, [result, spend]);
+  }, [result, altForTop, spend]);
 
   // baseline = median net across eligible cards (Journey B only), for the "on the table" line.
   const baselineNet = useMemo(() => {
@@ -193,6 +215,7 @@ export const CardEngine: React.FC<Props> = ({ db }) => {
                 baselineNet={baselineNet}
                 liquidity={liquidity}
                 priorities={priorities}
+                altForTop={altForTop}
                 onBack={() => setStep('priorities')}
                 onRestart={restart}
               />
