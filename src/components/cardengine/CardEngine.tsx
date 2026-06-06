@@ -27,8 +27,9 @@ import PrioritySelector from './PrioritySelector';
 import ResultsScreen from './ResultsScreen';
 import ProsConsDetail from './ProsConsDetail';
 import CardTileGallery from './CardTileGallery';
+import ChoicesPanel from './ChoicesPanel';
 
-type Step = 'journey' | 'owned' | 'spend' | 'profile' | 'priorities' | 'results';
+export type Step = 'journey' | 'owned' | 'spend' | 'profile' | 'priorities' | 'results';
 
 interface Props { db: LoadedCardDB; }
 
@@ -132,66 +133,69 @@ export const CardEngine: React.FC<Props> = ({ db }) => {
   return (
     <div className="wf-shell">
       <style>{shellCss}</style>
-      <StepBar step={step} journey={journey} />
-
-      <div className="wf-shell-body">
-        {step === 'journey' && (
-          <JourneySelector onSelect={(j) => { setJourney(j); setStep(j === 'owns_cards' ? 'owned' : 'spend'); }} />
-        )}
-
-        {step === 'owned' && (
-          <OwnedCardSelector
-            cards={db.cards} initial={ownedIds}
-            onBack={() => setStep('journey')}
-            onContinue={(ids) => { setOwnedIds(ids); setStep('spend'); }}
-          />
-        )}
-
-        {step === 'spend' && (
-          <SpendInput
-            initial={spend}
-            monthlyIncome={profile?.inHandMonthlyIncome}
-            onBack={() => setStep(journey === 'owns_cards' ? 'owned' : 'journey')}
-            onContinue={(s) => { setSpend(s); setStep('profile'); }}
-          />
-        )}
-
-        {step === 'profile' && (
-          <ProfileInput
-            initial={profile ?? undefined}
-            onBack={() => setStep('spend')}
-            onContinue={(p) => { setProfile(p); setStep('priorities'); }}
-          />
-        )}
-
-        {step === 'priorities' && (
-          <PrioritySelector
-            initial={priorities}
-            onBack={() => setStep('profile')}
-            onSkip={() => { setPriorities({}); setStep('results'); }}
-            onContinue={(p) => { setPriorities(p); setStep('results'); }}
-          />
-        )}
-
-        {step === 'results' && result && (
-          <ResultsScreen
-            result={result}
-            monthlySpend={spend}
-            isTravelPriority={priorities.top === 'Travel' || priorities.top === 'Lounge'}
-            devaluations={devaluations}
-            hacks={hacks}
-            insights={insights}
-            intelligence={intelligence}
-            narratives={narratives}
-            onKnowMore={(cardId) => setKnowMoreCardId(cardId)}
-            baselineNet={baselineNet}
-            liquidity={liquidity}
-            priorities={priorities}
-            onBack={() => setStep('priorities')}
-            onRestart={restart}
-          />
-        )}
-      </div>
+      <div className="wf-layout">
+        <ChoicesPanel
+          step={step} journey={journey} ownedIds={ownedIds}
+          spend={spend} profile={profile} priorities={priorities}
+          setStep={setStep}
+        />
+        <div className="wf-main">
+          <StepBar step={step} journey={journey} />
+          <div className="wf-shell-body">
+            {step === 'journey' && (
+              <JourneySelector onSelect={(j) => { setJourney(j); setStep(j === 'owns_cards' ? 'owned' : 'spend'); }} />
+            )}
+            {step === 'owned' && (
+              <OwnedCardSelector
+                cards={db.cards} initial={ownedIds}
+                onBack={() => setStep('journey')}
+                onContinue={(ids) => { setOwnedIds(ids); setStep('spend'); }}
+              />
+            )}
+            {step === 'spend' && (
+              <SpendInput
+                initial={spend}
+                monthlyIncome={profile?.inHandMonthlyIncome}
+                onBack={() => setStep(journey === 'owns_cards' ? 'owned' : 'journey')}
+                onContinue={(s) => { setSpend(s); setStep('profile'); }}
+              />
+            )}
+            {step === 'profile' && (
+              <ProfileInput
+                initial={profile ?? undefined}
+                onBack={() => setStep('spend')}
+                onContinue={(p) => { setProfile(p); setStep('priorities'); }}
+              />
+            )}
+            {step === 'priorities' && (
+              <PrioritySelector
+                initial={priorities}
+                onBack={() => setStep('profile')}
+                onSkip={() => { setPriorities({}); setStep('results'); }}
+                onContinue={(p) => { setPriorities(p); setStep('results'); }}
+              />
+            )}
+            {step === 'results' && result && (
+              <ResultsScreen
+                result={result}
+                monthlySpend={spend}
+                isTravelPriority={priorities.top === 'Travel' || priorities.top === 'Lounge'}
+                devaluations={devaluations}
+                hacks={hacks}
+                insights={insights}
+                intelligence={intelligence}
+                narratives={narratives}
+                onKnowMore={(cardId) => setKnowMoreCardId(cardId)}
+                baselineNet={baselineNet}
+                liquidity={liquidity}
+                priorities={priorities}
+                onBack={() => setStep('priorities')}
+                onRestart={restart}
+              />
+            )}
+          </div>
+        </div>{/* wf-main */}
+      </div>{/* wf-layout */}
 
       {knowMoreCardId && (() => {
         const c = db.cardById.get(knowMoreCardId);
@@ -225,6 +229,8 @@ const StepBar: React.FC<{ step: Step; journey: Journey }> = ({ step, journey }) 
 
 const shellCss = `
 .wf-shell{font-family:'DM Sans',system-ui,sans-serif;background:#000;min-height:100vh;padding:28px 16px 60px}
+.wf-layout{display:flex;gap:32px;max-width:940px;margin:0 auto;align-items:flex-start}
+.wf-main{flex:1;min-width:0}
 .wf-stepbar{display:flex;gap:6px;justify-content:center;max-width:560px;margin:0 auto 26px}
 .wf-stepdot{height:3px;flex:1;max-width:60px;background:#27272a;border-radius:2px;transition:background .3s}
 .wf-stepdot.on{background:#10b981}
