@@ -134,7 +134,10 @@ const css = `
   font-size:13px;font-weight:700;padding:10px;border-radius:9px;cursor:pointer;transition:.12s}
 .wf-pcd-tabs button.on.wf-pcd-tab-pro{background:#0a1410;border-color:#10b981;color:#34d399}
 .wf-pcd-tabs button.on.wf-pcd-tab-con{background:#1a1206;border-color:#b45309;color:#fbbf24}
-.wf-pcd-body{padding:14px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.wf-pcd-body{padding:14px 18px;overflow-y:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;
+  background:
+    linear-gradient(to bottom,transparent,#0c0c0e) 0 100%/100% 48px no-repeat local,
+    linear-gradient(to bottom,transparent,#0c0c0e) 0 100%/100% 48px no-repeat scroll}
 .wf-pcd-group{background:#111113;border:1px solid #1f1f23;border-radius:10px;overflow:hidden}
 .wf-pcd-group>summary{list-style:none;cursor:pointer;padding:12px 14px;font-size:12.5px;font-weight:700;
   text-transform:uppercase;letter-spacing:.03em;color:#e4e4e7;display:flex;align-items:center;
