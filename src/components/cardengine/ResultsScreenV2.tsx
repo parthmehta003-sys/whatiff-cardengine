@@ -228,19 +228,16 @@ const css = `
 .r2-hero-sub{font-size:13px;color:#a1a1aa;margin-top:5px;margin-bottom:20px;line-height:1.4}
 .r2-hero-sub b{color:#fafafa;font-weight:600}
 
-/* ── Card stack — matches prototype .cardstack ── */
-/* Width: 380px column. Card width: calc(100% - 40px) = 340px. Height: 340*(188/300) ≈ 213px.
-   Back card bottom: 64 + 213*0.93 ≈ 262px → container height 275px. */
-.r2-stack{position:relative;height:275px;margin-bottom:10px}
+/* ── Card stack — matches prototype .cardstack height:280px ── */
+.r2-stack{position:relative;height:280px;margin-bottom:10px}
 
-/* ── Solo single-card stack (no offset needed) — matches prototype height:210px ── */
-.r2-solo-stack{position:relative;height:230px;margin-bottom:12px}
+/* ── Solo single-card stack — matches prototype height:210px ── */
+.r2-solo-stack{position:relative;height:210px;margin-bottom:12px}
 
-/* ── Prototype .pcard — gradient card with chip, name, cats, net, sheen all inside ── */
+/* ── Prototype .pcard: fixed 300×188px, matches prototype exactly ── */
 .r2-pcard{
   position:absolute;left:0;
-  width:calc(100% - 40px); /* room for back card right peek */
-  aspect-ratio:300/188;
+  width:300px;height:188px;
   border-radius:18px;padding:20px;color:#fff;overflow:hidden;
   border:1px solid rgba(255,255,255,.09);
   transition:transform .38s cubic-bezier(.4,0,.2,1),box-shadow .38s;
@@ -263,9 +260,8 @@ const css = `
 .r2-pcard-back:hover{opacity:.88}
 .r2-pcard-back:focus-visible{outline:2px solid rgba(255,255,255,.4);outline-offset:2px}
 
-/* Solo card (single-card view) — full width, front position */
+/* Solo card — same fixed dimensions, front position */
 .r2-pcard-solo{
-  width:100%;
   transform:translate(0,0) scale(1);
   z-index:5;
   box-shadow:0 14px 36px rgba(0,0,0,.55);
