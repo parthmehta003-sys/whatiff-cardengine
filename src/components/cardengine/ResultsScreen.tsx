@@ -167,6 +167,7 @@ export const ResultsScreen: React.FC<Props> = ({
               commonFailure: hacks[c.cardId]!.commonFailure,
               lastVerified: hacks[c.cardId]!.lastVerified,
               matchedOnSpend: hacks[c.cardId]!.matchedOnSpend,
+              locked: hacks[c.cardId]!.locked,
             } : undefined}
             intelligence={intelligence?.[c.cardId]}
             narrative={narratives?.[c.cardId]}
@@ -192,33 +193,28 @@ export const ResultsScreen: React.FC<Props> = ({
             <span className={'wf-alt-chev' + (altExpanded ? ' open' : '')}>⌄</span>
           </button>
           {altExpanded && (
-            <div className="wf-alt-body">
-              <div className="wf-alt-row wf-alt-met">
-                <span className="wf-alt-glyph">✓</span>
-                <span>{altForTop.line}</span>
-              </div>
-              {hacks?.[altForTop.card.cardId] && (
-                <div className="wf-alt-hack">
-                  <span className="wf-alt-hack-name">{hacks[altForTop.card.cardId]!.name}</span>
-                  <span className="wf-alt-hack-why">{hacks[altForTop.card.cardId]!.whyItMatters}</span>
-                </div>
-              )}
-              {narratives?.[altForTop.card.cardId]?.topPros.slice(0, 2).map((p, i) => (
-                <div key={i} className="wf-alt-row">
-                  <span className="wf-alt-plus">+</span>
-                  <span>{p.text}</span>
-                </div>
-              ))}
-              {intelligence?.[altForTop.card.cardId]?.slice(0, 2).map((item, i) => (
-                <div key={i} className={'wf-alt-intel wf-alt-intel-' + (item.severity ?? item.type)}>
-                  {item.text}
-                </div>
-              ))}
-              {onKnowMore && (
-                <button className="wf-alt-knowmore" onClick={() => onKnowMore(altForTop.card.cardId)}>
-                  See full pros &amp; cons →
-                </button>
-              )}
+            <div className="wf-alt-card">
+              <RecommendationCard
+                card={altForTop.card}
+                monthlySpend={monthlySpend}
+                forexPct={(altForTop.card.meta as CardMeta).forexPct}
+                isTravelPriority={isTravelPriority}
+                devaluation={devaluations?.[altForTop.card.cardId]}
+                hack={hacks?.[altForTop.card.cardId] ? {
+                  name: hacks[altForTop.card.cardId]!.name,
+                  whyItMatters: hacks[altForTop.card.cardId]!.whyItMatters,
+                  executionSteps: hacks[altForTop.card.cardId]!.executionSteps,
+                  difficulty: hacks[altForTop.card.cardId]!.difficulty,
+                  status: hacks[altForTop.card.cardId]!.status,
+                  commonFailure: hacks[altForTop.card.cardId]!.commonFailure,
+                  lastVerified: hacks[altForTop.card.cardId]!.lastVerified,
+                  matchedOnSpend: hacks[altForTop.card.cardId]!.matchedOnSpend,
+                  locked: hacks[altForTop.card.cardId]!.locked,
+                } : undefined}
+                intelligence={intelligence?.[altForTop.card.cardId]}
+                narrative={narratives?.[altForTop.card.cardId]}
+                onKnowMore={onKnowMore ? () => onKnowMore(altForTop.card.cardId) : undefined}
+              />
             </div>
           )}
         </div>
@@ -436,20 +432,7 @@ const css = `
 .wf-alt-header-text b{color:#e4e4e7;font-weight:700}
 .wf-alt-chev{font-size:15px;color:#71717a;flex-shrink:0;transition:transform .2s;line-height:1.3;margin-top:1px}
 .wf-alt-chev.open{transform:rotate(180deg)}
-.wf-alt-body{border-top:1px solid #232329;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
-.wf-alt-row{display:flex;align-items:baseline;gap:8px;font-size:12.5px;color:#d4d4d8;line-height:1.45}
-.wf-alt-glyph{font-weight:800;font-size:13px;flex-shrink:0;width:14px}
-.wf-alt-met .wf-alt-glyph{color:#10b981}
-.wf-alt-plus{font-weight:800;color:#10b981;flex-shrink:0;width:14px}
-.wf-alt-hack{background:#0a1410;border:1px solid #1a3d28;border-radius:8px;padding:9px 11px;display:flex;flex-direction:column;gap:3px}
-.wf-alt-hack-name{font-size:12px;font-weight:700;color:#34d399}
-.wf-alt-hack-why{font-size:11.5px;color:#a7f3d0;line-height:1.4}
-.wf-alt-intel{font-size:11.5px;color:#a1a1aa;line-height:1.4;padding-left:14px;position:relative}
-.wf-alt-intel:before{content:'·';position:absolute;left:0;color:#52525b}
-.wf-alt-intel-important,.wf-alt-intel-warning{color:#fbbf24}
-.wf-alt-intel-important:before,.wf-alt-intel-warning:before{color:#92400e}
-.wf-alt-knowmore{background:none;border:none;padding:0;font-family:'DM Sans',system-ui,sans-serif;font-size:12.5px;font-weight:700;color:#a78bfa;cursor:pointer;text-align:left;transition:color .12s}
-.wf-alt-knowmore:hover{color:#c4b5fd}
+.wf-alt-card{border-top:1px solid #232329;padding:12px 14px}
 .wf-res-runners{display:flex;flex-direction:column;gap:7px}
 .wf-runner{display:flex;justify-content:space-between;align-items:center;background:#0e0e11;border:1px solid #2a2a30;border-radius:11px;padding:13px 15px}
 .wf-runner-name{font-size:14px;font-weight:600;color:#fafafa;display:flex;align-items:center;gap:7px}

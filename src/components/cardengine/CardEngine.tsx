@@ -93,20 +93,24 @@ export const CardEngine: React.FC<Props> = ({ db }) => {
     return findAlternativeForMissedTop(priorities, result.ranked, result.recommended, heroNet, spend);
   }, [result, priorities, spend]);
 
+  // Stable primitive dep for the three memo loops — avoids a fresh-object-every-render in deps.
+  const altCardId = altForTop?.card.cardId ?? null;
+
   // Hacks, insights, and the Journey-B "leaving on the table" baseline — derived from the result.
   const totalMonthly = Object.values(spend).reduce((s, v) => s + (v ?? 0), 0);
   const hacks = useMemo(() => {
     if (!result) return {};
     const map: Record<string, SelectedHack | null> = {};
     const cards = [...result.recommended];
-    if (altForTop && !result.recommended.some((c) => c.cardId === altForTop.card.cardId)) {
-      cards.push(altForTop.card);
+    if (altCardId) {
+      const altCard = result.ranked.find((c) => c.cardId === altCardId);
+      if (altCard && !result.recommended.some((c) => c.cardId === altCardId)) cards.push(altCard);
     }
     for (const c of cards) {
       map[c.cardId] = selectHackForCard(c.cardId, db.hacks, db.warnings, spend, totalMonthly);
     }
     return map;
-  }, [result, altForTop, db.hacks, db.warnings, spend, totalMonthly]);
+  }, [result, altCardId, db.hacks, db.warnings, spend, totalMonthly]);
 
   const insights = useMemo(
     () => (result ? surfaceInsights(db.insights, spend, priorities) : []),
@@ -117,28 +121,30 @@ export const CardEngine: React.FC<Props> = ({ db }) => {
     if (!result) return {};
     const map: Record<string, { type: string; text: string; severity?: string | null }[]> = {};
     const cards = [...result.recommended];
-    if (altForTop && !result.recommended.some((c) => c.cardId === altForTop.card.cardId)) {
-      cards.push(altForTop.card);
+    if (altCardId) {
+      const altCard = result.ranked.find((c) => c.cardId === altCardId);
+      if (altCard && !result.recommended.some((c) => c.cardId === altCardId)) cards.push(altCard);
     }
     for (const c of cards) {
       const items = cardIntelligence(c.cardId, db.warnings, db.intelligence);
       if (items.length) map[c.cardId] = items;
     }
     return map;
-  }, [result, altForTop, db.warnings]);
+  }, [result, altCardId, db.warnings]);
 
   const narratives = useMemo(() => {
     if (!result) return {};
     const map: Record<string, CardNarrative> = {};
     const cards = [...result.recommended];
-    if (altForTop && !result.recommended.some((c) => c.cardId === altForTop.card.cardId)) {
-      cards.push(altForTop.card);
+    if (altCardId) {
+      const altCard = result.ranked.find((c) => c.cardId === altCardId);
+      if (altCard && !result.recommended.some((c) => c.cardId === altCardId)) cards.push(altCard);
     }
     for (const c of cards) {
       map[c.cardId] = buildCardNarrative(c.meta, c.earn, spend, c.effectiveAnnualFee);
     }
     return map;
-  }, [result, altForTop, spend]);
+  }, [result, altCardId, spend]);
 
   // baseline = median net across eligible cards (Journey B only), for the "on the table" line.
   const baselineNet = useMemo(() => {

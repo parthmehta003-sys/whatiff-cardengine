@@ -47,6 +47,8 @@ interface Props {
     commonFailure?: string | null;
     lastVerified?: string | null;
     matchedOnSpend?: boolean;
+    /** Present when the hack exists but is gated by a spend threshold. */
+    locked?: { minMonthlySpend: number; gap: number };
   };
   /** Layer 3 — "Things to Know" intelligence items (benefit changes, devaluations, hidden perks). */
   intelligence?: { type: string; text: string; severity?: string | null }[];
@@ -172,8 +174,11 @@ export const RecommendationCard: React.FC<Props> = ({
             </button>
           )}
           {(hack || hackLine) && (
-            <button className={detailTab === 'hack' ? 'on' : ''} onClick={() => setDetailTab((t) => t === 'hack' ? null : 'hack')}>
-              ★ Hack
+            <button
+              className={(detailTab === 'hack' ? 'on' : '') + (hack?.locked ? ' locked' : '')}
+              onClick={() => setDetailTab((t) => t === 'hack' ? null : 'hack')}
+            >
+              ★ Hack{hack?.locked ? ' · locked' : ''}
             </button>
           )}
           <button className={detailTab === 'math' ? 'on' : ''} onClick={() => setDetailTab((t) => t === 'math' ? null : 'math')}>
@@ -210,41 +215,55 @@ export const RecommendationCard: React.FC<Props> = ({
 
         {detailTab === 'hack' && (hack || hackLine) && (
           <div className="wf-detail-body">
-            <div className="wf-hackbox">
-              <div className="wf-hackbox-head">
-                {hack?.difficulty && <span className="wf-hack-diff">{hack.difficulty}</span>}
-                {hack?.status && (
-                  <span className={'wf-hack-st ' + (/active/i.test(hack.status) && !/fading/i.test(hack.status) ? 'live' : 'fading')}>
-                    {/active/i.test(hack.status) && !/fading/i.test(hack.status) ? 'Active' : hack.status}
-                  </span>
+            {hack?.locked ? (
+              <div className="wf-hackbox wf-hackbox-locked">
+                <div className="wf-hack-name2 wf-hack-locked-name">{hack.name}</div>
+                <div className="wf-hack-locked-threshold">
+                  Unlocks at ₹{hack.locked.minMonthlySpend.toLocaleString('en-IN')}/month total spend
+                  {hack.locked.gap > 0 && <> — you&rsquo;re ₹{hack.locked.gap.toLocaleString('en-IN')}/month away</>}
+                </div>
+                <div className="wf-hack-locked-note">
+                  This unlocks at ₹{hack.locked.minMonthlySpend.toLocaleString('en-IN')}/mo of spend you&rsquo;d route
+                  anyway — not a reason to spend more.
+                </div>
+              </div>
+            ) : (
+              <div className="wf-hackbox">
+                <div className="wf-hackbox-head">
+                  {hack?.difficulty && <span className="wf-hack-diff">{hack.difficulty}</span>}
+                  {hack?.status && (
+                    <span className={'wf-hack-st ' + (/active/i.test(hack.status) && !/fading/i.test(hack.status) ? 'live' : 'fading')}>
+                      {/active/i.test(hack.status) && !/fading/i.test(hack.status) ? 'Active' : hack.status}
+                    </span>
+                  )}
+                </div>
+                {hack ? (
+                  <>
+                    <div className="wf-hack-name2">{hack.name}</div>
+                    <div className="wf-hack-why2">{hack.whyItMatters}</div>
+                    {hack.executionSteps && (
+                      <>
+                        <button className="wf-hack-toggle" onClick={() => setHackOpen((v) => !v)}>
+                          {hackOpen ? '▲ hide steps' : 'See how →'}
+                        </button>
+                        {hackOpen && (
+                          <div className="wf-hack-detail">
+                            <div className="wf-hack-steps-h">How to do it</div>
+                            <div className="wf-hack-steps">{hack.executionSteps}</div>
+                            {hack.commonFailure && (
+                              <div className="wf-hack-fail"><span>Common failure</span> {hack.commonFailure}</div>
+                            )}
+                            {hack.lastVerified && <div className="wf-hack-verified">Last verified {hack.lastVerified}</div>}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <div className="wf-hack-why2">{hackLine}</div>
                 )}
               </div>
-              {hack ? (
-                <>
-                  <div className="wf-hack-name2">{hack.name}</div>
-                  <div className="wf-hack-why2">{hack.whyItMatters}</div>
-                  {hack.executionSteps && (
-                    <>
-                      <button className="wf-hack-toggle" onClick={() => setHackOpen((v) => !v)}>
-                        {hackOpen ? '▲ hide steps' : 'See how →'}
-                      </button>
-                      {hackOpen && (
-                        <div className="wf-hack-detail">
-                          <div className="wf-hack-steps-h">How to do it</div>
-                          <div className="wf-hack-steps">{hack.executionSteps}</div>
-                          {hack.commonFailure && (
-                            <div className="wf-hack-fail"><span>Common failure</span> {hack.commonFailure}</div>
-                          )}
-                          {hack.lastVerified && <div className="wf-hack-verified">Last verified {hack.lastVerified}</div>}
-                        </div>
-                      )}
-                    </>
-                  )}
-                </>
-              ) : (
-                <div className="wf-hack-why2">{hackLine}</div>
-              )}
-            </div>
+            )}
           </div>
         )}
 
@@ -353,7 +372,13 @@ const css = `
 .wf-pc-more{grid-column:1 / -1;background:#111113;border:1px solid #27272a;color:#a1a1aa;font-family:inherit;
   font-size:12px;font-weight:600;padding:9px;border-radius:9px;cursor:pointer;transition:.15s}
 .wf-pc-more:hover{background:#18181b;border-color:#3f3f46;color:#e4e4e7}
+.wf-detail-tabs button.locked{color:#52525b}
+.wf-detail-tabs button.on.locked{background:#111113;border-color:#3f3f46;color:#71717a}
 .wf-hackbox{margin-top:13px;background:#14110a;border:1px solid #3a2f12;border-radius:12px;padding:13px 14px}
+.wf-hackbox-locked{background:#111113;border-color:#27272a}
+.wf-hack-locked-name{color:#52525b !important;margin-bottom:6px}
+.wf-hack-locked-threshold{font-size:12.5px;color:#71717a;line-height:1.5;margin-bottom:8px}
+.wf-hack-locked-note{font-size:11.5px;color:#3f3f46;line-height:1.45;border-top:1px solid #1f1f23;padding-top:8px}
 .wf-hackbox-head{display:flex;align-items:center;gap:8px;margin-bottom:7px}
 .wf-hackbox-tag{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fbbf24}
 .wf-hack-diff{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#a1a1aa;border:1px solid #3f3f46;border-radius:4px;padding:1px 6px}
