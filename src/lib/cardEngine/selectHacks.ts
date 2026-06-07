@@ -26,6 +26,8 @@ export interface SelectedHack {
   lastVerified?: string | null;
   relevantCategories: string[];
   matchedOnSpend: boolean;       // true if chosen because user spends in its categories
+  /** Set when the hack exists but is gated by a spend threshold the user hasn't reached. */
+  locked?: { minMonthlySpend: number; gap: number };
 }
 
 export interface SurfacedInsight {
@@ -120,7 +122,35 @@ export function selectHackForCard(
     if (h.minMonthlySpend != null && totalMonthlySpend < h.minMonthlySpend) return false;
     return true;
   });
-  if (candidates.length === 0) return null;
+  if (candidates.length === 0) {
+    // Check whether any non-discontinued hacks are gated only by minMonthlySpend.
+    // If so, surface the lowest-threshold one as a locked hint rather than returning null.
+    const gated = cardHacks
+      .filter((h) => {
+        const status = (h.status ?? '').toLowerCase();
+        if (status.includes('discontinued')) return false;
+        if (deadHackIds.has(h.hackId)) return false;
+        return h.minMonthlySpend != null && totalMonthlySpend < h.minMonthlySpend;
+      })
+      .sort((a, b) => (a.minMonthlySpend ?? 0) - (b.minMonthlySpend ?? 0));
+    if (gated.length > 0) {
+      const g = gated[0];
+      return {
+        cardId,
+        name: g.hackName ?? 'Optimisation tip',
+        whyItMatters: '',
+        executionSteps: null,
+        status: g.status,
+        difficulty: (g as any).difficulty ?? null,
+        commonFailure: null,
+        lastVerified: null,
+        relevantCategories: [],
+        matchedOnSpend: false,
+        locked: { minMonthlySpend: g.minMonthlySpend!, gap: g.minMonthlySpend! - totalMonthlySpend },
+      };
+    }
+    return null;
+  }
 
   // rank: spend-matched first, then by rate uplift (rateWithHack − rateWithoutHack) if present
   const scored = candidates.map((h) => {
