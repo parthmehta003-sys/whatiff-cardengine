@@ -1,25 +1,23 @@
 /**
- * ResultsScreenV2.tsx — Stage 1 of the V2 results redesign.
+ * ResultsScreenV2.tsx — Stage 1 + Stage 2 of the V2 results redesign.
  *
  * Two-column desktop layout (≥820px): left column (sticky) = hero number + card stack/single;
- * right column = placeholder for Stage 2–4 detail panels.
+ * right column = 5-icon detail panel (pros/cons, hack, math, priorities, things to know).
  * Stacks to single column on mobile.
  *
  * Props are identical to ResultsScreen — drop-in swap when all stages are complete.
  * Preview via ?v2 query param (CardEngine gates it).
  *
- * Card composition matches whatiff_results_prototype.html exactly:
- *   chip → pc-name → pc-cats → pc-net (absolute bottom-left) → pc-sheen
- *   all rendered INSIDE the gradient card, no block below the tile.
- *
- * Stage 1 scope: shell, hero numbers, card stack with swap, baseline lines.
- * NOT wired yet: icon rows, detail tabs, alt-card panel, runners-up, insights.
+ * Stage 2 additions: icon-circle row + wired detail panels for active card.
+ * Deferred to Stage 3: math two-figure treatment, per-card combo priority coverage.
  */
 import React, { useState } from 'react';
-import type { RankResult, RankedCard, CardMeta, Priorities } from '../../lib/cardEngine/rankCards';
+import { Scale, Zap, Calculator, Target, Info } from 'lucide-react';
+import type { RankResult, RankedCard, CardMeta, Priorities, PriorityKey } from '../../lib/cardEngine/rankCards';
 import type { MonthlySpend } from '../../lib/cardEngine/computeEarn';
-import type { AlternativeForPriority } from '../../lib/cardEngine/evaluatePriorities';
+import { evalPriorityForCard, LABEL, type AlternativeForPriority } from '../../lib/cardEngine/evaluatePriorities';
 import { resolveTileColor } from './CardTile';
+import { CardMathBreakdown } from './CardMathBreakdown';
 import type { DevaluationFlag } from './RecommendationCard';
 import type { SelectedHack, SurfacedInsight } from '../../lib/cardEngine/selectHacks';
 
@@ -76,8 +74,35 @@ const PCard: React.FC<{
   );
 };
 
+/** Split executionSteps (newline-separated) into numbered step rows. */
+const HackSteps: React.FC<{ steps: string }> = ({ steps }) => {
+  const lines = steps.split(/\r?\n/).map(l => l.replace(/^\d+[\.\)]\s*/, '').trim()).filter(Boolean);
+  if (lines.length === 0) return null;
+  return (
+    <div className="r2-steps">
+      {lines.map((l, i) => (
+        <div key={i} className="r2-step">
+          <span className="r2-sn">{i + 1}</span>
+          <span>{l}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// ── Icon row configuration ───────────────────────────────────────────────────
+const ICONS = [
+  { key: 'pros',       label: 'Pros & cons',     Icon: Scale,      accent: '#10b981' },
+  { key: 'hack',       label: 'Hack',             Icon: Zap,        accent: '#8b5cf6' },
+  { key: 'math',       label: 'The math',         Icon: Calculator, accent: '#06b6d4' },
+  { key: 'priorities', label: 'Priorities',       Icon: Target,     accent: '#f59e0b' },
+  { key: 'know',       label: 'Things to know',   Icon: Info,       accent: '#f59e0b' },
+] as const;
+type IconKey = typeof ICONS[number]['key'];
+
 export const ResultsScreenV2: React.FC<Props> = ({
-  result, baselineNet, onBack, onRestart,
+  result, monthlySpend, baselineNet, hacks, intelligence, narratives,
+  onKnowMore, priorities, onBack, onRestart,
 }) => {
   const journeyA = result.journey === 'owns_cards';
   const top = result.recommended[0];
@@ -90,6 +115,10 @@ export const ResultsScreenV2: React.FC<Props> = ({
 
   // Which combo card is in the foreground (0 = first recommended, 1 = second).
   const [frontIdx, setFrontIdx] = useState(0);
+
+  // Which detail panel is open (null = all closed).
+  const [activeIcon, setActiveIcon] = useState<IconKey | null>(null);
+  const toggleIcon = (key: IconKey) => setActiveIcon(prev => prev === key ? null : key);
 
   const combo = result.combo ?? null;
   const cardContrib = (c: RankedCard): number => {
@@ -192,11 +221,193 @@ export const ResultsScreenV2: React.FC<Props> = ({
           ) : null}
         </div>
 
-        {/* ── RIGHT: detail placeholder (Stage 2–4) ── */}
+        {/* ── RIGHT: icon row + detail panels (Stage 2) ── */}
         <div className="r2-right">
-          <div className="r2-placeholder">
-            <span className="r2-placeholder-label">Detail panels — Stage 2</span>
-          </div>
+          {/* Active card drives the panel — front card in combo, top card in single */}
+          {(() => {
+            const activeCard = comboHero && front ? front : top;
+            if (!activeCard) return null;
+            const cardId = activeCard.cardId;
+            const hack = hacks?.[cardId] ?? null;
+            const intel = intelligence?.[cardId] ?? [];
+            const narrative = narratives?.[cardId];
+            const activeIconCfg = ICONS.find(i => i.key === activeIcon);
+
+            // Collect priority keys from the three tiers
+            const priorityKeys: PriorityKey[] = [
+              ...(priorities?.top ? [priorities.top] : []),
+              ...(priorities?.secondary ? [priorities.secondary] : []),
+              ...(priorities?.niceToHave ? [priorities.niceToHave] : []),
+            ];
+
+            // Category label for active card
+            const cardCats = comboHero && combo
+              ? (combo.assignments[cardId] ?? []).join(' · ')
+              : Object.entries(activeCard.earn.perCategory)
+                  .filter(([, v]) => v.guaranteed > 0)
+                  .sort(([, a], [, b]) => b.guaranteed - a.guaranteed)
+                  .slice(0, 3)
+                  .map(([c]) => c)
+                  .join(' · ');
+
+            return (
+              <>
+                {/* ── Icon row ── */}
+                <div className="r2-iconrow">
+                  {ICONS.map(({ key, label, Icon, accent }) => (
+                    <button
+                      key={key}
+                      className={'r2-iconcircle' + (activeIcon === key ? ' on' : '')}
+                      style={{ '--r2-accent': accent } as React.CSSProperties}
+                      onClick={() => toggleIcon(key)}
+                      aria-label={label}
+                      aria-pressed={activeIcon === key}
+                    >
+                      <div className="r2-circ">
+                        <Icon size={20} strokeWidth={1.75} />
+                      </div>
+                      <span className="r2-lbl">{label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* ── Detail panel ── */}
+                {activeIcon && activeIconCfg && (
+                  <div className="r2-detail" style={{ '--r2-accent': activeIconCfg.accent } as React.CSSProperties}>
+                    {/* Card context header */}
+                    <div className="r2-detail-which">
+                      {activeCard.meta.name}{cardCats ? ` · ${cardCats}` : ''}
+                    </div>
+
+                    {/* ── Pros & cons ── */}
+                    {activeIcon === 'pros' && (
+                      <div className="r2-panel-pros">
+                        {narrative ? (
+                          <>
+                            {narrative.topPros.length > 0 && (
+                              <div className="r2-procon-group">
+                                {narrative.topPros.map((p, i) => (
+                                  <div key={i} className="r2-item">
+                                    <span className="r2-pl">+</span>
+                                    <span>{p.text}{p.valuePerYear > 0 ? <span className="r2-item-val"> · {inr(p.valuePerYear)}/yr</span> : null}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {narrative.topCons.length > 0 && (
+                              <div className="r2-procon-group" style={{ marginTop: narrative.topPros.length > 0 ? '10px' : 0 }}>
+                                {narrative.topCons.map((c, i) => (
+                                  <div key={i} className="r2-item">
+                                    <span className="r2-mn">−</span>
+                                    <span>{c.text}{c.valuePerYear > 0 ? <span className="r2-item-val"> · {inr(c.valuePerYear)}/yr</span> : null}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {onKnowMore && (
+                              <button className="r2-linkbtn" onClick={() => onKnowMore(cardId)}>
+                                See full pros &amp; cons →
+                              </button>
+                            )}
+                          </>
+                        ) : (
+                          <div className="r2-empty">No pros/cons data available.</div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* ── Hack ── */}
+                    {activeIcon === 'hack' && (
+                      <div className="r2-panel-hack">
+                        {hack ? (
+                          hack.locked ? (
+                            <div className="r2-hackbox locked">
+                              <div className="r2-ht">{hack.name}</div>
+                              <div className="r2-hd">
+                                Unlocks at <b>₹{hack.locked.minMonthlySpend.toLocaleString('en-IN')}/month</b> total spend.
+                                You&rsquo;re <b>₹{hack.locked.gap.toLocaleString('en-IN')}/month</b> away.
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="r2-hackbox">
+                                <div className="r2-ht">{hack.name}</div>
+                                <div className="r2-hd">{hack.whyItMatters}</div>
+                              </div>
+                              {hack.executionSteps && (
+                                <HackSteps steps={hack.executionSteps} />
+                              )}
+                              {hack.difficulty && (
+                                <div className="r2-hack-meta">
+                                  Difficulty: <b>{hack.difficulty}</b>
+                                  {hack.commonFailure && <> · Watch out: {hack.commonFailure}</>}
+                                </div>
+                              )}
+                            </>
+                          )
+                        ) : (
+                          <div className="r2-empty">No hack available for this card yet.</div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* ── The math ── */}
+                    {activeIcon === 'math' && (
+                      <CardMathBreakdown
+                        earn={activeCard.earn}
+                        effectiveAnnualFee={activeCard.effectiveAnnualFee}
+                        annualFee={(activeCard.meta as CardMeta).annualFee ?? 0}
+                        feeWaiverSpend={(activeCard.meta as CardMeta).feeWaiverSpend ?? 0}
+                        netGuaranteedPerYear={activeCard.netGuaranteedPerYear}
+                        annualUpside={activeCard.annualUpside}
+                        monthlySpend={monthlySpend}
+                      />
+                    )}
+
+                    {/* ── Priorities ── */}
+                    {activeIcon === 'priorities' && (
+                      <div className="r2-panel-priorities">
+                        {priorityKeys.length === 0 ? (
+                          <div className="r2-empty">No priorities selected — go back to the priorities step to set them.</div>
+                        ) : (
+                          priorityKeys.map(key => {
+                            const ev = evalPriorityForCard(key, activeCard, monthlySpend);
+                            return (
+                              <div key={key} className={'r2-pri-row ' + ev.status}>
+                                <span className="r2-pri-glyph">
+                                  {ev.status === 'met' ? '✓' : ev.status === 'partial' ? '⚠' : '✗'}
+                                </span>
+                                <div>
+                                  <div className="r2-pri-label">{LABEL[key]}</div>
+                                  {ev.line && <div className="r2-pri-line">{ev.line}</div>}
+                                </div>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    )}
+
+                    {/* ── Things to know ── */}
+                    {activeIcon === 'know' && (
+                      <div className="r2-panel-know">
+                        {intel.length === 0 ? (
+                          <div className="r2-empty">No current alerts or notable changes for this card.</div>
+                        ) : (
+                          intel.map((item, i) => (
+                            <div key={i} className={'r2-item know ' + (item.severity ?? '')}>
+                              <span className="r2-know-dot" />
+                              <span>{item.text}</span>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
 
       </div>
@@ -293,11 +504,82 @@ const css = `
 .r2-betterline{margin-top:12px;font-size:15px;color:#a1a1aa;line-height:1.4}
 .r2-betterline b{color:#10b981;font-size:22px;font-weight:800;letter-spacing:-0.01em;font-variant-numeric:tabular-nums}
 
-/* ── Right placeholder ── */
-.r2-placeholder{border:1px dashed #27272a;border-radius:14px;padding:48px 24px;
-  display:flex;align-items:center;justify-content:center;min-height:220px}
-.r2-placeholder-label{font-size:11px;font-weight:700;text-transform:uppercase;
-  letter-spacing:.08em;color:#3f3f46}
+/* ── Icon row ── */
+.r2-iconrow{display:flex;gap:8px;margin-bottom:14px}
+.r2-iconcircle{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;
+  cursor:pointer;background:none;border:none;font-family:inherit;padding:0}
+.r2-circ{
+  width:48px;height:48px;border-radius:50%;
+  background:#0c0c0e;border:1px solid #27272a;
+  display:flex;align-items:center;justify-content:center;
+  color:#71717a;transition:all .18s}
+.r2-iconcircle.on .r2-circ{
+  border-color:var(--r2-accent,#10b981);
+  background-color:color-mix(in srgb,var(--r2-accent,#10b981) 10%,#0c0c0e);
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--r2-accent,#10b981) 30%,transparent),
+             0 0 14px color-mix(in srgb,var(--r2-accent,#10b981) 18%,transparent);
+  color:var(--r2-accent,#10b981)}
+.r2-iconcircle:hover:not(.on) .r2-circ{border-color:#3f3f46;color:#a1a1aa}
+.r2-lbl{font-size:10px;font-weight:600;color:#52525b;text-align:center;line-height:1.3}
+.r2-iconcircle.on .r2-lbl{color:#d4d4d8}
+
+/* ── Detail panel ── */
+.r2-detail{
+  background:#0c0c0e;border:1px solid #1f1f23;border-radius:14px;
+  padding:18px;margin-bottom:8px;
+  border-top-color:color-mix(in srgb,var(--r2-accent,#10b981) 35%,#1f1f23)}
+.r2-detail-which{
+  font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:#52525b;margin-bottom:14px}
+
+/* ── Shared item rows ── */
+.r2-item{display:flex;gap:9px;font-size:13px;color:#d4d4d8;line-height:1.55;margin-bottom:8px}
+.r2-pl{color:#10b981;font-weight:800;flex-shrink:0}
+.r2-mn{color:#f59e0b;font-weight:800;flex-shrink:0}
+.r2-item-val{color:#71717a;font-size:12px}
+.r2-empty{font-size:13px;color:#52525b;line-height:1.5}
+
+/* ── Link button ── */
+.r2-linkbtn{
+  background:none;border:none;color:#8b5cf6;font-family:inherit;font-size:13px;
+  font-weight:600;cursor:pointer;padding:8px 0 0;display:block}
+.r2-linkbtn:hover{color:#a78bfa}
+
+/* ── Hack panel ── */
+.r2-hackbox{
+  background:#140d1f;border:1px solid #8b5cf633;border-radius:10px;
+  padding:13px;margin-bottom:10px}
+.r2-hackbox.locked{background:#111113;border-color:#27272a}
+.r2-ht{color:#8b5cf6;font-weight:700;font-size:13.5px;margin-bottom:5px}
+.r2-hd{color:#a1a1aa;font-size:13px;line-height:1.55}
+.r2-hackbox.locked .r2-ht{color:#52525b}
+.r2-steps{margin-top:10px}
+.r2-step{display:flex;gap:10px;font-size:13px;color:#d4d4d8;line-height:1.5;margin-bottom:9px}
+.r2-sn{
+  width:20px;height:20px;border-radius:50%;background:#18181b;color:#8b5cf6;
+  font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.r2-hack-meta{font-size:11.5px;color:#52525b;margin-top:4px;line-height:1.5}
+.r2-hack-meta b{color:#71717a}
+
+/* ── Priorities panel ── */
+.r2-pri-row{display:flex;gap:10px;font-size:13px;padding:8px 0;
+  border-bottom:1px solid #141416;align-items:flex-start}
+.r2-pri-row:last-child{border-bottom:none}
+.r2-pri-glyph{font-size:14px;font-weight:800;width:18px;flex-shrink:0;margin-top:1px}
+.r2-pri-row.met .r2-pri-glyph{color:#10b981}
+.r2-pri-row.partial .r2-pri-glyph{color:#f59e0b}
+.r2-pri-row.unmet .r2-pri-glyph{color:#52525b}
+.r2-pri-label{color:#fafafa;font-weight:600;font-size:13px}
+.r2-pri-line{color:#a1a1aa;font-size:12.5px;margin-top:2px;line-height:1.45}
+
+/* ── Things to know panel ── */
+.r2-item.know{align-items:flex-start}
+.r2-know-dot{
+  width:7px;height:7px;border-radius:50%;background:#3f3f46;
+  flex-shrink:0;margin-top:5px}
+.r2-item.know.high .r2-know-dot{background:#f59e0b}
+.r2-item.know.critical .r2-know-dot{background:#ef4444}
 
 /* ── Nav ── */
 .r2-nav{display:flex;gap:8px;margin-top:32px}
