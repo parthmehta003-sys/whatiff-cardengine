@@ -26,6 +26,7 @@ import SpendInput from './SpendInput';
 import ProfileInput, { ProfileValues } from './ProfileInput';
 import PrioritySelector from './PrioritySelector';
 import ResultsScreen from './ResultsScreen';
+import ResultsScreenV2 from './ResultsScreenV2';
 import ProsConsDetail from './ProsConsDetail';
 import CardTileGallery from './CardTileGallery';
 import ChoicesPanel from './ChoicesPanel';
@@ -159,6 +160,10 @@ export const CardEngine: React.FC<Props> = ({ db }) => {
     return <CardTileGallery cards={db.cards} />;
   }
 
+  // DEV: V2 results layout preview — go through the normal flow, results step renders V2.
+  // Access via ?v2 on any URL (e.g. /?v2 or /index.html?v2).
+  const useV2 = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('v2');
+
   return (
     <div className="wf-shell">
       <style>{shellCss}</style>
@@ -207,7 +212,25 @@ export const CardEngine: React.FC<Props> = ({ db }) => {
                 onContinue={(p) => { setPriorities(p); setStep('results'); }}
               />
             )}
-            {step === 'results' && result && (
+            {step === 'results' && result && (useV2 ? (
+              <ResultsScreenV2
+                result={result}
+                monthlySpend={spend}
+                isTravelPriority={priorities.top === 'Travel' || priorities.top === 'Lounge'}
+                devaluations={devaluations}
+                hacks={hacks}
+                insights={insights}
+                intelligence={intelligence}
+                narratives={narratives}
+                onKnowMore={(cardId) => setKnowMoreCardId(cardId)}
+                baselineNet={baselineNet}
+                liquidity={liquidity}
+                priorities={priorities}
+                altForTop={altForTop}
+                onBack={() => setStep('priorities')}
+                onRestart={restart}
+              />
+            ) : (
               <ResultsScreen
                 result={result}
                 monthlySpend={spend}
@@ -225,7 +248,7 @@ export const CardEngine: React.FC<Props> = ({ db }) => {
                 onBack={() => setStep('priorities')}
                 onRestart={restart}
               />
-            )}
+            ))}
           </div>
         </div>{/* wf-main */}
       </div>{/* wf-layout */}
