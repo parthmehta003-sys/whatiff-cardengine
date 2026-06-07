@@ -10,6 +10,7 @@ import type { RankResult, RankedCard, CardMeta, Priorities } from '../../lib/car
 import type { MonthlySpend } from '../../lib/cardEngine/computeEarn';
 import { evaluatePriorities, LABEL, type PriorityEval, type AlternativeForPriority } from '../../lib/cardEngine/evaluatePriorities';
 import RecommendationCard, { DevaluationFlag } from './RecommendationCard';
+import { CardTile } from './CardTile';
 import AprEmiCalculator from './AprEmiCalculator';
 import type { SelectedHack, SurfacedInsight } from '../../lib/cardEngine/selectHacks';
 
@@ -90,58 +91,53 @@ export const ResultsScreen: React.FC<Props> = ({
         <span className="wf-res-shape">{result.spendShape} spend</span>
       </div>
 
-      {/* combo block — hero position (above the "on the table" line) when combo wins */}
+      {/* combo block — hero position when combo wins */}
       {result.combo && (() => {
         const combo = result.combo!;
         const cardContrib = (c: RankedCard) => {
           const cats = combo.assignments[c.cardId] ?? [];
           return cats.reduce((s, cat) => s + (c.earn.perCategory[cat]?.guaranteed ?? 0) * 12, 0);
         };
-        // How much the 2-card setup beats the best single card alone (the combo's reason to exist).
-        const vsSolo = top ? Math.round(combo.netPerYear - top.netGuaranteedPerYear) : null;
         return (
           <div className={'wf-res-combo' + (comboHero ? ' wf-res-combo-hero' : '')}>
-            <span className="wf-res-combo-tag">best combo</span>
-            <div className="wf-combo-rows">
-              {result.recommended.map((c) => {
-                const cats = combo.assignments[c.cardId] ?? [];
-                const contrib = cardContrib(c);
-                return (
-                  <div key={c.cardId} className="wf-combo-row">
-                    <div className="wf-combo-card-name">{c.meta.name}</div>
-                    <div className="wf-combo-cats">{cats.join(' · ')}</div>
-                    <div className="wf-combo-contrib">{inr(contrib)}/yr on these</div>
+            <div className="wf-combo-header">
+              <span className="wf-res-combo-tag">best combo</span>
+              <span className="wf-combo-together">Together: <b>{inr(combo.netPerYear)}/yr</b></span>
+            </div>
+            {result.recommended.map((c, i) => {
+              const cats = combo.assignments[c.cardId] ?? [];
+              const contrib = cardContrib(c);
+              return (
+                <React.Fragment key={c.cardId}>
+                  {i > 0 && <div className="wf-combo-divider" />}
+                  <div className="wf-combo-card">
+                    <div className="wf-combo-tile">
+                      <CardTile cardName={c.meta.name} issuer={(c.meta as CardMeta).bank ?? ''} />
+                    </div>
+                    <div className="wf-combo-info">
+                      <div className="wf-combo-namerow">
+                        <span className="wf-combo-name">{c.meta.name}</span>
+                        <span className="wf-combo-val">{inr(contrib)}/yr</span>
+                      </div>
+                      <div className="wf-combo-cats2">{cats.join(' · ')}</div>
+                    </div>
                   </div>
-                );
-              })}
-            </div>
-            <div className="wf-combo-total">
-              Combined value {inr(combo.combinedAnnualValue)}
-              <span className="wf-combo-sep">−</span>fees {inr(combo.combinedFees)}
-              <span className="wf-combo-sep">=</span>
-              <span className="wf-combo-net">{inr(combo.netPerYear)}</span>
-            </div>
-            {comboHero && vsSolo != null && vsSolo > 0 && (
-              <div className="wf-combo-vssolo">
-                <b>{inr(vsSolo)} more</b> than the best single card alone.
+                </React.Fragment>
+              );
+            })}
+            {comboHero && onTable != null && onTable > 0 && (
+              <div className="wf-combo-footnote">
+                You&rsquo;re leaving <b>{inr(onTable)}/year</b> on the table with a single card.
               </div>
             )}
           </div>
         );
       })()}
 
-      {/* Journey B "leaving on the table" — the memorable number; compares the hero net (combo total
-          when combo is hero, else the single card) against a typical eligible card. */}
-      {onTable != null && onTable > 0 && (
-        <div className="wf-res-ontable">
-          <div className="wf-ot-row">
-            <span>{comboHero ? 'This 2-card setup' : top.meta.name}</span>
-            <b>{inr(heroNet!)}/yr</b>
-          </div>
-          <div className="wf-ot-row wf-ot-base"><span>A typical eligible card</span><span>{inr(baselineNet!)}/yr</span></div>
-          <div className="wf-ot-punch">
-            You&rsquo;re leaving <b>{inr(onTable)}/year</b> on the table {comboHero ? 'with a single card.' : 'with the wrong card.'}
-          </div>
+      {/* single-card Journey B baseline line — shown only when no combo */}
+      {!journeyA && !comboHero && onTable != null && onTable > 0 && (
+        <div className="wf-res-ontable-line">
+          <b>{inr(onTable)}/year</b> better than an average card you&rsquo;d qualify for.
         </div>
       )}
 
@@ -379,27 +375,24 @@ const css = `
 .wf-vgain b{color:#fafafa}
 .wf-res-h{display:flex;justify-content:space-between;align-items:baseline;font-size:16px;font-weight:800;color:#fafafa;margin-top:6px;letter-spacing:-.01em}
 .wf-res-shape{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#a78bfa}
-.wf-res-ontable{background:#0c0c0e;border:1px solid #2a2a30;border-radius:12px;padding:14px 16px}
-.wf-ot-row{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;color:#e4e4e7;margin-bottom:5px}
-.wf-ot-row b{color:#10b981;font-weight:800;font-variant-numeric:tabular-nums}
-.wf-ot-base{color:#a1a1aa;font-size:13px}
-.wf-ot-base span:last-child{font-variant-numeric:tabular-nums}
-.wf-ot-punch{margin-top:9px;padding-top:10px;border-top:1px solid #27272a;font-size:14px;color:#fafafa;line-height:1.5}
-.wf-ot-punch b{color:#34d399;font-weight:800}
-.wf-res-combo{background:#0a1410;border:1px solid #1a6b46;border-radius:12px;padding:13px 15px;font-size:13px;color:#e4e4e7;line-height:1.55}
-.wf-res-combo-tag{display:inline-block;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#34d399;border:1px solid #1a6b46;border-radius:4px;padding:2px 6px;margin-right:8px}
-.wf-combo-rows{display:flex;flex-direction:column;gap:8px;margin-top:10px}
-.wf-combo-row{display:grid;grid-template-columns:1fr auto;column-gap:12px;row-gap:1px}
-.wf-combo-card-name{font-size:13px;font-weight:700;color:#fafafa}
-.wf-combo-cats{font-size:11.5px;color:#71717a;grid-column:1}
-.wf-combo-contrib{font-size:12.5px;font-weight:600;color:#34d399;grid-row:1/3;align-self:center;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.wf-combo-total{margin-top:11px;padding-top:10px;border-top:1px solid #1a3d28;font-size:13px;color:#a1a1aa;display:flex;align-items:baseline;flex-wrap:wrap;gap:5px}
-.wf-combo-sep{color:#3f3f46;font-weight:700}
-.wf-combo-net{font-size:15px;font-weight:800;color:#10b981;font-variant-numeric:tabular-nums;margin-left:2px}
+.wf-res-combo{background:#0a1410;border:1px solid #1a6b46;border-radius:12px;overflow:hidden;font-size:13px;color:#e4e4e7}
 .wf-res-combo-hero{border-color:#10b981;box-shadow:0 0 0 1px #10b981 inset,0 8px 30px rgba(0,0,0,.4)}
-.wf-res-combo-hero .wf-combo-net{font-size:18px}
-.wf-combo-vssolo{margin-top:9px;padding-top:9px;border-top:1px solid #1a3d28;font-size:12.5px;color:#a7f3d0;line-height:1.45}
-.wf-combo-vssolo b{color:#34d399;font-weight:800}
+.wf-combo-header{display:flex;align-items:center;justify-content:space-between;padding:11px 14px 11px;border-bottom:1px solid #1a3d28}
+.wf-res-combo-tag{display:inline-block;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#34d399;border:1px solid #1a6b46;border-radius:4px;padding:2px 6px}
+.wf-combo-together{font-size:13px;color:#a1a1aa}
+.wf-combo-together b{color:#10b981;font-weight:800;font-variant-numeric:tabular-nums}
+.wf-combo-card{display:flex;align-items:center;gap:12px;padding:12px 14px}
+.wf-combo-tile{width:72px;flex-shrink:0}
+.wf-combo-info{flex:1;min-width:0}
+.wf-combo-namerow{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.wf-combo-name{font-size:13.5px;font-weight:700;color:#fafafa;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.wf-combo-val{font-size:13px;font-weight:700;color:#34d399;font-variant-numeric:tabular-nums;white-space:nowrap;flex-shrink:0}
+.wf-combo-cats2{font-size:11.5px;color:#52525b;margin-top:3px;line-height:1.4}
+.wf-combo-divider{height:1px;background:#27272a;margin:0 14px}
+.wf-combo-footnote{margin:0;padding:10px 14px;border-top:1px solid #1a3d28;font-size:12px;color:#6b7280;line-height:1.5}
+.wf-combo-footnote b{color:#10b981;font-weight:700;font-variant-numeric:tabular-nums}
+.wf-res-ontable-line{font-size:13px;color:#a1a1aa;padding:2px 0}
+.wf-res-ontable-line b{color:#10b981;font-weight:800;font-variant-numeric:tabular-nums}
 .wf-res-cards{display:flex;flex-direction:column;gap:13px}
 .wf-res-insights{display:flex;flex-direction:column;gap:8px}
 .wf-insight{background:#0c0c0e;border:1px solid #2a2a30;border-radius:11px;padding:11px 14px;font-size:12.5px;color:#d4d4d8;line-height:1.55}
