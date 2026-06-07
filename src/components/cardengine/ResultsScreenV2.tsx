@@ -228,9 +228,11 @@ const css = `
 .r2-hero-sub{font-size:13px;color:#a1a1aa;margin-top:5px;margin-bottom:20px;line-height:1.4}
 .r2-hero-sub b{color:#fafafa;font-weight:600}
 
-/* ── Card stack — heights calculated for 260×164px card at translate(34,64) scale(.93) ── */
-/* Back card bottom: 64 + 164×0.93 = 217px → container 230px; right edge: 34 + 260×0.93 = 276px (fits in 380px column) */
-.r2-stack{position:relative;height:230px;margin-bottom:10px}
+/* ── Card stack — height must clear the back card's full visual extent.
+   Back card: translate(34px,64px) scale(.93) with transform-origin:50% 50%
+   → visual bottom = (0.035×164 + 64) + 164×0.93 = 69.7 + 152.5 = 222.2px
+   265px gives ~43px clearance so swaphint + footnote sit cleanly below. */
+.r2-stack{position:relative;height:265px;margin-bottom:10px}
 
 /* ── Solo single-card stack ── */
 .r2-solo-stack{position:relative;height:180px;margin-bottom:12px}
