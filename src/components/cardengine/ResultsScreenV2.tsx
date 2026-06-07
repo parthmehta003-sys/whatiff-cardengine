@@ -8,6 +8,10 @@
  * Props are identical to ResultsScreen — drop-in swap when all stages are complete.
  * Preview via ?v2 query param (CardEngine gates it).
  *
+ * Card composition matches whatiff_results_prototype.html exactly:
+ *   chip → pc-name → pc-cats → pc-net (absolute bottom-left) → pc-sheen
+ *   all rendered INSIDE the gradient card, no block below the tile.
+ *
  * Stage 1 scope: shell, hero numbers, card stack with swap, baseline lines.
  * NOT wired yet: icon rows, detail tabs, alt-card panel, runners-up, insights.
  */
@@ -15,7 +19,7 @@ import React, { useState } from 'react';
 import type { RankResult, RankedCard, CardMeta, Priorities } from '../../lib/cardEngine/rankCards';
 import type { MonthlySpend } from '../../lib/cardEngine/computeEarn';
 import type { AlternativeForPriority } from '../../lib/cardEngine/evaluatePriorities';
-import { CardTile } from './CardTile';
+import { resolveTileColor } from './CardTile';
 import type { DevaluationFlag } from './RecommendationCard';
 import type { SelectedHack, SurfacedInsight } from '../../lib/cardEngine/selectHacks';
 
@@ -39,6 +43,39 @@ interface Props {
   onRestart?: () => void;
 }
 
+/** A single gradient card matching the prototype .pcard composition exactly. */
+const PCard: React.FC<{
+  card: RankedCard;
+  cats: string;
+  net: number;
+  className?: string;
+  style?: React.CSSProperties;
+  onClick?: () => void;
+  onKeyDown?: (e: React.KeyboardEvent) => void;
+  role?: string;
+  tabIndex?: number;
+  'aria-label'?: string;
+}> = ({ card, cats, net, className = '', style, onClick, onKeyDown, role, tabIndex, 'aria-label': ariaLabel }) => {
+  const { from, to } = resolveTileColor(card.meta.name, (card.meta as CardMeta).bank ?? '');
+  return (
+    <div
+      className={'r2-pcard ' + className}
+      style={{ background: `linear-gradient(150deg,${from},${to})`, ...style }}
+      onClick={onClick}
+      onKeyDown={onKeyDown}
+      role={role}
+      tabIndex={tabIndex}
+      aria-label={ariaLabel}
+    >
+      <div className="r2-chip" />
+      <div className="r2-pc-name">{card.meta.name}</div>
+      <div className="r2-pc-cats">{cats}</div>
+      <div className="r2-pc-net">net for you <b>{inr(net)}/yr</b></div>
+      <div className="r2-pc-sheen" />
+    </div>
+  );
+};
+
 export const ResultsScreenV2: React.FC<Props> = ({
   result, baselineNet, onBack, onRestart,
 }) => {
@@ -51,7 +88,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
       ? Math.round(heroNet - baselineNet)
       : null;
 
-  // Which combo card is in the foreground (0 = first card, 1 = second).
+  // Which combo card is in the foreground (0 = first recommended, 1 = second).
   const [frontIdx, setFrontIdx] = useState(0);
 
   const combo = result.combo ?? null;
@@ -78,42 +115,35 @@ export const ResultsScreenV2: React.FC<Props> = ({
               <div className="r2-hero-num">
                 {inr(combo.netPerYear)}<span className="r2-hero-yr">/yr</span>
               </div>
-              <div className="r2-hero-sub">combined net benefit across 2 cards</div>
+              <div className="r2-hero-sub">
+                combined net benefit across <b>2 cards</b>
+              </div>
 
-              {/* Stacked cards — back card tappable to swap forward */}
+              {/* Card stack — prototype: back at translate(34px,64px) scale(.93), front at 0/0 scale(1) */}
               <div className="r2-stack">
-                {/* Invisible sizer so the container has height matching one card */}
-                <div className="r2-card r2-stack-sizer" aria-hidden>
-                  <CardTile cardName={front.meta.name} issuer={(front.meta as CardMeta).bank ?? ''} />
-                  <div className="r2-card-body">
-                    <div className="r2-card-name">{front.meta.name}</div>
-                    <div className="r2-card-cats">{(combo.assignments[front.cardId] ?? []).join(' · ')}</div>
-                    <div className="r2-card-val">net for you {inr(cardContrib(front))}/yr</div>
-                  </div>
-                </div>
-                <div
-                  className="r2-card r2-card-back"
-                  onClick={() => setFrontIdx((i) => 1 - i)}
+                {/* Back card — tappable to swap forward */}
+                <PCard
+                  card={back}
+                  cats={(combo.assignments[back.cardId] ?? []).join(' · ')}
+                  net={cardContrib(back)}
+                  className="r2-pcard-back"
+                  onClick={() => setFrontIdx(i => 1 - i)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setFrontIdx(i => 1 - i); }}
                   role="button"
                   tabIndex={0}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setFrontIdx((i) => 1 - i); }}
                   aria-label={`Bring ${back.meta.name} to front`}
-                >
-                  <CardTile cardName={back.meta.name} issuer={(back.meta as CardMeta).bank ?? ''} />
-                  <div className="r2-card-body">
-                    <div className="r2-card-name">{back.meta.name}</div>
-                    <div className="r2-card-cats">{(combo.assignments[back.cardId] ?? []).join(' · ')}</div>
-                    <div className="r2-card-val">net for you {inr(cardContrib(back))}/yr</div>
-                  </div>
-                </div>
-                <div className="r2-card r2-card-front">
-                  <CardTile cardName={front.meta.name} issuer={(front.meta as CardMeta).bank ?? ''} />
-                  <div className="r2-card-body">
-                    <div className="r2-card-name">{front.meta.name}</div>
-                    <div className="r2-card-cats">{(combo.assignments[front.cardId] ?? []).join(' · ')}</div>
-                    <div className="r2-card-val">net for you {inr(cardContrib(front))}/yr</div>
-                  </div>
-                </div>
+                />
+                {/* Front card */}
+                <PCard
+                  card={front}
+                  cats={(combo.assignments[front.cardId] ?? []).join(' · ')}
+                  net={cardContrib(front)}
+                  className="r2-pcard-front"
+                />
+              </div>
+
+              <div className="r2-swaphint">
+                Showing <b>{front.meta.name}</b> · tap the other card to swap
               </div>
 
               {onTable != null && onTable > 0 && (
@@ -123,7 +153,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
               )}
             </>
           ) : top ? (
-            /* ── Single-card view (Journey B new-card or Journey A owns-cards) ── */
+            /* ── Single-card view ── */
             <>
               <div className="r2-eyebrow">
                 {journeyA ? 'Top addition for your setup' : 'Your #1 fit'}
@@ -131,30 +161,31 @@ export const ResultsScreenV2: React.FC<Props> = ({
               <div className="r2-hero-num">
                 {inr(top.netGuaranteedPerYear)}<span className="r2-hero-yr">/yr</span>
               </div>
-              <div className="r2-hero-sub">annual net benefit · {top.meta.name}</div>
+              <div className="r2-hero-sub">
+                annual net benefit · <b>{top.meta.name}</b>
+              </div>
 
-              <div className="r2-card r2-card-solo">
-                <CardTile cardName={top.meta.name} issuer={(top.meta as CardMeta).bank ?? ''} />
-                <div className="r2-card-body">
-                  <div className="r2-card-name">{top.meta.name}</div>
-                  <div className="r2-card-cats">
-                    {Object.entries(top.earn.perCategory)
+              {/* Single card — same .pcard composition, normal flow */}
+              <div className="r2-solo-stack">
+                <PCard
+                  card={top}
+                  cats={
+                    Object.entries(top.earn.perCategory)
                       .filter(([, v]) => v.guaranteed > 0)
                       .sort(([, a], [, b]) => b.guaranteed - a.guaranteed)
                       .slice(0, 4)
                       .map(([cat]) => cat)
-                      .join(' · ')}
-                  </div>
-                </div>
+                      .join(' · ')
+                  }
+                  net={top.netGuaranteedPerYear}
+                  className="r2-pcard-solo"
+                />
               </div>
 
               {/* Baseline line — Journey B only, no combo */}
               {!journeyA && onTable != null && onTable > 0 && (
-                <div className="r2-baseline">
-                  <span className="r2-baseline-num">{inr(onTable)}</span>
-                  <span className="r2-baseline-text">
-                    {' '}better/year than an average card you&rsquo;d qualify for
-                  </span>
+                <div className="r2-betterline">
+                  <b>{inr(onTable)}</b> better/year than an average card you&rsquo;d qualify for
                 </div>
               )}
             </>
@@ -181,63 +212,87 @@ export const ResultsScreenV2: React.FC<Props> = ({
 };
 
 const css = `
-/* ── Shell & grid ── */
-.r2-shell{font-family:'DM Sans',system-ui,sans-serif;color:#e4e4e7;max-width:920px;margin:0 auto}
-.r2-grid{display:grid;grid-template-columns:360px 1fr;gap:36px;align-items:start}
+/* ── Shell & grid — matches prototype .shell ── */
+.r2-shell{font-family:'DM Sans',system-ui,sans-serif;color:#fafafa;max-width:1080px;margin:0 auto}
+.r2-grid{display:grid;grid-template-columns:380px 1fr;gap:32px;align-items:start}
 @media(max-width:820px){.r2-grid{grid-template-columns:1fr}}
 
-/* ── Left column — sticky ── */
-.r2-left{position:sticky;top:28px;display:flex;flex-direction:column}
+/* ── Left column — sticky — matches prototype .left ── */
+.r2-left{position:sticky;top:24px}
 @media(max-width:820px){.r2-left{position:static}}
 
-/* ── Eyebrow + hero number ── */
-.r2-eyebrow{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#52525b;margin-bottom:10px}
-.r2-hero-num{font-size:44px;font-weight:800;color:#10b981;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;margin-bottom:5px}
-.r2-hero-yr{font-size:24px;font-weight:700;color:#34d399;letter-spacing:0;margin-left:1px}
-.r2-hero-sub{font-size:13px;color:#71717a;margin-bottom:20px;line-height:1.4}
+/* ── Eyebrow + hero numbers — matches prototype .eyebrow / .hero-num / .hero-sub ── */
+.r2-eyebrow{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#52525b;margin-bottom:6px}
+.r2-hero-num{font-size:42px;font-weight:800;color:#10b981;letter-spacing:-0.02em;line-height:1.05;font-variant-numeric:tabular-nums}
+.r2-hero-yr{font-size:26px;font-weight:800;color:#10b981;letter-spacing:-.01em}
+.r2-hero-sub{font-size:13px;color:#a1a1aa;margin-top:5px;margin-bottom:20px;line-height:1.4}
+.r2-hero-sub b{color:#fafafa;font-weight:600}
 
-/* ── Card base — transparent layout wrapper; the tile handles its own visual box ── */
-.r2-card{display:block}
-.r2-card-body{padding:11px 2px 0}
-.r2-card-name{font-size:15px;font-weight:700;color:#fafafa;margin-bottom:4px;line-height:1.3}
-.r2-card-cats{font-size:12px;color:#52525b;line-height:1.5;margin-bottom:5px}
-.r2-card-val{font-size:12.5px;font-weight:700;color:#34d399;font-variant-numeric:tabular-nums}
+/* ── Card stack — matches prototype .cardstack ── */
+/* Width: 380px column. Card width: calc(100% - 40px) = 340px. Height: 340*(188/300) ≈ 213px.
+   Back card bottom: 64 + 213*0.93 ≈ 262px → container height 275px. */
+.r2-stack{position:relative;height:275px;margin-bottom:10px}
 
-/* ── Solo card ── */
-.r2-card-solo{margin-bottom:16px}
+/* ── Solo single-card stack (no offset needed) — matches prototype height:210px ── */
+.r2-solo-stack{position:relative;height:230px;margin-bottom:12px}
 
-/* ── Card stack (combo) ── */
-/*
- * Both cards are absolute. The container height is driven by an invisible spacer
- * (.r2-stack-sizer) whose size matches the front card's natural size, plus padding
- * on the right/bottom to contain the back card's 34px/64px offset at 0.93 scale.
- * Left column is 360px; back card right edge ≈ 360×0.93+34 = 369 — fits within
- * the 40px right padding budget on the column. Bottom: card body ~220px × 0.93 + 64 ≈ 269.
- */
-.r2-stack{position:relative;padding-right:40px;padding-bottom:80px;margin-bottom:18px}
-
-/* Invisible sizer — front card dimensions define the container height. */
-.r2-stack-sizer{visibility:hidden;pointer-events:none}
-
-/* Both cards: absolutely positioned on top of the sizer. */
-.r2-card-front{position:absolute;inset:0 40px 80px 0;z-index:1}
-.r2-card-back{
-  position:absolute;inset:0 40px 80px 0;
-  transform:translate(34px,64px) scale(0.93);transform-origin:top left;
-  opacity:0.6;z-index:0;
-  cursor:pointer;outline:none;
-  transition:opacity .18s,transform .2s;
+/* ── Prototype .pcard — gradient card with chip, name, cats, net, sheen all inside ── */
+.r2-pcard{
+  position:absolute;left:0;
+  width:calc(100% - 40px); /* room for back card right peek */
+  aspect-ratio:300/188;
+  border-radius:18px;padding:20px;color:#fff;overflow:hidden;
+  border:1px solid rgba(255,255,255,.09);
+  transition:transform .38s cubic-bezier(.4,0,.2,1),box-shadow .38s;
 }
-.r2-card-back:hover,.r2-card-back:focus-visible{opacity:0.9;transform:translate(34px,64px) scale(0.95)}
+
+/* Front card — prototype: translate(0,0) scale(1), z-index:5, shadow */
+.r2-pcard-front{
+  transform:translate(0,0) scale(1);
+  z-index:5;
+  box-shadow:0 14px 36px rgba(0,0,0,.55);
+}
+
+/* Back card — prototype: translate(34px,64px) scale(.93), z-index:2, no shadow, cursor:pointer */
+.r2-pcard-back{
+  transform:translate(34px,64px) scale(.93);
+  z-index:2;
+  cursor:pointer;outline:none;
+  transition:transform .38s cubic-bezier(.4,0,.2,1),opacity .18s;
+}
+.r2-pcard-back:hover{opacity:.88}
+.r2-pcard-back:focus-visible{outline:2px solid rgba(255,255,255,.4);outline-offset:2px}
+
+/* Solo card (single-card view) — full width, front position */
+.r2-pcard-solo{
+  width:100%;
+  transform:translate(0,0) scale(1);
+  z-index:5;
+  box-shadow:0 14px 36px rgba(0,0,0,.55);
+}
+
+/* ── Card internals — matches prototype .chip / .pc-name / .pc-cats / .pc-net / .pc-sheen ── */
+.r2-chip{width:34px;height:25px;border-radius:5px;
+  background:linear-gradient(135deg,#D4A827,#A07D1A);margin-bottom:16px}
+.r2-pc-name{font-size:18px;font-weight:700;line-height:1.2}
+.r2-pc-cats{font-size:11.5px;opacity:.82;margin-top:5px;font-weight:500;line-height:1.4}
+.r2-pc-net{position:absolute;bottom:18px;left:20px;font-size:12px;opacity:.9}
+.r2-pc-net b{font-size:15px;font-weight:700}
+.r2-pc-sheen{position:absolute;inset:0;
+  background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.10) 50%,transparent 60%);
+  pointer-events:none}
+
+/* ── Swap hint — matches prototype .swaphint ── */
+.r2-swaphint{font-size:12px;color:#52525b;margin-bottom:10px}
+.r2-swaphint b{color:#a1a1aa;font-weight:600}
 
 /* ── Combo footnote ── */
-.r2-footnote{font-size:12.5px;color:#6b7280;line-height:1.55}
+.r2-footnote{font-size:12.5px;color:#6b7280;line-height:1.55;margin-top:4px}
 .r2-footnote b{color:#10b981;font-weight:700;font-variant-numeric:tabular-nums}
 
-/* ── Single-card baseline line ── */
-.r2-baseline{display:flex;align-items:baseline;flex-wrap:wrap;gap:5px;margin-top:2px}
-.r2-baseline-num{font-size:22px;font-weight:800;color:#10b981;font-variant-numeric:tabular-nums;line-height:1.1}
-.r2-baseline-text{font-size:13px;color:#71717a;line-height:1.5}
+/* ── Single-card baseline — matches prototype .betterline ── */
+.r2-betterline{margin-top:12px;font-size:15px;color:#a1a1aa;line-height:1.4}
+.r2-betterline b{color:#10b981;font-size:22px;font-weight:800;letter-spacing:-0.01em;font-variant-numeric:tabular-nums}
 
 /* ── Right placeholder ── */
 .r2-placeholder{border:1px dashed #27272a;border-radius:14px;padding:48px 24px;
