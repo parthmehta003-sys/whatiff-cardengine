@@ -221,36 +221,37 @@ const css = `
 .r2-left{position:sticky;top:24px}
 @media(max-width:820px){.r2-left{position:static}}
 
-/* ── Eyebrow + hero numbers — matches prototype .eyebrow / .hero-num / .hero-sub ── */
+/* ── Eyebrow + hero numbers — scaled for desktop two-column layout ── */
 .r2-eyebrow{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#52525b;margin-bottom:6px}
-.r2-hero-num{font-size:42px;font-weight:800;color:#10b981;letter-spacing:-0.02em;line-height:1.05;font-variant-numeric:tabular-nums}
-.r2-hero-yr{font-size:26px;font-weight:800;color:#10b981;letter-spacing:-.01em}
+.r2-hero-num{font-size:32px;font-weight:800;color:#10b981;letter-spacing:-0.02em;line-height:1.05;font-variant-numeric:tabular-nums}
+.r2-hero-yr{font-size:20px;font-weight:800;color:#10b981;letter-spacing:-.01em}
 .r2-hero-sub{font-size:13px;color:#a1a1aa;margin-top:5px;margin-bottom:20px;line-height:1.4}
 .r2-hero-sub b{color:#fafafa;font-weight:600}
 
-/* ── Card stack — matches prototype .cardstack height:280px ── */
-.r2-stack{position:relative;height:280px;margin-bottom:10px}
+/* ── Card stack — heights calculated for 260×164px card at translate(34,64) scale(.93) ── */
+/* Back card bottom: 64 + 164×0.93 = 217px → container 230px; right edge: 34 + 260×0.93 = 276px (fits in 380px column) */
+.r2-stack{position:relative;height:230px;margin-bottom:10px}
 
-/* ── Solo single-card stack — matches prototype height:210px ── */
-.r2-solo-stack{position:relative;height:210px;margin-bottom:12px}
+/* ── Solo single-card stack ── */
+.r2-solo-stack{position:relative;height:180px;margin-bottom:12px}
 
-/* ── Prototype .pcard: fixed 300×188px, matches prototype exactly ── */
+/* ── Card: desktop-scaled 260×164px (prototype was 300×188 tuned for ~390px mobile) ── */
 .r2-pcard{
   position:absolute;left:0;
-  width:300px;height:188px;
+  width:260px;height:164px;
   border-radius:18px;padding:20px;color:#fff;overflow:hidden;
   border:1px solid rgba(255,255,255,.09);
   transition:transform .38s cubic-bezier(.4,0,.2,1),box-shadow .38s;
 }
 
-/* Front card — prototype: translate(0,0) scale(1), z-index:5, shadow */
+/* Front card */
 .r2-pcard-front{
   transform:translate(0,0) scale(1);
   z-index:5;
   box-shadow:0 14px 36px rgba(0,0,0,.55);
 }
 
-/* Back card — prototype: translate(34px,64px) scale(.93), z-index:2, no shadow, cursor:pointer */
+/* Back card — prototype offset kept; tappable strip = 34px right + bottom of 217px vs 164px front */
 .r2-pcard-back{
   transform:translate(34px,64px) scale(.93);
   z-index:2;
@@ -260,20 +261,20 @@ const css = `
 .r2-pcard-back:hover{opacity:.88}
 .r2-pcard-back:focus-visible{outline:2px solid rgba(255,255,255,.4);outline-offset:2px}
 
-/* Solo card — same fixed dimensions, front position */
+/* Solo card — same dimensions, front position */
 .r2-pcard-solo{
   transform:translate(0,0) scale(1);
   z-index:5;
   box-shadow:0 14px 36px rgba(0,0,0,.55);
 }
 
-/* ── Card internals — matches prototype .chip / .pc-name / .pc-cats / .pc-net / .pc-sheen ── */
-.r2-chip{width:34px;height:25px;border-radius:5px;
-  background:linear-gradient(135deg,#D4A827,#A07D1A);margin-bottom:16px}
-.r2-pc-name{font-size:18px;font-weight:700;line-height:1.2}
-.r2-pc-cats{font-size:11.5px;opacity:.82;margin-top:5px;font-weight:500;line-height:1.4}
-.r2-pc-net{position:absolute;bottom:18px;left:20px;font-size:12px;opacity:.9}
-.r2-pc-net b{font-size:15px;font-weight:700}
+/* ── Card internals — scaled down to suit 260×164px card ── */
+.r2-chip{width:30px;height:22px;border-radius:4px;
+  background:linear-gradient(135deg,#D4A827,#A07D1A);margin-bottom:12px}
+.r2-pc-name{font-size:16px;font-weight:700;line-height:1.2}
+.r2-pc-cats{font-size:11px;opacity:.82;margin-top:4px;font-weight:500;line-height:1.4}
+.r2-pc-net{position:absolute;bottom:16px;left:20px;font-size:11px;opacity:.9}
+.r2-pc-net b{font-size:14px;font-weight:700}
 .r2-pc-sheen{position:absolute;inset:0;
   background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.10) 50%,transparent 60%);
   pointer-events:none}
