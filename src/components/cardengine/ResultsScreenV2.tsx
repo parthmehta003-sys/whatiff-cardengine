@@ -196,11 +196,11 @@ const css = `
 .r2-hero-yr{font-size:24px;font-weight:700;color:#34d399;letter-spacing:0;margin-left:1px}
 .r2-hero-sub{font-size:13px;color:#71717a;margin-bottom:20px;line-height:1.4}
 
-/* ── Card base ── */
-.r2-card{background:#111113;border:1px solid #27272a;border-radius:14px;overflow:hidden}
-.r2-card-body{padding:13px 15px 15px}
-.r2-card-name{font-size:15px;font-weight:700;color:#fafafa;margin-bottom:5px}
-.r2-card-cats{font-size:12px;color:#52525b;line-height:1.5;margin-bottom:7px}
+/* ── Card base — transparent layout wrapper; the tile handles its own visual box ── */
+.r2-card{display:block}
+.r2-card-body{padding:11px 2px 0}
+.r2-card-name{font-size:15px;font-weight:700;color:#fafafa;margin-bottom:4px;line-height:1.3}
+.r2-card-cats{font-size:12px;color:#52525b;line-height:1.5;margin-bottom:5px}
 .r2-card-val{font-size:12.5px;font-weight:700;color:#34d399;font-variant-numeric:tabular-nums}
 
 /* ── Solo card ── */
