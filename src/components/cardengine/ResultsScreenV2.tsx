@@ -82,6 +82,15 @@ export const ResultsScreenV2: React.FC<Props> = ({
 
               {/* Stacked cards — back card tappable to swap forward */}
               <div className="r2-stack">
+                {/* Invisible sizer so the container has height matching one card */}
+                <div className="r2-card r2-stack-sizer" aria-hidden>
+                  <CardTile cardName={front.meta.name} issuer={(front.meta as CardMeta).bank ?? ''} />
+                  <div className="r2-card-body">
+                    <div className="r2-card-name">{front.meta.name}</div>
+                    <div className="r2-card-cats">{(combo.assignments[front.cardId] ?? []).join(' · ')}</div>
+                    <div className="r2-card-val">net for you {inr(cardContrib(front))}/yr</div>
+                  </div>
+                </div>
                 <div
                   className="r2-card r2-card-back"
                   onClick={() => setFrontIdx((i) => 1 - i)}
@@ -198,21 +207,28 @@ const css = `
 .r2-card-solo{margin-bottom:16px}
 
 /* ── Card stack (combo) ── */
-/* Container adds top + right padding so the back card can peek above and right of the front. */
-.r2-stack{position:relative;padding-top:14px;padding-right:20px;margin-bottom:18px}
+/*
+ * Both cards are absolute. The container height is driven by an invisible spacer
+ * (.r2-stack-sizer) whose size matches the front card's natural size, plus padding
+ * on the right/bottom to contain the back card's 34px/64px offset at 0.93 scale.
+ * Left column is 360px; back card right edge ≈ 360×0.93+34 = 369 — fits within
+ * the 40px right padding budget on the column. Bottom: card body ~220px × 0.93 + 64 ≈ 269.
+ */
+.r2-stack{position:relative;padding-right:40px;padding-bottom:80px;margin-bottom:18px}
 
-/* Back card: absolutely positioned at top-right, scaled down, muted. */
+/* Invisible sizer — front card dimensions define the container height. */
+.r2-stack-sizer{visibility:hidden;pointer-events:none}
+
+/* Both cards: absolutely positioned on top of the sizer. */
+.r2-card-front{position:absolute;inset:0 40px 80px 0;z-index:1}
 .r2-card-back{
-  position:absolute;top:0;right:0;left:20px;
-  transform:scale(0.93);transform-origin:top right;
-  opacity:0.5;z-index:0;
+  position:absolute;inset:0 40px 80px 0;
+  transform:translate(34px,64px) scale(0.93);transform-origin:top left;
+  opacity:0.6;z-index:0;
   cursor:pointer;outline:none;
   transition:opacity .18s,transform .2s;
 }
-.r2-card-back:hover,.r2-card-back:focus-visible{opacity:0.85;transform:scale(0.96)}
-
-/* Front card: normal flow, fills the padding-narrowed width. */
-.r2-card-front{position:relative;z-index:1}
+.r2-card-back:hover,.r2-card-back:focus-visible{opacity:0.9;transform:translate(34px,64px) scale(0.95)}
 
 /* ── Combo footnote ── */
 .r2-footnote{font-size:12.5px;color:#6b7280;line-height:1.55}
