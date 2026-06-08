@@ -171,6 +171,11 @@ export const ResultsScreenV2: React.FC<Props> = ({
   // Alt-card expansion (single-card view only).
   const [altExpanded, setAltExpanded] = useState(false);
 
+  // Lower horizontal tabs (none open initially).
+  type TabKey = 'fee' | 'others' | 'how';
+  const [activeTab, setActiveTab] = useState<TabKey | null>(null);
+  const toggleTab = (key: TabKey) => setActiveTab(prev => prev === key ? null : key);
+
   const combo = result.combo ?? null;
   const cardContrib = (c: RankedCard): number => {
     if (!combo) return 0;
@@ -574,6 +579,126 @@ export const ResultsScreenV2: React.FC<Props> = ({
             );
           })()}
 
+          {/* ── Stage 4: Lower horizontal tabs ── */}
+          {(() => {
+            const t = result.transparency;
+            const eligibleCount = t.totalEvaluated - t.failedIncome - t.failedFee;
+            const premium = result.premiumWorthConsidering ?? [];
+            const runners = result.runnersUp ?? [];
+
+            const TAB_LABELS: Record<TabKey, string> = {
+              fee:    'Other cards outside your fee preference',
+              others: 'Others',
+              how:    'How we picked',
+            };
+
+            return (
+              <>
+                <div className="r2-lowtabrow">
+                  {(['fee', 'others', 'how'] as TabKey[]).map((key) => (
+                    <button
+                      key={key}
+                      className={'r2-lowtabbtn' + (activeTab === key ? ' on' : '')}
+                      onClick={() => toggleTab(key)}
+                    >
+                      {TAB_LABELS[key]}
+                    </button>
+                  ))}
+                </div>
+
+                {activeTab && (
+                  <div className="r2-lowcontent">
+
+                    {/* ── Other cards outside your fee preference ── */}
+                    {activeTab === 'fee' && (
+                      premium.length === 0 ? (
+                        <div className="r2-lc-note">
+                          No cards above your fee preference have significantly stronger value for your spend.
+                          {result.premiumWorthConsidering === undefined
+                            ? ' (This section is most relevant when you have a Travel or Lounge priority.)'
+                            : ''}
+                        </div>
+                      ) : (
+                        <>
+                          {premium.map(c => (
+                            <div key={c.cardId} className="r2-lc-item">
+                              <span className="r2-lc-name">{c.meta.name}</span>
+                              <span className="r2-lc-val">
+                                {(c.meta as CardMeta).annualFee
+                                  ? `₹${(c.meta as CardMeta).annualFee!.toLocaleString('en-IN')} fee`
+                                  : 'Lifetime Free'}
+                              </span>
+                            </div>
+                          ))}
+                          <div className="r2-lc-note">Above your fee comfort, but strong value if you&rsquo;d stretch.</div>
+                        </>
+                      )
+                    )}
+
+                    {/* ── Others (runners-up) ── */}
+                    {activeTab === 'others' && (
+                      runners.length === 0 ? (
+                        <div className="r2-lc-note">No other cards to show.</div>
+                      ) : (
+                        runners.map(c => (
+                          <div key={c.cardId} className="r2-lc-item">
+                            <span className="r2-lc-name">
+                              {c.meta.name}
+                              {c.inviteOnly && <span className="r2-lc-badge">invite</span>}
+                            </span>
+                            <span className="r2-lc-val">
+                              {journeyA
+                                ? `+${inr(c.marginalGainPerYear ?? 0)}/yr additional`
+                                : `${inr(c.netGuaranteedPerYear)}/yr`}
+                            </span>
+                          </div>
+                        ))
+                      )
+                    )}
+
+                    {/* ── How we picked ── */}
+                    {activeTab === 'how' && (
+                      <>
+                        <div className={'r2-elig yes'}>
+                          <span className="r2-elig-n">✓{eligibleCount}</span>
+                          <span className="r2-elig-t">eligible for you</span>
+                        </div>
+                        {t.failedIncome > 0 && (
+                          <div className="r2-elig no">
+                            <span className="r2-elig-n">✕{t.failedIncome}</span>
+                            <span className="r2-elig-t">income mismatch</span>
+                          </div>
+                        )}
+                        {t.failedFee > 0 && (
+                          <div className="r2-elig no">
+                            <span className="r2-elig-n">✕{t.failedFee}</span>
+                            <span className="r2-elig-t">above your fee comfort</span>
+                          </div>
+                        )}
+                        {t.inviteOnly > 0 && (
+                          <div className="r2-elig no">
+                            <span className="r2-elig-n">✕{t.inviteOnly}</span>
+                            <span className="r2-elig-t">invite-only</span>
+                          </div>
+                        )}
+                        {t.weakSpendMatch > 0 && (
+                          <div className="r2-elig no">
+                            <span className="r2-elig-n">✕{t.weakSpendMatch}</span>
+                            <span className="r2-elig-t">weak fit for your spend</span>
+                          </div>
+                        )}
+                        <div className="r2-lc-note" style={{ marginTop: 14 }}>
+                          Ranked by net annual rupee value for your exact spends.
+                          No card pays to rank here.
+                        </div>
+                      </>
+                    )}
+
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
 
       </div>
@@ -799,6 +924,50 @@ const css = `
   flex-shrink:0;margin-top:5px}
 .r2-item.know.high .r2-know-dot{background:#f59e0b}
 .r2-item.know.critical .r2-know-dot{background:#ef4444}
+
+/* ── Stage 4: Lower horizontal tabs ── */
+.r2-lowtabrow{
+  display:flex;border-top:1px solid #1f1f23;border-bottom:1px solid #1f1f23;
+  margin-top:20px;padding-top:4px}
+.r2-lowtabbtn{
+  flex:1;font-family:'DM Sans',system-ui,sans-serif;background:none;border:none;
+  padding:12px 6px 13px;font-size:11.5px;font-weight:600;color:#52525b;
+  cursor:pointer;text-align:center;border-bottom:2px solid transparent;
+  margin-bottom:-1px;transition:color .15s,border-color .15s;line-height:1.3;
+  position:relative}
+.r2-lowtabbtn:not(:last-child)::after{
+  content:'';position:absolute;right:0;top:22%;height:56%;
+  width:1px;background:#27272a}
+.r2-lowtabbtn:hover{color:#a1a1aa}
+.r2-lowtabbtn.on{color:#fafafa;border-bottom-color:#10b981}
+
+.r2-lowcontent{
+  background:#0c0c0e;border:1px solid #1f1f23;border-top:none;
+  border-radius:0 0 12px 12px;padding:14px 16px}
+
+/* item rows */
+.r2-lc-item{
+  display:flex;justify-content:space-between;align-items:baseline;
+  font-size:13px;color:#d4d4d8;padding:8px 0;
+  border-bottom:1px solid #141416}
+.r2-lc-item:last-of-type{border-bottom:none}
+.r2-lc-name{color:#fafafa;font-weight:600;display:flex;align-items:center;gap:8px}
+.r2-lc-val{color:#a1a1aa;flex-shrink:0;font-variant-numeric:tabular-nums}
+.r2-lc-badge{
+  background:#18181b;color:#a78bfa;font-size:9.5px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.04em;padding:2px 6px;
+  border-radius:5px;border:1px solid #8b5cf633}
+.r2-lc-note{font-size:12px;color:#52525b;line-height:1.55;padding-top:2px}
+
+/* eligibility rows */
+.r2-elig{display:flex;align-items:center;gap:10px;font-size:13px;
+  padding:7px 0;border-bottom:1px solid #141416}
+.r2-elig:last-of-type{border-bottom:none}
+.r2-elig-n{font-size:15px;font-weight:700;width:46px;flex-shrink:0}
+.r2-elig.yes .r2-elig-n{color:#10b981}
+.r2-elig.no .r2-elig-n{color:#3f3f46}
+.r2-elig-t{color:#d4d4d8}
+.r2-elig.no .r2-elig-t{color:#71717a}
 
 /* ── Alt card — single-card path, purple-bordered, desktop-sized ── */
 .r2-alt-card{
