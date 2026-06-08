@@ -165,7 +165,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
   const [frontIdx, setFrontIdx] = useState(0);
 
   // Which detail panel is open (null = all closed).
-  const [activeIcon, setActiveIcon] = useState<IconKey | null>(null);
+  const [activeIcon, setActiveIcon] = useState<IconKey | null>('pros');
   const toggleIcon = (key: IconKey) => setActiveIcon(prev => prev === key ? null : key);
 
   // Alt-card expansion (single-card view only).
