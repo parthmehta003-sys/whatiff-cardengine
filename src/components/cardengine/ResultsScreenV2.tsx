@@ -18,8 +18,9 @@ import type { MonthlySpend } from '../../lib/cardEngine/computeEarn';
 import { evalPriorityForCard, LABEL, type AlternativeForPriority } from '../../lib/cardEngine/evaluatePriorities';
 import { resolveTileColor } from './CardTile';
 import { CardMathBreakdown } from './CardMathBreakdown';
-import type { DevaluationFlag } from './RecommendationCard';
+import RecommendationCard, { type DevaluationFlag } from './RecommendationCard';
 import type { SelectedHack, SurfacedInsight } from '../../lib/cardEngine/selectHacks';
+import { LABEL as PRIORITY_LABEL } from '../../lib/cardEngine/evaluatePriorities';
 
 const inr = (n: number) => '₹' + Math.round(n).toLocaleString('en-IN');
 
@@ -102,7 +103,7 @@ type IconKey = typeof ICONS[number]['key'];
 
 export const ResultsScreenV2: React.FC<Props> = ({
   result, monthlySpend, baselineNet, hacks, intelligence, narratives,
-  onKnowMore, priorities, onBack, onRestart,
+  onKnowMore, priorities, altForTop, isTravelPriority, devaluations, onBack, onRestart,
 }) => {
   const journeyA = result.journey === 'owns_cards';
   const top = result.recommended[0];
@@ -119,6 +120,9 @@ export const ResultsScreenV2: React.FC<Props> = ({
   // Which detail panel is open (null = all closed).
   const [activeIcon, setActiveIcon] = useState<IconKey | null>(null);
   const toggleIcon = (key: IconKey) => setActiveIcon(prev => prev === key ? null : key);
+
+  // Alt-card expansion (single-card view only).
+  const [altExpanded, setAltExpanded] = useState(false);
 
   const combo = result.combo ?? null;
   const cardContrib = (c: RankedCard): number => {
@@ -408,6 +412,40 @@ export const ResultsScreenV2: React.FC<Props> = ({
               </>
             );
           })()}
+
+          {/* ── Alt card — single-card view only, when top priority is unmet ── */}
+          {!comboHero && altForTop && (
+            <div className="r2-alt-card">
+              <div className="r2-alt-pill">Alternative for your {PRIORITY_LABEL[altForTop.key]} priority</div>
+              <div className="r2-alt-line">
+                Your optimal setup earns <b>{inr(altForTop.optimalNet)}</b>. The closest setup that
+                covers <b>{PRIORITY_LABEL[altForTop.key]}</b> is <b>{altForTop.card.meta.name}</b>,
+                earning {inr(altForTop.altNet)} — that&rsquo;s <b>{inr(altForTop.costOfSwitch)} less</b>.
+                Your call.
+              </div>
+              <button
+                className="r2-alt-toggle"
+                onClick={() => setAltExpanded(v => !v)}
+              >
+                {altExpanded ? 'Hide details ↑' : 'See full details →'}
+              </button>
+              {altExpanded && (
+                <div className="r2-alt-detail">
+                  <RecommendationCard
+                    card={altForTop.card}
+                    monthlySpend={monthlySpend}
+                    forexPct={(altForTop.card.meta as CardMeta).forexPct}
+                    isTravelPriority={isTravelPriority}
+                    devaluation={devaluations?.[altForTop.card.cardId]}
+                    hack={hacks?.[altForTop.card.cardId] ?? undefined}
+                    intelligence={intelligence?.[altForTop.card.cardId]}
+                    narrative={narratives?.[altForTop.card.cardId]}
+                    onKnowMore={onKnowMore ? () => onKnowMore(altForTop.card.cardId) : undefined}
+                  />
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
       </div>
@@ -581,6 +619,23 @@ const css = `
   flex-shrink:0;margin-top:5px}
 .r2-item.know.high .r2-know-dot{background:#f59e0b}
 .r2-item.know.critical .r2-know-dot{background:#ef4444}
+
+/* ── Alt card — single-card path, purple-bordered, desktop-sized ── */
+.r2-alt-card{
+  background:#0c0c0e;border:1px solid #8b5cf633;border-radius:12px;
+  padding:16px;margin-top:16px}
+.r2-alt-pill{
+  display:inline-block;background:#18181b;color:#8b5cf6;
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  padding:3px 9px;border-radius:6px;margin-bottom:10px}
+.r2-alt-line{
+  font-size:13.5px;color:#d4d4d8;line-height:1.55;margin-bottom:10px}
+.r2-alt-line b{color:#fafafa}
+.r2-alt-toggle{
+  background:none;border:none;color:#8b5cf6;font-family:inherit;
+  font-size:13px;font-weight:600;cursor:pointer;padding:4px 0;display:block}
+.r2-alt-toggle:hover{color:#a78bfa}
+.r2-alt-detail{margin-top:14px;border-top:1px solid #1f1f23;padding-top:14px}
 
 /* ── Nav ── */
 .r2-nav{display:flex;gap:8px;margin-top:32px}
