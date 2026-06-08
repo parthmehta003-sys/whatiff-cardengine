@@ -14,7 +14,7 @@
 import React, { useState } from 'react';
 import { Scale, Zap, Calculator, Target, Info } from 'lucide-react';
 import type { RankResult, RankedCard, CardMeta, Priorities, PriorityKey } from '../../lib/cardEngine/rankCards';
-import type { MonthlySpend } from '../../lib/cardEngine/computeEarn';
+import type { MonthlySpend, CategoryEarn } from '../../lib/cardEngine/computeEarn';
 import { evalPriorityForCard, LABEL, type AlternativeForPriority } from '../../lib/cardEngine/evaluatePriorities';
 import { resolveTileColor } from './CardTile';
 import { CardMathBreakdown } from './CardMathBreakdown';
@@ -87,6 +87,53 @@ const HackSteps: React.FC<{ steps: string }> = ({ steps }) => {
           <span>{l}</span>
         </div>
       ))}
+    </div>
+  );
+};
+
+const CAT_ACCENT_R2: Record<string, string> = {
+  Online: '#06b6d4', Travel: '#10b981', Dining: '#f59e0b', Fuel: '#8b5cf6',
+  Grocery: '#10b981', Utility: '#8b5cf6', Subscriptions: '#06b6d4',
+  International: '#10b981', 'Other(base)': '#71717a',
+};
+
+/** Per-category row for the combo Math panel — mirrors CardMathBreakdown's CategoryRow. */
+const R2CategoryRow: React.FC<{
+  cat: string; ce: CategoryEarn; monthlySpend: number; annual: number; maxAnnual: number;
+}> = ({ cat, ce, monthlySpend, annual, maxAnnual }) => {
+  const accent = CAT_ACCENT_R2[cat] ?? '#71717a';
+  const pct = Math.max(2, (annual / maxAnnual) * 100);
+  return (
+    <div className="r2-cat-row">
+      <div className="r2-cat-top">
+        <span className="r2-cat-name">
+          <i className="r2-cat-dot" style={{ background: accent }} />
+          {cat === 'Other(base)' ? 'Everything else' : cat}
+        </span>
+        <span className="r2-cat-val">{inr(annual)}/yr</span>
+      </div>
+      <div className="r2-cat-spend">
+        {inr(monthlySpend)}/mo
+        {ce.baseRatePer100 > 0 && (
+          <span className="r2-cat-rate"> · {ce.baseRatePer100.toFixed(2)}% back</span>
+        )}
+      </div>
+      <div className="r2-bar-track">
+        <div className="r2-bar" style={{ width: pct + '%', background: accent }} />
+      </div>
+      {ce.capHit && ce.capBinding != null && (
+        <div className="r2-caphit">
+          earned {inr(ce.rawBeforeCap * 12)}/yr → capped at {inr(ce.capBinding * 12)}/yr
+          <span className="r2-caphit-loss">
+            {inr((ce.rawBeforeCap - ce.guaranteed) * 12)}/yr lost to the cap
+          </span>
+        </div>
+      )}
+      {ce.thresholdAmount != null && ce.thresholdRatePer100 != null && monthlySpend > ce.thresholdAmount && (
+        <div className="r2-thresh">
+          spend above {inr(ce.thresholdAmount)}/mo earns the boosted {ce.thresholdRatePer100.toFixed(2)}% rate
+        </div>
+      )}
     </div>
   );
 };
@@ -370,12 +417,16 @@ export const ResultsScreenV2: React.FC<Props> = ({
                             .filter(cat => assignedCats.has(cat))
                             .map(cat => ({
                               cat,
+                              ce: activeCard.earn.perCategory[cat],
+                              spend: monthlySpend[cat as keyof typeof monthlySpend] ?? 0,
                               annual: (activeCard.earn.perCategory[cat]?.guaranteed ?? 0) * 12,
                             }))
+                            .filter(r => r.ce != null)
                             .sort((a, b) => b.annual - a.annual);
                           const excludedRows = spendCats
                             .filter(cat => !assignedCats.has(cat));
                           const cardNet = cardContrib(activeCard); // assigned earn gross — matches card display
+                          const maxAnnual = Math.max(1, ...assignedRows.map(r => r.annual));
 
                           return (
                             <>
@@ -386,11 +437,15 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 </span>
                               </div>
                               <div className="r2-math-rows">
-                                {assignedRows.map(({ cat, annual }) => (
-                                  <div key={cat} className="r2-math-row">
-                                    <span className="r2-math-row-cat">{cat}</span>
-                                    <span className="r2-math-row-val">{inr(annual)}</span>
-                                  </div>
+                                {assignedRows.map(({ cat, ce, spend, annual }) => (
+                                  <R2CategoryRow
+                                    key={cat}
+                                    cat={cat}
+                                    ce={ce}
+                                    monthlySpend={spend}
+                                    annual={annual}
+                                    maxAnnual={maxAnnual}
+                                  />
                                 ))}
                                 {excludedRows.map(cat => (
                                   <div key={cat} className="r2-math-row excluded">
@@ -683,15 +738,25 @@ const css = `
   letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .r2-math-hero-yr{font-size:15px;font-weight:700;color:#10b981}
 
-/* ── Combo Math breakdown rows ── */
-.r2-math-rows{display:flex;flex-direction:column;gap:0;margin-bottom:0}
+/* ── Combo Math breakdown rows — mirrors CardMathBreakdown's CategoryRow ── */
+.r2-math-rows{display:flex;flex-direction:column;gap:13px;margin-bottom:0}
+/* Rich per-category rows (assigned) */
+.r2-cat-row{font-family:'DM Sans',system-ui,sans-serif}
+.r2-cat-top{display:flex;justify-content:space-between;align-items:baseline}
+.r2-cat-name{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#fafafa}
+.r2-cat-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+.r2-cat-val{font-size:14px;font-weight:700;color:#fafafa;font-variant-numeric:tabular-nums}
+.r2-cat-spend{font-size:11.5px;color:#71717a;margin:3px 0 5px 16px}
+.r2-cat-rate{color:#a1a1aa}
+.r2-bar-track{height:5px;background:#18181b;border-radius:3px;overflow:hidden;margin-left:16px}
+.r2-bar{height:100%;border-radius:3px}
+.r2-caphit{font-size:11px;color:#f59e0b;margin:5px 0 0 16px;display:flex;flex-wrap:wrap;gap:8px}
+.r2-caphit-loss{color:#dc2626;font-weight:600}
+.r2-thresh{font-size:11px;color:#10b981;margin:4px 0 0 16px}
+/* Excluded (other card's) rows — simple, greyed */
 .r2-math-row{
   display:flex;justify-content:space-between;align-items:baseline;
   font-size:13px;padding:7px 0;border-bottom:1px solid #141416}
-.r2-math-row:last-child{border-bottom:none}
-.r2-math-row-cat{color:#d4d4d8}
-.r2-math-row-val{color:#fafafa;font-weight:600;font-variant-numeric:tabular-nums}
-/* Excluded (other card's) rows */
 .r2-math-row.excluded .r2-math-row-cat{color:#3f3f46}
 .r2-math-row-val.excluded{color:#3f3f46}
 .r2-math-attributed{font-size:11px;color:#3f3f46;font-style:italic}
