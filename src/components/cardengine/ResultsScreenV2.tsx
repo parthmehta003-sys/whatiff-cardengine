@@ -389,6 +389,36 @@ export const ResultsScreenV2: React.FC<Props> = ({
                             );
                           })
                         )}
+                        {/* Alt for missed top priority — inside the Priorities panel */}
+                        {!comboHero && altForTop && (
+                          <div className="r2-alt-card">
+                            <div className="r2-alt-pill">Alternative for your {PRIORITY_LABEL[altForTop.key]} priority</div>
+                            <div className="r2-alt-line">
+                              Your optimal setup earns <b>{inr(altForTop.optimalNet)}</b>. The closest setup that
+                              covers <b>{PRIORITY_LABEL[altForTop.key]}</b> is <b>{altForTop.card.meta.name}</b>,
+                              earning {inr(altForTop.altNet)} — that&rsquo;s <b>{inr(altForTop.costOfSwitch)} less</b>.
+                              Your call.
+                            </div>
+                            <button className="r2-alt-toggle" onClick={() => setAltExpanded(v => !v)}>
+                              {altExpanded ? 'Hide details ↑' : 'See full details →'}
+                            </button>
+                            {altExpanded && (
+                              <div className="r2-alt-detail">
+                                <RecommendationCard
+                                  card={altForTop.card}
+                                  monthlySpend={monthlySpend}
+                                  forexPct={(altForTop.card.meta as CardMeta).forexPct}
+                                  isTravelPriority={isTravelPriority}
+                                  devaluation={devaluations?.[altForTop.card.cardId]}
+                                  hack={hacks?.[altForTop.card.cardId] ?? undefined}
+                                  intelligence={intelligence?.[altForTop.card.cardId]}
+                                  narrative={narratives?.[altForTop.card.cardId]}
+                                  onKnowMore={onKnowMore ? () => onKnowMore(altForTop.card.cardId) : undefined}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -413,39 +443,6 @@ export const ResultsScreenV2: React.FC<Props> = ({
             );
           })()}
 
-          {/* ── Alt card — single-card view only, when top priority is unmet ── */}
-          {!comboHero && altForTop && (
-            <div className="r2-alt-card">
-              <div className="r2-alt-pill">Alternative for your {PRIORITY_LABEL[altForTop.key]} priority</div>
-              <div className="r2-alt-line">
-                Your optimal setup earns <b>{inr(altForTop.optimalNet)}</b>. The closest setup that
-                covers <b>{PRIORITY_LABEL[altForTop.key]}</b> is <b>{altForTop.card.meta.name}</b>,
-                earning {inr(altForTop.altNet)} — that&rsquo;s <b>{inr(altForTop.costOfSwitch)} less</b>.
-                Your call.
-              </div>
-              <button
-                className="r2-alt-toggle"
-                onClick={() => setAltExpanded(v => !v)}
-              >
-                {altExpanded ? 'Hide details ↑' : 'See full details →'}
-              </button>
-              {altExpanded && (
-                <div className="r2-alt-detail">
-                  <RecommendationCard
-                    card={altForTop.card}
-                    monthlySpend={monthlySpend}
-                    forexPct={(altForTop.card.meta as CardMeta).forexPct}
-                    isTravelPriority={isTravelPriority}
-                    devaluation={devaluations?.[altForTop.card.cardId]}
-                    hack={hacks?.[altForTop.card.cardId] ?? undefined}
-                    intelligence={intelligence?.[altForTop.card.cardId]}
-                    narrative={narratives?.[altForTop.card.cardId]}
-                    onKnowMore={onKnowMore ? () => onKnowMore(altForTop.card.cardId) : undefined}
-                  />
-                </div>
-              )}
-            </div>
-          )}
         </div>
 
       </div>
