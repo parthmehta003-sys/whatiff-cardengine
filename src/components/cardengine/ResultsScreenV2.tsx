@@ -358,20 +358,83 @@ export const ResultsScreenV2: React.FC<Props> = ({
                     {/* ── The math ── */}
                     {activeIcon === 'math' && (
                       <div className="r2-panel-math">
-                        {/* Your value headline — real engine figure (netGuaranteedPerYear) */}
-                        <div className="r2-math-hero">
-                          <span className="r2-math-hero-lbl">Your value</span>
-                          <span className="r2-math-hero-val">{inr(activeCard.netGuaranteedPerYear)}<span className="r2-math-hero-yr">/yr</span></span>
-                        </div>
-                        <CardMathBreakdown
-                          earn={activeCard.earn}
-                          effectiveAnnualFee={activeCard.effectiveAnnualFee}
-                          annualFee={(activeCard.meta as CardMeta).annualFee ?? 0}
-                          feeWaiverSpend={(activeCard.meta as CardMeta).feeWaiverSpend ?? 0}
-                          netGuaranteedPerYear={activeCard.netGuaranteedPerYear}
-                          annualUpside={activeCard.annualUpside}
-                          monthlySpend={monthlySpend}
-                        />
+                        {comboHero && combo ? (() => {
+                          // Combo: show only THIS card's assigned categories in the total.
+                          // Unassigned categories (where user spends but the other card handles them)
+                          // are shown greyed with attribution — excluded from this card's total.
+                          const assignedCats = new Set(combo.assignments[activeCard.cardId] ?? []);
+                          type SpCat = keyof typeof monthlySpend;
+                          const spendCats = (Object.keys(monthlySpend) as SpCat[])
+                            .filter(cat => (monthlySpend[cat] ?? 0) > 0);
+                          const assignedRows = spendCats
+                            .filter(cat => assignedCats.has(cat))
+                            .map(cat => ({
+                              cat,
+                              annual: (activeCard.earn.perCategory[cat]?.guaranteed ?? 0) * 12,
+                            }))
+                            .sort((a, b) => b.annual - a.annual);
+                          const excludedRows = spendCats
+                            .filter(cat => !assignedCats.has(cat));
+                          const cardNet = cardContrib(activeCard); // assigned earn gross — matches card display
+
+                          return (
+                            <>
+                              <div className="r2-math-hero">
+                                <span className="r2-math-hero-lbl">Your value from this card</span>
+                                <span className="r2-math-hero-val">
+                                  {inr(cardNet)}<span className="r2-math-hero-yr">/yr</span>
+                                </span>
+                              </div>
+                              <div className="r2-math-rows">
+                                {assignedRows.map(({ cat, annual }) => (
+                                  <div key={cat} className="r2-math-row">
+                                    <span className="r2-math-row-cat">{cat}</span>
+                                    <span className="r2-math-row-val">{inr(annual)}</span>
+                                  </div>
+                                ))}
+                                {excludedRows.map(cat => (
+                                  <div key={cat} className="r2-math-row excluded">
+                                    <span className="r2-math-row-cat">
+                                      {cat}
+                                      <span className="r2-math-attributed"> → your other card</span>
+                                    </span>
+                                    <span className="r2-math-row-val excluded">—</span>
+                                  </div>
+                                ))}
+                              </div>
+                              <div className="r2-math-total">
+                                <span>Value from assigned categories</span>
+                                <span className="r2-math-total-val">{inr(cardNet)}</span>
+                              </div>
+                              {activeCard.annualUpside > 0 && (
+                                <div className="r2-math-upside">
+                                  + up to {inr(activeCard.annualUpside)}/yr extra via the card&rsquo;s
+                                  portal/app&nbsp;<span className="r2-math-upside-tag">conditional</span>
+                                </div>
+                              )}
+                            </>
+                          );
+                        })() : (
+                          // Single-card: all categories belong to this card — CardMathBreakdown
+                          // nets to netGuaranteedPerYear which matches the card's "net for you" display.
+                          <>
+                            <div className="r2-math-hero">
+                              <span className="r2-math-hero-lbl">Your value</span>
+                              <span className="r2-math-hero-val">
+                                {inr(activeCard.netGuaranteedPerYear)}<span className="r2-math-hero-yr">/yr</span>
+                              </span>
+                            </div>
+                            <CardMathBreakdown
+                              earn={activeCard.earn}
+                              effectiveAnnualFee={activeCard.effectiveAnnualFee}
+                              annualFee={(activeCard.meta as CardMeta).annualFee ?? 0}
+                              feeWaiverSpend={(activeCard.meta as CardMeta).feeWaiverSpend ?? 0}
+                              netGuaranteedPerYear={activeCard.netGuaranteedPerYear}
+                              annualUpside={activeCard.annualUpside}
+                              monthlySpend={monthlySpend}
+                            />
+                          </>
+                        )}
                       </div>
                     )}
 
@@ -619,6 +682,34 @@ const css = `
 .r2-math-hero-val{font-size:26px;font-weight:800;color:#10b981;
   letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .r2-math-hero-yr{font-size:15px;font-weight:700;color:#10b981}
+
+/* ── Combo Math breakdown rows ── */
+.r2-math-rows{display:flex;flex-direction:column;gap:0;margin-bottom:0}
+.r2-math-row{
+  display:flex;justify-content:space-between;align-items:baseline;
+  font-size:13px;padding:7px 0;border-bottom:1px solid #141416}
+.r2-math-row:last-child{border-bottom:none}
+.r2-math-row-cat{color:#d4d4d8}
+.r2-math-row-val{color:#fafafa;font-weight:600;font-variant-numeric:tabular-nums}
+/* Excluded (other card's) rows */
+.r2-math-row.excluded .r2-math-row-cat{color:#3f3f46}
+.r2-math-row-val.excluded{color:#3f3f46}
+.r2-math-attributed{font-size:11px;color:#3f3f46;font-style:italic}
+/* Total line */
+.r2-math-total{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding:10px 0 0;margin-top:8px;border-top:1px solid #27272a}
+.r2-math-total>span:first-child{font-size:13px;font-weight:600;color:#a1a1aa}
+.r2-math-total-val{font-size:20px;font-weight:800;color:#10b981;
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+/* Upside note (combo) */
+.r2-math-upside{
+  margin-top:10px;font-size:12px;color:#a1a1aa;line-height:1.5;
+  background:#18140a;border:1px solid #3a2f10;border-radius:9px;padding:9px 11px}
+.r2-math-upside-tag{
+  display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;
+  color:#f59e0b;border:1px solid #f59e0b;border-radius:4px;
+  padding:1px 5px;margin-left:5px;letter-spacing:.05em;vertical-align:middle}
 
 /* ── Priorities panel context note (combo) ── */
 .r2-pri-context{
