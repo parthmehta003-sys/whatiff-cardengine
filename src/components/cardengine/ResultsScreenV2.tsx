@@ -357,22 +357,35 @@ export const ResultsScreenV2: React.FC<Props> = ({
 
                     {/* ── The math ── */}
                     {activeIcon === 'math' && (
-                      <CardMathBreakdown
-                        earn={activeCard.earn}
-                        effectiveAnnualFee={activeCard.effectiveAnnualFee}
-                        annualFee={(activeCard.meta as CardMeta).annualFee ?? 0}
-                        feeWaiverSpend={(activeCard.meta as CardMeta).feeWaiverSpend ?? 0}
-                        netGuaranteedPerYear={activeCard.netGuaranteedPerYear}
-                        annualUpside={activeCard.annualUpside}
-                        monthlySpend={monthlySpend}
-                      />
+                      <div className="r2-panel-math">
+                        {/* Your value headline — real engine figure (netGuaranteedPerYear) */}
+                        <div className="r2-math-hero">
+                          <span className="r2-math-hero-lbl">Your value</span>
+                          <span className="r2-math-hero-val">{inr(activeCard.netGuaranteedPerYear)}<span className="r2-math-hero-yr">/yr</span></span>
+                        </div>
+                        <CardMathBreakdown
+                          earn={activeCard.earn}
+                          effectiveAnnualFee={activeCard.effectiveAnnualFee}
+                          annualFee={(activeCard.meta as CardMeta).annualFee ?? 0}
+                          feeWaiverSpend={(activeCard.meta as CardMeta).feeWaiverSpend ?? 0}
+                          netGuaranteedPerYear={activeCard.netGuaranteedPerYear}
+                          annualUpside={activeCard.annualUpside}
+                          monthlySpend={monthlySpend}
+                        />
+                      </div>
                     )}
 
                     {/* ── Priorities ── */}
                     {activeIcon === 'priorities' && (
                       <div className="r2-panel-priorities">
+                        {/* In combo: clarify which card's coverage is shown */}
+                        {comboHero && (
+                          <div className="r2-pri-context">
+                            Showing <b>{activeCard.meta.name}</b>&rsquo;s coverage — swap cards to compare
+                          </div>
+                        )}
                         {priorityKeys.length === 0 ? (
-                          <div className="r2-empty">No priorities selected — go back to the priorities step to set them.</div>
+                          <div className="r2-empty">You didn&rsquo;t set any priorities.</div>
                         ) : (
                           priorityKeys.map(key => {
                             const ev = evalPriorityForCard(key, activeCard, monthlySpend);
@@ -597,6 +610,20 @@ const css = `
   font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .r2-hack-meta{font-size:11.5px;color:#52525b;margin-top:4px;line-height:1.5}
 .r2-hack-meta b{color:#71717a}
+
+/* ── Math panel hero stat ── */
+.r2-math-hero{
+  display:flex;align-items:baseline;justify-content:space-between;
+  margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #1f1f23}
+.r2-math-hero-lbl{font-size:12px;font-weight:600;color:#a1a1aa}
+.r2-math-hero-val{font-size:26px;font-weight:800;color:#10b981;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.r2-math-hero-yr{font-size:15px;font-weight:700;color:#10b981}
+
+/* ── Priorities panel context note (combo) ── */
+.r2-pri-context{
+  font-size:12px;color:#52525b;margin-bottom:12px;line-height:1.4}
+.r2-pri-context b{color:#71717a}
 
 /* ── Priorities panel ── */
 .r2-pri-row{display:flex;gap:10px;font-size:13px;padding:8px 0;
