@@ -445,8 +445,9 @@ const css = `
    265px gives ~43px clearance so swaphint + footnote sit cleanly below. */
 .r2-stack{position:relative;height:265px;margin-bottom:10px}
 
-/* ── Solo single-card stack ── */
-.r2-solo-stack{position:relative;height:180px;margin-bottom:12px}
+/* ── Solo single-card stack — height = card height (164px) + 40px clearance so
+   the betterline sits cleanly below the card's bottom edge. */
+.r2-solo-stack{position:relative;height:204px;margin-bottom:12px}
 
 /* ── Card: desktop-scaled 260×164px (prototype was 300×188 tuned for ~390px mobile) ── */
 .r2-pcard{
