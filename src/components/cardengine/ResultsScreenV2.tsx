@@ -12,7 +12,8 @@
  * Deferred to Stage 3: math two-figure treatment, per-card combo priority coverage.
  */
 import React, { useState } from 'react';
-import { Scale, Zap, Calculator, Target, Info } from 'lucide-react';
+import { Scale, Zap, Calculator, Target, Info, Plane } from 'lucide-react';
+import type { TransferHack, TransferPartner } from '../../lib/cardEngine/loadCardDB';
 import type { RankResult, RankedCard, CardMeta, Priorities, PriorityKey } from '../../lib/cardEngine/rankCards';
 import type { MonthlySpend, CategoryEarn } from '../../lib/cardEngine/computeEarn';
 import { evalPriorityForCard, LABEL, type AlternativeForPriority } from '../../lib/cardEngine/evaluatePriorities';
@@ -38,6 +39,8 @@ interface Props {
   liquidity?: Map<string, { aprAnnualPct: number | null; emiConversionAprPct: number | null }>;
   priorities?: Priorities;
   altForTop?: AlternativeForPriority | null;
+  transferHacks?: Record<string, TransferHack>;
+  transferPartners?: Record<string, TransferPartner[]>;
   onBack?: () => void;
   onRestart?: () => void;
 }
@@ -138,6 +141,45 @@ const R2CategoryRow: React.FC<{
   );
 };
 
+// ── Transfer callout box ─────────────────────────────────────────────────────
+const TransferCallout: React.FC<{
+  hack: TransferHack;
+  partners: TransferPartner[];
+}> = ({ hack, partners }) => (
+  <div className="r2-xfr-box">
+    <div className="r2-xfr-head">
+      <Plane size={16} strokeWidth={2} className="r2-xfr-icon" />
+      <span>Free flights &amp; hotels with your points</span>
+    </div>
+    <div className="r2-xfr-rows">
+      {hack.flightHack && (
+        <div className="r2-xfr-row">
+          <span className="r2-xfr-pill flight">Flights</span>
+          <span className="r2-xfr-text">{hack.flightHack}</span>
+        </div>
+      )}
+      {hack.hotelHack && (
+        <div className="r2-xfr-row">
+          <span className="r2-xfr-pill hotel">Hotels</span>
+          <span className="r2-xfr-text">{hack.hotelHack}</span>
+        </div>
+      )}
+    </div>
+    {partners.length > 0 && (
+      <div className="r2-xfr-partners">
+        {partners.map((p, i) => (
+          <span key={i} className={'r2-xfr-partner ' + p.type}>
+            {p.partner} <span className="r2-xfr-ratio">{p.ratio}</span>
+          </span>
+        ))}
+      </div>
+    )}
+    <div className="r2-xfr-foot">
+      Best-case sweet-spots &middot; confirm award live before transferring &middot; as of {hack.transferAsOf}
+    </div>
+  </div>
+);
+
 // ── Icon row configuration ───────────────────────────────────────────────────
 const ICONS = [
   { key: 'pros',       label: 'Pros & cons',     Icon: Scale,      accent: '#10b981' },
@@ -150,7 +192,8 @@ type IconKey = typeof ICONS[number]['key'];
 
 export const ResultsScreenV2: React.FC<Props> = ({
   result, monthlySpend, baselineNet, hacks, intelligence, narratives,
-  onKnowMore, priorities, altForTop, isTravelPriority, devaluations, onBack, onRestart,
+  onKnowMore, priorities, altForTop, isTravelPriority, devaluations,
+  transferHacks, transferPartners, onBack, onRestart,
 }) => {
   const journeyA = result.journey === 'owns_cards';
   const top = result.recommended[0];
@@ -596,6 +639,16 @@ export const ResultsScreenV2: React.FC<Props> = ({
             );
           })()}
 
+          {/* ── Stage 7: Transfer callout — visible without opening any icon panel ── */}
+          {(() => {
+            const activeCard = comboHero && front ? front : top;
+            if (!activeCard) return null;
+            const th = transferHacks?.[activeCard.cardId];
+            if (!th || !th.displayTravelHack) return null;
+            const partners = transferPartners?.[activeCard.cardId] ?? [];
+            return <TransferCallout hack={th} partners={partners} />;
+          })()}
+
           {/* ── Stage 4: Lower horizontal tabs ── */}
           {(() => {
             const t = result.transparency;
@@ -1030,6 +1083,47 @@ const css = `
   font-size:13px;font-weight:600;cursor:pointer;padding:4px 0;display:block}
 .r2-alt-toggle:hover{color:#a78bfa}
 .r2-alt-detail{margin-top:14px;border-top:1px solid #1f1f23;padding-top:14px}
+
+/* ── Stage 7: Transfer callout box ── */
+.r2-xfr-box{
+  margin-top:14px;margin-bottom:4px;
+  border-radius:14px;padding:18px;
+  background:linear-gradient(#09090b,#09090b) padding-box,
+             linear-gradient(135deg,#06b6d4 0%,#8b5cf6 100%) border-box;
+  border:1px solid transparent;
+  box-shadow:0 0 0 1px rgba(6,182,212,.10),
+             0 6px 24px rgba(6,182,212,.07),
+             0 6px 24px rgba(139,92,246,.05)}
+
+.r2-xfr-head{
+  display:flex;align-items:center;gap:9px;
+  font-size:13.5px;font-weight:800;color:#fafafa;margin-bottom:14px;line-height:1.3}
+.r2-xfr-icon{color:#06b6d4;flex-shrink:0}
+
+.r2-xfr-rows{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.r2-xfr-row{display:flex;gap:10px;align-items:flex-start}
+.r2-xfr-pill{
+  flex-shrink:0;font-size:9.5px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;padding:3px 8px;border-radius:6px;margin-top:2px}
+.r2-xfr-pill.flight{background:rgba(6,182,212,.12);color:#06b6d4;border:1px solid rgba(6,182,212,.2)}
+.r2-xfr-pill.hotel{background:rgba(139,92,246,.12);color:#a78bfa;border:1px solid rgba(139,92,246,.2)}
+.r2-xfr-text{font-size:12.5px;color:#a1a1aa;line-height:1.6}
+
+.r2-xfr-partners{
+  display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.r2-xfr-partner{
+  font-size:11px;font-weight:600;padding:4px 9px;border-radius:7px;
+  display:flex;align-items:center;gap:5px;line-height:1}
+.r2-xfr-partner.airline{background:rgba(6,182,212,.08);color:#67e8f9;border:1px solid rgba(6,182,212,.15)}
+.r2-xfr-partner.hotel{background:rgba(139,92,246,.08);color:#c4b5fd;border:1px solid rgba(139,92,246,.15)}
+.r2-xfr-partner.portal{background:rgba(16,185,129,.08);color:#6ee7b7;border:1px solid rgba(16,185,129,.15)}
+.r2-xfr-ratio{
+  font-size:10px;font-weight:700;opacity:.7;
+  background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px}
+
+.r2-xfr-foot{
+  font-size:10.5px;color:#3f3f46;line-height:1.5;
+  padding-top:10px;border-top:1px solid rgba(255,255,255,.05)}
 
 /* ── Nav ── */
 .r2-nav{display:flex;gap:8px;margin-top:32px}

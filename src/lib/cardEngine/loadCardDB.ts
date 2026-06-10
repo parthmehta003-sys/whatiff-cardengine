@@ -63,10 +63,20 @@ export interface CardIntel {
   intelId: string; cardId: string; type: string | null; title: string | null;
   description: string | null; severity: string | null; source: string | null;
 }
+export interface TransferHack {
+  cardId: string; flightHack: string; hotelHack: string;
+  transferAsOf: string; displayTravelHack: boolean;
+  honestyStatus: string; attachedWarnings: string[];
+}
+export interface TransferPartner {
+  cardId: string; partner: string; type: string; ratio: string; notes: string | null;
+}
 interface RawDB {
   version: string; cards: RawCard[]; earnRows: RawEarn[]; ladder: RawLadder[];
   strengths: RawStrength[]; warnings: Warning[]; hacks: Hack[]; insights: Insight[];
   intelligence?: CardIntel[];
+  transferHacks?: TransferHack[];
+  transferPartners?: TransferPartner[];
 }
 
 // ── The parsed, validated, indexed structure the app uses ────────────────────
@@ -86,6 +96,8 @@ export interface LoadedCardDB {
   liquidity: Map<string, { aprAnnualPct: number | null; interestFreeDaysRetail: number | null; emiConversionAprPct: number | null }>;
   /** Pros/Cons/Tips per card, for the AI prose layer (NOT for math). */
   narrative: Map<string, { pros: string | null; cons: string | null; tips: string | null }>;
+  transferHacks: TransferHack[];
+  transferPartners: TransferPartner[];
 }
 
 const VALID_CATEGORIES = new Set<SpendCategory>([
@@ -279,6 +291,8 @@ export function loadCardDB(raw: RawDB): LoadedCardDB {
     cards, cardById, earnByCard, strengths, ladderLookup,
     warnings: raw.warnings ?? [], hacks: raw.hacks ?? [], insights: raw.insights ?? [],
     intelligence: raw.intelligence ?? [],
+    transferHacks: raw.transferHacks ?? [],
+    transferPartners: raw.transferPartners ?? [],
     liquidity, narrative,
   };
 }
