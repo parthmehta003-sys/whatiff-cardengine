@@ -17,6 +17,7 @@ import {
 import type { MonthlySpend } from '../../lib/cardEngine/computeEarn';
 import type { DevaluationFlag } from './RecommendationCard';
 import { selectHackForCard, surfaceInsights, cardIntelligence, type SelectedHack } from '../../lib/cardEngine/selectHacks';
+import type { TransferHack, TransferPartner } from '../../lib/cardEngine/loadCardDB';
 import { buildCardNarrative, type CardNarrative } from '../../lib/cardEngine/cardNarrative';
 import { findAlternativeForMissedTop, type AlternativeForPriority } from '../../lib/cardEngine/evaluatePriorities';
 
@@ -147,6 +148,22 @@ export const CardEngine: React.FC<Props> = ({ db }) => {
     return map;
   }, [result, altCardId, spend]);
 
+  // Transfer hacks and partners — keyed by cardId for fast lookup in ResultsScreenV2.
+  const transferHacksMap = useMemo(() => {
+    const map: Record<string, TransferHack> = {};
+    for (const h of db.transferHacks) map[h.cardId] = h;
+    return map;
+  }, [db.transferHacks]);
+
+  const transferPartnersMap = useMemo(() => {
+    const map: Record<string, TransferPartner[]> = {};
+    for (const p of db.transferPartners) {
+      if (!map[p.cardId]) map[p.cardId] = [];
+      map[p.cardId].push(p);
+    }
+    return map;
+  }, [db.transferPartners]);
+
   // baseline = median net across eligible cards (Journey B only), for the "on the table" line.
   const baselineNet = useMemo(() => {
     if (!result || result.journey !== 'new_card') return undefined;
@@ -227,6 +244,8 @@ export const CardEngine: React.FC<Props> = ({ db }) => {
                 liquidity={liquidity}
                 priorities={priorities}
                 altForTop={altForTop}
+                transferHacks={transferHacksMap}
+                transferPartners={transferPartnersMap}
                 onBack={() => setStep('priorities')}
                 onRestart={restart}
               />
