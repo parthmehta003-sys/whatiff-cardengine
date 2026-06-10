@@ -192,19 +192,18 @@ export const ResultsScreenV2: React.FC<Props> = ({
 
       {/* ── Stage 5: decorative background layer — additive only, behind all content ── */}
       <div className="r2-bg" aria-hidden="true">
-        <div className="r2-bg-grad1" />
-        <div className="r2-bg-grad2" />
         <svg className="r2-bg-svg" preserveAspectRatio="none" viewBox="0 0 1600 900">
           <g className="r2-bg-lines">
-            <path d="M0,360 C400,240 700,520 1600,320" stroke="#10b98118" strokeWidth="1.5" fill="none" />
-            <path d="M0,540 C500,660 1000,420 1600,600" stroke="#8b5cf615" strokeWidth="1.5" fill="none" />
-            <path d="M0,220 C600,160 1100,400 1600,200" stroke="#06b6d412" strokeWidth="1.5" fill="none" />
+            <path d="M0,300 C400,180 760,440 1600,240" stroke="#10b98138" strokeWidth="2" fill="none" />
+            <path d="M0,560 C520,700 1040,420 1600,640" stroke="#8b5cf632" strokeWidth="2" fill="none" />
+            <path d="M0,180 C620,120 1120,420 1600,160" stroke="#06b6d42e" strokeWidth="2" fill="none" />
+            <path d="M0,760 C460,640 980,820 1600,720" stroke="#f59e0b26" strokeWidth="2" fill="none" />
           </g>
         </svg>
-        <div className="r2-floatcirc fc1" style={{ borderColor: '#8b5cf640', color: '#8b5cf6' }}>₹</div>
-        <div className="r2-floatcirc fc2" style={{ borderColor: '#10b98140', color: '#10b981' }}>∑</div>
-        <div className="r2-floatcirc fc3" style={{ borderColor: '#06b6d440', color: '#06b6d4' }}>∿</div>
-        <div className="r2-floatcirc fc4" style={{ borderColor: '#f59e0b40', color: '#f59e0b' }}>↗</div>
+        <div className="r2-floatcirc fc1" style={{ borderColor: '#8b5cf6', color: '#8b5cf6' }}>₹</div>
+        <div className="r2-floatcirc fc2" style={{ borderColor: '#10b981', color: '#10b981' }}>∑</div>
+        <div className="r2-floatcirc fc3" style={{ borderColor: '#06b6d4', color: '#06b6d4' }}>∿</div>
+        <div className="r2-floatcirc fc4" style={{ borderColor: '#f59e0b', color: '#f59e0b' }}>↗</div>
       </div>
 
       <div className="r2-grid">
@@ -738,27 +737,27 @@ const css = `
 @media(max-width:820px){.r2-grid{grid-template-columns:1fr}}
 
 /* ── Stage 5: decorative background layer — fixed, behind all content, non-interactive ── */
-.r2-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-.r2-bg-grad1{position:absolute;top:-12%;left:-6%;width:55%;height:62%;
-  background:radial-gradient(circle,#10b98115,transparent 70%)}
-.r2-bg-grad2{position:absolute;bottom:-12%;right:-6%;width:58%;height:66%;
-  background:radial-gradient(circle,#8b5cf612,transparent 70%)}
+.r2-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+  background:
+    radial-gradient(48% 52% at 6% 8%, #10b9811f, transparent 70%),
+    radial-gradient(52% 56% at 94% 92%, #8b5cf61c, transparent 70%),
+    radial-gradient(130% 95% at 50% -8%, #17171d 0%, #0c0c11 48%, #050507 100%)}
 .r2-bg-svg{position:absolute;inset:0;width:100%;height:100%}
-.r2-bg-lines{animation:r2-lines-drift 26s ease-in-out infinite alternate}
-.r2-floatcirc{position:absolute;border-radius:50%;border:1px solid;display:flex;
-  align-items:center;justify-content:center;font-size:17px;opacity:.4;will-change:transform}
-.r2-floatcirc.fc1{top:13%;left:9%;width:56px;height:56px;animation:r2-drift-a 17s ease-in-out infinite}
-.r2-floatcirc.fc2{top:22%;right:11%;width:50px;height:50px;animation:r2-drift-b 21s ease-in-out infinite}
-.r2-floatcirc.fc3{top:58%;right:7%;width:52px;height:52px;animation:r2-drift-a 23s ease-in-out infinite}
-.r2-floatcirc.fc4{bottom:14%;left:14%;width:48px;height:48px;animation:r2-drift-b 19s ease-in-out infinite}
+.r2-bg-lines{opacity:.85;animation:r2-lines-drift 26s ease-in-out infinite alternate}
+.r2-floatcirc{position:absolute;border-radius:50%;border:1.5px solid;display:flex;
+  align-items:center;justify-content:center;font-size:18px;opacity:.6;will-change:transform}
+.r2-floatcirc.fc1{top:15%;left:11%;width:58px;height:58px;animation:r2-drift-a 17s ease-in-out infinite}
+.r2-floatcirc.fc2{top:24%;right:13%;width:52px;height:52px;animation:r2-drift-b 21s ease-in-out infinite}
+.r2-floatcirc.fc3{top:64%;right:9%;width:54px;height:54px;animation:r2-drift-a 23s ease-in-out infinite}
+.r2-floatcirc.fc4{bottom:13%;left:16%;width:50px;height:50px;animation:r2-drift-b 19s ease-in-out infinite}
 @keyframes r2-drift-a{
-  0%{transform:translate(0,0);opacity:.34}
-  50%{transform:translate(14px,-18px);opacity:.46}
-  100%{transform:translate(0,0);opacity:.34}}
+  0%{transform:translate(0,0);opacity:.5}
+  50%{transform:translate(16px,-20px);opacity:.68}
+  100%{transform:translate(0,0);opacity:.5}}
 @keyframes r2-drift-b{
-  0%{transform:translate(0,0);opacity:.32}
-  50%{transform:translate(-16px,14px);opacity:.44}
-  100%{transform:translate(0,0);opacity:.32}}
+  0%{transform:translate(0,0);opacity:.48}
+  50%{transform:translate(-18px,16px);opacity:.66}
+  100%{transform:translate(0,0);opacity:.48}}
 @keyframes r2-lines-drift{
   0%{transform:translateX(0)}
   100%{transform:translateX(-28px)}}
