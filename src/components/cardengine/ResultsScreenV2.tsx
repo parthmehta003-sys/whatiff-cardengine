@@ -154,7 +154,7 @@ const TransferCallout: React.FC<{
   hack: TransferHack;
   partners: TransferPartner[];
 }> = ({ hack, partners }) => {
-  const [bodyOpen, setBodyOpen] = useState(true);
+  const [bodyOpen, setBodyOpen] = useState(false);
   const [stepsOpen, setStepsOpen] = useState(false);
   return (
     <div className="r2-xfr-box">
