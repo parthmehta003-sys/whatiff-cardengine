@@ -178,8 +178,9 @@ export const CardEngine: React.FC<Props> = ({ db }) => {
   }
 
   // DEV: V2 results layout preview — go through the normal flow, results step renders V2.
-  // Access via ?v2 on any URL (e.g. /?v2 or /index.html?v2).
-  const useV2 = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('v2');
+  // Access via ?v2 on any URL (e.g. /?v2 or /index.html?v2). Case-insensitive: ?V2 also works.
+  const useV2 = typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search.toLowerCase()).has('v2');
 
   return (
     <div className="wf-shell">
