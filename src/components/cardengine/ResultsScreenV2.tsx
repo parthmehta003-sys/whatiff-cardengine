@@ -846,16 +846,21 @@ export const ResultsScreenV2: React.FC<Props> = ({
               </>
             );
           })()}
+          {/* ── Credit note (low credit score warning — both journeys) ── */}
+          {result.creditNote && (
+            <div className="r2-creditnote">{result.creditNote}</div>
+          )}
+          {/* ── Nav buttons ── */}
+          {(onBack || onRestart) && (
+            <div className="r2-nav">
+              {onBack && <button className="r2-back" onClick={onBack}>Back</button>}
+              {onRestart && <button className="r2-restart" onClick={onRestart}>Start over</button>}
+            </div>
+          )}
         </div>
 
       </div>
 
-      {(onBack || onRestart) && (
-        <div className="r2-nav">
-          {onBack && <button className="r2-back" onClick={onBack}>Back</button>}
-          {onRestart && <button className="r2-restart" onClick={onRestart}>Start over</button>}
-        </div>
-      )}
     </div>
   );
 };
@@ -1252,8 +1257,14 @@ const css = `
   font-size:10.5px;color:#3f3f46;line-height:1.5;
   padding-top:10px;border-top:1px solid rgba(255,255,255,.05)}
 
+/* ── Credit note ── */
+.r2-creditnote{
+  margin-top:14px;padding:10px 14px;border-radius:10px;font-size:12.5px;
+  color:#fbbf24;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.18);
+  line-height:1.55}
+
 /* ── Nav ── */
-.r2-nav{display:flex;gap:8px;margin-top:32px}
+.r2-nav{display:flex;gap:8px;margin-top:16px}
 .r2-back{flex:1;background:#27272a;border:1px solid #52525b;color:#fafafa;
   font-family:inherit;font-size:13px;font-weight:700;padding:11px;border-radius:10px;cursor:pointer}
 .r2-back:hover{background:#3f3f46;border-color:#71717a}
