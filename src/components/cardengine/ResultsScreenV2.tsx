@@ -50,6 +50,7 @@ const PCard: React.FC<{
   card: RankedCard;
   cats: string;
   net: number;
+  hideNet?: boolean;
   className?: string;
   style?: React.CSSProperties;
   onClick?: () => void;
@@ -57,7 +58,7 @@ const PCard: React.FC<{
   role?: string;
   tabIndex?: number;
   'aria-label'?: string;
-}> = ({ card, cats, net, className = '', style, onClick, onKeyDown, role, tabIndex, 'aria-label': ariaLabel }) => {
+}> = ({ card, cats, net, hideNet, className = '', style, onClick, onKeyDown, role, tabIndex, 'aria-label': ariaLabel }) => {
   const { from, to } = resolveTileColor(card.meta.name, (card.meta as CardMeta).bank ?? '');
   return (
     <div
@@ -72,9 +73,9 @@ const PCard: React.FC<{
       <div className="r2-chip" />
       <div className="r2-pc-name">{card.meta.name}</div>
       <div className="r2-pc-cats">{cats}</div>
-      <div className="r2-pc-net">net for you <b>{inr(net)}/yr</b></div>
+      {!hideNet && <div className="r2-pc-net">net for you <b>{inr(net)}/yr</b></div>}
       <div className="r2-pc-num">4291 •••• •••• 7634</div>
-      <div className="r2-pc-holder">Cardholder Name</div>
+      <div className="r2-pc-holder">P. Mehta</div>
       <div className="r2-pc-sheen" />
     </div>
   );
@@ -345,6 +346,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                       .join(' · ')
                   }
                   net={top.netGuaranteedPerYear}
+                  hideNet
                   className="r2-pcard-solo"
                 />
               </div>
@@ -874,7 +876,7 @@ const css = `
 .r2-pc-cats{font-size:11px;opacity:.82;margin-top:4px;font-weight:500;line-height:1.4}
 .r2-pc-net{position:absolute;bottom:16px;left:20px;font-size:11px;opacity:.9}
 .r2-pc-net b{font-size:14px;font-weight:700}
-.r2-pc-num{position:absolute;bottom:40px;right:20px;font-family:'Courier New',monospace;
+.r2-pc-num{position:absolute;bottom:40px;left:20px;font-family:'Courier New',monospace;
   font-size:10px;letter-spacing:.13em;opacity:.45;color:#fff;pointer-events:none}
 .r2-pc-holder{position:absolute;bottom:18px;right:20px;font-size:8.5px;
   text-transform:uppercase;letter-spacing:.1em;opacity:.38;color:#fff;pointer-events:none}
