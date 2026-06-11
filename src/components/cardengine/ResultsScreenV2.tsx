@@ -440,7 +440,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 {narrative.topPros.map((p, i) => (
                                   <div key={i} className="r2-item">
                                     <span className="r2-pl">+</span>
-                                    <span>{p.text}{p.valuePerYear > 0 ? <span className="r2-item-val"> · {inr(p.valuePerYear)}/yr</span> : null}</span>
+                                    <span>{p.text}</span>
                                   </div>
                                 ))}
                               </div>
@@ -450,7 +450,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 {narrative.topCons.map((c, i) => (
                                   <div key={i} className="r2-item">
                                     <span className="r2-mn">−</span>
-                                    <span>{c.text}{c.valuePerYear > 0 ? <span className="r2-item-val"> · {inr(c.valuePerYear)}/yr</span> : null}</span>
+                                    <span>{c.text}</span>
                                   </div>
                                 ))}
                               </div>
@@ -701,7 +701,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
 
             const TAB_LABELS: Record<TabKey, string> = {
               fee:    'Other cards outside your fee preference',
-              others: 'Others',
+              others: 'Also considered',
               how:    'How we picked',
             };
 
@@ -1201,10 +1201,12 @@ const css = `
 
 /* ── Nav ── */
 .r2-nav{display:flex;gap:8px;margin-top:32px}
-.r2-back{flex:1;background:#1c1c20;border:1px solid #3f3f46;color:#fafafa;
+.r2-back{flex:1;background:#27272a;border:1px solid #52525b;color:#fafafa;
   font-family:inherit;font-size:13px;font-weight:700;padding:11px;border-radius:10px;cursor:pointer}
-.r2-restart{flex:1;background:#141417;border:1px solid #2a2a30;color:#a1a1aa;
+.r2-back:hover{background:#3f3f46;border-color:#71717a}
+.r2-restart{flex:1;background:#18181b;border:1px solid #3f3f46;color:#d4d4d8;
   font-family:inherit;font-size:13px;font-weight:600;padding:11px;border-radius:10px;cursor:pointer}
+.r2-restart:hover{background:#27272a;border-color:#52525b;color:#fafafa}
 `;
 
 export default ResultsScreenV2;
