@@ -73,6 +73,8 @@ const PCard: React.FC<{
       <div className="r2-pc-name">{card.meta.name}</div>
       <div className="r2-pc-cats">{cats}</div>
       <div className="r2-pc-net">net for you <b>{inr(net)}/yr</b></div>
+      <div className="r2-pc-num">4291 •••• •••• 7634</div>
+      <div className="r2-pc-holder">Cardholder Name</div>
       <div className="r2-pc-sheen" />
     </div>
   );
@@ -346,12 +348,6 @@ export const ResultsScreenV2: React.FC<Props> = ({
                 />
               </div>
 
-              {/* Baseline line — Journey B only, no combo */}
-              {!journeyA && onTable != null && onTable > 0 && (
-                <div className="r2-betterline">
-                  <b>{inr(onTable)}</b> better/year than an average card you&rsquo;d qualify for
-                </div>
-              )}
             </>
           ) : null}
         </div>
@@ -877,6 +873,10 @@ const css = `
 .r2-pc-cats{font-size:11px;opacity:.82;margin-top:4px;font-weight:500;line-height:1.4}
 .r2-pc-net{position:absolute;bottom:16px;left:20px;font-size:11px;opacity:.9}
 .r2-pc-net b{font-size:14px;font-weight:700}
+.r2-pc-num{position:absolute;bottom:40px;right:20px;font-family:'Courier New',monospace;
+  font-size:10px;letter-spacing:.13em;opacity:.45;color:#fff;pointer-events:none}
+.r2-pc-holder{position:absolute;bottom:18px;right:20px;font-size:8.5px;
+  text-transform:uppercase;letter-spacing:.1em;opacity:.38;color:#fff;pointer-events:none}
 .r2-pc-sheen{position:absolute;inset:0;
   background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.10) 50%,transparent 60%);
   pointer-events:none}
