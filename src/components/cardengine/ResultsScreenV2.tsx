@@ -155,7 +155,8 @@ const XFR_STEPS = [
 const TransferCallout: React.FC<{
   hack: TransferHack;
   partners: TransferPartner[];
-}> = ({ hack, partners }) => {
+  cardName: string;
+}> = ({ hack, partners, cardName }) => {
   const [bodyOpen, setBodyOpen] = useState(false);
   const [stepsOpen, setStepsOpen] = useState(false);
   return (
@@ -168,7 +169,7 @@ const TransferCallout: React.FC<{
       {bodyOpen && (
         <div className="r2-xfr-body">
           <p className="r2-xfr-desc">
-            Some cards let you move reward points to airline or hotel programmes, where the same points can be worth far more — especially for business-class flights and hotel stays.
+            {cardName} lets you move reward points to airline or hotel programmes, where the same points can be worth far more — especially for business-class flights and hotel stays.
           </p>
           <div className="r2-xfr-rows">
             {hack.flightHack && (
@@ -669,7 +670,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
             const th = transferHacks?.[activeCard.cardId];
             if (!th || !th.displayTravelHack) return null;
             const partners = transferPartners?.[activeCard.cardId] ?? [];
-            return <TransferCallout hack={th} partners={partners} />;
+            return <TransferCallout hack={th} partners={partners} cardName={activeCard.meta.name} />;
           })()}
 
           {/* ── Stage 4: Lower horizontal tabs ── */}
