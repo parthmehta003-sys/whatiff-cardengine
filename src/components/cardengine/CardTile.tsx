@@ -30,7 +30,30 @@ const ISSUER_COLORS_RAW: Record<string, string | { from: string; to: string }> =
 const ISSUER_COLORS: Record<string, string | { from: string; to: string }> =
   Object.fromEntries(Object.entries(ISSUER_COLORS_RAW).map(([k, v]) => [k.toUpperCase(), v]));
 
-const SCAPIA_GRADIENT = { from: '#1A1A1A', to: '#F04E23' };
+/**
+ * Per-card overrides keyed on card name prefix (uppercased). Layered on top of issuer colours —
+ * allows premium cards to get distinct metal/dark tones without touching the issuer map.
+ * IP-safe: stylised gradients evoking real-world card tone, no logos or artwork.
+ */
+const CARD_NAME_COLORS: Array<{ prefix: string; from: string; to: string }> = [
+  // HDFC Infinia Metal — deep navy-steel evoking brushed metal
+  { prefix: 'HDFC INFINIA METAL',         from: '#1C2B3A', to: '#2D4A6A' },
+  // HDFC Diners Club Black — near-black charcoal
+  { prefix: 'HDFC DINERS CLUB BLACK',     from: '#111111', to: '#1E1E1E' },
+  // HDFC Diners Club Privilege — deep indigo to distinguish from plain HDFC blue
+  { prefix: 'HDFC DINERS CLUB PRIVILEGE', from: '#1A0A2E', to: '#2D1A5A' },
+  // Axis Magnus — dark purple-navy (Magnus brand deep colour)
+  { prefix: 'AXIS MAGNUS',                from: '#1C1A2E', to: '#2D2155' },
+  // ICICI Private Emeralde Metal — dark forest emerald evoking the card's green metal
+  { prefix: 'ICICI PRIVATE EMERALDE',     from: '#0A1F15', to: '#133D2A' },
+  // Amex Platinum Card (Charge) — platinum-silver gradient
+  { prefix: 'AMEX PLATINUM CARD',         from: '#9E9E9E', to: '#5A5A5A' },
+  // HSBC Premier — richer deep red vs generic HSBC crimson
+  { prefix: 'HSBC PREMIER',               from: '#8B0000', to: '#5C0000' },
+  // Scapia — card-name exception (black → deep orange)
+  { prefix: 'SCAPIA',                     from: '#1A1A1A', to: '#F04E23' },
+];
+
 const ZINC_FALLBACK = '#27272a';
 
 /** Parse a #rrggbb into [r,g,b]. */
@@ -62,11 +85,15 @@ export interface ResolvedTileColor {
  * its resolved colour (or FALLBACK) — proving no issuer silently drops to zinc.
  */
 export function resolveTileColor(cardName: string, issuer: string): ResolvedTileColor {
-  // Scapia exception is keyed on CARD NAME, never on bank (so a future Federal Bank card
-  // does not inherit Scapia's orange).
-  if (cardName.toUpperCase().startsWith('SCAPIA')) {
-    return { from: SCAPIA_GRADIENT.from, to: SCAPIA_GRADIENT.to, isFallback: false };
+  // Check per-card overrides first (longest-prefix match wins so "HDFC INFINIA METAL" beats "HDFC").
+  const nameUp = cardName.toUpperCase();
+  const cardOverride = CARD_NAME_COLORS
+    .filter(e => nameUp.startsWith(e.prefix))
+    .sort((a, b) => b.prefix.length - a.prefix.length)[0];
+  if (cardOverride) {
+    return { from: cardOverride.from, to: cardOverride.to, isFallback: false };
   }
+
   const entry = ISSUER_COLORS[(issuer ?? '').toUpperCase().trim()];
   if (entry == null) {
     // Unknown issuer → neutral zinc tile. Never crash.
