@@ -286,6 +286,11 @@ export const ResultsScreenV2: React.FC<Props> = ({
               <div className="r2-hero-sub">
                 combined net benefit across <b>2 cards</b>
               </div>
+              {combo.combinedFees > 0 ? (
+                <div className="r2-combo-feenote">after {inr(combo.combinedFees)} in annual fees</div>
+              ) : (
+                <div className="r2-combo-feenote waived">both annual fees waived</div>
+              )}
 
               {/* Card stack — prototype: back at translate(34px,64px) scale(.93), front at 0/0 scale(1) */}
               <div className="r2-stack">
@@ -552,6 +557,35 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 <span>Value from assigned categories</span>
                                 <span className="r2-math-total-val">{inr(cardNet)}</span>
                               </div>
+                              {/* Fee + net — mirrors CardMathBreakdown's fee line */}
+                              {(() => {
+                                const fee = activeCard.effectiveAnnualFee;
+                                const rawFee = (activeCard.meta as CardMeta).annualFee ?? 0;
+                                const waiverSpend = (activeCard.meta as CardMeta).feeWaiverSpend ?? 0;
+                                return (
+                                  <>
+                                    <div className="r2-math-feeline">
+                                      <div className="r2-math-fee-label">
+                                        {fee === 0 && rawFee > 0 ? (
+                                          <>
+                                            <span className="r2-math-fee-strike">{inr(rawFee)}</span>
+                                            <span className="r2-math-fee-waived">waived (exceed {inr(waiverSpend)} routed spend)</span>
+                                          </>
+                                        ) : fee === 0 ? (
+                                          <span className="r2-math-fee-waived">Lifetime Free — no annual fee</span>
+                                        ) : (
+                                          <span>Annual fee</span>
+                                        )}
+                                      </div>
+                                      <span className="r2-math-fee-val">{fee === 0 ? '−₹0' : '−' + inr(fee)}</span>
+                                    </div>
+                                    <div className="r2-math-cardnet">
+                                      <span>Net from this card</span>
+                                      <span className="r2-math-cardnet-val">{inr(cardNet - fee)}</span>
+                                    </div>
+                                  </>
+                                );
+                              })()}
                               {activeCard.annualUpside > 0 && (
                                 <div className="r2-math-upside">
                                   + up to {inr(activeCard.annualUpside)}/yr extra via the card&rsquo;s
@@ -1004,6 +1038,25 @@ const css = `
   display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;
   color:#f59e0b;border:1px solid #f59e0b;border-radius:4px;
   padding:1px 5px;margin-left:5px;letter-spacing:.05em;vertical-align:middle}
+
+/* ── Combo hero fee note ── */
+.r2-combo-feenote{font-size:12px;color:#52525b;margin-top:-12px;margin-bottom:18px;line-height:1.4}
+.r2-combo-feenote.waived{color:#10b981}
+
+/* ── Combo Math fee line + net line (mirrors CardMathBreakdown) ── */
+.r2-math-feeline{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding:8px 0 0;margin-top:6px;border-top:1px solid #1f1f23;font-size:13px}
+.r2-math-fee-label{color:#a1a1aa;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.r2-math-fee-strike{text-decoration:line-through;color:#52525b}
+.r2-math-fee-waived{color:#10b981;font-weight:600;font-size:12px}
+.r2-math-fee-val{color:#a1a1aa;font-weight:600;font-variant-numeric:tabular-nums;flex-shrink:0}
+.r2-math-cardnet{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding:8px 0 0;margin-top:4px;border-top:1px solid #27272a}
+.r2-math-cardnet>span:first-child{font-size:13px;font-weight:700;color:#fafafa}
+.r2-math-cardnet-val{font-size:22px;font-weight:800;color:#10b981;
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 
 /* ── Priorities panel context note (combo) ── */
 .r2-pri-context{
