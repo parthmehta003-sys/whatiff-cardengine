@@ -142,43 +142,76 @@ const R2CategoryRow: React.FC<{
 };
 
 // ── Transfer callout box ─────────────────────────────────────────────────────
+const XFR_STEPS = [
+  'Find the seat first — confirm an award seat exists on your dates before transferring. No seat, don\'t transfer.',
+  'Check the math — note the award price, work back through the card\'s ratio for points needed.',
+  'Transfer the points — move only what you need plus a small buffer; transfers aren\'t always instant.',
+  'Book immediately — award space can vanish; lock the seat the same session.',
+  'Pay taxes & fees — awards still carry taxes and sometimes surcharges; check before transferring.',
+];
+
 const TransferCallout: React.FC<{
   hack: TransferHack;
   partners: TransferPartner[];
-}> = ({ hack, partners }) => (
-  <div className="r2-xfr-box">
-    <div className="r2-xfr-head">
-      <Plane size={16} strokeWidth={2} className="r2-xfr-icon" />
-      <span>Free flights &amp; hotels with your points</span>
-    </div>
-    <div className="r2-xfr-rows">
-      {hack.flightHack && (
-        <div className="r2-xfr-row">
-          <span className="r2-xfr-pill flight">Flights</span>
-          <span className="r2-xfr-text">{hack.flightHack}</span>
+}> = ({ hack, partners }) => {
+  const [bodyOpen, setBodyOpen] = useState(true);
+  const [stepsOpen, setStepsOpen] = useState(false);
+  return (
+    <div className="r2-xfr-box">
+      <button className="r2-xfr-head" onClick={() => setBodyOpen(v => !v)}>
+        <Plane size={15} strokeWidth={2} className="r2-xfr-icon" />
+        <span>Turn points into flights &amp; hotels</span>
+        <span className={'r2-xfr-chev' + (bodyOpen ? ' open' : '')}>›</span>
+      </button>
+      {bodyOpen && (
+        <div className="r2-xfr-body">
+          <p className="r2-xfr-desc">
+            Some cards let you move reward points to airline or hotel programmes, where the same points can be worth far more — especially for business-class flights and hotel stays.
+          </p>
+          <div className="r2-xfr-rows">
+            {hack.flightHack && (
+              <div className="r2-xfr-row">
+                <span className="r2-xfr-pill flight">Flights</span>
+                <span className="r2-xfr-text">{hack.flightHack}</span>
+              </div>
+            )}
+            {hack.hotelHack && (
+              <div className="r2-xfr-row">
+                <span className="r2-xfr-pill hotel">Hotels</span>
+                <span className="r2-xfr-text">{hack.hotelHack}</span>
+              </div>
+            )}
+          </div>
+          {partners.length > 0 && (
+            <div className="r2-xfr-partners">
+              {partners.map((p, i) => (
+                <span key={i} className={'r2-xfr-partner ' + p.type}>
+                  {p.partner} <span className="r2-xfr-ratio">{p.ratio}</span>
+                </span>
+              ))}
+            </div>
+          )}
+          <button className="r2-xfr-seehow" onClick={() => setStepsOpen(v => !v)}>
+            {stepsOpen ? 'Hide steps ↑' : 'See how → 5 steps to book'}
+          </button>
+          {stepsOpen && (
+            <div className="r2-steps r2-xfr-steps">
+              {XFR_STEPS.map((s, i) => (
+                <div key={i} className="r2-step">
+                  <span className="r2-sn xfr">{i + 1}</span>
+                  <span>{s}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="r2-xfr-foot">
+            Best-case sweet-spots &middot; confirm award live before transferring &middot; as of {hack.transferAsOf}
+          </div>
         </div>
       )}
-      {hack.hotelHack && (
-        <div className="r2-xfr-row">
-          <span className="r2-xfr-pill hotel">Hotels</span>
-          <span className="r2-xfr-text">{hack.hotelHack}</span>
-        </div>
-      )}
     </div>
-    {partners.length > 0 && (
-      <div className="r2-xfr-partners">
-        {partners.map((p, i) => (
-          <span key={i} className={'r2-xfr-partner ' + p.type}>
-            {p.partner} <span className="r2-xfr-ratio">{p.ratio}</span>
-          </span>
-        ))}
-      </div>
-    )}
-    <div className="r2-xfr-foot">
-      Best-case sweet-spots &middot; confirm award live before transferring &middot; as of {hack.transferAsOf}
-    </div>
-  </div>
-);
+  );
+};
 
 // ── Icon row configuration ───────────────────────────────────────────────────
 const ICONS = [
@@ -210,6 +243,9 @@ export const ResultsScreenV2: React.FC<Props> = ({
   // Which detail panel is open (null = all closed).
   const [activeIcon, setActiveIcon] = useState<IconKey | null>('pros');
   const toggleIcon = (key: IconKey) => setActiveIcon(prev => prev === key ? null : key);
+
+  // Hack steps expansion (collapses when icon panel switches card).
+  const [hackStepsOpen, setHackStepsOpen] = useState(false);
 
   // Alt-card expansion (single-card view only).
   const [altExpanded, setAltExpanded] = useState(false);
@@ -434,7 +470,15 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 <div className="r2-hd">{hack.whyItMatters}</div>
                               </div>
                               {hack.executionSteps && (
-                                <HackSteps steps={hack.executionSteps} />
+                                <>
+                                  <button
+                                    className="r2-hack-seehow"
+                                    onClick={() => setHackStepsOpen(v => !v)}
+                                  >
+                                    {hackStepsOpen ? 'Hide steps ↑' : 'See how →'}
+                                  </button>
+                                  {hackStepsOpen && <HackSteps steps={hack.executionSteps} />}
+                                </>
                               )}
                               {hack.difficulty && (
                                 <div className="r2-hack-meta">
@@ -906,6 +950,10 @@ const css = `
   font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .r2-hack-meta{font-size:11.5px;color:#52525b;margin-top:4px;line-height:1.5}
 .r2-hack-meta b{color:#71717a}
+.r2-hack-seehow{
+  background:none;border:none;color:#8b5cf6;font-family:inherit;font-size:13px;
+  font-weight:600;cursor:pointer;padding:8px 0 2px;display:block}
+.r2-hack-seehow:hover{color:#a78bfa}
 
 /* ── Math panel hero stat ── */
 .r2-math-hero{
@@ -1042,18 +1090,33 @@ const css = `
 /* ── Stage 7: Transfer callout box ── */
 .r2-xfr-box{
   margin-top:14px;margin-bottom:4px;
-  border-radius:14px;padding:18px;
+  border-radius:14px;
   background:linear-gradient(#09090b,#09090b) padding-box,
              linear-gradient(135deg,#06b6d4 0%,#8b5cf6 100%) border-box;
   border:1px solid transparent;
   box-shadow:0 0 0 1px rgba(6,182,212,.10),
              0 6px 24px rgba(6,182,212,.07),
-             0 6px 24px rgba(139,92,246,.05)}
+             0 6px 24px rgba(139,92,246,.05);
+  overflow:hidden}
 
+/* Header — acts as the collapse toggle */
 .r2-xfr-head{
-  display:flex;align-items:center;gap:9px;
-  font-size:13.5px;font-weight:800;color:#fafafa;margin-bottom:14px;line-height:1.3}
+  display:flex;align-items:center;gap:9px;width:100%;
+  font-family:'DM Sans',system-ui,sans-serif;
+  font-size:13.5px;font-weight:800;color:#fafafa;
+  background:none;border:none;cursor:pointer;
+  padding:16px 18px;text-align:left;line-height:1.3}
+.r2-xfr-head:hover{background:rgba(255,255,255,.02)}
 .r2-xfr-icon{color:#06b6d4;flex-shrink:0}
+.r2-xfr-chev{
+  margin-left:auto;color:#52525b;font-size:18px;line-height:1;
+  transition:transform .2s;display:inline-block;transform:rotate(90deg)}
+.r2-xfr-chev.open{transform:rotate(-90deg)}
+
+/* Expanded body */
+.r2-xfr-body{padding:0 18px 16px;border-top:1px solid rgba(255,255,255,.05)}
+.r2-xfr-desc{
+  font-size:12.5px;color:#71717a;line-height:1.6;margin:12px 0 14px}
 
 .r2-xfr-rows{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
 .r2-xfr-row{display:flex;gap:10px;align-items:flex-start}
@@ -1075,6 +1138,14 @@ const css = `
 .r2-xfr-ratio{
   font-size:10px;font-weight:700;opacity:.7;
   background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px}
+
+.r2-xfr-seehow{
+  background:none;border:none;color:#06b6d4;font-family:inherit;font-size:13px;
+  font-weight:600;cursor:pointer;padding:4px 0 8px;display:block}
+.r2-xfr-seehow:hover{color:#67e8f9}
+/* XFR steps use same r2-steps / r2-step / r2-sn layout as hack panel */
+.r2-xfr-steps{margin-top:4px;margin-bottom:8px}
+.r2-sn.xfr{background:rgba(6,182,212,.12);color:#06b6d4}
 
 .r2-xfr-foot{
   font-size:10.5px;color:#3f3f46;line-height:1.5;
