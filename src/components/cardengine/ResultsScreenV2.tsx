@@ -13,6 +13,7 @@
  */
 import React, { useState } from 'react';
 import { Scale, Zap, Calculator, Target, Info, Plane } from 'lucide-react';
+import AprEmiCalculator from './AprEmiCalculator';
 import type { TransferHack, TransferPartner } from '../../lib/cardEngine/loadCardDB';
 import type { RankResult, RankedCard, CardMeta, Priorities, PriorityKey } from '../../lib/cardEngine/rankCards';
 import type { MonthlySpend, CategoryEarn } from '../../lib/cardEngine/computeEarn';
@@ -230,7 +231,7 @@ type IconKey = typeof ICONS[number]['key'];
 export const ResultsScreenV2: React.FC<Props> = ({
   result, monthlySpend, baselineNet, hacks, intelligence, narratives,
   onKnowMore, priorities, altForTop, isTravelPriority, devaluations,
-  transferHacks, transferPartners, onBack, onRestart,
+  transferHacks, transferPartners, liquidity, onBack, onRestart,
 }) => {
   const journeyA = result.journey === 'owns_cards';
   const top = result.recommended[0];
@@ -345,6 +346,23 @@ export const ResultsScreenV2: React.FC<Props> = ({
           ) : top ? (
             /* ── Single-card view ── */
             <>
+              {/* ── Owned verdicts (Journey A only) ── */}
+              {journeyA && result.ownedVerdicts && result.ownedVerdicts.length > 0 && (
+                <div className="r2-verdict">
+                  {result.ownedVerdicts.map((v) => (
+                    <div key={v.cardId} className={'r2-vrow r2-v-' + v.verdict}>
+                      <span className="r2-vbadge">{v.verdict.replace('_', ' ')}</span>
+                      <span className="r2-vreason"><b className="r2-vname">{v.cardName}</b> — {v.reason}</span>
+                    </div>
+                  ))}
+                  {top.marginalGainPerYear != null && top.marginalGainPerYear > 0 && (
+                    <div className="r2-vgain">
+                      Adding our top pick lifts your setup by <b>+{inr(top.marginalGainPerYear)}/yr</b>.
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="r2-eyebrow">
                 {journeyA ? 'Top addition for your setup' : 'Your #1 fit'}
               </div>
@@ -861,6 +879,20 @@ export const ResultsScreenV2: React.FC<Props> = ({
 
       </div>
 
+      {/* ── Balance calculator — Journey A only, full-width below grid ── */}
+      {journeyA && top && (
+        <details className="r2-fold">
+          <summary>Thinking of carrying a balance? See what it costs</summary>
+          <div className="r2-fold-body">
+            <AprEmiCalculator
+              cardName={top.meta.name}
+              storedAprAnnualPct={liquidity?.get(top.cardId)?.aprAnnualPct ?? null}
+              storedEmiAprAnnualPct={liquidity?.get(top.cardId)?.emiConversionAprPct ?? null}
+            />
+          </div>
+        </details>
+      )}
+
     </div>
   );
 };
@@ -1271,6 +1303,35 @@ const css = `
 .r2-restart{flex:1;background:#18181b;border:1px solid #3f3f46;color:#d4d4d8;
   font-family:inherit;font-size:13px;font-weight:600;padding:11px;border-radius:10px;cursor:pointer}
 .r2-restart:hover{background:#27272a;border-color:#52525b;color:#fafafa}
+
+/* ── Owned verdicts (Journey A) ── */
+.r2-verdict{
+  background:#0a1f16;border:1px solid #1a6b46;border-radius:12px;
+  padding:14px;display:flex;flex-direction:column;gap:9px;margin-bottom:20px}
+.r2-vrow{display:flex;align-items:baseline;gap:10px}
+.r2-vbadge{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
+  padding:3px 7px;border-radius:5px;flex:0 0 auto}
+.r2-v-keep .r2-vbadge{background:#0d2c1c;color:#34d399;border:1px solid #1a6b46}
+.r2-v-underused .r2-vbadge{background:#2a2406;color:#fbbf24;border:1px solid #6b5410}
+.r2-v-wrong_fit .r2-vbadge{background:#2a0f0f;color:#f87171;border:1px solid #6b1d1d}
+.r2-vreason{font-size:13px;color:#d4d4d8;line-height:1.5}
+.r2-vname{color:#fafafa}
+.r2-vgain{font-size:13px;color:#a7f3d0;padding-top:6px;border-top:1px solid #1a6b46}
+.r2-vgain b{color:#fafafa}
+
+/* ── Balance calculator fold (Journey A, full-width below grid) ── */
+.r2-fold{
+  background:#0c0c0e;border:1px solid #1f1f23;border-radius:12px;
+  overflow:hidden;margin-top:24px}
+.r2-fold>summary{
+  list-style:none;cursor:pointer;padding:14px 16px;font-size:13px;
+  font-weight:600;color:#a1a1aa;display:flex;justify-content:space-between;align-items:center}
+.r2-fold>summary::-webkit-details-marker{display:none}
+.r2-fold>summary:hover{color:#e4e4e7}
+.r2-fold>summary::after{content:'⌄';font-size:16px;color:#52525b;transition:transform .2s}
+.r2-fold[open]>summary::after{transform:rotate(180deg)}
+.r2-fold[open]>summary{border-bottom:1px solid #1f1f23}
+.r2-fold-body{padding:8px 0 0}
 `;
 
 export default ResultsScreenV2;
