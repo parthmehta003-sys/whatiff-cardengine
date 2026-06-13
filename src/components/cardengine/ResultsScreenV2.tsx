@@ -254,8 +254,14 @@ export const ResultsScreenV2: React.FC<Props> = ({
   // Which combo card is in the foreground (0 = first recommended, 1 = second).
   const [frontIdx, setFrontIdx] = useState(0);
 
-  // Which owned card is in the foreground (Journey A stack).
+  // Which owned card is in the foreground (Journey A carousel).
   const [ownedFrontIdx, setOwnedFrontIdx] = useState(0);
+
+  // Clarity tooltip open state (Journey A hero).
+  const [clarityOpen, setClarityOpen] = useState(false);
+
+  // Which owned card is selected in the balance calculator dropdown.
+  const [balanceCardIdx, setBalanceCardIdx] = useState(0);
 
   // Which detail panel is open (null = all closed).
   const [activeIcon, setActiveIcon] = useState<IconKey | null>('pros');
@@ -305,7 +311,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
       <div className="r2-grid">
 
         {/* ── LEFT: sticky hero column ── */}
-        <div className="r2-left">
+        <div className={'r2-left' + (journeyA ? ' r2-left--a' : '')}>
           {comboHero && front && back && combo ? (
             /* ── Combo view ── */
             <>
@@ -431,15 +437,25 @@ export const ResultsScreenV2: React.FC<Props> = ({
               </div>
               {journeyA && top.marginalGainPerYear != null ? (
                 <>
-                  <div className="r2-hero-num">
-                    +{inr(top.marginalGainPerYear)}<span className="r2-hero-yr">/yr</span>
+                  <div className="r2-hero-row">
+                    <div className="r2-hero-num">
+                      +{inr(top.marginalGainPerYear)}<span className="r2-hero-yr">/yr</span>
+                    </div>
+                    <button
+                      className={'r2-clarity-btn' + (clarityOpen ? ' on' : '')}
+                      onClick={() => setClarityOpen(v => !v)}
+                      aria-label="What does this mean?"
+                      aria-expanded={clarityOpen}
+                    >ⓘ</button>
                   </div>
                   <div className="r2-hero-sub">
                     new value over your current setup · <b>{top.meta.name}</b>
                   </div>
-                  <div className="r2-clarity-line">
-                    {top.meta.name} is worth ~{inr(top.netGuaranteedPerYear)}/yr on its own — about {inr(top.marginalGainPerYear)} of that is new value on top of your current cards (the rest overlaps with what you already earn).
-                  </div>
+                  {clarityOpen && (
+                    <div className="r2-clarity-popover">
+                      {top.meta.name} is worth ~{inr(top.netGuaranteedPerYear)}/yr on its own — about {inr(top.marginalGainPerYear)} of that is new value on top of your current cards (the rest overlaps with what you already earn).
+                    </div>
+                  )}
                 </>
               ) : (
                 <>
@@ -948,18 +964,39 @@ export const ResultsScreenV2: React.FC<Props> = ({
             <div className="r2-creditnote">{result.creditNote}</div>
           )}
           {/* ── Balance calculator — Journey A only, above nav buttons ── */}
-          {journeyA && top && (
-            <details className="r2-fold">
-              <summary>Thinking of carrying a balance? See what it costs</summary>
-              <div className="r2-fold-body">
-                <AprEmiCalculator
-                  cardName={top.meta.name}
-                  storedAprAnnualPct={liquidity?.get(top.cardId)?.aprAnnualPct ?? null}
-                  storedEmiAprAnnualPct={liquidity?.get(top.cardId)?.emiConversionAprPct ?? null}
-                />
-              </div>
-            </details>
-          )}
+          {journeyA && result.ownedVerdicts && result.ownedVerdicts.length > 0 && (() => {
+            const ownedVerdicts = result.ownedVerdicts!;
+            const safeIdx = balanceCardIdx % ownedVerdicts.length;
+            const balCard = ownedVerdicts[safeIdx];
+            const balLiq = liquidity?.get(balCard.cardId);
+            return (
+              <details className="r2-fold">
+                <summary>Thinking of carrying a balance? See what it costs</summary>
+                <div className="r2-fold-body">
+                  {ownedVerdicts.length > 1 && (
+                    <div className="r2-fold-cardpick">
+                      <label className="r2-fold-cardlabel" htmlFor="r2-bal-select">Card</label>
+                      <select
+                        id="r2-bal-select"
+                        className="r2-fold-cardsel"
+                        value={safeIdx}
+                        onChange={e => setBalanceCardIdx(Number(e.target.value))}
+                      >
+                        {ownedVerdicts.map((v, i) => (
+                          <option key={v.cardId} value={i}>{v.cardName}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  <AprEmiCalculator
+                    cardName={balCard.cardName}
+                    storedAprAnnualPct={balLiq?.aprAnnualPct ?? null}
+                    storedEmiAprAnnualPct={balLiq?.emiConversionAprPct ?? null}
+                  />
+                </div>
+              </details>
+            );
+          })()}
           {/* ── Nav buttons ── */}
           {(onBack || onRestart) && (
             <div className="r2-nav">
@@ -1428,9 +1465,34 @@ const css = `
   transition:background .15s,transform .15s}
 .r2-carousel-dot.on{background:#10b981;transform:scale(1.25)}
 
-/* ── Clarity line (Journey A — connects marginal to standalone) ── */
-.r2-clarity-line{
-  font-size:12px;color:#71717a;line-height:1.6;margin-top:6px;margin-bottom:18px}
+/* ── Journey A: smaller tiles so both carousel + recommendation fit without scrolling ── */
+/* Scope under r2-left--a so combo stack (r2-left without modifier) is untouched. */
+.r2-left--a .r2-pcard{width:210px;height:132px;border-radius:14px;padding:16px}
+.r2-left--a .r2-chip{width:24px;height:17px;border-radius:3px;margin-bottom:9px}
+.r2-left--a .r2-pc-name{font-size:13px}
+.r2-left--a .r2-pc-cats{font-size:9.5px}
+.r2-left--a .r2-pc-num{font-size:8.5px;bottom:32px}
+.r2-left--a .r2-pc-holder{font-size:7px;bottom:14px}
+.r2-left--a .r2-pc-verdict{margin-top:4px;gap:2px}
+.r2-left--a .r2-pc-vbadge{font-size:7px;padding:1px 5px}
+.r2-left--a .r2-pc-vline{font-size:8px}
+.r2-left--a .r2-solo-stack{height:168px;margin-bottom:8px}
+.r2-left--a .r2-hero-num{font-size:26px}
+.r2-left--a .r2-hero-yr{font-size:16px}
+
+/* ── Hero row — flex to place ⓘ button beside the number ── */
+.r2-hero-row{display:flex;align-items:center;gap:10px}
+
+/* ── Clarity info button + popover ── */
+.r2-clarity-btn{
+  flex-shrink:0;background:none;border:none;cursor:pointer;
+  font-size:16px;color:#52525b;line-height:1;padding:2px;
+  transition:color .15s;margin-bottom:2px}
+.r2-clarity-btn:hover,.r2-clarity-btn.on{color:#a1a1aa}
+.r2-clarity-popover{
+  font-size:12px;color:#71717a;line-height:1.6;
+  background:#0c0c0e;border:1px solid #27272a;border-radius:10px;
+  padding:10px 13px;margin-top:6px;margin-bottom:10px}
 
 /* ── Owned card stack supporting text ── */
 .r2-owned-divider{border:none;border-top:1px solid #27272a;margin:20px 0 16px}
@@ -1454,6 +1516,15 @@ const css = `
 .r2-fold[open]>summary::after{transform:rotate(180deg)}
 .r2-fold[open]>summary{border-bottom:1px solid #1f1f23}
 .r2-fold-body{padding:8px 0 0}
+
+/* ── Balance calc card picker (Journey A) ── */
+.r2-fold-cardpick{display:flex;align-items:center;gap:8px;padding:10px 16px 0}
+.r2-fold-cardlabel{font-size:11px;font-weight:700;color:#71717a;flex-shrink:0;text-transform:uppercase;letter-spacing:.05em}
+.r2-fold-cardsel{
+  flex:1;background:#18181b;border:1px solid #3f3f46;border-radius:8px;
+  color:#e4e4e7;font-family:'DM Sans',system-ui,sans-serif;font-size:13px;
+  font-weight:600;padding:6px 10px;cursor:pointer;outline:none}
+.r2-fold-cardsel:focus{border-color:#71717a}
 `;
 
 export default ResultsScreenV2;
