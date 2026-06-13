@@ -15,7 +15,7 @@ import React, { useState } from 'react';
 import { Scale, Zap, Calculator, Target, Info, Plane } from 'lucide-react';
 import AprEmiCalculator from './AprEmiCalculator';
 import type { TransferHack, TransferPartner } from '../../lib/cardEngine/loadCardDB';
-import type { RankResult, RankedCard, CardMeta, Priorities, PriorityKey } from '../../lib/cardEngine/rankCards';
+import type { RankResult, RankedCard, CardMeta, Priorities, PriorityKey, OwnedCategoryRoute } from '../../lib/cardEngine/rankCards';
 import type { MonthlySpend, CategoryEarn } from '../../lib/cardEngine/computeEarn';
 import { evalPriorityForCard, LABEL, type AlternativeForPriority } from '../../lib/cardEngine/evaluatePriorities';
 import { resolveTileColor } from './CardTile';
@@ -485,6 +485,41 @@ export const ResultsScreenV2: React.FC<Props> = ({
                   className="r2-pcard-solo"
                 />
               </div>
+
+              {/* ── Journey A: routing map — which owned card to use per category ── */}
+              {journeyA && result.bestCardPerCategory && (() => {
+                const routes = Object.entries(result.bestCardPerCategory) as [string, OwnedCategoryRoute][];
+                // Sort: leaking rows last; within each group, highest annual value first.
+                const sorted = routes.slice().sort((a, b) => {
+                  const aLeak = !a[1].cardId;
+                  const bLeak = !b[1].cardId;
+                  if (aLeak !== bLeak) return aLeak ? 1 : -1;
+                  return b[1].guaranteed - a[1].guaranteed;
+                });
+                return (
+                  <div className="r2-routemap">
+                    <div className="r2-eyebrow r2-routemap-heading">Your best card per category</div>
+                    {sorted.map(([cat, route]) => {
+                      const isLeak = !route.cardId;
+                      return (
+                        <div key={cat} className={'r2-routemap-row' + (isLeak ? ' leak' : '')}>
+                          <span className="r2-routemap-cat">{cat}</span>
+                          {isLeak ? (
+                            <span className="r2-routemap-leak-note">
+                              {route.noData ? 'no rate data' : 'none earn here'}
+                            </span>
+                          ) : (
+                            <>
+                              <span className="r2-routemap-card">{route.cardName}</span>
+                              <span className="r2-routemap-val">₹{Math.round(route.guaranteed * 12).toLocaleString('en-IN')}/yr</span>
+                            </>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
 
             </>
           ) : null}
@@ -1503,6 +1538,27 @@ const css = `
 
 /* ── Owned card stack supporting text ── */
 .r2-owned-divider{border:none;border-top:1px solid #27272a;margin:20px 0 16px}
+
+/* ── Routing map (Journey A — best owned card per spend category) ── */
+.r2-routemap{
+  margin-top:20px;background:#0c0c0e;border:1px solid #1f1f23;
+  border-radius:14px;padding:14px 16px;overflow:hidden}
+.r2-routemap-heading{margin-bottom:10px}
+.r2-routemap-row{
+  display:grid;grid-template-columns:1fr auto auto;align-items:center;
+  gap:6px 10px;padding:7px 0;border-bottom:1px solid #141416;font-size:13px}
+.r2-routemap-row:last-child{border-bottom:none}
+.r2-routemap-cat{color:#a1a1aa;font-weight:600;font-size:12px}
+.r2-routemap-card{color:#fafafa;font-weight:600;text-align:right}
+.r2-routemap-val{
+  color:#10b981;font-weight:700;font-variant-numeric:tabular-nums;
+  text-align:right;white-space:nowrap;font-size:12px}
+/* Leaking spend — muted, flagged, no value column */
+.r2-routemap-row.leak{opacity:.55}
+.r2-routemap-row.leak .r2-routemap-cat{color:#71717a}
+.r2-routemap-leak-note{
+  grid-column:2 / 4;text-align:right;
+  font-size:11px;color:#52525b;font-style:italic}
 
 /* ── AprEmiCalculator font overrides for V2's compact right column ── */
 .r2-fold .wf-apr-title{font-size:14px!important}
