@@ -18,6 +18,7 @@ import {
   type MonthlySpend,
   type SpendCategory,
   type CardEarnResult,
+  type CategoryEarn,
 } from './computeEarn';
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -127,6 +128,8 @@ export interface RankedCard {
   inviteOnly: boolean;
   /** Journey A only: net gain vs the user's existing setup. */
   marginalGainPerYear?: number;
+  /** Journey A only: per-category breakdown behind marginalGainPerYear (display approximation). */
+  marginalPerCategory?: Record<string, MarginalCategoryDelta>;
   notes: string[];
 }
 
@@ -142,6 +145,10 @@ export interface RankResult {
   transparency: TransparencySummary;
   combo?: ComboRecommendation;    // when a 2-card combo wins (clustered/flat opt-in)
   ownedVerdicts?: OwnedVerdict[]; // Journey A only
+  /** Journey A only: best-earning owned card per spend category the user has. */
+  bestCardPerCategory?: Record<string, OwnedCategoryRoute>;
+  /** Journey A only: per-category earn for each owned card (cardId → category → CategoryEarn). */
+  ownedPerCategory?: Record<string, Record<string, CategoryEarn>>;
   flatSpendNote?: string;         // Journey B flat-shape generalist explainer
   /**
    * Cards that EXCEED the user's stated fee tolerance but would rank well on the math, surfaced
@@ -177,6 +184,29 @@ export interface OwnedVerdict {
   verdict: 'keep' | 'underused' | 'wrong_fit';
   netPerYear: number;
   reason: string;
+}
+
+/**
+ * Per-category routing result for the owned setup.
+ * cardId=null means no owned card earns meaningfully here (leaking spend).
+ */
+export interface OwnedCategoryRoute {
+  cardId: string | null;
+  cardName: string | null;
+  guaranteed: number;    // ₹/month from the winning card (0 if null)
+  annualFee: number;     // raw annual fee of the winning card (0 if null)
+  noData: boolean;       // true if every owned card has noData for this category
+}
+
+/**
+ * Per-category breakdown behind marginalGainPerYear for a candidate card.
+ * Display approximation — does not sum to exactly marginalGainPerYear (fee
+ * interactions differ) but gives "candidate earns ₹X vs your best ₹Y" for prose.
+ */
+export interface MarginalCategoryDelta {
+  candidateGuaranteed: number;     // ₹/month the candidate earns here
+  currentBestGuaranteed: number;   // ₹/month the best owned card earns here
+  incrementalGuaranteed: number;   // max(0, candidate − currentBest)
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -537,7 +567,15 @@ export function ownedSetupValue(
   owned: CardMeta[],
   earnByCard: Map<string, EarnRow[]>,
   user: UserInput
-): { value: number; netByCard: Map<string, number>; effFees: number } {
+): {
+  value: number;
+  netByCard: Map<string, number>;
+  effFees: number;
+  /** Best-earning card per category: cardId '' = no owned card earns here. */
+  bestCardPerCategoryMap: Map<string, { cardId: string; bestVal: number; allNoData: boolean }>;
+  /** Full per-category earn for every owned card (reuse, don't recompute). */
+  earnResults: Map<string, CardEarnResult>;
+} {
   const cats = (Object.keys(user.monthlySpend) as SpendCategory[]).filter(
     (c) => (user.monthlySpend[c] ?? 0) > 0
   );
@@ -549,15 +587,24 @@ export function ownedSetupValue(
   }
   // Assign each category to the card that earns most on it; track BOTH reward earned AND
   // spend routed to each card (the latter drives that card's fee waiver — Review fix).
+  // Fee tiebreak: when two owned cards have equal guaranteed, prefer the lower-fee card.
   let grossValue = 0;
   const contribByCard = new Map<string, number>();
   const spendRoutedToCard = new Map<string, number>(); // ₹/MONTH routed to each card
+  const bestCardPerCategoryMap = new Map<string, { cardId: string; bestVal: number; allNoData: boolean }>();
   for (const cat of cats) {
-    let bestCard = ''; let bestVal = -1;
+    let bestCard = ''; let bestVal = -1; let bestFee = Infinity;
+    let allNoData = owned.length > 0;
     for (const m of owned) {
-      const v = earnResults.get(m.cardId)!.perCategory[cat]?.guaranteed ?? 0;
-      if (v > bestVal) { bestVal = v; bestCard = m.cardId; }
+      const ce = earnResults.get(m.cardId)!.perCategory[cat];
+      const v = ce?.guaranteed ?? 0;
+      if (ce && !ce.noData) allNoData = false;
+      // Fee tiebreak: prefer lower annualFee when guaranteed is exactly equal (and positive).
+      if (v > bestVal || (v === bestVal && bestVal > 0 && m.annualFee < bestFee)) {
+        bestVal = v; bestCard = m.cardId; bestFee = m.annualFee;
+      }
     }
+    bestCardPerCategoryMap.set(cat, { cardId: bestCard, bestVal, allNoData });
     grossValue += bestVal * 12;
     contribByCard.set(bestCard, (contribByCard.get(bestCard) ?? 0) + bestVal * 12);
     spendRoutedToCard.set(bestCard, (spendRoutedToCard.get(bestCard) ?? 0) + (user.monthlySpend[cat] ?? 0));
@@ -570,7 +617,7 @@ export function ownedSetupValue(
   }, 0);
   const netByCard = new Map<string, number>();
   for (const m of owned) netByCard.set(m.cardId, contribByCard.get(m.cardId) ?? 0);
-  return { value: grossValue - effFees, netByCard, effFees };
+  return { value: grossValue - effFees, netByCard, effFees, bestCardPerCategoryMap, earnResults };
 }
 
 export function reviewOwnedCards(
@@ -582,6 +629,10 @@ export function reviewOwnedCards(
 ): RankResult {
   const owned = cards.filter((c) => ownedIds.includes(c.cardId));
   const setup = ownedSetupValue(owned, earnByCard, user);
+  const { bestCardPerCategoryMap, earnResults: ownedEarnResults } = setup;
+
+  // Build cardId → CardMeta lookup for owned cards (name resolution in bestCardPerCategory).
+  const ownedById = new Map(owned.map((m) => [m.cardId, m]));
 
   // Verdict per owned card: how much of the user's spend does it actually win?
   const ownedVerdicts: OwnedVerdict[] = owned.map((m) => {
@@ -601,6 +652,26 @@ export function reviewOwnedCards(
     return { cardId: m.cardId, cardName: m.name, bank: m.bank, verdict, netPerYear: Math.round(contribution), reason };
   });
 
+  // Surface bestCardPerCategory for the UI routing map.
+  const bestCardPerCategory: Record<string, OwnedCategoryRoute> = {};
+  for (const [cat, { cardId, bestVal, allNoData }] of bestCardPerCategoryMap) {
+    const meta = cardId ? ownedById.get(cardId) : undefined;
+    const noEarn = bestVal <= 0;
+    bestCardPerCategory[cat] = {
+      cardId: noEarn ? null : cardId || null,
+      cardName: noEarn ? null : (meta?.name ?? null),
+      guaranteed: noEarn ? 0 : bestVal,
+      annualFee: (noEarn || !meta) ? 0 : meta.annualFee,
+      noData: allNoData,
+    };
+  }
+
+  // Surface per-card per-category earn (reuse already-computed earnResults).
+  const ownedPerCategory: Record<string, Record<string, CategoryEarn>> = {};
+  for (const [cardId, earnResult] of ownedEarnResults) {
+    ownedPerCategory[cardId] = earnResult.perCategory as Record<string, CategoryEarn>;
+  }
+
   // Candidates = all cards minus owned, ranked by MARGINAL GAIN over the current setup.
   const { eligible, filteredOut } = filterEligible(
     cards.filter((c) => !ownedIds.includes(c.cardId)), user, user.feeTolerance
@@ -611,6 +682,24 @@ export function reviewOwnedCards(
     // marginal gain: value of (owned + this card) best-allocation, minus current setup
     const withCard = ownedSetupValue([...owned, m], earnByCard, user).value;
     rc.marginalGainPerYear = Math.round((withCard - setup.value) * 100) / 100;
+
+    // Per-category delta: display approximation for "candidate earns ₹X vs your best ₹Y".
+    // Does not sum exactly to marginalGainPerYear (fee interactions differ) but is correct for prose.
+    const cats = (Object.keys(user.monthlySpend) as SpendCategory[]).filter(
+      (c) => (user.monthlySpend[c] ?? 0) > 0
+    );
+    const marginalPerCategory: Record<string, MarginalCategoryDelta> = {};
+    for (const cat of cats) {
+      const candidateGuaranteed = rc.earn.perCategory[cat]?.guaranteed ?? 0;
+      const currentBestGuaranteed = bestCardPerCategory[cat]?.guaranteed ?? 0;
+      marginalPerCategory[cat] = {
+        candidateGuaranteed,
+        currentBestGuaranteed,
+        incrementalGuaranteed: Math.max(0, candidateGuaranteed - currentBestGuaranteed),
+      };
+    }
+    rc.marginalPerCategory = marginalPerCategory;
+
     return rc;
   });
 
@@ -645,6 +734,8 @@ export function reviewOwnedCards(
       fitCount: recommended.length,
     },
     ownedVerdicts,
+    bestCardPerCategory,
+    ownedPerCategory,
     creditNote: creditNote(user.creditScore),
   };
 }
