@@ -173,6 +173,7 @@ export interface ComboRecommendation {
 export interface OwnedVerdict {
   cardId: string;
   cardName: string;
+  bank: string;
   verdict: 'keep' | 'underused' | 'wrong_fit';
   netPerYear: number;
   reason: string;
@@ -597,7 +598,7 @@ export function reviewOwnedCards(
       verdict = 'wrong_fit';
       reason = `Earns nothing on your current spending pattern.`;
     }
-    return { cardId: m.cardId, cardName: m.name, verdict, netPerYear: Math.round(contribution), reason };
+    return { cardId: m.cardId, cardName: m.name, bank: m.bank, verdict, netPerYear: Math.round(contribution), reason };
   });
 
   // Candidates = all cards minus owned, ranked by MARGINAL GAIN over the current setup.

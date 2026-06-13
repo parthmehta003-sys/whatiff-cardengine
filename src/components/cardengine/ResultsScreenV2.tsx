@@ -48,10 +48,12 @@ interface Props {
 
 /** A single gradient card matching the prototype .pcard composition exactly. */
 const PCard: React.FC<{
-  card: RankedCard;
+  card: { meta: { name: string; bank?: string } };
   cats: string;
   net: number;
   hideNet?: boolean;
+  verdictBadge?: string;
+  verdictLine?: string;
   className?: string;
   style?: React.CSSProperties;
   onClick?: () => void;
@@ -59,8 +61,8 @@ const PCard: React.FC<{
   role?: string;
   tabIndex?: number;
   'aria-label'?: string;
-}> = ({ card, cats, net, hideNet, className = '', style, onClick, onKeyDown, role, tabIndex, 'aria-label': ariaLabel }) => {
-  const { from, to } = resolveTileColor(card.meta.name, (card.meta as CardMeta).bank ?? '');
+}> = ({ card, cats, net, hideNet, verdictBadge, verdictLine, className = '', style, onClick, onKeyDown, role, tabIndex, 'aria-label': ariaLabel }) => {
+  const { from, to } = resolveTileColor(card.meta.name, card.meta.bank ?? '');
   return (
     <div
       className={'r2-pcard ' + className}
@@ -73,7 +75,14 @@ const PCard: React.FC<{
     >
       <div className="r2-chip" />
       <div className="r2-pc-name">{card.meta.name}</div>
-      <div className="r2-pc-cats">{cats}</div>
+      {verdictBadge ? (
+        <div className="r2-pc-verdict">
+          <span className={'r2-pc-vbadge r2-vpc-' + verdictBadge.replace(' ', '_')}>{verdictBadge}</span>
+          {verdictLine && <span className="r2-pc-vline">{verdictLine}</span>}
+        </div>
+      ) : (
+        <div className="r2-pc-cats">{cats}</div>
+      )}
       {!hideNet && <div className="r2-pc-net">net for you <b>{inr(net)}/yr</b></div>}
       <div className="r2-pc-num">4291 •••• •••• 7634</div>
       <div className="r2-pc-holder">P. Mehta</div>
@@ -352,47 +361,43 @@ export const ResultsScreenV2: React.FC<Props> = ({
               {/* ── Journey A: owned-card stack + verdict, then divider, then recommendation ── */}
               {journeyA && result.ownedVerdicts && result.ownedVerdicts.length > 0 && (() => {
                 const verdicts = result.ownedVerdicts!;
-                // Show top 3 by netPerYear (engine already sorts desc); cap display at 3.
                 const shown = verdicts.slice(0, 3);
                 const extra = verdicts.length - shown.length;
                 const N = shown.length;
-                // Clamp ownedFrontIdx to shown range
                 const fi = ownedFrontIdx % N;
                 const activeV = shown[fi];
-                // Need a RankedCard-like object for PCard; look up from result.ranked
-                const findCard = (id: string) => result.ranked?.find(c => c.cardId === id);
-                const activeMeta = findCard(activeV.cardId);
+                // Build minimal stub — PCard only needs meta.name + meta.bank for colour resolution.
+                const toStub = (v: typeof activeV) => ({ meta: { name: v.cardName, bank: v.bank } });
 
                 return (
                   <>
                     <div className="r2-eyebrow">Your cards</div>
                     {N === 1 ? (
-                      /* Single owned card — solo tile */
                       <div className="r2-solo-stack">
-                        {activeMeta && (
-                          <PCard
-                            card={activeMeta}
-                            cats=""
-                            net={activeV.netPerYear}
-                            hideNet
-                            className="r2-pcard-solo"
-                          />
-                        )}
+                        <PCard
+                          card={toStub(activeV)}
+                          cats=""
+                          net={activeV.netPerYear}
+                          hideNet
+                          verdictBadge={activeV.verdict.replace('_', ' ')}
+                          verdictLine={activeV.reason}
+                          className="r2-pcard-solo"
+                        />
                       </div>
                     ) : (
-                      /* 2–3 owned cards — swappable stack */
                       <>
                         <div className="r2-stack">
                           {/* Back card */}
                           {(() => {
                             const backV = shown[(fi + 1) % N];
-                            const backMeta = findCard(backV.cardId);
-                            return backMeta ? (
+                            return (
                               <PCard
-                                card={backMeta}
+                                card={toStub(backV)}
                                 cats=""
                                 net={backV.netPerYear}
                                 hideNet
+                                verdictBadge={backV.verdict.replace('_', ' ')}
+                                verdictLine={backV.reason}
                                 className="r2-pcard-back"
                                 onClick={() => setOwnedFrontIdx(i => (i + 1) % N)}
                                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setOwnedFrontIdx(i => (i + 1) % N); }}
@@ -400,31 +405,24 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 tabIndex={0}
                                 aria-label={`Bring ${backV.cardName} to front`}
                               />
-                            ) : null;
+                            );
                           })()}
                           {/* Front card */}
-                          {activeMeta && (
-                            <PCard
-                              card={activeMeta}
-                              cats=""
-                              net={activeV.netPerYear}
-                              hideNet
-                              className="r2-pcard-front"
-                            />
-                          )}
+                          <PCard
+                            card={toStub(activeV)}
+                            cats=""
+                            net={activeV.netPerYear}
+                            hideNet
+                            verdictBadge={activeV.verdict.replace('_', ' ')}
+                            verdictLine={activeV.reason}
+                            className="r2-pcard-front"
+                          />
                         </div>
                         <div className="r2-swaphint">
                           Showing <b>{activeV.cardName}</b> · tap the other card to swap
                         </div>
                       </>
                     )}
-                    {/* Active card verdict */}
-                    <div className={'r2-owned-verdict r2-v-' + activeV.verdict}>
-                      <span className="r2-vbadge">{activeV.verdict.replace('_', ' ')}</span>
-                      <span className="r2-owned-detail">
-                        Earns ~{inr(activeV.netPerYear)}/yr on your spend — {activeV.reason}
-                      </span>
-                    </div>
                     {extra > 0 && (
                       <div className="r2-owned-more">+{extra} more card{extra > 1 ? 's' : ''} in your setup</div>
                     )}
@@ -1394,10 +1392,18 @@ const css = `
 .r2-vgain{font-size:13px;color:#a7f3d0;padding-top:6px;border-top:1px solid #1a6b46}
 .r2-vgain b{color:#fafafa}
 
-/* ── Owned card stack verdict row (Journey A) ── */
-.r2-owned-verdict{display:flex;align-items:baseline;gap:10px;margin-top:12px;flex-wrap:wrap}
-.r2-owned-verdict .r2-vbadge{flex-shrink:0}
-.r2-owned-detail{font-size:13px;color:#d4d4d8;line-height:1.5}
+/* ── Verdict-on-tile (Journey A owned cards) ── */
+.r2-pc-verdict{margin-top:5px;display:flex;flex-direction:column;gap:3px}
+.r2-pc-vbadge{
+  display:inline-block;font-size:8px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.06em;padding:2px 6px;border-radius:4px;align-self:flex-start}
+.r2-vpc-keep{background:rgba(52,211,153,.18);color:#34d399;border:1px solid rgba(52,211,153,.3)}
+.r2-vpc-underused{background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.28)}
+.r2-vpc-wrong_fit{background:rgba(248,113,113,.15);color:#f87171;border:1px solid rgba(248,113,113,.28)}
+.r2-pc-vline{font-size:9px;color:rgba(255,255,255,.60);line-height:1.45;margin-top:2px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ── Owned card stack supporting text ── */
 .r2-owned-more{font-size:12px;color:#52525b;margin-top:4px}
 .r2-owned-divider{border:none;border-top:1px solid #27272a;margin:20px 0 16px}
 
