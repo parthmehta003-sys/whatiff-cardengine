@@ -245,6 +245,9 @@ export const ResultsScreenV2: React.FC<Props> = ({
   // Which combo card is in the foreground (0 = first recommended, 1 = second).
   const [frontIdx, setFrontIdx] = useState(0);
 
+  // Which owned card is in the foreground (Journey A stack).
+  const [ownedFrontIdx, setOwnedFrontIdx] = useState(0);
+
   // Which detail panel is open (null = all closed).
   const [activeIcon, setActiveIcon] = useState<IconKey | null>('pros');
   const toggleIcon = (key: IconKey) => setActiveIcon(prev => prev === key ? null : key);
@@ -329,23 +332,96 @@ export const ResultsScreenV2: React.FC<Props> = ({
           ) : top ? (
             /* ── Single-card view ── */
             <>
-              {/* ── Owned verdicts (Journey A only) ── */}
-              {journeyA && result.ownedVerdicts && result.ownedVerdicts.length > 0 && (
-                <div className="r2-verdict">
-                  {result.ownedVerdicts.map((v) => (
-                    <div key={v.cardId} className={'r2-vrow r2-v-' + v.verdict}>
-                      <span className="r2-vbadge">{v.verdict.replace('_', ' ')}</span>
-                      <span className="r2-vreason"><b className="r2-vname">{v.cardName}</b> — {v.reason}</span>
-                    </div>
-                  ))}
-                  {top.marginalGainPerYear != null && top.marginalGainPerYear > 0 && (
-                    <div className="r2-vgain">
-                      Adding our top pick lifts your setup by <b>+{inr(top.marginalGainPerYear)}/yr</b>.
-                    </div>
-                  )}
-                </div>
-              )}
+              {/* ── Journey A: owned-card stack + verdict, then divider, then recommendation ── */}
+              {journeyA && result.ownedVerdicts && result.ownedVerdicts.length > 0 && (() => {
+                const verdicts = result.ownedVerdicts!;
+                // Show top 3 by netPerYear (engine already sorts desc); cap display at 3.
+                const shown = verdicts.slice(0, 3);
+                const extra = verdicts.length - shown.length;
+                const N = shown.length;
+                // Clamp ownedFrontIdx to shown range
+                const fi = ownedFrontIdx % N;
+                const activeV = shown[fi];
+                // Need a RankedCard-like object for PCard; look up from result.ranked
+                const findCard = (id: string) => result.ranked?.find(c => c.cardId === id);
+                const activeMeta = findCard(activeV.cardId);
 
+                return (
+                  <>
+                    <div className="r2-eyebrow">Your cards</div>
+                    {N === 1 ? (
+                      /* Single owned card — solo tile */
+                      <div className="r2-solo-stack">
+                        {activeMeta && (
+                          <PCard
+                            card={activeMeta}
+                            cats=""
+                            net={activeV.netPerYear}
+                            hideNet
+                            className="r2-pcard-solo"
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      /* 2–3 owned cards — swappable stack */
+                      <>
+                        <div className="r2-stack">
+                          {/* Back card */}
+                          {(() => {
+                            const backV = shown[(fi + 1) % N];
+                            const backMeta = findCard(backV.cardId);
+                            return backMeta ? (
+                              <PCard
+                                card={backMeta}
+                                cats=""
+                                net={backV.netPerYear}
+                                hideNet
+                                className="r2-pcard-back"
+                                onClick={() => setOwnedFrontIdx(i => (i + 1) % N)}
+                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setOwnedFrontIdx(i => (i + 1) % N); }}
+                                role="button"
+                                tabIndex={0}
+                                aria-label={`Bring ${backV.cardName} to front`}
+                              />
+                            ) : null;
+                          })()}
+                          {/* Front card */}
+                          {activeMeta && (
+                            <PCard
+                              card={activeMeta}
+                              cats=""
+                              net={activeV.netPerYear}
+                              hideNet
+                              className="r2-pcard-front"
+                            />
+                          )}
+                        </div>
+                        <div className="r2-swaphint">
+                          Showing <b>{activeV.cardName}</b> · tap the other card to swap
+                        </div>
+                      </>
+                    )}
+                    {/* Active card verdict */}
+                    <div className={'r2-owned-verdict r2-v-' + activeV.verdict}>
+                      <span className="r2-vbadge">{activeV.verdict.replace('_', ' ')}</span>
+                      <span className="r2-owned-detail">
+                        Earns ~{inr(activeV.netPerYear)}/yr on your spend — {activeV.reason}
+                      </span>
+                    </div>
+                    {extra > 0 && (
+                      <div className="r2-owned-more">+{extra} more card{extra > 1 ? 's' : ''} in your setup</div>
+                    )}
+                    {top.marginalGainPerYear != null && top.marginalGainPerYear > 0 && (
+                      <div className="r2-vgain">
+                        Adding our top pick lifts your setup by <b>+{inr(top.marginalGainPerYear)}/yr</b>.
+                      </div>
+                    )}
+                    <hr className="r2-owned-divider" />
+                  </>
+                );
+              })()}
+
+              {/* Recommendation (both journeys; label differs) */}
               <div className="r2-eyebrow">
                 {journeyA ? 'Top addition for your setup' : 'Your #1 fit'}
               </div>
@@ -1272,6 +1348,19 @@ const css = `
 .r2-vname{color:#fafafa}
 .r2-vgain{font-size:13px;color:#a7f3d0;padding-top:6px;border-top:1px solid #1a6b46}
 .r2-vgain b{color:#fafafa}
+
+/* ── Owned card stack verdict row (Journey A) ── */
+.r2-owned-verdict{display:flex;align-items:baseline;gap:10px;margin-top:12px;flex-wrap:wrap}
+.r2-owned-verdict .r2-vbadge{flex-shrink:0}
+.r2-owned-detail{font-size:13px;color:#d4d4d8;line-height:1.5}
+.r2-owned-more{font-size:12px;color:#52525b;margin-top:4px}
+.r2-owned-divider{border:none;border-top:1px solid #27272a;margin:20px 0 16px}
+
+/* ── AprEmiCalculator font overrides for V2's compact right column ── */
+.r2-fold .wf-apr-title{font-size:14px!important}
+.r2-fold .wf-stat-val{font-size:18px!important}
+.r2-fold .wf-field input{font-size:13px!important}
+.r2-fold .wf-rate-num{font-size:13px!important}
 
 /* ── Balance calculator fold (Journey A, above nav buttons in right column) ── */
 .r2-fold{
