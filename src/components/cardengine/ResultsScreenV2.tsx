@@ -358,16 +358,15 @@ export const ResultsScreenV2: React.FC<Props> = ({
           ) : top ? (
             /* ── Single-card view ── */
             <>
-              {/* ── Journey A: owned-card stack + verdict, then divider, then recommendation ── */}
+              {/* ── Journey A: owned-card carousel, then divider, then recommendation ── */}
               {journeyA && result.ownedVerdicts && result.ownedVerdicts.length > 0 && (() => {
                 const verdicts = result.ownedVerdicts!;
-                const shown = verdicts.slice(0, 3);
-                const extra = verdicts.length - shown.length;
-                const N = shown.length;
+                const N = verdicts.length;
                 const fi = ownedFrontIdx % N;
-                const activeV = shown[fi];
-                // Build minimal stub — PCard only needs meta.name + meta.bank for colour resolution.
+                const activeV = verdicts[fi];
                 const toStub = (v: typeof activeV) => ({ meta: { name: v.cardName, bank: v.bank } });
+                const prev = () => setOwnedFrontIdx(i => (i - 1 + N) % N);
+                const next = () => setOwnedFrontIdx(i => (i + 1) % N);
 
                 return (
                   <>
@@ -385,66 +384,41 @@ export const ResultsScreenV2: React.FC<Props> = ({
                         />
                       </div>
                     ) : (
-                      <>
-                        <div className="r2-stack">
-                          {/* Third card (rightmost fan) — only when N === 3 */}
-                          {N === 3 && (() => {
-                            const thirdV = shown[(fi + 2) % N];
-                            return (
-                              <PCard
-                                card={toStub(thirdV)}
-                                cats=""
-                                net={thirdV.netPerYear}
-                                hideNet
-                                verdictBadge={thirdV.verdict.replace('_', ' ')}
-                                verdictLine={thirdV.reason}
-                                className="r2-pcard-back2"
-                                onClick={() => setOwnedFrontIdx(i => (i + 1) % N)}
-                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setOwnedFrontIdx(i => (i + 1) % N); }}
-                                role="button"
-                                tabIndex={0}
-                                aria-label={`Cycle to ${thirdV.cardName}`}
+                      <div className="r2-owned-carousel">
+                        <button
+                          className="r2-carousel-arrow"
+                          onClick={prev}
+                          aria-label="Previous card"
+                        >‹</button>
+                        <div className="r2-carousel-body">
+                          <div className="r2-solo-stack">
+                            <PCard
+                              card={toStub(activeV)}
+                              cats=""
+                              net={activeV.netPerYear}
+                              hideNet
+                              verdictBadge={activeV.verdict.replace('_', ' ')}
+                              verdictLine={activeV.reason}
+                              className="r2-pcard-solo"
+                            />
+                          </div>
+                          <div className="r2-carousel-dots">
+                            {verdicts.map((_, i) => (
+                              <button
+                                key={i}
+                                className={'r2-carousel-dot' + (i === fi ? ' on' : '')}
+                                onClick={() => setOwnedFrontIdx(i)}
+                                aria-label={`Go to card ${i + 1}`}
                               />
-                            );
-                          })()}
-                          {/* Back card (bottom-left) */}
-                          {(() => {
-                            const backV = shown[(fi + 1) % N];
-                            return (
-                              <PCard
-                                card={toStub(backV)}
-                                cats=""
-                                net={backV.netPerYear}
-                                hideNet
-                                verdictBadge={backV.verdict.replace('_', ' ')}
-                                verdictLine={backV.reason}
-                                className="r2-pcard-back"
-                                onClick={() => setOwnedFrontIdx(i => (i + 1) % N)}
-                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setOwnedFrontIdx(i => (i + 1) % N); }}
-                                role="button"
-                                tabIndex={0}
-                                aria-label={`Bring ${backV.cardName} to front`}
-                              />
-                            );
-                          })()}
-                          {/* Front card */}
-                          <PCard
-                            card={toStub(activeV)}
-                            cats=""
-                            net={activeV.netPerYear}
-                            hideNet
-                            verdictBadge={activeV.verdict.replace('_', ' ')}
-                            verdictLine={activeV.reason}
-                            className="r2-pcard-front"
-                          />
+                            ))}
+                          </div>
                         </div>
-                        <div className="r2-swaphint">
-                          Showing <b>{activeV.cardName}</b> · tap {N === 3 ? 'either' : 'the other'} card to swap
-                        </div>
-                      </>
-                    )}
-                    {extra > 0 && (
-                      <div className="r2-owned-more">+{extra} more card{extra > 1 ? 's' : ''} in your setup</div>
+                        <button
+                          className="r2-carousel-arrow"
+                          onClick={next}
+                          aria-label="Next card"
+                        >›</button>
+                      </div>
                     )}
                     <hr className="r2-owned-divider" />
                   </>
@@ -1082,15 +1056,6 @@ const css = `
 .r2-pcard-back:hover{opacity:.88}
 .r2-pcard-back:focus-visible{outline:2px solid rgba(255,255,255,.4);outline-offset:2px}
 
-/* Third card — fans from the right; sits behind both at z-index:1 */
-.r2-pcard-back2{
-  transform:translate(-34px,64px) scale(.93);
-  z-index:1;
-  cursor:pointer;outline:none;
-  transition:transform .38s cubic-bezier(.4,0,.2,1),opacity .18s;
-}
-.r2-pcard-back2:hover{opacity:.88}
-.r2-pcard-back2:focus-visible{outline:2px solid rgba(255,255,255,.4);outline-offset:2px}
 
 /* Solo card — same dimensions, front position */
 .r2-pcard-solo{
@@ -1430,8 +1395,6 @@ const css = `
 .r2-v-wrong_fit .r2-vbadge{background:#2a0f0f;color:#f87171;border:1px solid #6b1d1d}
 .r2-vreason{font-size:13px;color:#d4d4d8;line-height:1.5}
 .r2-vname{color:#fafafa}
-.r2-vgain{font-size:13px;color:#a7f3d0;padding-top:6px;border-top:1px solid #1a6b46}
-.r2-vgain b{color:#fafafa}
 
 /* ── Verdict-on-tile (Journey A owned cards) ── */
 .r2-pc-verdict{margin-top:5px;display:flex;flex-direction:column;gap:3px}
@@ -1447,12 +1410,29 @@ const css = `
 .r2-pc-vline{font-size:9px;color:rgba(255,255,255,.70);line-height:1.45;margin-top:2px;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
+/* ── Owned-card carousel (Journey A) ── */
+.r2-owned-carousel{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.r2-carousel-arrow{
+  flex-shrink:0;width:32px;height:32px;border-radius:50%;
+  background:#18181b;border:1px solid #3f3f46;color:#a1a1aa;
+  font-size:20px;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s,border-color .15s,color .15s;
+  font-family:inherit;padding:0;margin-bottom:34px}
+.r2-carousel-arrow:hover{background:#27272a;border-color:#71717a;color:#fafafa}
+.r2-carousel-body{flex:1;min-width:0}
+.r2-carousel-dots{display:flex;justify-content:center;gap:6px;margin-top:8px}
+.r2-carousel-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:#3f3f46;border:none;cursor:pointer;padding:0;
+  transition:background .15s,transform .15s}
+.r2-carousel-dot.on{background:#10b981;transform:scale(1.25)}
+
 /* ── Clarity line (Journey A — connects marginal to standalone) ── */
 .r2-clarity-line{
   font-size:12px;color:#71717a;line-height:1.6;margin-top:6px;margin-bottom:18px}
 
 /* ── Owned card stack supporting text ── */
-.r2-owned-more{font-size:12px;color:#52525b;margin-top:4px}
 .r2-owned-divider{border:none;border-top:1px solid #27272a;margin:20px 0 16px}
 
 /* ── AprEmiCalculator font overrides for V2's compact right column ── */
