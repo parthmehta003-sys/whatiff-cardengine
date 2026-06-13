@@ -370,7 +370,27 @@ export const ResultsScreenV2: React.FC<Props> = ({
                     ) : (
                       <>
                         <div className="r2-stack">
-                          {/* Back card */}
+                          {/* Third card (rightmost fan) — only when N === 3 */}
+                          {N === 3 && (() => {
+                            const thirdV = shown[(fi + 2) % N];
+                            return (
+                              <PCard
+                                card={toStub(thirdV)}
+                                cats=""
+                                net={thirdV.netPerYear}
+                                hideNet
+                                verdictBadge={thirdV.verdict.replace('_', ' ')}
+                                verdictLine={thirdV.reason}
+                                className="r2-pcard-back2"
+                                onClick={() => setOwnedFrontIdx(i => (i + 1) % N)}
+                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setOwnedFrontIdx(i => (i + 1) % N); }}
+                                role="button"
+                                tabIndex={0}
+                                aria-label={`Cycle to ${thirdV.cardName}`}
+                              />
+                            );
+                          })()}
+                          {/* Back card (bottom-left) */}
                           {(() => {
                             const backV = shown[(fi + 1) % N];
                             return (
@@ -402,17 +422,12 @@ export const ResultsScreenV2: React.FC<Props> = ({
                           />
                         </div>
                         <div className="r2-swaphint">
-                          Showing <b>{activeV.cardName}</b> · tap the other card to swap
+                          Showing <b>{activeV.cardName}</b> · tap {N === 3 ? 'either' : 'the other'} card to swap
                         </div>
                       </>
                     )}
                     {extra > 0 && (
                       <div className="r2-owned-more">+{extra} more card{extra > 1 ? 's' : ''} in your setup</div>
-                    )}
-                    {top.marginalGainPerYear != null && top.marginalGainPerYear > 0 && (
-                      <div className="r2-vgain">
-                        Adding our top pick lifts your setup by <b>+{inr(top.marginalGainPerYear)}/yr</b>.
-                      </div>
                     )}
                     <hr className="r2-owned-divider" />
                   </>
@@ -423,12 +438,28 @@ export const ResultsScreenV2: React.FC<Props> = ({
               <div className="r2-eyebrow">
                 {journeyA ? 'Top addition for your setup' : 'Your #1 fit'}
               </div>
-              <div className="r2-hero-num">
-                {inr(top.netGuaranteedPerYear)}<span className="r2-hero-yr">/yr</span>
-              </div>
-              <div className="r2-hero-sub">
-                annual net benefit · <b>{top.meta.name}</b>
-              </div>
+              {journeyA && top.marginalGainPerYear != null ? (
+                <>
+                  <div className="r2-hero-num">
+                    +{inr(top.marginalGainPerYear)}<span className="r2-hero-yr">/yr</span>
+                  </div>
+                  <div className="r2-hero-sub">
+                    new value over your current setup · <b>{top.meta.name}</b>
+                  </div>
+                  <div className="r2-clarity-line">
+                    {top.meta.name} is worth ~{inr(top.netGuaranteedPerYear)}/yr on its own — about {inr(top.marginalGainPerYear)} of that is new value on top of your current cards (the rest overlaps with what you already earn).
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="r2-hero-num">
+                    {inr(top.netGuaranteedPerYear)}<span className="r2-hero-yr">/yr</span>
+                  </div>
+                  <div className="r2-hero-sub">
+                    annual net benefit · <b>{top.meta.name}</b>
+                  </div>
+                </>
+              )}
 
               {/* Single card — same .pcard composition, normal flow */}
               <div className="r2-solo-stack">
@@ -996,7 +1027,7 @@ const css = `
   box-shadow:0 14px 36px rgba(0,0,0,.55);
 }
 
-/* Back card — prototype offset kept; tappable strip = 34px right + bottom of 217px vs 164px front */
+/* Back card — bottom-left offset */
 .r2-pcard-back{
   transform:translate(34px,64px) scale(.93);
   z-index:2;
@@ -1005,6 +1036,16 @@ const css = `
 }
 .r2-pcard-back:hover{opacity:.88}
 .r2-pcard-back:focus-visible{outline:2px solid rgba(255,255,255,.4);outline-offset:2px}
+
+/* Third card — fans from the right; sits behind both at z-index:1 */
+.r2-pcard-back2{
+  transform:translate(-34px,64px) scale(.93);
+  z-index:1;
+  cursor:pointer;outline:none;
+  transition:transform .38s cubic-bezier(.4,0,.2,1),opacity .18s;
+}
+.r2-pcard-back2:hover{opacity:.88}
+.r2-pcard-back2:focus-visible{outline:2px solid rgba(255,255,255,.4);outline-offset:2px}
 
 /* Solo card — same dimensions, front position */
 .r2-pcard-solo{
@@ -1349,14 +1390,21 @@ const css = `
 
 /* ── Verdict-on-tile (Journey A owned cards) ── */
 .r2-pc-verdict{margin-top:5px;display:flex;flex-direction:column;gap:3px}
+/* Solid dark chip so badge reads on ANY tile gradient (light red, dark navy, etc).
+   Semantic colour is the text, not the background — fixes the contrast-on-light-tile class of bugs. */
 .r2-pc-vbadge{
   display:inline-block;font-size:8px;font-weight:800;text-transform:uppercase;
-  letter-spacing:.06em;padding:2px 6px;border-radius:4px;align-self:flex-start}
-.r2-vpc-keep{background:rgba(52,211,153,.18);color:#34d399;border:1px solid rgba(52,211,153,.3)}
-.r2-vpc-underused{background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.28)}
-.r2-vpc-wrong_fit{background:rgba(248,113,113,.15);color:#f87171;border:1px solid rgba(248,113,113,.28)}
-.r2-pc-vline{font-size:9px;color:rgba(255,255,255,.60);line-height:1.45;margin-top:2px;
+  letter-spacing:.06em;padding:2px 7px;border-radius:4px;align-self:flex-start;
+  background:rgba(0,0,0,.58);backdrop-filter:blur(2px)}
+.r2-vpc-keep{color:#4ade80}
+.r2-vpc-underused{color:#fbbf24}
+.r2-vpc-wrong_fit{color:#f87171}
+.r2-pc-vline{font-size:9px;color:rgba(255,255,255,.70);line-height:1.45;margin-top:2px;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ── Clarity line (Journey A — connects marginal to standalone) ── */
+.r2-clarity-line{
+  font-size:12px;color:#71717a;line-height:1.6;margin-top:6px;margin-bottom:18px}
 
 /* ── Owned card stack supporting text ── */
 .r2-owned-more{font-size:12px;color:#52525b;margin-top:4px}
