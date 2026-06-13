@@ -868,6 +868,19 @@ export const ResultsScreenV2: React.FC<Props> = ({
           {result.creditNote && (
             <div className="r2-creditnote">{result.creditNote}</div>
           )}
+          {/* ── Balance calculator — Journey A only, above nav buttons ── */}
+          {journeyA && top && (
+            <details className="r2-fold">
+              <summary>Thinking of carrying a balance? See what it costs</summary>
+              <div className="r2-fold-body">
+                <AprEmiCalculator
+                  cardName={top.meta.name}
+                  storedAprAnnualPct={liquidity?.get(top.cardId)?.aprAnnualPct ?? null}
+                  storedEmiAprAnnualPct={liquidity?.get(top.cardId)?.emiConversionAprPct ?? null}
+                />
+              </div>
+            </details>
+          )}
           {/* ── Nav buttons ── */}
           {(onBack || onRestart) && (
             <div className="r2-nav">
@@ -878,20 +891,6 @@ export const ResultsScreenV2: React.FC<Props> = ({
         </div>
 
       </div>
-
-      {/* ── Balance calculator — Journey A only, full-width below grid ── */}
-      {journeyA && top && (
-        <details className="r2-fold">
-          <summary>Thinking of carrying a balance? See what it costs</summary>
-          <div className="r2-fold-body">
-            <AprEmiCalculator
-              cardName={top.meta.name}
-              storedAprAnnualPct={liquidity?.get(top.cardId)?.aprAnnualPct ?? null}
-              storedEmiAprAnnualPct={liquidity?.get(top.cardId)?.emiConversionAprPct ?? null}
-            />
-          </div>
-        </details>
-      )}
 
     </div>
   );
@@ -1319,10 +1318,10 @@ const css = `
 .r2-vgain{font-size:13px;color:#a7f3d0;padding-top:6px;border-top:1px solid #1a6b46}
 .r2-vgain b{color:#fafafa}
 
-/* ── Balance calculator fold (Journey A, full-width below grid) ── */
+/* ── Balance calculator fold (Journey A, above nav buttons in right column) ── */
 .r2-fold{
-  background:#0c0c0e;border:1px solid #1f1f23;border-radius:12px;
-  overflow:hidden;margin-top:24px}
+  background:#0c0c0e;border:1px solid #27272a;border-radius:12px;
+  overflow:hidden;margin-top:14px}
 .r2-fold>summary{
   list-style:none;cursor:pointer;padding:14px 16px;font-size:13px;
   font-weight:600;color:#a1a1aa;display:flex;justify-content:space-between;align-items:center}
