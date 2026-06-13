@@ -1410,7 +1410,9 @@ const css = `
   font-size:20px;line-height:1;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   transition:background .15s,border-color .15s,color .15s;
-  font-family:inherit;padding:0;margin-bottom:34px}
+  font-family:inherit;padding:0;
+  /* offset down by half the dots row height so arrow centres on the card, not card+dots */
+  margin-bottom:20px}
 .r2-carousel-arrow:hover{background:#27272a;border-color:#71717a;color:#fafafa}
 .r2-carousel-body{flex:1;min-width:0}
 .r2-carousel-dots{display:flex;justify-content:center;gap:6px;margin-top:8px}
@@ -1430,8 +1432,13 @@ const css = `
 .r2-left--a .r2-pc-holder{font-size:7px;bottom:14px}
 .r2-left--a .r2-pc-verdict{margin-top:4px;gap:2px}
 .r2-left--a .r2-pc-vbadge{font-size:7px;padding:1px 5px}
-.r2-left--a .r2-pc-vline{font-size:8px}
-.r2-left--a .r2-solo-stack{height:168px;margin-bottom:8px}
+/* Fix 3: verdict earn line — raise from 8px to readable size */
+.r2-left--a .r2-pc-vline{font-size:10.5px}
+/* Fix 1+2: center every solo-stack in Journey A to 210px.
+   Carousel card: centers within the flex body (arrow+gap offset cancelled).
+   Recommendation card: centers in the 380px column.
+   Both land at the same horizontal position → clean vertical column. */
+.r2-left--a .r2-solo-stack{width:210px;height:168px;margin:0 auto 8px}
 .r2-left--a .r2-hero-num{font-size:26px}
 .r2-left--a .r2-hero-yr{font-size:16px}
 
