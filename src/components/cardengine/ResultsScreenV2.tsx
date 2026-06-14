@@ -263,10 +263,6 @@ export const ResultsScreenV2: React.FC<Props> = ({
   // Which owned card is selected in the balance calculator dropdown.
   const [balanceCardIdx, setBalanceCardIdx] = useState(0);
 
-  // Whether the verdict proof panel is open for the currently-visible owned card.
-  // Default true — expanded by default per Model B spec.
-  const [verdictProofOpen, setVerdictProofOpen] = useState(true);
-
   // Phase 2 (recommendation + icon panels) open/closed in Journey A Model B layout.
   const [phase2Open, setPhase2Open] = useState(false);
 
@@ -276,6 +272,14 @@ export const ResultsScreenV2: React.FC<Props> = ({
 
   // Hack steps expansion (collapses when icon panel switches card).
   const [hackStepsOpen, setHackStepsOpen] = useState(false);
+
+  // Phase 1 icon panels for active owned card (separate from Phase 2's activeIcon).
+  type P1IconKey = 'why' | 'cat' | 'hack' | 'transfer';
+  const [p1ActiveIcon, setP1ActiveIcon] = useState<P1IconKey | null>('why');
+  const toggleP1Icon = (key: P1IconKey) => setP1ActiveIcon(prev => prev === key ? null : key);
+
+  // Hack steps for Phase 1 owned card (separate from Phase 2 hackStepsOpen).
+  const [p1HackStepsOpen, setP1HackStepsOpen] = useState(false);
 
   // Alt-card expansion (single-card view only).
   const [altExpanded, setAltExpanded] = useState(false);
@@ -413,35 +417,48 @@ export const ResultsScreenV2: React.FC<Props> = ({
           ══════════════════════════════════════════════════════════════════ */}
           {journeyA ? (
             <>
-              {/* ── Phase 1: carousel + proof + routing map + collapsibles ── */}
+              {/* ── Phase 1: carousel + icon panels for active owned card ── */}
               <div className="r2-phase1">
 
-                {/* Carousel */}
                 {result.ownedVerdicts && result.ownedVerdicts.length > 0 && (() => {
                   const verdicts = result.ownedVerdicts!;
                   const N = verdicts.length;
                   const fi = ownedFrontIdx % N;
                   const activeV = verdicts[fi];
+                  const activeCardId = activeV.cardId;
                   const toStub = (v: typeof activeV) => ({ meta: { name: v.cardName, bank: v.bank } });
-                  const prev = () => { setOwnedFrontIdx(i => (i - 1 + N) % N); setVerdictProofOpen(true); };
-                  const next = () => { setOwnedFrontIdx(i => (i + 1) % N); setVerdictProofOpen(true); };
+                  const prev = () => { setOwnedFrontIdx(i => (i - 1 + N) % N); setP1ActiveIcon('why'); setP1HackStepsOpen(false); };
+                  const next = () => { setOwnedFrontIdx(i => (i + 1) % N); setP1ActiveIcon('why'); setP1HackStepsOpen(false); };
+
+                  const p1Hack = hacks?.[activeCardId] ?? null;
+                  const p1Transfer = transferHacks?.[activeCardId];
+                  const p1Partners = transferPartners?.[activeCardId] ?? [];
+                  const hasTransfer = !!(p1Transfer?.displayTravelHack);
+
+                  const P1_ICONS: { key: P1IconKey; label: string; Icon: typeof Scale; accent: string }[] = [
+                    { key: 'why',      label: 'See why',          Icon: Scale,      accent: '#10b981' },
+                    { key: 'cat',      label: 'Per category',     Icon: Target,     accent: '#06b6d4' },
+                    { key: 'hack',     label: 'Hacks',            Icon: Zap,        accent: '#8b5cf6' },
+                    ...(hasTransfer ? [{ key: 'transfer' as P1IconKey, label: 'Flights & hotels', Icon: Plane, accent: '#f59e0b' }] : []),
+                  ];
+
+                  const p1IconCfg = P1_ICONS.find(i => i.key === p1ActiveIcon);
 
                   return (
                     <>
+                      {/* Carousel */}
                       <div className="r2-eyebrow">Your cards</div>
                       {N === 1 ? (
-                        <div className="r2-p1-cardwrap">
-                          <div className="r2-solo-stack">
-                            <PCard
-                              card={toStub(activeV)}
-                              cats=""
-                              net={activeV.netPerYear}
-                              hideNet
-                              verdictBadge={activeV.verdict.replace('_', ' ')}
-                              verdictLine={activeV.reason}
-                              className="r2-pcard-solo"
-                            />
-                          </div>
+                        <div className="r2-solo-stack">
+                          <PCard
+                            card={toStub(activeV)}
+                            cats=""
+                            net={activeV.netPerYear}
+                            hideNet
+                            verdictBadge={activeV.verdict.replace('_', ' ')}
+                            verdictLine={activeV.reason}
+                            className="r2-pcard-solo"
+                          />
                         </div>
                       ) : (
                         <div className="r2-owned-carousel">
@@ -463,7 +480,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 <button
                                   key={i}
                                   className={'r2-carousel-dot' + (i === fi ? ' on' : '')}
-                                  onClick={() => { setOwnedFrontIdx(i); setVerdictProofOpen(true); }}
+                                  onClick={() => { setOwnedFrontIdx(i); setP1ActiveIcon('why'); setP1HackStepsOpen(false); }}
                                   aria-label={`Go to card ${i + 1}`}
                                 />
                               ))}
@@ -473,27 +490,40 @@ export const ResultsScreenV2: React.FC<Props> = ({
                         </div>
                       )}
 
-                      {/* Verdict proof — always expanded by default in Model B */}
-                      {(() => {
-                        const cardProof = result.ownedPerCategory?.[activeV.cardId];
-                        if (!cardProof) return null;
-                        const spendCats = (Object.keys(monthlySpend) as (keyof typeof monthlySpend)[])
-                          .filter(c => (monthlySpend[c] ?? 0) > 0);
-                        return (
-                          <div className="r2-vproof-wrap">
-                            <button
-                              className="r2-vproof-toggle"
-                              onClick={() => setVerdictProofOpen(v => !v)}
-                              aria-expanded={verdictProofOpen}
-                            >
-                              {verdictProofOpen ? 'Hide breakdown ↑' : 'See why →'}
-                            </button>
-                            {verdictProofOpen && (
+                      {/* Phase 1 icon row */}
+                      <div className="r2-iconrow">
+                        {P1_ICONS.map(({ key, label, Icon, accent }) => (
+                          <button
+                            key={key}
+                            className={'r2-iconcircle' + (p1ActiveIcon === key ? ' on' : '')}
+                            style={{ '--r2-accent': accent } as React.CSSProperties}
+                            onClick={() => toggleP1Icon(key)}
+                            aria-label={label}
+                            aria-pressed={p1ActiveIcon === key}
+                          >
+                            <div className="r2-circ"><Icon size={20} strokeWidth={1.75} /></div>
+                            <span className="r2-lbl">{label}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Phase 1 detail panel */}
+                      {p1ActiveIcon && p1IconCfg && (
+                        <div className="r2-detail" style={{ '--r2-accent': p1IconCfg.accent } as React.CSSProperties}>
+                          <div className="r2-detail-which">{activeV.cardName}</div>
+
+                          {/* Icon 1 — See why: verdict proof */}
+                          {p1ActiveIcon === 'why' && (() => {
+                            const cardProof = result.ownedPerCategory?.[activeCardId];
+                            if (!cardProof) return <div className="r2-empty">No breakdown available.</div>;
+                            const spendCats = (Object.keys(monthlySpend) as (keyof typeof monthlySpend)[])
+                              .filter(c => (monthlySpend[c] ?? 0) > 0);
+                            return (
                               <div className="r2-vproof">
                                 <div className="r2-vproof-head">{activeV.cardName} · earn on your spend</div>
                                 {spendCats.map(cat => {
                                   const ce = cardProof[cat as keyof typeof cardProof];
-                                  const isBest = result.bestCardPerCategory?.[cat]?.cardId === activeV.cardId;
+                                  const isBest = result.bestCardPerCategory?.[cat]?.cardId === activeCardId;
                                   const earn = ce?.guaranteed ?? 0;
                                   return (
                                     <div key={cat} className={'r2-vproof-row' + (isBest && earn > 0 ? ' best' : '') + (earn === 0 ? ' zero' : '')}>
@@ -514,118 +544,119 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                   );
                                 })}
                               </div>
-                            )}
-                          </div>
+                            );
+                          })()}
+
+                          {/* Icon 2 — Per category: routing map */}
+                          {p1ActiveIcon === 'cat' && (() => {
+                            if (!result.bestCardPerCategory) return <div className="r2-empty">No routing data.</div>;
+                            const routes = Object.entries(result.bestCardPerCategory) as [string, OwnedCategoryRoute][];
+                            const sorted = routes.slice().sort((a, b) => {
+                              const aLeak = !a[1].cardId; const bLeak = !b[1].cardId;
+                              if (aLeak !== bLeak) return aLeak ? 1 : -1;
+                              return b[1].guaranteed - a[1].guaranteed;
+                            });
+                            const totalAnnual = routes.reduce((s, [, r]) => s + (r.guaranteed ?? 0) * 12, 0);
+                            return (
+                              <>
+                                <div className="r2-routemap-heading-row" style={{ marginBottom: 8 }}>
+                                  <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.06em', color: '#52525b' }}>Your best card per category</span>
+                                  <span className="r2-routemap-sub">among cards you own today</span>
+                                </div>
+                                {sorted.map(([cat, route]) => {
+                                  const isLeak = !route.cardId;
+                                  return (
+                                    <div key={cat} className={'r2-routemap-row' + (isLeak ? ' leak' : '')}>
+                                      <span className="r2-routemap-cat">{cat}</span>
+                                      {isLeak ? (
+                                        <span className="r2-routemap-leak-note">{route.noData ? 'no rate data' : 'none earn here'}</span>
+                                      ) : (
+                                        <>
+                                          <span className="r2-routemap-card">{route.cardName}</span>
+                                          <span className="r2-routemap-val">₹{Math.round(route.guaranteed * 12).toLocaleString('en-IN')}/yr</span>
+                                        </>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                                {totalAnnual > 0 && (
+                                  <div className="r2-routemap-total">
+                                    <span className="r2-routemap-total-lbl">Total with current setup</span>
+                                    <span className="r2-routemap-total-val">₹{Math.round(totalAnnual).toLocaleString('en-IN')}/yr</span>
+                                  </div>
+                                )}
+                              </>
+                            );
+                          })()}
+
+                          {/* Icon 3 — Hacks: everyday optimisation hack for this card */}
+                          {p1ActiveIcon === 'hack' && (
+                            <div className="r2-panel-hack">
+                              {p1Hack ? (p1Hack.locked ? (
+                                <div className="r2-hackbox locked">
+                                  <div className="r2-ht">{p1Hack.name}</div>
+                                  <div className="r2-hd">Unlocks at <b>₹{p1Hack.locked.minMonthlySpend.toLocaleString('en-IN')}/month</b>. You&rsquo;re <b>₹{p1Hack.locked.gap.toLocaleString('en-IN')}/month</b> away.</div>
+                                </div>
+                              ) : (
+                                <>
+                                  <div className="r2-hackbox">
+                                    <div className="r2-ht">{p1Hack.name}</div>
+                                    <div className="r2-hd">{p1Hack.whyItMatters}</div>
+                                  </div>
+                                  {p1Hack.executionSteps && (
+                                    <>
+                                      <button className="r2-hack-seehow" onClick={() => setP1HackStepsOpen(v => !v)}>
+                                        {p1HackStepsOpen ? 'Hide steps ↑' : 'See how →'}
+                                      </button>
+                                      {p1HackStepsOpen && <HackSteps steps={p1Hack.executionSteps} />}
+                                    </>
+                                  )}
+                                  {p1Hack.difficulty && (
+                                    <div className="r2-hack-meta">Difficulty: <b>{p1Hack.difficulty}</b>{p1Hack.commonFailure && <> · Watch out: {p1Hack.commonFailure}</>}</div>
+                                  )}
+                                </>
+                              )) : <div className="r2-empty">No hack available for this card yet.</div>}
+                            </div>
+                          )}
+
+                          {/* Icon 4 — Flights & hotels: transfer hack (only shown when hasTransfer) */}
+                          {p1ActiveIcon === 'transfer' && hasTransfer && (
+                            <TransferCallout hack={p1Transfer!} partners={p1Partners} cardName={activeV.cardName} />
+                          )}
+                        </div>
+                      )}
+
+                      {/* Balance calculator — stays as collapsible (not an icon panel) */}
+                      {(() => {
+                        const ownedVerdicts = result.ownedVerdicts!;
+                        const safeIdx = balanceCardIdx % ownedVerdicts.length;
+                        const balCard = ownedVerdicts[safeIdx];
+                        const balLiq = liquidity?.get(balCard.cardId);
+                        return (
+                          <details className="r2-fold">
+                            <summary>Thinking of carrying a balance? See what it costs</summary>
+                            <div className="r2-fold-body">
+                              {ownedVerdicts.length > 1 && (
+                                <div className="r2-fold-cardpick">
+                                  <label className="r2-fold-cardlabel" htmlFor="r2-bal-select">Card</label>
+                                  <select id="r2-bal-select" className="r2-fold-cardsel" value={safeIdx}
+                                    onChange={e => setBalanceCardIdx(Number(e.target.value))}>
+                                    {ownedVerdicts.map((v, i) => (
+                                      <option key={v.cardId} value={i}>{v.cardName}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                              )}
+                              <AprEmiCalculator
+                                cardName={balCard.cardName}
+                                storedAprAnnualPct={balLiq?.aprAnnualPct ?? null}
+                                storedEmiAprAnnualPct={balLiq?.emiConversionAprPct ?? null}
+                              />
+                            </div>
+                          </details>
                         );
                       })()}
                     </>
-                  );
-                })()}
-
-                {/* Routing map — "Your best card per category · among cards you own today" */}
-                {result.bestCardPerCategory && (() => {
-                  const routes = Object.entries(result.bestCardPerCategory) as [string, OwnedCategoryRoute][];
-                  const sorted = routes.slice().sort((a, b) => {
-                    const aLeak = !a[1].cardId; const bLeak = !b[1].cardId;
-                    if (aLeak !== bLeak) return aLeak ? 1 : -1;
-                    return b[1].guaranteed - a[1].guaranteed;
-                  });
-                  const totalAnnual = routes.reduce((s, [, r]) => s + (r.guaranteed ?? 0) * 12, 0);
-                  return (
-                    <div className="r2-routemap r2-routemap--p1">
-                      <div className="r2-routemap-heading-row">
-                        <span className="r2-eyebrow r2-routemap-heading">Your best card per category</span>
-                        <span className="r2-routemap-sub">among cards you own today</span>
-                      </div>
-                      {sorted.map(([cat, route]) => {
-                        const isLeak = !route.cardId;
-                        return (
-                          <div key={cat} className={'r2-routemap-row' + (isLeak ? ' leak' : '')}>
-                            <span className="r2-routemap-cat">{cat}</span>
-                            {isLeak ? (
-                              <span className="r2-routemap-leak-note">
-                                {route.noData ? 'no rate data' : 'none earn here'}
-                              </span>
-                            ) : (
-                              <>
-                                <span className="r2-routemap-card">{route.cardName}</span>
-                                <span className="r2-routemap-val">₹{Math.round(route.guaranteed * 12).toLocaleString('en-IN')}/yr</span>
-                              </>
-                            )}
-                          </div>
-                        );
-                      })}
-                      {/* Total row */}
-                      {totalAnnual > 0 && (
-                        <div className="r2-routemap-total">
-                          <span className="r2-routemap-total-lbl">Total with current setup</span>
-                          <span className="r2-routemap-total-val">₹{Math.round(totalAnnual).toLocaleString('en-IN')}/yr</span>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })()}
-
-                {/* Phase-1 collapsibles: owned-card hack + transfer + balance */}
-                {/* Owned-card hack (for the carousel-active card) */}
-                {result.ownedVerdicts && result.ownedVerdicts.length > 0 && (() => {
-                  const activeCardId = result.ownedVerdicts![ownedFrontIdx % result.ownedVerdicts!.length].cardId;
-                  const p1Hack = hacks?.[activeCardId] ?? null;
-                  const th = transferHacks?.[activeCardId];
-                  const partners = transferPartners?.[activeCardId] ?? [];
-                  return (
-                    <>
-                      {p1Hack && !p1Hack.locked && (
-                        <details className="r2-fold r2-fold--p1hack">
-                          <summary>{p1Hack.name}</summary>
-                          <div className="r2-fold-body r2-fold-body--hack">
-                            <div className="r2-hd">{p1Hack.whyItMatters}</div>
-                            {p1Hack.executionSteps && (
-                              <>
-                                <button className="r2-hack-seehow" onClick={() => setHackStepsOpen(v => !v)}>
-                                  {hackStepsOpen ? 'Hide steps ↑' : 'See how →'}
-                                </button>
-                                {hackStepsOpen && <HackSteps steps={p1Hack.executionSteps} />}
-                              </>
-                            )}
-                          </div>
-                        </details>
-                      )}
-                      {th && th.displayTravelHack && (
-                        <TransferCallout hack={th} partners={partners} cardName={result.ownedVerdicts![ownedFrontIdx % result.ownedVerdicts!.length].cardName} />
-                      )}
-                    </>
-                  );
-                })()}
-
-                {/* Balance calculator */}
-                {result.ownedVerdicts && result.ownedVerdicts.length > 0 && (() => {
-                  const ownedVerdicts = result.ownedVerdicts!;
-                  const safeIdx = balanceCardIdx % ownedVerdicts.length;
-                  const balCard = ownedVerdicts[safeIdx];
-                  const balLiq = liquidity?.get(balCard.cardId);
-                  return (
-                    <details className="r2-fold">
-                      <summary>Thinking of carrying a balance? See what it costs</summary>
-                      <div className="r2-fold-body">
-                        {ownedVerdicts.length > 1 && (
-                          <div className="r2-fold-cardpick">
-                            <label className="r2-fold-cardlabel" htmlFor="r2-bal-select">Card</label>
-                            <select id="r2-bal-select" className="r2-fold-cardsel" value={safeIdx}
-                              onChange={e => setBalanceCardIdx(Number(e.target.value))}>
-                              {ownedVerdicts.map((v, i) => (
-                                <option key={v.cardId} value={i}>{v.cardName}</option>
-                              ))}
-                            </select>
-                          </div>
-                        )}
-                        <AprEmiCalculator
-                          cardName={balCard.cardName}
-                          storedAprAnnualPct={balLiq?.aprAnnualPct ?? null}
-                          storedEmiAprAnnualPct={balLiq?.emiConversionAprPct ?? null}
-                        />
-                      </div>
-                    </details>
                   );
                 })()}
 
@@ -1760,19 +1791,8 @@ const css = `
 /* Owned-card hack fold in Phase 1 */
 .r2-fold--p1hack{margin-top:14px}
 
-/* Tile sizing scoped to Phase 1 carousel (replaces .r2-left--a scope) */
-.r2-phase1 .r2-pcard{width:210px;height:132px;border-radius:14px;padding:16px}
-.r2-phase1 .r2-chip{width:24px;height:17px;border-radius:3px;margin-bottom:9px}
-.r2-phase1 .r2-pc-name{font-size:13px}
-.r2-phase1 .r2-pc-cats{font-size:9.5px}
-.r2-phase1 .r2-pc-num{font-size:8.5px;bottom:32px}
-.r2-phase1 .r2-pc-holder{font-size:7px;bottom:14px}
-.r2-phase1 .r2-pc-verdict{margin-top:4px;gap:2px}
-.r2-phase1 .r2-pc-vbadge{font-size:7px;padding:1px 5px}
-.r2-phase1 .r2-pc-vline{font-size:10.5px}
-.r2-phase1 .r2-solo-stack{width:210px;height:168px;margin:0 auto 8px}
-.r2-phase1 .r2-hero-num{font-size:26px}
-.r2-phase1 .r2-hero-yr{font-size:16px}
+/* Phase 1 carousel card: same size as Phase 2 recommendation tile (sizing parity) */
+.r2-phase1 .r2-solo-stack{margin-bottom:20px}
 `;
 
 export default ResultsScreenV2;
