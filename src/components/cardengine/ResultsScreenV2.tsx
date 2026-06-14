@@ -298,6 +298,23 @@ export const ResultsScreenV2: React.FC<Props> = ({
   return (
     <div className="r2-shell">
       <style>{css}</style>
+
+      {/* ── Stage 5: decorative background layer — additive only, behind all content ── */}
+      <div className="r2-bg" aria-hidden="true">
+        <svg className="r2-bg-svg" preserveAspectRatio="none" viewBox="0 0 1600 900">
+          <g className="r2-bg-lines">
+            <path d="M0,300 C400,180 760,440 1600,240" stroke="#10b98138" strokeWidth="2" fill="none" />
+            <path d="M0,560 C520,700 1040,420 1600,640" stroke="#8b5cf632" strokeWidth="2" fill="none" />
+            <path d="M0,180 C620,120 1120,420 1600,160" stroke="#06b6d42e" strokeWidth="2" fill="none" />
+            <path d="M0,760 C460,640 980,820 1600,720" stroke="#f59e0b26" strokeWidth="2" fill="none" />
+          </g>
+        </svg>
+        <div className="r2-floatcirc fc1" style={{ borderColor: '#8b5cf6', color: '#8b5cf6' }}>₹</div>
+        <div className="r2-floatcirc fc2" style={{ borderColor: '#10b981', color: '#10b981' }}>∑</div>
+        <div className="r2-floatcirc fc3" style={{ borderColor: '#06b6d4', color: '#06b6d4' }}>∿</div>
+        <div className="r2-floatcirc fc4" style={{ borderColor: '#f59e0b', color: '#f59e0b' }}>↗</div>
+      </div>
+
       <div className={'r2-grid' + (journeyA ? ' r2-grid--a' : '')}>
 
         {/* ── LEFT: sticky hero column ── */}
@@ -1116,9 +1133,37 @@ export const ResultsScreenV2: React.FC<Props> = ({
 const css = `
 /* ── Shell & grid — matches prototype .shell ── */
 .r2-shell{font-family:'DM Sans',system-ui,sans-serif;color:#fafafa;max-width:1080px;margin:0 auto}
-.r2-grid{display:grid;grid-template-columns:380px 1fr;gap:32px;align-items:start}
+.r2-grid{position:relative;z-index:1;display:grid;grid-template-columns:380px 1fr;gap:32px;align-items:start}
 .r2-grid--a{grid-template-columns:1fr}
 @media(max-width:820px){.r2-grid{grid-template-columns:1fr}}
+
+/* ── Stage 5: decorative background layer — fixed, behind all content, non-interactive ── */
+.r2-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+  background:
+    radial-gradient(48% 52% at 6% 8%, #10b9811f, transparent 70%),
+    radial-gradient(52% 56% at 94% 92%, #8b5cf61c, transparent 70%),
+    radial-gradient(130% 95% at 50% -8%, #17171d 0%, #0c0c11 48%, #050507 100%)}
+.r2-bg-svg{position:absolute;inset:0;width:100%;height:100%}
+.r2-bg-lines{opacity:.85;animation:r2-lines-drift 26s ease-in-out infinite alternate}
+.r2-floatcirc{position:absolute;border-radius:50%;border:1.5px solid;display:flex;
+  align-items:center;justify-content:center;font-size:18px;opacity:.6;will-change:transform}
+.r2-floatcirc.fc1{top:15%;left:11%;width:58px;height:58px;animation:r2-drift-a 17s ease-in-out infinite}
+.r2-floatcirc.fc2{top:24%;right:13%;width:52px;height:52px;animation:r2-drift-b 21s ease-in-out infinite}
+.r2-floatcirc.fc3{top:64%;right:9%;width:54px;height:54px;animation:r2-drift-a 23s ease-in-out infinite}
+.r2-floatcirc.fc4{bottom:13%;left:16%;width:50px;height:50px;animation:r2-drift-b 19s ease-in-out infinite}
+@keyframes r2-drift-a{
+  0%{transform:translate(0,0);opacity:.5}
+  50%{transform:translate(16px,-20px);opacity:.68}
+  100%{transform:translate(0,0);opacity:.5}}
+@keyframes r2-drift-b{
+  0%{transform:translate(0,0);opacity:.48}
+  50%{transform:translate(-18px,16px);opacity:.66}
+  100%{transform:translate(0,0);opacity:.48}}
+@keyframes r2-lines-drift{
+  0%{transform:translateX(0)}
+  100%{transform:translateX(-28px)}}
+@media(prefers-reduced-motion:reduce){
+  .r2-bg-lines,.r2-floatcirc{animation:none}}
 
 /* ── Left column — sticky — matches prototype .left ── */
 .r2-left{position:sticky;top:24px}
