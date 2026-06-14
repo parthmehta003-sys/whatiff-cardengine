@@ -263,6 +263,9 @@ export const ResultsScreenV2: React.FC<Props> = ({
   // Which owned card is selected in the balance calculator dropdown.
   const [balanceCardIdx, setBalanceCardIdx] = useState(0);
 
+  // Whether the verdict proof panel is open for the currently-visible owned card.
+  const [verdictProofOpen, setVerdictProofOpen] = useState(false);
+
   // Which detail panel is open (null = all closed).
   const [activeIcon, setActiveIcon] = useState<IconKey | null>('pros');
   const toggleIcon = (key: IconKey) => setActiveIcon(prev => prev === key ? null : key);
@@ -354,8 +357,8 @@ export const ResultsScreenV2: React.FC<Props> = ({
                 const fi = ownedFrontIdx % N;
                 const activeV = verdicts[fi];
                 const toStub = (v: typeof activeV) => ({ meta: { name: v.cardName, bank: v.bank } });
-                const prev = () => setOwnedFrontIdx(i => (i - 1 + N) % N);
-                const next = () => setOwnedFrontIdx(i => (i + 1) % N);
+                const prev = () => { setOwnedFrontIdx(i => (i - 1 + N) % N); setVerdictProofOpen(false); };
+                const next = () => { setOwnedFrontIdx(i => (i + 1) % N); setVerdictProofOpen(false); };
 
                 return (
                   <>
@@ -396,7 +399,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                               <button
                                 key={i}
                                 className={'r2-carousel-dot' + (i === fi ? ' on' : '')}
-                                onClick={() => setOwnedFrontIdx(i)}
+                                onClick={() => { setOwnedFrontIdx(i); setVerdictProofOpen(false); }}
                                 aria-label={`Go to card ${i + 1}`}
                               />
                             ))}
@@ -409,6 +412,56 @@ export const ResultsScreenV2: React.FC<Props> = ({
                         >›</button>
                       </div>
                     )}
+                    {/* Verdict proof — expandable per-category breakdown */}
+                    {(() => {
+                      const cardProof = result.ownedPerCategory?.[activeV.cardId];
+                      if (!cardProof) return null;
+                      const spendCats = (Object.keys(monthlySpend) as (keyof typeof monthlySpend)[])
+                        .filter(c => (monthlySpend[c] ?? 0) > 0);
+                      return (
+                        <div className="r2-vproof-wrap">
+                          <button
+                            className="r2-vproof-toggle"
+                            onClick={() => setVerdictProofOpen(v => !v)}
+                            aria-expanded={verdictProofOpen}
+                          >
+                            {verdictProofOpen ? 'Hide breakdown ↑' : 'See why →'}
+                          </button>
+                          {verdictProofOpen && (
+                            <div className="r2-vproof">
+                              <div className="r2-vproof-head">
+                                {activeV.cardName} · earn on your spend
+                              </div>
+                              {spendCats.map(cat => {
+                                const ce = cardProof[cat as keyof typeof cardProof];
+                                const isBest = result.bestCardPerCategory?.[cat]?.cardId === activeV.cardId;
+                                const earn = ce?.guaranteed ?? 0;
+                                return (
+                                  <div key={cat} className={'r2-vproof-row' + (isBest && earn > 0 ? ' best' : '') + (earn === 0 ? ' zero' : '')}>
+                                    <span className="r2-vproof-cat">{cat === 'Other(base)' ? 'Everything else' : cat}</span>
+                                    <span className="r2-vproof-earn">
+                                      {earn > 0 ? (
+                                        <>
+                                          {inr(earn * 12)}/yr
+                                          {ce!.baseRatePer100 > 0 && <span className="r2-vproof-rate"> · {ce!.baseRatePer100.toFixed(2)}%</span>}
+                                        </>
+                                      ) : ce?.excluded ? (
+                                        <span className="r2-vproof-excl">excluded</span>
+                                      ) : ce?.noData ? (
+                                        <span className="r2-vproof-nodata">no data</span>
+                                      ) : (
+                                        <span className="r2-vproof-zero">not earned</span>
+                                      )}
+                                    </span>
+                                    {isBest && earn > 0 && <span className="r2-vproof-best">best</span>}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                     <hr className="r2-owned-divider" />
                   </>
                 );
@@ -439,6 +492,31 @@ export const ResultsScreenV2: React.FC<Props> = ({
                       {top.meta.name} is worth ~{inr(top.netGuaranteedPerYear)}/yr on its own — about {inr(top.marginalGainPerYear)} of that is new value on top of your current cards (the rest overlaps with what you already earn).
                     </div>
                   )}
+                  {/* Gap-fill tag — shown when a zero-earning category dominates the marginal gain */}
+                  {(() => {
+                    if (!top.marginalPerCategory) return null;
+                    const entries = Object.entries(top.marginalPerCategory);
+                    const totalIncremental = entries.reduce((s, [, d]) => s + d.incrementalGuaranteed, 0);
+                    if (totalIncremental === 0) return null;
+                    // Find the largest gap: a category the user's cards earn ₹0 on but the candidate earns on
+                    const gaps = entries
+                      .filter(([, d]) => d.currentBestGuaranteed === 0 && d.incrementalGuaranteed > 0)
+                      .sort(([, a], [, b]) => b.incrementalGuaranteed - a.incrementalGuaranteed);
+                    if (gaps.length === 0) return null;
+                    const [topGapCat, topGapDelta] = gaps[0];
+                    const gapShare = topGapDelta.incrementalGuaranteed / totalIncremental;
+                    // Only show when the gap category drives ≥40% of the marginal (clearly gap-filling)
+                    if (gapShare < 0.40) return null;
+                    const gapAnnual = Math.round(topGapDelta.incrementalGuaranteed * 12);
+                    return (
+                      <div className="r2-gaptag">
+                        <span className="r2-gaptag-pill">{topGapCat}</span>
+                        <span className="r2-gaptag-text">
+                          None of your cards earn on <b>{topGapCat}</b>. Adding this card captures <b>{inr(gapAnnual)}/yr</b> you&rsquo;re currently leaving behind.
+                        </span>
+                      </div>
+                    );
+                  })()}
                 </>
               ) : (
                 <>
@@ -1514,6 +1592,49 @@ const css = `
 .r2-routemap-leak-note{
   grid-column:2 / 4;text-align:right;
   font-size:11px;color:#52525b;font-style:italic}
+
+/* ── Gap-fill tag (Journey A recommendation — connects to routing map leak row) ── */
+.r2-gaptag{
+  display:flex;align-items:flex-start;gap:9px;
+  background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.25);
+  border-radius:10px;padding:10px 13px;margin-bottom:16px;line-height:1.5}
+.r2-gaptag-pill{
+  flex-shrink:0;font-size:9px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.07em;padding:2px 7px;border-radius:5px;
+  background:rgba(139,92,246,.22);color:#a78bfa;border:1px solid rgba(139,92,246,.35);
+  align-self:flex-start;margin-top:1px;white-space:nowrap}
+.r2-gaptag-text{font-size:12px;color:#c4b5fd}
+.r2-gaptag-text b{color:#fafafa;font-weight:700}
+
+/* ── Verdict proof (Journey A owned card expandable breakdown) ── */
+.r2-vproof-wrap{margin-top:2px;margin-bottom:4px}
+.r2-vproof-toggle{
+  background:none;border:none;color:#71717a;font-family:inherit;
+  font-size:12px;font-weight:600;cursor:pointer;padding:6px 0 2px;display:block;
+  width:100%;text-align:center;transition:color .15s}
+.r2-vproof-toggle:hover{color:#a1a1aa}
+.r2-vproof{
+  background:#0c0c0e;border:1px solid #1f1f23;border-radius:10px;
+  padding:10px 13px;margin-top:4px}
+.r2-vproof-head{
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:#3f3f46;margin-bottom:8px}
+.r2-vproof-row{
+  display:grid;grid-template-columns:1fr auto auto;align-items:center;
+  gap:4px 8px;padding:5px 0;border-bottom:1px solid #141416;font-size:12px}
+.r2-vproof-row:last-child{border-bottom:none}
+.r2-vproof-row.best .r2-vproof-cat{color:#fafafa;font-weight:600}
+.r2-vproof-row.zero{opacity:.55}
+.r2-vproof-cat{color:#71717a}
+.r2-vproof-earn{color:#fafafa;font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+.r2-vproof-rate{font-size:10.5px;color:#71717a;font-weight:400}
+.r2-vproof-excl{color:#52525b;font-style:italic;font-weight:400}
+.r2-vproof-nodata{color:#52525b;font-style:italic;font-weight:400}
+.r2-vproof-zero{color:#3f3f46;font-weight:400}
+.r2-vproof-best{
+  font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
+  color:#10b981;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.2);
+  border-radius:4px;padding:1px 5px;white-space:nowrap}
 
 /* ── AprEmiCalculator font overrides for V2's compact right column ── */
 .r2-fold .wf-apr-title{font-size:14px!important}
