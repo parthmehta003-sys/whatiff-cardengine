@@ -509,27 +509,44 @@ export const ResultsScreenV2: React.FC<Props> = ({
                       {top.meta.name} is worth ~{inr(top.netGuaranteedPerYear)}/yr on its own — about {inr(top.marginalGainPerYear)} of that is new value on top of your current cards (the rest overlaps with what you already earn).
                     </div>
                   )}
-                  {/* Gap-fill tag — shown when a zero-earning category dominates the marginal gain */}
+                  {/* "Why this recommendation" tag — gap-fill or rate-beating framing from marginalPerCategory */}
                   {(() => {
                     if (!top.marginalPerCategory) return null;
-                    const entries = Object.entries(top.marginalPerCategory);
-                    const totalIncremental = entries.reduce((s, [, d]) => s + d.incrementalGuaranteed, 0);
-                    if (totalIncremental === 0) return null;
-                    // Find the largest gap: a category the user's cards earn ₹0 on but the candidate earns on
-                    const gaps = entries
-                      .filter(([, d]) => d.currentBestGuaranteed === 0 && d.incrementalGuaranteed > 0)
+                    const entries = Object.entries(top.marginalPerCategory)
+                      .filter(([, d]) => d.incrementalGuaranteed > 0)
                       .sort(([, a], [, b]) => b.incrementalGuaranteed - a.incrementalGuaranteed);
-                    if (gaps.length === 0) return null;
-                    const [topGapCat, topGapDelta] = gaps[0];
-                    const gapShare = topGapDelta.incrementalGuaranteed / totalIncremental;
-                    // Only show when the gap category drives ≥40% of the marginal (clearly gap-filling)
-                    if (gapShare < 0.40) return null;
-                    const gapAnnual = Math.round(topGapDelta.incrementalGuaranteed * 12);
+                    if (entries.length === 0) return null;
+                    const totalIncremental = entries.reduce((s, [, d]) => s + d.incrementalGuaranteed, 0);
+
+                    // Case A — gap-fill: top driver is a category the user's cards earn ₹0 on,
+                    // and it accounts for ≥40% of the marginal (clearly filling a leak, not noise).
+                    const [topCat, topDelta] = entries[0];
+                    if (topDelta.currentBestGuaranteed === 0 &&
+                        topDelta.incrementalGuaranteed / totalIncremental >= 0.40) {
+                      const gapAnnual = Math.round(topDelta.incrementalGuaranteed * 12);
+                      return (
+                        <div className="r2-gaptag r2-gaptag--gap">
+                          <span className="r2-gaptag-pill">{topCat}</span>
+                          <span className="r2-gaptag-text">
+                            None of your cards earn on <b>{topCat}</b>. Adding this card captures <b>{inr(gapAnnual)}/yr</b> you&rsquo;re currently leaving behind.
+                          </span>
+                        </div>
+                      );
+                    }
+
+                    // Case B — rate-beating: top 1–2 categories where this card earns more than
+                    // the user's current best. Name them and sum their incremental annual value.
+                    const topTwo = entries.slice(0, 2).filter(([, d]) => d.currentBestGuaranteed >= 0);
+                    const catNames = topTwo.map(([cat]) => cat);
+                    const beatAnnual = Math.round(topTwo.reduce((s, [, d]) => s + d.incrementalGuaranteed, 0) * 12);
+                    const catLabel = catNames.length >= 2
+                      ? `${catNames[0]} & ${catNames[1]}`
+                      : catNames[0];
                     return (
-                      <div className="r2-gaptag">
-                        <span className="r2-gaptag-pill">{topGapCat}</span>
+                      <div className="r2-gaptag r2-gaptag--beat">
+                        <span className="r2-gaptag-pill">{catLabel}</span>
                         <span className="r2-gaptag-text">
-                          None of your cards earn on <b>{topGapCat}</b>. Adding this card captures <b>{inr(gapAnnual)}/yr</b> you&rsquo;re currently leaving behind.
+                          Earns more than your current cards on <b>{catLabel}</b> — adds <b>{inr(beatAnnual)}/yr</b> on those categories.
                         </span>
                       </div>
                     );
@@ -1638,17 +1655,28 @@ const css = `
   grid-column:2 / 4;text-align:right;
   font-size:11px;color:#52525b;font-style:italic}
 
-/* ── Gap-fill tag (Journey A recommendation — connects to routing map leak row) ── */
+/* ── "Why this recommendation" tag (Journey A — gap-fill and rate-beating variants) ── */
 .r2-gaptag{
   display:flex;align-items:flex-start;gap:9px;
-  background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.25);
   border-radius:10px;padding:10px 13px;margin-bottom:16px;line-height:1.5}
+/* Gap-fill variant — purple */
+.r2-gaptag--gap{
+  background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.25)}
+.r2-gaptag--gap .r2-gaptag-pill{
+  background:rgba(139,92,246,.22);color:#a78bfa;border:1px solid rgba(139,92,246,.35)}
+.r2-gaptag--gap .r2-gaptag-text{color:#c4b5fd}
+/* Rate-beating variant — teal */
+.r2-gaptag--beat{
+  background:rgba(6,182,212,.07);border:1px solid rgba(6,182,212,.22)}
+.r2-gaptag--beat .r2-gaptag-pill{
+  background:rgba(6,182,212,.16);color:#67e8f9;border:1px solid rgba(6,182,212,.3)}
+.r2-gaptag--beat .r2-gaptag-text{color:#a5f3fc}
+/* Shared */
 .r2-gaptag-pill{
   flex-shrink:0;font-size:9px;font-weight:800;text-transform:uppercase;
   letter-spacing:.07em;padding:2px 7px;border-radius:5px;
-  background:rgba(139,92,246,.22);color:#a78bfa;border:1px solid rgba(139,92,246,.35);
   align-self:flex-start;margin-top:1px;white-space:nowrap}
-.r2-gaptag-text{font-size:12px;color:#c4b5fd}
+.r2-gaptag-text{font-size:12px}
 .r2-gaptag-text b{color:#fafafa;font-weight:700}
 
 /* ── Verdict proof (Journey A owned card expandable breakdown) ── */
