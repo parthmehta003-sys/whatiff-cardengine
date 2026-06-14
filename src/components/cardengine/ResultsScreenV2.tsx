@@ -264,7 +264,11 @@ export const ResultsScreenV2: React.FC<Props> = ({
   const [balanceCardIdx, setBalanceCardIdx] = useState(0);
 
   // Whether the verdict proof panel is open for the currently-visible owned card.
-  const [verdictProofOpen, setVerdictProofOpen] = useState(false);
+  // Default true — expanded by default per Model B spec.
+  const [verdictProofOpen, setVerdictProofOpen] = useState(true);
+
+  // Phase 2 (recommendation + icon panels) open/closed in Journey A Model B layout.
+  const [phase2Open, setPhase2Open] = useState(false);
 
   // Which detail panel is open (null = all closed).
   const [activeIcon, setActiveIcon] = useState<IconKey | null>('pros');
@@ -311,7 +315,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
         <div className="r2-floatcirc fc4" style={{ borderColor: '#f59e0b', color: '#f59e0b' }}>↗</div>
       </div>
 
-      <div className="r2-grid">
+      <div className={'r2-grid' + (journeyA ? ' r2-grid--a' : '')}>
 
         {/* ── LEFT: sticky hero column ── */}
         <div className={'r2-left' + (journeyA ? ' r2-left--a' : '')}>
@@ -367,39 +371,66 @@ export const ResultsScreenV2: React.FC<Props> = ({
           ) : top ? (
             /* ── Single-card view ── */
             <>
-              {/* ── Journey A: owned-card carousel, then divider, then recommendation ── */}
-              {journeyA && result.ownedVerdicts && result.ownedVerdicts.length > 0 && (() => {
-                const verdicts = result.ownedVerdicts!;
-                const N = verdicts.length;
-                const fi = ownedFrontIdx % N;
-                const activeV = verdicts[fi];
-                const toStub = (v: typeof activeV) => ({ meta: { name: v.cardName, bank: v.bank } });
-                const prev = () => { setOwnedFrontIdx(i => (i - 1 + N) % N); setVerdictProofOpen(false); };
-                const next = () => { setOwnedFrontIdx(i => (i + 1) % N); setVerdictProofOpen(false); };
+              {/* ── Journey B: classic single-card layout (recommendation first, no phases) ── */}
+              {!journeyA && (
+                <>
+                  <div className="r2-eyebrow">Your #1 fit</div>
+                  <div className="r2-hero-num">
+                    {inr(top.netGuaranteedPerYear)}<span className="r2-hero-yr">/yr</span>
+                  </div>
+                  <div className="r2-hero-sub">
+                    annual net benefit · <b>{top.meta.name}</b>
+                  </div>
+                  <div className="r2-solo-stack">
+                    <PCard
+                      card={top}
+                      cats={
+                        Object.entries(top.earn.perCategory)
+                          .filter(([, v]) => v.guaranteed > 0)
+                          .sort(([, a], [, b]) => b.guaranteed - a.guaranteed)
+                          .slice(0, 4)
+                          .map(([cat]) => cat)
+                          .join(' · ')
+                      }
+                      net={top.netGuaranteedPerYear}
+                      hideNet
+                      className="r2-pcard-solo"
+                    />
+                  </div>
+                </>
+              )}
+            </>
+          ) : null}
+        </div>
 
-                return (
-                  <>
-                    <div className="r2-eyebrow">Your cards</div>
-                    {N === 1 ? (
-                      <div className="r2-solo-stack">
-                        <PCard
-                          card={toStub(activeV)}
-                          cats=""
-                          net={activeV.netPerYear}
-                          hideNet
-                          verdictBadge={activeV.verdict.replace('_', ' ')}
-                          verdictLine={activeV.reason}
-                          className="r2-pcard-solo"
-                        />
-                      </div>
-                    ) : (
-                      <div className="r2-owned-carousel">
-                        <button
-                          className="r2-carousel-arrow"
-                          onClick={prev}
-                          aria-label="Previous card"
-                        >‹</button>
-                        <div className="r2-carousel-body">
+        {/* ── RIGHT / PHASE CONTAINER ── */}
+        <div className="r2-right">
+
+          {/* ══════════════════════════════════════════════════════════════════
+              JOURNEY A — Model B two-phase layout
+              Phase 1: owned-card analysis (always visible)
+              Phase 2: recommendation + icon panels (collapsed behind CTA)
+          ══════════════════════════════════════════════════════════════════ */}
+          {journeyA ? (
+            <>
+              {/* ── Phase 1: carousel + proof + routing map + collapsibles ── */}
+              <div className="r2-phase1">
+
+                {/* Carousel */}
+                {result.ownedVerdicts && result.ownedVerdicts.length > 0 && (() => {
+                  const verdicts = result.ownedVerdicts!;
+                  const N = verdicts.length;
+                  const fi = ownedFrontIdx % N;
+                  const activeV = verdicts[fi];
+                  const toStub = (v: typeof activeV) => ({ meta: { name: v.cardName, bank: v.bank } });
+                  const prev = () => { setOwnedFrontIdx(i => (i - 1 + N) % N); setVerdictProofOpen(true); };
+                  const next = () => { setOwnedFrontIdx(i => (i + 1) % N); setVerdictProofOpen(true); };
+
+                  return (
+                    <>
+                      <div className="r2-eyebrow">Your cards</div>
+                      {N === 1 ? (
+                        <div className="r2-p1-cardwrap">
                           <div className="r2-solo-stack">
                             <PCard
                               card={toStub(activeV)}
@@ -411,458 +442,382 @@ export const ResultsScreenV2: React.FC<Props> = ({
                               className="r2-pcard-solo"
                             />
                           </div>
-                          <div className="r2-carousel-dots">
-                            {verdicts.map((_, i) => (
-                              <button
-                                key={i}
-                                className={'r2-carousel-dot' + (i === fi ? ' on' : '')}
-                                onClick={() => { setOwnedFrontIdx(i); setVerdictProofOpen(false); }}
-                                aria-label={`Go to card ${i + 1}`}
+                        </div>
+                      ) : (
+                        <div className="r2-owned-carousel">
+                          <button className="r2-carousel-arrow" onClick={prev} aria-label="Previous card">‹</button>
+                          <div className="r2-carousel-body">
+                            <div className="r2-solo-stack">
+                              <PCard
+                                card={toStub(activeV)}
+                                cats=""
+                                net={activeV.netPerYear}
+                                hideNet
+                                verdictBadge={activeV.verdict.replace('_', ' ')}
+                                verdictLine={activeV.reason}
+                                className="r2-pcard-solo"
                               />
-                            ))}
-                          </div>
-                        </div>
-                        <button
-                          className="r2-carousel-arrow"
-                          onClick={next}
-                          aria-label="Next card"
-                        >›</button>
-                      </div>
-                    )}
-                    {/* Verdict proof — expandable per-category breakdown */}
-                    {(() => {
-                      const cardProof = result.ownedPerCategory?.[activeV.cardId];
-                      if (!cardProof) return null;
-                      const spendCats = (Object.keys(monthlySpend) as (keyof typeof monthlySpend)[])
-                        .filter(c => (monthlySpend[c] ?? 0) > 0);
-                      return (
-                        <div className="r2-vproof-wrap">
-                          <button
-                            className="r2-vproof-toggle"
-                            onClick={() => setVerdictProofOpen(v => !v)}
-                            aria-expanded={verdictProofOpen}
-                          >
-                            {verdictProofOpen ? 'Hide breakdown ↑' : 'See why →'}
-                          </button>
-                          {verdictProofOpen && (
-                            <div className="r2-vproof">
-                              <div className="r2-vproof-head">
-                                {activeV.cardName} · earn on your spend
-                              </div>
-                              {spendCats.map(cat => {
-                                const ce = cardProof[cat as keyof typeof cardProof];
-                                const isBest = result.bestCardPerCategory?.[cat]?.cardId === activeV.cardId;
-                                const earn = ce?.guaranteed ?? 0;
-                                return (
-                                  <div key={cat} className={'r2-vproof-row' + (isBest && earn > 0 ? ' best' : '') + (earn === 0 ? ' zero' : '')}>
-                                    <span className="r2-vproof-cat">{cat === 'Other(base)' ? 'Everything else' : cat}</span>
-                                    <span className="r2-vproof-earn">
-                                      {earn > 0 ? (
-                                        <>
-                                          {inr(earn * 12)}/yr
-                                          {ce!.baseRatePer100 > 0 && <span className="r2-vproof-rate"> · {ce!.baseRatePer100.toFixed(2)}%</span>}
-                                        </>
-                                      ) : ce?.excluded ? (
-                                        <span className="r2-vproof-excl">excluded</span>
-                                      ) : ce?.noData ? (
-                                        <span className="r2-vproof-nodata">no data</span>
-                                      ) : (
-                                        <span className="r2-vproof-zero">not earned</span>
-                                      )}
-                                    </span>
-                                    {isBest && earn > 0 && <span className="r2-vproof-best">best</span>}
-                                  </div>
-                                );
-                              })}
                             </div>
-                          )}
+                            <div className="r2-carousel-dots">
+                              {verdicts.map((_, i) => (
+                                <button
+                                  key={i}
+                                  className={'r2-carousel-dot' + (i === fi ? ' on' : '')}
+                                  onClick={() => { setOwnedFrontIdx(i); setVerdictProofOpen(true); }}
+                                  aria-label={`Go to card ${i + 1}`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <button className="r2-carousel-arrow" onClick={next} aria-label="Next card">›</button>
                         </div>
-                      );
-                    })()}
-                    <hr className="r2-owned-divider" />
-                  </>
-                );
-              })()}
+                      )}
 
-              {/* Recommendation (both journeys; label differs) */}
-              <div className="r2-eyebrow">
-                {journeyA ? 'Top addition for your setup' : 'Your #1 fit'}
-              </div>
-              {journeyA && top.marginalGainPerYear != null ? (
-                <>
-                  <div className="r2-hero-row">
-                    <div className="r2-hero-num">
-                      +{inr(top.marginalGainPerYear)}<span className="r2-hero-yr">/yr</span>
-                    </div>
-                    <button
-                      className={'r2-clarity-btn' + (clarityOpen ? ' on' : '')}
-                      onClick={() => setClarityOpen(v => !v)}
-                      aria-label="What does this mean?"
-                      aria-expanded={clarityOpen}
-                    >ⓘ</button>
-                  </div>
-                  <div className="r2-hero-sub">
-                    new value over your current setup · <b>{top.meta.name}</b>
-                  </div>
-                  {clarityOpen && (
-                    <div className="r2-clarity-popover">
-                      {top.meta.name} is worth ~{inr(top.netGuaranteedPerYear)}/yr on its own — about {inr(top.marginalGainPerYear)} of that is new value on top of your current cards (the rest overlaps with what you already earn).
-                    </div>
-                  )}
-                  {/* "Why this recommendation" tag — gap-fill or rate-beating framing from marginalPerCategory */}
-                  {(() => {
-                    if (!top.marginalPerCategory) return null;
-                    const entries = Object.entries(top.marginalPerCategory)
-                      .filter(([, d]) => d.incrementalGuaranteed > 0)
-                      .sort(([, a], [, b]) => b.incrementalGuaranteed - a.incrementalGuaranteed);
-                    if (entries.length === 0) return null;
-                    const totalIncremental = entries.reduce((s, [, d]) => s + d.incrementalGuaranteed, 0);
+                      {/* Verdict proof — always expanded by default in Model B */}
+                      {(() => {
+                        const cardProof = result.ownedPerCategory?.[activeV.cardId];
+                        if (!cardProof) return null;
+                        const spendCats = (Object.keys(monthlySpend) as (keyof typeof monthlySpend)[])
+                          .filter(c => (monthlySpend[c] ?? 0) > 0);
+                        return (
+                          <div className="r2-vproof-wrap">
+                            <button
+                              className="r2-vproof-toggle"
+                              onClick={() => setVerdictProofOpen(v => !v)}
+                              aria-expanded={verdictProofOpen}
+                            >
+                              {verdictProofOpen ? 'Hide breakdown ↑' : 'See why →'}
+                            </button>
+                            {verdictProofOpen && (
+                              <div className="r2-vproof">
+                                <div className="r2-vproof-head">{activeV.cardName} · earn on your spend</div>
+                                {spendCats.map(cat => {
+                                  const ce = cardProof[cat as keyof typeof cardProof];
+                                  const isBest = result.bestCardPerCategory?.[cat]?.cardId === activeV.cardId;
+                                  const earn = ce?.guaranteed ?? 0;
+                                  return (
+                                    <div key={cat} className={'r2-vproof-row' + (isBest && earn > 0 ? ' best' : '') + (earn === 0 ? ' zero' : '')}>
+                                      <span className="r2-vproof-cat">{cat === 'Other(base)' ? 'Everything else' : cat}</span>
+                                      <span className="r2-vproof-earn">
+                                        {earn > 0 ? (
+                                          <>{inr(earn * 12)}/yr{ce!.baseRatePer100 > 0 && <span className="r2-vproof-rate"> · {ce!.baseRatePer100.toFixed(2)}%</span>}</>
+                                        ) : ce?.excluded ? (
+                                          <span className="r2-vproof-excl">excluded</span>
+                                        ) : ce?.noData ? (
+                                          <span className="r2-vproof-nodata">no data</span>
+                                        ) : (
+                                          <span className="r2-vproof-zero">not earned</span>
+                                        )}
+                                      </span>
+                                      {isBest && earn > 0 && <span className="r2-vproof-best">best</span>}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
+                    </>
+                  );
+                })()}
 
-                    // Case A — gap-fill: top driver is a category the user's cards earn ₹0 on,
-                    // and it accounts for ≥40% of the marginal (clearly filling a leak, not noise).
-                    const [topCat, topDelta] = entries[0];
-                    if (topDelta.currentBestGuaranteed === 0 &&
-                        topDelta.incrementalGuaranteed / totalIncremental >= 0.40) {
-                      const gapAnnual = Math.round(topDelta.incrementalGuaranteed * 12);
-                      return (
-                        <div className="r2-gaptag r2-gaptag--gap">
-                          <span className="r2-gaptag-pill">{topCat}</span>
-                          <span className="r2-gaptag-text">
-                            None of your cards earn on <b>{topCat}</b>. Adding this card captures <b>{inr(gapAnnual)}/yr</b> you&rsquo;re currently leaving behind.
-                          </span>
-                        </div>
-                      );
-                    }
-
-                    // Case B — rate-beating: top 1–2 categories where this card earns more than
-                    // the user's current best. Name them and sum their incremental annual value.
-                    const topTwo = entries.slice(0, 2).filter(([, d]) => d.currentBestGuaranteed >= 0);
-                    const catNames = topTwo.map(([cat]) => cat);
-                    const beatAnnual = Math.round(topTwo.reduce((s, [, d]) => s + d.incrementalGuaranteed, 0) * 12);
-                    const catLabel = catNames.length >= 2
-                      ? `${catNames[0]} & ${catNames[1]}`
-                      : catNames[0];
-                    return (
-                      <div className="r2-gaptag r2-gaptag--beat">
-                        <span className="r2-gaptag-pill">{catLabel}</span>
-                        <span className="r2-gaptag-text">
-                          Earns more than your current cards on <b>{catLabel}</b> — adds <b>{inr(beatAnnual)}/yr</b> on those categories.
-                        </span>
+                {/* Routing map — "Your best card per category · among cards you own today" */}
+                {result.bestCardPerCategory && (() => {
+                  const routes = Object.entries(result.bestCardPerCategory) as [string, OwnedCategoryRoute][];
+                  const sorted = routes.slice().sort((a, b) => {
+                    const aLeak = !a[1].cardId; const bLeak = !b[1].cardId;
+                    if (aLeak !== bLeak) return aLeak ? 1 : -1;
+                    return b[1].guaranteed - a[1].guaranteed;
+                  });
+                  const totalAnnual = routes.reduce((s, [, r]) => s + (r.guaranteed ?? 0) * 12, 0);
+                  return (
+                    <div className="r2-routemap r2-routemap--p1">
+                      <div className="r2-routemap-heading-row">
+                        <span className="r2-eyebrow r2-routemap-heading">Your best card per category</span>
+                        <span className="r2-routemap-sub">among cards you own today</span>
                       </div>
-                    );
-                  })()}
-                </>
-              ) : (
-                <>
-                  <div className="r2-hero-num">
-                    {inr(top.netGuaranteedPerYear)}<span className="r2-hero-yr">/yr</span>
-                  </div>
-                  <div className="r2-hero-sub">
-                    annual net benefit · <b>{top.meta.name}</b>
-                  </div>
-                </>
-              )}
-
-              {/* Single card — same .pcard composition, normal flow */}
-              <div className="r2-solo-stack">
-                <PCard
-                  card={top}
-                  cats={
-                    Object.entries(top.earn.perCategory)
-                      .filter(([, v]) => v.guaranteed > 0)
-                      .sort(([, a], [, b]) => b.guaranteed - a.guaranteed)
-                      .slice(0, 4)
-                      .map(([cat]) => cat)
-                      .join(' · ')
-                  }
-                  net={top.netGuaranteedPerYear}
-                  hideNet
-                  className="r2-pcard-solo"
-                />
-              </div>
-
-              {/* ── Journey A: routing map — which owned card to use per category ── */}
-              {journeyA && result.bestCardPerCategory && (() => {
-                const routes = Object.entries(result.bestCardPerCategory) as [string, OwnedCategoryRoute][];
-                // Sort: leaking rows last; within each group, highest annual value first.
-                const sorted = routes.slice().sort((a, b) => {
-                  const aLeak = !a[1].cardId;
-                  const bLeak = !b[1].cardId;
-                  if (aLeak !== bLeak) return aLeak ? 1 : -1;
-                  return b[1].guaranteed - a[1].guaranteed;
-                });
-                return (
-                  <div className="r2-routemap">
-                    <div className="r2-eyebrow r2-routemap-heading">Your best card per category</div>
-                    {sorted.map(([cat, route]) => {
-                      const isLeak = !route.cardId;
-                      return (
-                        <div key={cat} className={'r2-routemap-row' + (isLeak ? ' leak' : '')}>
-                          <span className="r2-routemap-cat">{cat}</span>
-                          {isLeak ? (
-                            <span className="r2-routemap-leak-note">
-                              {route.noData ? 'no rate data' : 'none earn here'}
-                            </span>
-                          ) : (
-                            <>
-                              <span className="r2-routemap-card">{route.cardName}</span>
-                              <span className="r2-routemap-val">₹{Math.round(route.guaranteed * 12).toLocaleString('en-IN')}/yr</span>
-                            </>
-                          )}
+                      {sorted.map(([cat, route]) => {
+                        const isLeak = !route.cardId;
+                        return (
+                          <div key={cat} className={'r2-routemap-row' + (isLeak ? ' leak' : '')}>
+                            <span className="r2-routemap-cat">{cat}</span>
+                            {isLeak ? (
+                              <span className="r2-routemap-leak-note">
+                                {route.noData ? 'no rate data' : 'none earn here'}
+                              </span>
+                            ) : (
+                              <>
+                                <span className="r2-routemap-card">{route.cardName}</span>
+                                <span className="r2-routemap-val">₹{Math.round(route.guaranteed * 12).toLocaleString('en-IN')}/yr</span>
+                              </>
+                            )}
+                          </div>
+                        );
+                      })}
+                      {/* Total row */}
+                      {totalAnnual > 0 && (
+                        <div className="r2-routemap-total">
+                          <span className="r2-routemap-total-lbl">Total with current setup</span>
+                          <span className="r2-routemap-total-val">₹{Math.round(totalAnnual).toLocaleString('en-IN')}/yr</span>
                         </div>
-                      );
-                    })}
-                  </div>
-                );
-              })()}
+                      )}
+                    </div>
+                  );
+                })()}
 
-            </>
-          ) : null}
-        </div>
+                {/* Phase-1 collapsibles: owned-card hack + transfer + balance */}
+                {/* Owned-card hack (for the carousel-active card) */}
+                {result.ownedVerdicts && result.ownedVerdicts.length > 0 && (() => {
+                  const activeCardId = result.ownedVerdicts![ownedFrontIdx % result.ownedVerdicts!.length].cardId;
+                  const p1Hack = hacks?.[activeCardId] ?? null;
+                  const th = transferHacks?.[activeCardId];
+                  const partners = transferPartners?.[activeCardId] ?? [];
+                  return (
+                    <>
+                      {p1Hack && !p1Hack.locked && (
+                        <details className="r2-fold r2-fold--p1hack">
+                          <summary>{p1Hack.name}</summary>
+                          <div className="r2-fold-body r2-fold-body--hack">
+                            <div className="r2-hd">{p1Hack.whyItMatters}</div>
+                            {p1Hack.executionSteps && (
+                              <>
+                                <button className="r2-hack-seehow" onClick={() => setHackStepsOpen(v => !v)}>
+                                  {hackStepsOpen ? 'Hide steps ↑' : 'See how →'}
+                                </button>
+                                {hackStepsOpen && <HackSteps steps={p1Hack.executionSteps} />}
+                              </>
+                            )}
+                          </div>
+                        </details>
+                      )}
+                      {th && th.displayTravelHack && (
+                        <TransferCallout hack={th} partners={partners} cardName={result.ownedVerdicts![ownedFrontIdx % result.ownedVerdicts!.length].cardName} />
+                      )}
+                    </>
+                  );
+                })()}
 
-        {/* ── RIGHT: icon row + detail panels (Stage 2) ── */}
-        <div className="r2-right">
-          {/* Active card drives the panel — front card in combo, top card in single */}
-          {(() => {
-            const activeCard = comboHero && front ? front : top;
-            if (!activeCard) return null;
-            const cardId = activeCard.cardId;
-            const hack = hacks?.[cardId] ?? null;
-            const intel = intelligence?.[cardId] ?? [];
-            const narrative = narratives?.[cardId];
-            const activeIconCfg = ICONS.find(i => i.key === activeIcon);
+                {/* Balance calculator */}
+                {result.ownedVerdicts && result.ownedVerdicts.length > 0 && (() => {
+                  const ownedVerdicts = result.ownedVerdicts!;
+                  const safeIdx = balanceCardIdx % ownedVerdicts.length;
+                  const balCard = ownedVerdicts[safeIdx];
+                  const balLiq = liquidity?.get(balCard.cardId);
+                  return (
+                    <details className="r2-fold">
+                      <summary>Thinking of carrying a balance? See what it costs</summary>
+                      <div className="r2-fold-body">
+                        {ownedVerdicts.length > 1 && (
+                          <div className="r2-fold-cardpick">
+                            <label className="r2-fold-cardlabel" htmlFor="r2-bal-select">Card</label>
+                            <select id="r2-bal-select" className="r2-fold-cardsel" value={safeIdx}
+                              onChange={e => setBalanceCardIdx(Number(e.target.value))}>
+                              {ownedVerdicts.map((v, i) => (
+                                <option key={v.cardId} value={i}>{v.cardName}</option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+                        <AprEmiCalculator
+                          cardName={balCard.cardName}
+                          storedAprAnnualPct={balLiq?.aprAnnualPct ?? null}
+                          storedEmiAprAnnualPct={balLiq?.emiConversionAprPct ?? null}
+                        />
+                      </div>
+                    </details>
+                  );
+                })()}
 
-            // Collect priority keys from the three tiers
-            const priorityKeys: PriorityKey[] = [
-              ...(priorities?.top ? [priorities.top] : []),
-              ...(priorities?.secondary ? [priorities.secondary] : []),
-              ...(priorities?.niceToHave ? [priorities.niceToHave] : []),
-            ];
+                {/* "See what to add →" CTA — Phase 2 trigger */}
+                {top && (
+                  <button
+                    className={'r2-phase2-cta' + (phase2Open ? ' open' : '')}
+                    onClick={() => setPhase2Open(v => !v)}
+                    aria-expanded={phase2Open}
+                  >
+                    {phase2Open
+                      ? '↑ Hide recommendation'
+                      : `See what to add → ${top ? top.meta.name : ''}`}
+                  </button>
+                )}
+              </div>{/* /r2-phase1 */}
 
-            // Category label for active card
-            const cardCats = comboHero && combo
-              ? (combo.assignments[cardId] ?? []).join(' · ')
-              : Object.entries(activeCard.earn.perCategory)
+              {/* ── Phase 2: recommendation + icon panels (collapsed until CTA clicked) ── */}
+              {phase2Open && top && (() => {
+                const activeCard = top;
+                const cardId = activeCard.cardId;
+                const hack = hacks?.[cardId] ?? null;
+                const intel = intelligence?.[cardId] ?? [];
+                const narrative = narratives?.[cardId];
+                const activeIconCfg = ICONS.find(i => i.key === activeIcon);
+                const priorityKeys: PriorityKey[] = [
+                  ...(priorities?.top ? [priorities.top] : []),
+                  ...(priorities?.secondary ? [priorities.secondary] : []),
+                  ...(priorities?.niceToHave ? [priorities.niceToHave] : []),
+                ];
+                const cardCats = Object.entries(activeCard.earn.perCategory)
                   .filter(([, v]) => v.guaranteed > 0)
                   .sort(([, a], [, b]) => b.guaranteed - a.guaranteed)
-                  .slice(0, 3)
-                  .map(([c]) => c)
-                  .join(' · ');
+                  .slice(0, 3).map(([c]) => c).join(' · ');
 
-            return (
-              <>
-                {/* ── Icon row ── */}
-                <div className="r2-iconrow">
-                  {ICONS.map(({ key, label, Icon, accent }) => (
-                    <button
-                      key={key}
-                      className={'r2-iconcircle' + (activeIcon === key ? ' on' : '')}
-                      style={{ '--r2-accent': accent } as React.CSSProperties}
-                      onClick={() => toggleIcon(key)}
-                      aria-label={label}
-                      aria-pressed={activeIcon === key}
-                    >
-                      <div className="r2-circ">
-                        <Icon size={20} strokeWidth={1.75} />
-                      </div>
-                      <span className="r2-lbl">{label}</span>
-                    </button>
-                  ))}
-                </div>
-
-                {/* ── Detail panel ── */}
-                {activeIcon && activeIconCfg && (
-                  <div className="r2-detail" style={{ '--r2-accent': activeIconCfg.accent } as React.CSSProperties}>
-                    {/* Card context header */}
-                    <div className="r2-detail-which">
-                      {activeCard.meta.name}{cardCats ? ` · ${cardCats}` : ''}
-                    </div>
-
-                    {/* ── Pros & cons ── */}
-                    {activeIcon === 'pros' && (
-                      <div className="r2-panel-pros">
-                        {narrative ? (
-                          <>
-                            {narrative.topPros.length > 0 && (
-                              <div className="r2-procon-group">
-                                {narrative.topPros.map((p, i) => (
-                                  <div key={i} className="r2-item">
-                                    <span className="r2-pl">+</span>
-                                    <span>{p.text}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                            {narrative.topCons.length > 0 && (
-                              <div className="r2-procon-group" style={{ marginTop: narrative.topPros.length > 0 ? '10px' : 0 }}>
-                                {narrative.topCons.map((c, i) => (
-                                  <div key={i} className="r2-item">
-                                    <span className="r2-mn">−</span>
-                                    <span>{c.text}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                            {onKnowMore && (
-                              <button className="r2-linkbtn" onClick={() => onKnowMore(cardId)}>
-                                See full pros &amp; cons →
-                              </button>
-                            )}
-                          </>
-                        ) : (
-                          <div className="r2-empty">No pros/cons data available.</div>
+                return (
+                  <div className="r2-phase2">
+                    {/* Recommendation header */}
+                    <div className="r2-eyebrow r2-phase2-eyebrow">Top addition for your setup</div>
+                    {top.marginalGainPerYear != null && (
+                      <>
+                        <div className="r2-hero-row">
+                          <div className="r2-hero-num">
+                            +{inr(top.marginalGainPerYear)}<span className="r2-hero-yr">/yr</span>
+                          </div>
+                          <button
+                            className={'r2-clarity-btn' + (clarityOpen ? ' on' : '')}
+                            onClick={() => setClarityOpen(v => !v)}
+                            aria-label="What does this mean?"
+                            aria-expanded={clarityOpen}
+                          >ⓘ</button>
+                        </div>
+                        <div className="r2-hero-sub">
+                          new value over your current setup · <b>{top.meta.name}</b>
+                        </div>
+                        {clarityOpen && (
+                          <div className="r2-clarity-popover">
+                            {top.meta.name} is worth ~{inr(top.netGuaranteedPerYear)}/yr on its own — about {inr(top.marginalGainPerYear)} of that is new value on top of your current cards (the rest overlaps with what you already earn).
+                          </div>
                         )}
-                      </div>
-                    )}
-
-                    {/* ── Hack ── */}
-                    {activeIcon === 'hack' && (
-                      <div className="r2-panel-hack">
-                        {hack ? (
-                          hack.locked ? (
-                            <div className="r2-hackbox locked">
-                              <div className="r2-ht">{hack.name}</div>
-                              <div className="r2-hd">
-                                Unlocks at <b>₹{hack.locked.minMonthlySpend.toLocaleString('en-IN')}/month</b> total spend.
-                                You&rsquo;re <b>₹{hack.locked.gap.toLocaleString('en-IN')}/month</b> away.
-                              </div>
-                            </div>
-                          ) : (
-                            <>
-                              <div className="r2-hackbox">
-                                <div className="r2-ht">{hack.name}</div>
-                                <div className="r2-hd">{hack.whyItMatters}</div>
-                              </div>
-                              {hack.executionSteps && (
-                                <>
-                                  <button
-                                    className="r2-hack-seehow"
-                                    onClick={() => setHackStepsOpen(v => !v)}
-                                  >
-                                    {hackStepsOpen ? 'Hide steps ↑' : 'See how →'}
-                                  </button>
-                                  {hackStepsOpen && <HackSteps steps={hack.executionSteps} />}
-                                </>
-                              )}
-                              {hack.difficulty && (
-                                <div className="r2-hack-meta">
-                                  Difficulty: <b>{hack.difficulty}</b>
-                                  {hack.commonFailure && <> · Watch out: {hack.commonFailure}</>}
-                                </div>
-                              )}
-                            </>
-                          )
-                        ) : (
-                          <div className="r2-empty">No hack available for this card yet.</div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* ── The math ── */}
-                    {activeIcon === 'math' && (
-                      <div className="r2-panel-math">
-                        {comboHero && combo ? (() => {
-                          // Combo: show only THIS card's assigned categories in the total.
-                          // Unassigned categories (where user spends but the other card handles them)
-                          // are shown greyed with attribution — excluded from this card's total.
-                          const assignedCats = new Set(combo.assignments[activeCard.cardId] ?? []);
-                          type SpCat = keyof typeof monthlySpend;
-                          const spendCats = (Object.keys(monthlySpend) as SpCat[])
-                            .filter(cat => (monthlySpend[cat] ?? 0) > 0);
-                          const assignedRows = spendCats
-                            .filter(cat => assignedCats.has(cat))
-                            .map(cat => ({
-                              cat,
-                              ce: activeCard.earn.perCategory[cat],
-                              spend: monthlySpend[cat as keyof typeof monthlySpend] ?? 0,
-                              annual: (activeCard.earn.perCategory[cat]?.guaranteed ?? 0) * 12,
-                            }))
-                            .filter(r => r.ce != null)
-                            .sort((a, b) => b.annual - a.annual);
-                          const excludedRows = spendCats
-                            .filter(cat => !assignedCats.has(cat));
-                          const cardNet = cardContrib(activeCard); // assigned earn gross — matches card display
-                          const maxAnnual = Math.max(1, ...assignedRows.map(r => r.annual));
-
-                          return (
-                            <>
-                              <div className="r2-math-hero">
-                                <span className="r2-math-hero-lbl">Your value from this card</span>
-                                <span className="r2-math-hero-val">
-                                  {inr(cardNet)}<span className="r2-math-hero-yr">/yr</span>
+                        {/* "Why this recommendation" tag */}
+                        {(() => {
+                          if (!top.marginalPerCategory) return null;
+                          const entries = Object.entries(top.marginalPerCategory)
+                            .filter(([, d]) => d.incrementalGuaranteed > 0)
+                            .sort(([, a], [, b]) => b.incrementalGuaranteed - a.incrementalGuaranteed);
+                          if (entries.length === 0) return null;
+                          const totalIncremental = entries.reduce((s, [, d]) => s + d.incrementalGuaranteed, 0);
+                          const [topCat, topDelta] = entries[0];
+                          if (topDelta.currentBestGuaranteed === 0 &&
+                              topDelta.incrementalGuaranteed / totalIncremental >= 0.40) {
+                            const gapAnnual = Math.round(topDelta.incrementalGuaranteed * 12);
+                            return (
+                              <div className="r2-gaptag r2-gaptag--gap">
+                                <span className="r2-gaptag-pill">{topCat}</span>
+                                <span className="r2-gaptag-text">
+                                  None of your cards earn on <b>{topCat}</b>. Adding this card captures <b>{inr(gapAnnual)}/yr</b> you&rsquo;re currently leaving behind.
                                 </span>
                               </div>
-                              <div className="r2-math-rows">
-                                {assignedRows.map(({ cat, ce, spend, annual }) => (
-                                  <R2CategoryRow
-                                    key={cat}
-                                    cat={cat}
-                                    ce={ce}
-                                    monthlySpend={spend}
-                                    annual={annual}
-                                    maxAnnual={maxAnnual}
-                                  />
-                                ))}
-                                {excludedRows.map(cat => (
-                                  <div key={cat} className="r2-math-row excluded">
-                                    <span className="r2-math-row-cat">
-                                      {cat}
-                                      <span className="r2-math-attributed"> → your other card</span>
-                                    </span>
-                                    <span className="r2-math-row-val excluded">—</span>
-                                  </div>
-                                ))}
-                              </div>
-                              <div className="r2-math-total">
-                                <span>Value from assigned categories</span>
-                                <span className="r2-math-total-val">{inr(cardNet)}</span>
-                              </div>
-                              {/* Fee + net — mirrors CardMathBreakdown's fee line */}
-                              {(() => {
-                                const fee = activeCard.effectiveAnnualFee;
-                                const rawFee = (activeCard.meta as CardMeta).annualFee ?? 0;
-                                const waiverSpend = (activeCard.meta as CardMeta).feeWaiverSpend ?? 0;
-                                return (
-                                  <>
-                                    <div className="r2-math-feeline">
-                                      <div className="r2-math-fee-label">
-                                        {fee === 0 && rawFee > 0 ? (
-                                          <>
-                                            <span className="r2-math-fee-strike">{inr(rawFee)}</span>
-                                            <span className="r2-math-fee-waived">waived (exceed {inr(waiverSpend)} routed spend)</span>
-                                          </>
-                                        ) : fee === 0 ? (
-                                          <span className="r2-math-fee-waived">Lifetime Free — no annual fee</span>
-                                        ) : (
-                                          <span>Annual fee</span>
-                                        )}
-                                      </div>
-                                      <span className="r2-math-fee-val">{fee === 0 ? '−₹0' : '−' + inr(fee)}</span>
-                                    </div>
-                                    <div className="r2-math-cardnet">
-                                      <span>Net from this card</span>
-                                      <span className="r2-math-cardnet-val">{inr(cardNet - fee)}</span>
-                                    </div>
-                                  </>
-                                );
-                              })()}
-                              {activeCard.annualUpside > 0 && (
-                                <div className="r2-math-upside">
-                                  + up to {inr(activeCard.annualUpside)}/yr extra via the card&rsquo;s
-                                  portal/app&nbsp;<span className="r2-math-upside-tag">conditional</span>
-                                </div>
-                              )}
-                            </>
+                            );
+                          }
+                          const topTwo = entries.slice(0, 2);
+                          const catNames = topTwo.map(([cat]) => cat);
+                          const beatAnnual = Math.round(topTwo.reduce((s, [, d]) => s + d.incrementalGuaranteed, 0) * 12);
+                          const catLabel = catNames.length >= 2 ? `${catNames[0]} & ${catNames[1]}` : catNames[0];
+                          return (
+                            <div className="r2-gaptag r2-gaptag--beat">
+                              <span className="r2-gaptag-pill">{catLabel}</span>
+                              <span className="r2-gaptag-text">
+                                Earns more than your current cards on <b>{catLabel}</b> — adds <b>{inr(beatAnnual)}/yr</b> on those categories.
+                              </span>
+                            </div>
                           );
-                        })() : (
-                          // Single-card: all categories belong to this card — CardMathBreakdown
-                          // nets to netGuaranteedPerYear which matches the card's "net for you" display.
-                          <>
+                        })()}
+                      </>
+                    )}
+
+                    {/* Recommendation card tile */}
+                    <div className="r2-solo-stack">
+                      <PCard
+                        card={top}
+                        cats={Object.entries(top.earn.perCategory)
+                          .filter(([, v]) => v.guaranteed > 0)
+                          .sort(([, a], [, b]) => b.guaranteed - a.guaranteed)
+                          .slice(0, 4).map(([cat]) => cat).join(' · ')}
+                        net={top.netGuaranteedPerYear}
+                        hideNet
+                        className="r2-pcard-solo"
+                      />
+                    </div>
+
+                    {/* Icon row */}
+                    <div className="r2-iconrow">
+                      {ICONS.map(({ key, label, Icon, accent }) => (
+                        <button
+                          key={key}
+                          className={'r2-iconcircle' + (activeIcon === key ? ' on' : '')}
+                          style={{ '--r2-accent': accent } as React.CSSProperties}
+                          onClick={() => toggleIcon(key)}
+                          aria-label={label}
+                          aria-pressed={activeIcon === key}
+                        >
+                          <div className="r2-circ"><Icon size={20} strokeWidth={1.75} /></div>
+                          <span className="r2-lbl">{label}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Detail panel */}
+                    {activeIcon && activeIconCfg && (
+                      <div className="r2-detail" style={{ '--r2-accent': activeIconCfg.accent } as React.CSSProperties}>
+                        <div className="r2-detail-which">
+                          {activeCard.meta.name}{cardCats ? ` · ${cardCats}` : ''}
+                        </div>
+
+                        {activeIcon === 'pros' && (
+                          <div className="r2-panel-pros">
+                            {narrative ? (
+                              <>
+                                {narrative.topPros.length > 0 && (
+                                  <div className="r2-procon-group">
+                                    {narrative.topPros.map((p, i) => (
+                                      <div key={i} className="r2-item"><span className="r2-pl">+</span><span>{p.text}</span></div>
+                                    ))}
+                                  </div>
+                                )}
+                                {narrative.topCons.length > 0 && (
+                                  <div className="r2-procon-group" style={{ marginTop: narrative.topPros.length > 0 ? '10px' : 0 }}>
+                                    {narrative.topCons.map((c, i) => (
+                                      <div key={i} className="r2-item"><span className="r2-mn">−</span><span>{c.text}</span></div>
+                                    ))}
+                                  </div>
+                                )}
+                                {onKnowMore && (
+                                  <button className="r2-linkbtn" onClick={() => onKnowMore(cardId)}>See full pros &amp; cons →</button>
+                                )}
+                              </>
+                            ) : <div className="r2-empty">No pros/cons data available.</div>}
+                          </div>
+                        )}
+
+                        {activeIcon === 'hack' && (
+                          <div className="r2-panel-hack">
+                            {hack ? (hack.locked ? (
+                              <div className="r2-hackbox locked">
+                                <div className="r2-ht">{hack.name}</div>
+                                <div className="r2-hd">Unlocks at <b>₹{hack.locked.minMonthlySpend.toLocaleString('en-IN')}/month</b>. You&rsquo;re <b>₹{hack.locked.gap.toLocaleString('en-IN')}/month</b> away.</div>
+                              </div>
+                            ) : (
+                              <>
+                                <div className="r2-hackbox"><div className="r2-ht">{hack.name}</div><div className="r2-hd">{hack.whyItMatters}</div></div>
+                                {hack.executionSteps && (
+                                  <>
+                                    <button className="r2-hack-seehow" onClick={() => setHackStepsOpen(v => !v)}>
+                                      {hackStepsOpen ? 'Hide steps ↑' : 'See how →'}
+                                    </button>
+                                    {hackStepsOpen && <HackSteps steps={hack.executionSteps} />}
+                                  </>
+                                )}
+                                {hack.difficulty && (
+                                  <div className="r2-hack-meta">Difficulty: <b>{hack.difficulty}</b>{hack.commonFailure && <> · Watch out: {hack.commonFailure}</>}</div>
+                                )}
+                              </>
+                            )) : <div className="r2-empty">No hack available for this card yet.</div>}
+                          </div>
+                        )}
+
+                        {activeIcon === 'math' && (
+                          <div className="r2-panel-math">
                             <div className="r2-math-hero">
                               <span className="r2-math-hero-lbl">Your value</span>
-                              <span className="r2-math-hero-val">
-                                {inr(activeCard.netGuaranteedPerYear)}<span className="r2-math-hero-yr">/yr</span>
-                              </span>
+                              <span className="r2-math-hero-val">{inr(activeCard.netGuaranteedPerYear)}<span className="r2-math-hero-yr">/yr</span></span>
                             </div>
                             <CardMathBreakdown
                               earn={activeCard.earn}
@@ -873,266 +828,299 @@ export const ResultsScreenV2: React.FC<Props> = ({
                               annualUpside={activeCard.annualUpside}
                               monthlySpend={monthlySpend}
                             />
-                          </>
-                        )}
-                      </div>
-                    )}
-
-                    {/* ── Priorities ── */}
-                    {activeIcon === 'priorities' && (
-                      <div className="r2-panel-priorities">
-                        {/* In combo: clarify which card's coverage is shown */}
-                        {comboHero && (
-                          <div className="r2-pri-context">
-                            Showing <b>{activeCard.meta.name}</b>&rsquo;s coverage — swap cards to compare
                           </div>
                         )}
-                        {priorityKeys.length === 0 ? (
-                          <div className="r2-empty">You didn&rsquo;t set any priorities.</div>
-                        ) : (
-                          priorityKeys.map(key => {
-                            const ev = evalPriorityForCard(key, activeCard, monthlySpend);
-                            return (
-                              <div key={key} className={'r2-pri-row ' + ev.status}>
-                                <span className="r2-pri-glyph">
-                                  {ev.status === 'met' ? '✓' : ev.status === 'partial' ? '⚠' : '✗'}
-                                </span>
-                                <div>
-                                  <div className="r2-pri-label">{LABEL[key]}</div>
-                                  {ev.line && <div className="r2-pri-line">{ev.line}</div>}
+
+                        {activeIcon === 'priorities' && (
+                          <div className="r2-panel-priorities">
+                            {priorityKeys.length === 0 ? (
+                              <div className="r2-empty">You didn&rsquo;t set any priorities.</div>
+                            ) : priorityKeys.map(key => {
+                              const ev = evalPriorityForCard(key, activeCard, monthlySpend);
+                              return (
+                                <div key={key} className={'r2-pri-row ' + ev.status}>
+                                  <span className="r2-pri-glyph">{ev.status === 'met' ? '✓' : ev.status === 'partial' ? '⚠' : '✗'}</span>
+                                  <div>
+                                    <div className="r2-pri-label">{LABEL[key]}</div>
+                                    {ev.line && <div className="r2-pri-line">{ev.line}</div>}
+                                  </div>
                                 </div>
-                              </div>
-                            );
-                          })
-                        )}
-                        {/* Alt for missed top priority — inside the Priorities panel */}
-                        {!comboHero && altForTop && (
-                          <div className="r2-alt-card">
-                            <div className="r2-alt-pill">Alternative for your {PRIORITY_LABEL[altForTop.key]} priority</div>
-                            <div className="r2-alt-line">
-                              Your optimal setup earns <b>{inr(altForTop.optimalNet)}</b>. The closest setup that
-                              covers <b>{PRIORITY_LABEL[altForTop.key]}</b> is <b>{altForTop.card.meta.name}</b>,
-                              earning {inr(altForTop.altNet)} — that&rsquo;s <b>{inr(altForTop.costOfSwitch)} less</b>.
-                              Your call.
-                            </div>
-                            <button className="r2-alt-toggle" onClick={() => setAltExpanded(v => !v)}>
-                              {altExpanded ? 'Hide details ↑' : 'See full details →'}
-                            </button>
-                            {altExpanded && (
-                              <div className="r2-alt-detail">
-                                <RecommendationCard
-                                  card={altForTop.card}
-                                  monthlySpend={monthlySpend}
-                                  forexPct={(altForTop.card.meta as CardMeta).forexPct}
-                                  isTravelPriority={isTravelPriority}
-                                  devaluation={devaluations?.[altForTop.card.cardId]}
-                                  hack={hacks?.[altForTop.card.cardId] ?? undefined}
-                                  intelligence={intelligence?.[altForTop.card.cardId]}
-                                  narrative={narratives?.[altForTop.card.cardId]}
-                                  onKnowMore={onKnowMore ? () => onKnowMore(altForTop.card.cardId) : undefined}
-                                />
+                              );
+                            })}
+                            {altForTop && (
+                              <div className="r2-alt-card">
+                                <div className="r2-alt-pill">Alternative for your {PRIORITY_LABEL[altForTop.key]} priority</div>
+                                <div className="r2-alt-line">
+                                  Your optimal setup earns <b>{inr(altForTop.optimalNet)}</b>. The closest setup that covers <b>{PRIORITY_LABEL[altForTop.key]}</b> is <b>{altForTop.card.meta.name}</b>, earning {inr(altForTop.altNet)} — that&rsquo;s <b>{inr(altForTop.costOfSwitch)} less</b>. Your call.
+                                </div>
+                                <button className="r2-alt-toggle" onClick={() => setAltExpanded(v => !v)}>
+                                  {altExpanded ? 'Hide details ↑' : 'See full details →'}
+                                </button>
+                                {altExpanded && (
+                                  <div className="r2-alt-detail">
+                                    <RecommendationCard
+                                      card={altForTop.card} monthlySpend={monthlySpend}
+                                      forexPct={(altForTop.card.meta as CardMeta).forexPct}
+                                      isTravelPriority={isTravelPriority}
+                                      devaluation={devaluations?.[altForTop.card.cardId]}
+                                      hack={hacks?.[altForTop.card.cardId] ?? undefined}
+                                      intelligence={intelligence?.[altForTop.card.cardId]}
+                                      narrative={narratives?.[altForTop.card.cardId]}
+                                      onKnowMore={onKnowMore ? () => onKnowMore(altForTop.card.cardId) : undefined}
+                                    />
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
                         )}
-                      </div>
-                    )}
 
-                    {/* ── Things to know ── */}
-                    {activeIcon === 'know' && (
-                      <div className="r2-panel-know">
-                        {intel.length === 0 ? (
-                          <div className="r2-empty">No current alerts or notable changes for this card.</div>
-                        ) : (
-                          intel.map((item, i) => (
-                            <div key={i} className={'r2-item know ' + (item.severity ?? '')}>
-                              <span className="r2-know-dot" />
-                              <span>{item.text}</span>
-                            </div>
-                          ))
+                        {activeIcon === 'know' && (
+                          <div className="r2-panel-know">
+                            {intel.length === 0 ? (
+                              <div className="r2-empty">No current alerts or notable changes for this card.</div>
+                            ) : intel.map((item, i) => (
+                              <div key={i} className={'r2-item know ' + (item.severity ?? '')}>
+                                <span className="r2-know-dot" /><span>{item.text}</span>
+                              </div>
+                            ))}
+                          </div>
                         )}
                       </div>
                     )}
-                  </div>
-                )}
-              </>
-            );
-          })()}
 
-          {/* ── Stage 7: Transfer callout — visible without opening any icon panel ── */}
-          {(() => {
-            const activeCard = comboHero && front ? front : top;
-            if (!activeCard) return null;
-            const th = transferHacks?.[activeCard.cardId];
-            if (!th || !th.displayTravelHack) return null;
-            const partners = transferPartners?.[activeCard.cardId] ?? [];
-            return <TransferCallout hack={th} partners={partners} cardName={activeCard.meta.name} />;
-          })()}
+                    {/* Transfer callout for the recommendation card */}
+                    {(() => {
+                      const th = transferHacks?.[cardId];
+                      if (!th || !th.displayTravelHack) return null;
+                      const partners = transferPartners?.[cardId] ?? [];
+                      return <TransferCallout hack={th} partners={partners} cardName={activeCard.meta.name} />;
+                    })()}
 
-          {/* ── Stage 4: Lower horizontal tabs ── */}
-          {(() => {
-            const t = result.transparency;
-            const eligibleCount = t.totalEvaluated - t.failedIncome - t.failedFee;
-            const premium = result.premiumWorthConsidering ?? [];
-            const runners = result.runnersUp ?? [];
-
-            const TAB_LABELS: Record<TabKey, string> = {
-              fee:    'Other cards outside your fee preference',
-              others: 'Also considered',
-              how:    'How we picked',
-            };
-
-            return (
-              <>
-                <div className="r2-lowtabrow">
-                  {(['fee', 'others', 'how'] as TabKey[]).map((key) => (
-                    <button
-                      key={key}
-                      className={'r2-lowtabbtn' + (activeTab === key ? ' on' : '')}
-                      onClick={() => toggleTab(key)}
-                    >
-                      {TAB_LABELS[key]}
-                    </button>
-                  ))}
-                </div>
-
-                {activeTab && (
-                  <div className="r2-lowcontent">
-
-                    {/* ── Other cards outside your fee preference ── */}
-                    {activeTab === 'fee' && (
-                      premium.length === 0 ? (
-                        <div className="r2-lc-note">
-                          No cards above your fee preference have significantly stronger value for your spend.
-                          {result.premiumWorthConsidering === undefined
-                            ? ' (This section is most relevant when you have a Travel or Lounge priority.)'
-                            : ''}
-                        </div>
-                      ) : (
+                    {/* Lower tabs */}
+                    {(() => {
+                      const t = result.transparency;
+                      const eligibleCount = t.totalEvaluated - t.failedIncome - t.failedFee;
+                      const premium = result.premiumWorthConsidering ?? [];
+                      const runners = result.runnersUp ?? [];
+                      const TAB_LABELS: Record<TabKey, string> = {
+                        fee: 'Other cards outside your fee preference',
+                        others: 'Also considered', how: 'How we picked',
+                      };
+                      return (
                         <>
-                          {premium.map(c => (
-                            <div key={c.cardId} className="r2-lc-item">
-                              <span className="r2-lc-name">{c.meta.name}</span>
-                              <span className="r2-lc-val">
-                                {(c.meta as CardMeta).annualFee
-                                  ? `₹${(c.meta as CardMeta).annualFee!.toLocaleString('en-IN')} fee`
-                                  : 'Lifetime Free'}
-                              </span>
+                          <div className="r2-lowtabrow">
+                            {(['fee', 'others', 'how'] as TabKey[]).map(key => (
+                              <button key={key} className={'r2-lowtabbtn' + (activeTab === key ? ' on' : '')} onClick={() => toggleTab(key)}>
+                                {TAB_LABELS[key]}
+                              </button>
+                            ))}
+                          </div>
+                          {activeTab && (
+                            <div className="r2-lowcontent">
+                              {activeTab === 'fee' && (premium.length === 0 ? (
+                                <div className="r2-lc-note">No cards above your fee preference have significantly stronger value.{result.premiumWorthConsidering === undefined ? ' (Most relevant for Travel or Lounge priority.)' : ''}</div>
+                              ) : (
+                                <>{premium.map(c => (<div key={c.cardId} className="r2-lc-item"><span className="r2-lc-name">{c.meta.name}</span><span className="r2-lc-val">{(c.meta as CardMeta).annualFee ? `₹${(c.meta as CardMeta).annualFee!.toLocaleString('en-IN')} fee` : 'Lifetime Free'}</span></div>))}<div className="r2-lc-note">Above your fee comfort, but strong value if you&rsquo;d stretch.</div></>
+                              ))}
+                              {activeTab === 'others' && (runners.length === 0 ? <div className="r2-lc-note">No other cards to show.</div> :
+                                runners.map(c => (<div key={c.cardId} className="r2-lc-item"><span className="r2-lc-name">{c.meta.name}{c.inviteOnly && <span className="r2-lc-badge">invite</span>}</span><span className="r2-lc-val">+{inr(c.marginalGainPerYear ?? 0)}/yr additional</span></div>))
+                              )}
+                              {activeTab === 'how' && (
+                                <>
+                                  <div className="r2-elig yes"><span className="r2-elig-n">✓{eligibleCount}</span><span className="r2-elig-t">eligible for you</span></div>
+                                  {t.failedIncome > 0 && <div className="r2-elig no"><span className="r2-elig-n">✕{t.failedIncome}</span><span className="r2-elig-t">income mismatch</span></div>}
+                                  {t.failedFee > 0 && <div className="r2-elig no"><span className="r2-elig-n">✕{t.failedFee}</span><span className="r2-elig-t">above your fee comfort</span></div>}
+                                  {t.inviteOnly > 0 && <div className="r2-elig no"><span className="r2-elig-n">✕{t.inviteOnly}</span><span className="r2-elig-t">invite-only</span></div>}
+                                  {t.weakSpendMatch > 0 && <div className="r2-elig no"><span className="r2-elig-n">✕{t.weakSpendMatch}</span><span className="r2-elig-t">weak fit for your spend</span></div>}
+                                  <div className="r2-lc-note" style={{ marginTop: 14 }}>Ranked by net annual rupee value for your exact spends. No card pays to rank here.</div>
+                                </>
+                              )}
                             </div>
-                          ))}
-                          <div className="r2-lc-note">Above your fee comfort, but strong value if you&rsquo;d stretch.</div>
+                          )}
                         </>
-                      )
-                    )}
-
-                    {/* ── Others (runners-up) ── */}
-                    {activeTab === 'others' && (
-                      runners.length === 0 ? (
-                        <div className="r2-lc-note">No other cards to show.</div>
-                      ) : (
-                        runners.map(c => (
-                          <div key={c.cardId} className="r2-lc-item">
-                            <span className="r2-lc-name">
-                              {c.meta.name}
-                              {c.inviteOnly && <span className="r2-lc-badge">invite</span>}
-                            </span>
-                            <span className="r2-lc-val">
-                              {journeyA
-                                ? `+${inr(c.marginalGainPerYear ?? 0)}/yr additional`
-                                : `${inr(c.netGuaranteedPerYear)}/yr`}
-                            </span>
-                          </div>
-                        ))
-                      )
-                    )}
-
-                    {/* ── How we picked ── */}
-                    {activeTab === 'how' && (
-                      <>
-                        <div className={'r2-elig yes'}>
-                          <span className="r2-elig-n">✓{eligibleCount}</span>
-                          <span className="r2-elig-t">eligible for you</span>
-                        </div>
-                        {t.failedIncome > 0 && (
-                          <div className="r2-elig no">
-                            <span className="r2-elig-n">✕{t.failedIncome}</span>
-                            <span className="r2-elig-t">income mismatch</span>
-                          </div>
-                        )}
-                        {t.failedFee > 0 && (
-                          <div className="r2-elig no">
-                            <span className="r2-elig-n">✕{t.failedFee}</span>
-                            <span className="r2-elig-t">above your fee comfort</span>
-                          </div>
-                        )}
-                        {t.inviteOnly > 0 && (
-                          <div className="r2-elig no">
-                            <span className="r2-elig-n">✕{t.inviteOnly}</span>
-                            <span className="r2-elig-t">invite-only</span>
-                          </div>
-                        )}
-                        {t.weakSpendMatch > 0 && (
-                          <div className="r2-elig no">
-                            <span className="r2-elig-n">✕{t.weakSpendMatch}</span>
-                            <span className="r2-elig-t">weak fit for your spend</span>
-                          </div>
-                        )}
-                        <div className="r2-lc-note" style={{ marginTop: 14 }}>
-                          Ranked by net annual rupee value for your exact spends.
-                          No card pays to rank here.
-                        </div>
-                      </>
-                    )}
-
+                      );
+                    })()}
                   </div>
-                )}
-              </>
-            );
-          })()}
-          {/* ── Credit note (low credit score warning — both journeys) ── */}
-          {result.creditNote && (
-            <div className="r2-creditnote">{result.creditNote}</div>
-          )}
-          {/* ── Balance calculator — Journey A only, above nav buttons ── */}
-          {journeyA && result.ownedVerdicts && result.ownedVerdicts.length > 0 && (() => {
-            const ownedVerdicts = result.ownedVerdicts!;
-            const safeIdx = balanceCardIdx % ownedVerdicts.length;
-            const balCard = ownedVerdicts[safeIdx];
-            const balLiq = liquidity?.get(balCard.cardId);
-            return (
-              <details className="r2-fold">
-                <summary>Thinking of carrying a balance? See what it costs</summary>
-                <div className="r2-fold-body">
-                  {ownedVerdicts.length > 1 && (
-                    <div className="r2-fold-cardpick">
-                      <label className="r2-fold-cardlabel" htmlFor="r2-bal-select">Card</label>
-                      <select
-                        id="r2-bal-select"
-                        className="r2-fold-cardsel"
-                        value={safeIdx}
-                        onChange={e => setBalanceCardIdx(Number(e.target.value))}
-                      >
-                        {ownedVerdicts.map((v, i) => (
-                          <option key={v.cardId} value={i}>{v.cardName}</option>
-                        ))}
-                      </select>
+                );
+              })()}{/* /phase2Open */}
+
+            </>
+
+          ) : (
+            /* ══════════════════════════════════════════════════════════════════
+                JOURNEY B — classic two-column layout (unchanged)
+            ══════════════════════════════════════════════════════════════════ */
+            <>
+              {/* Active card drives the panel — front card in combo, top card in single */}
+              {(() => {
+                const activeCard = comboHero && front ? front : top;
+                if (!activeCard) return null;
+                const cardId = activeCard.cardId;
+                const hack = hacks?.[cardId] ?? null;
+                const intel = intelligence?.[cardId] ?? [];
+                const narrative = narratives?.[cardId];
+                const activeIconCfg = ICONS.find(i => i.key === activeIcon);
+                const priorityKeys: PriorityKey[] = [
+                  ...(priorities?.top ? [priorities.top] : []),
+                  ...(priorities?.secondary ? [priorities.secondary] : []),
+                  ...(priorities?.niceToHave ? [priorities.niceToHave] : []),
+                ];
+                const cardCats = comboHero && combo
+                  ? (combo.assignments[cardId] ?? []).join(' · ')
+                  : Object.entries(activeCard.earn.perCategory)
+                      .filter(([, v]) => v.guaranteed > 0)
+                      .sort(([, a], [, b]) => b.guaranteed - a.guaranteed)
+                      .slice(0, 3).map(([c]) => c).join(' · ');
+
+                return (
+                  <>
+                    <div className="r2-iconrow">
+                      {ICONS.map(({ key, label, Icon, accent }) => (
+                        <button key={key} className={'r2-iconcircle' + (activeIcon === key ? ' on' : '')}
+                          style={{ '--r2-accent': accent } as React.CSSProperties}
+                          onClick={() => toggleIcon(key)} aria-label={label} aria-pressed={activeIcon === key}>
+                          <div className="r2-circ"><Icon size={20} strokeWidth={1.75} /></div>
+                          <span className="r2-lbl">{label}</span>
+                        </button>
+                      ))}
                     </div>
-                  )}
-                  <AprEmiCalculator
-                    cardName={balCard.cardName}
-                    storedAprAnnualPct={balLiq?.aprAnnualPct ?? null}
-                    storedEmiAprAnnualPct={balLiq?.emiConversionAprPct ?? null}
-                  />
+                    {activeIcon && activeIconCfg && (
+                      <div className="r2-detail" style={{ '--r2-accent': activeIconCfg.accent } as React.CSSProperties}>
+                        <div className="r2-detail-which">{activeCard.meta.name}{cardCats ? ` · ${cardCats}` : ''}</div>
+                        {activeIcon === 'pros' && (
+                          <div className="r2-panel-pros">
+                            {narrative ? (
+                              <>
+                                {narrative.topPros.length > 0 && <div className="r2-procon-group">{narrative.topPros.map((p, i) => (<div key={i} className="r2-item"><span className="r2-pl">+</span><span>{p.text}</span></div>))}</div>}
+                                {narrative.topCons.length > 0 && <div className="r2-procon-group" style={{ marginTop: narrative.topPros.length > 0 ? '10px' : 0 }}>{narrative.topCons.map((c, i) => (<div key={i} className="r2-item"><span className="r2-mn">−</span><span>{c.text}</span></div>))}</div>}
+                                {onKnowMore && <button className="r2-linkbtn" onClick={() => onKnowMore(cardId)}>See full pros &amp; cons →</button>}
+                              </>
+                            ) : <div className="r2-empty">No pros/cons data available.</div>}
+                          </div>
+                        )}
+                        {activeIcon === 'hack' && (
+                          <div className="r2-panel-hack">
+                            {hack ? (hack.locked ? (
+                              <div className="r2-hackbox locked"><div className="r2-ht">{hack.name}</div><div className="r2-hd">Unlocks at <b>₹{hack.locked.minMonthlySpend.toLocaleString('en-IN')}/month</b>. You&rsquo;re <b>₹{hack.locked.gap.toLocaleString('en-IN')}/month</b> away.</div></div>
+                            ) : (
+                              <>
+                                <div className="r2-hackbox"><div className="r2-ht">{hack.name}</div><div className="r2-hd">{hack.whyItMatters}</div></div>
+                                {hack.executionSteps && (<><button className="r2-hack-seehow" onClick={() => setHackStepsOpen(v => !v)}>{hackStepsOpen ? 'Hide steps ↑' : 'See how →'}</button>{hackStepsOpen && <HackSteps steps={hack.executionSteps} />}</>)}
+                                {hack.difficulty && <div className="r2-hack-meta">Difficulty: <b>{hack.difficulty}</b>{hack.commonFailure && <> · Watch out: {hack.commonFailure}</>}</div>}
+                              </>
+                            )) : <div className="r2-empty">No hack available for this card yet.</div>}
+                          </div>
+                        )}
+                        {activeIcon === 'math' && (
+                          <div className="r2-panel-math">
+                            {comboHero && combo ? (() => {
+                              const assignedCats = new Set(combo.assignments[activeCard.cardId] ?? []);
+                              type SpCat = keyof typeof monthlySpend;
+                              const spendCats = (Object.keys(monthlySpend) as SpCat[]).filter(cat => (monthlySpend[cat] ?? 0) > 0);
+                              const assignedRows = spendCats.filter(cat => assignedCats.has(cat))
+                                .map(cat => ({ cat, ce: activeCard.earn.perCategory[cat], spend: monthlySpend[cat as keyof typeof monthlySpend] ?? 0, annual: (activeCard.earn.perCategory[cat]?.guaranteed ?? 0) * 12 }))
+                                .filter(r => r.ce != null).sort((a, b) => b.annual - a.annual);
+                              const excludedRows = spendCats.filter(cat => !assignedCats.has(cat));
+                              const cardNet = cardContrib(activeCard);
+                              const maxAnnual = Math.max(1, ...assignedRows.map(r => r.annual));
+                              return (
+                                <>
+                                  <div className="r2-math-hero"><span className="r2-math-hero-lbl">Your value from this card</span><span className="r2-math-hero-val">{inr(cardNet)}<span className="r2-math-hero-yr">/yr</span></span></div>
+                                  <div className="r2-math-rows">{assignedRows.map(({ cat, ce, spend, annual }) => (<R2CategoryRow key={cat} cat={cat} ce={ce} monthlySpend={spend} annual={annual} maxAnnual={maxAnnual} />))}{excludedRows.map(cat => (<div key={cat} className="r2-math-row excluded"><span className="r2-math-row-cat">{cat}<span className="r2-math-attributed"> → your other card</span></span><span className="r2-math-row-val excluded">—</span></div>))}</div>
+                                  <div className="r2-math-total"><span>Value from assigned categories</span><span className="r2-math-total-val">{inr(cardNet)}</span></div>
+                                  {(() => { const fee = activeCard.effectiveAnnualFee; const rawFee = (activeCard.meta as CardMeta).annualFee ?? 0; const waiverSpend = (activeCard.meta as CardMeta).feeWaiverSpend ?? 0; return (<><div className="r2-math-feeline"><div className="r2-math-fee-label">{fee === 0 && rawFee > 0 ? (<><span className="r2-math-fee-strike">{inr(rawFee)}</span><span className="r2-math-fee-waived">waived (exceed {inr(waiverSpend)} routed spend)</span></>) : fee === 0 ? <span className="r2-math-fee-waived">Lifetime Free — no annual fee</span> : <span>Annual fee</span>}</div><span className="r2-math-fee-val">{fee === 0 ? '−₹0' : '−' + inr(fee)}</span></div><div className="r2-math-cardnet"><span>Net from this card</span><span className="r2-math-cardnet-val">{inr(cardNet - fee)}</span></div></>); })()}
+                                  {activeCard.annualUpside > 0 && <div className="r2-math-upside">+ up to {inr(activeCard.annualUpside)}/yr extra via the card&rsquo;s portal/app&nbsp;<span className="r2-math-upside-tag">conditional</span></div>}
+                                </>
+                              );
+                            })() : (
+                              <><div className="r2-math-hero"><span className="r2-math-hero-lbl">Your value</span><span className="r2-math-hero-val">{inr(activeCard.netGuaranteedPerYear)}<span className="r2-math-hero-yr">/yr</span></span></div>
+                              <CardMathBreakdown earn={activeCard.earn} effectiveAnnualFee={activeCard.effectiveAnnualFee} annualFee={(activeCard.meta as CardMeta).annualFee ?? 0} feeWaiverSpend={(activeCard.meta as CardMeta).feeWaiverSpend ?? 0} netGuaranteedPerYear={activeCard.netGuaranteedPerYear} annualUpside={activeCard.annualUpside} monthlySpend={monthlySpend} /></>
+                            )}
+                          </div>
+                        )}
+                        {activeIcon === 'priorities' && (
+                          <div className="r2-panel-priorities">
+                            {comboHero && <div className="r2-pri-context">Showing <b>{activeCard.meta.name}</b>&rsquo;s coverage — swap cards to compare</div>}
+                            {priorityKeys.length === 0 ? <div className="r2-empty">You didn&rsquo;t set any priorities.</div> : priorityKeys.map(key => { const ev = evalPriorityForCard(key, activeCard, monthlySpend); return (<div key={key} className={'r2-pri-row ' + ev.status}><span className="r2-pri-glyph">{ev.status === 'met' ? '✓' : ev.status === 'partial' ? '⚠' : '✗'}</span><div><div className="r2-pri-label">{LABEL[key]}</div>{ev.line && <div className="r2-pri-line">{ev.line}</div>}</div></div>); })}
+                            {!comboHero && altForTop && (
+                              <div className="r2-alt-card">
+                                <div className="r2-alt-pill">Alternative for your {PRIORITY_LABEL[altForTop.key]} priority</div>
+                                <div className="r2-alt-line">Your optimal setup earns <b>{inr(altForTop.optimalNet)}</b>. The closest setup that covers <b>{PRIORITY_LABEL[altForTop.key]}</b> is <b>{altForTop.card.meta.name}</b>, earning {inr(altForTop.altNet)} — that&rsquo;s <b>{inr(altForTop.costOfSwitch)} less</b>. Your call.</div>
+                                <button className="r2-alt-toggle" onClick={() => setAltExpanded(v => !v)}>{altExpanded ? 'Hide details ↑' : 'See full details →'}</button>
+                                {altExpanded && <div className="r2-alt-detail"><RecommendationCard card={altForTop.card} monthlySpend={monthlySpend} forexPct={(altForTop.card.meta as CardMeta).forexPct} isTravelPriority={isTravelPriority} devaluation={devaluations?.[altForTop.card.cardId]} hack={hacks?.[altForTop.card.cardId] ?? undefined} intelligence={intelligence?.[altForTop.card.cardId]} narrative={narratives?.[altForTop.card.cardId]} onKnowMore={onKnowMore ? () => onKnowMore(altForTop.card.cardId) : undefined} /></div>}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        {activeIcon === 'know' && (
+                          <div className="r2-panel-know">
+                            {intel.length === 0 ? <div className="r2-empty">No current alerts or notable changes for this card.</div> : intel.map((item, i) => (<div key={i} className={'r2-item know ' + (item.severity ?? '')}><span className="r2-know-dot" /><span>{item.text}</span></div>))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+
+              {/* Transfer callout (Journey B) */}
+              {(() => {
+                const activeCard = comboHero && front ? front : top;
+                if (!activeCard) return null;
+                const th = transferHacks?.[activeCard.cardId];
+                if (!th || !th.displayTravelHack) return null;
+                const partners = transferPartners?.[activeCard.cardId] ?? [];
+                return <TransferCallout hack={th} partners={partners} cardName={activeCard.meta.name} />;
+              })()}
+
+              {/* Lower tabs (Journey B) */}
+              {(() => {
+                const t = result.transparency;
+                const eligibleCount = t.totalEvaluated - t.failedIncome - t.failedFee;
+                const premium = result.premiumWorthConsidering ?? [];
+                const runners = result.runnersUp ?? [];
+                const TAB_LABELS: Record<TabKey, string> = { fee: 'Other cards outside your fee preference', others: 'Also considered', how: 'How we picked' };
+                return (
+                  <>
+                    <div className="r2-lowtabrow">
+                      {(['fee', 'others', 'how'] as TabKey[]).map(key => (
+                        <button key={key} className={'r2-lowtabbtn' + (activeTab === key ? ' on' : '')} onClick={() => toggleTab(key)}>{TAB_LABELS[key]}</button>
+                      ))}
+                    </div>
+                    {activeTab && (
+                      <div className="r2-lowcontent">
+                        {activeTab === 'fee' && (premium.length === 0 ? <div className="r2-lc-note">No cards above your fee preference have significantly stronger value for your spend.{result.premiumWorthConsidering === undefined ? ' (This section is most relevant when you have a Travel or Lounge priority.)' : ''}</div> : <>{premium.map(c => (<div key={c.cardId} className="r2-lc-item"><span className="r2-lc-name">{c.meta.name}</span><span className="r2-lc-val">{(c.meta as CardMeta).annualFee ? `₹${(c.meta as CardMeta).annualFee!.toLocaleString('en-IN')} fee` : 'Lifetime Free'}</span></div>))}<div className="r2-lc-note">Above your fee comfort, but strong value if you&rsquo;d stretch.</div></>)}
+                        {activeTab === 'others' && (runners.length === 0 ? <div className="r2-lc-note">No other cards to show.</div> : runners.map(c => (<div key={c.cardId} className="r2-lc-item"><span className="r2-lc-name">{c.meta.name}{c.inviteOnly && <span className="r2-lc-badge">invite</span>}</span><span className="r2-lc-val">{inr(c.netGuaranteedPerYear)}/yr</span></div>)))}
+                        {activeTab === 'how' && (<><div className="r2-elig yes"><span className="r2-elig-n">✓{eligibleCount}</span><span className="r2-elig-t">eligible for you</span></div>{t.failedIncome > 0 && <div className="r2-elig no"><span className="r2-elig-n">✕{t.failedIncome}</span><span className="r2-elig-t">income mismatch</span></div>}{t.failedFee > 0 && <div className="r2-elig no"><span className="r2-elig-n">✕{t.failedFee}</span><span className="r2-elig-t">above your fee comfort</span></div>}{t.inviteOnly > 0 && <div className="r2-elig no"><span className="r2-elig-n">✕{t.inviteOnly}</span><span className="r2-elig-t">invite-only</span></div>}{t.weakSpendMatch > 0 && <div className="r2-elig no"><span className="r2-elig-n">✕{t.weakSpendMatch}</span><span className="r2-elig-t">weak fit for your spend</span></div>}<div className="r2-lc-note" style={{ marginTop: 14 }}>Ranked by net annual rupee value for your exact spends. No card pays to rank here.</div></>)}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+
+              {result.creditNote && <div className="r2-creditnote">{result.creditNote}</div>}
+
+              {(onBack || onRestart) && (
+                <div className="r2-nav">
+                  {onBack && <button className="r2-back" onClick={onBack}>Back</button>}
+                  {onRestart && <button className="r2-restart" onClick={onRestart}>Start over</button>}
                 </div>
-              </details>
-            );
-          })()}
-          {/* ── Nav buttons ── */}
-          {(onBack || onRestart) && (
-            <div className="r2-nav">
-              {onBack && <button className="r2-back" onClick={onBack}>Back</button>}
-              {onRestart && <button className="r2-restart" onClick={onRestart}>Start over</button>}
-            </div>
+              )}
+            </>
+          )}
+
+          {/* Credit note + nav — Journey A (outside phase sections, always visible) */}
+          {journeyA && (
+            <>
+              {result.creditNote && <div className="r2-creditnote">{result.creditNote}</div>}
+              {(onBack || onRestart) && (
+                <div className="r2-nav">
+                  {onBack && <button className="r2-back" onClick={onBack}>Back</button>}
+                  {onRestart && <button className="r2-restart" onClick={onRestart}>Start over</button>}
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -1146,6 +1134,7 @@ const css = `
 /* ── Shell & grid — matches prototype .shell ── */
 .r2-shell{font-family:'DM Sans',system-ui,sans-serif;color:#fafafa;max-width:1080px;margin:0 auto}
 .r2-grid{position:relative;z-index:1;display:grid;grid-template-columns:380px 1fr;gap:32px;align-items:start}
+.r2-grid--a{grid-template-columns:1fr}
 @media(max-width:820px){.r2-grid{grid-template-columns:1fr}}
 
 /* ── Stage 5: decorative background layer — fixed, behind all content, non-interactive ── */
@@ -1737,6 +1726,53 @@ const css = `
   color:#e4e4e7;font-family:'DM Sans',system-ui,sans-serif;font-size:13px;
   font-weight:600;padding:6px 10px;cursor:pointer;outline:none}
 .r2-fold-cardsel:focus{border-color:#71717a}
+
+/* ── Model B two-phase layout (Journey A) ── */
+.r2-grid--a .r2-left{display:none}
+.r2-phase1{max-width:640px;margin:0 auto}
+.r2-phase2{max-width:640px;margin:0 auto;margin-top:24px;padding-top:24px;border-top:1px solid #1f1f23}
+
+/* Phase 2 eyebrow */
+.r2-phase2-eyebrow{margin-bottom:4px}
+
+/* CTA button between Phase 1 and Phase 2 */
+.r2-phase2-cta{
+  display:block;width:100%;margin-top:20px;
+  background:#18181b;border:1px solid #3f3f46;border-radius:12px;
+  color:#a1a1aa;font-family:'DM Sans',system-ui,sans-serif;font-size:14px;
+  font-weight:700;padding:14px 20px;cursor:pointer;text-align:center;
+  transition:background .15s,border-color .15s,color .15s}
+.r2-phase2-cta:hover{background:#1f1f23;border-color:#52525b;color:#e4e4e7}
+.r2-phase2-cta.open{border-color:#10b981;color:#10b981}
+.r2-phase2-cta.open:hover{background:rgba(16,185,129,.06)}
+
+/* Routing map — Phase 1 full-width variant */
+.r2-routemap--p1{margin-top:16px}
+.r2-routemap-heading-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
+.r2-routemap-heading-row .r2-routemap-heading{margin-bottom:0}
+.r2-routemap-sub{font-size:11px;color:#52525b;font-style:italic}
+.r2-routemap-total{
+  display:grid;grid-template-columns:1fr auto;align-items:center;
+  gap:6px 10px;padding:8px 0 2px;margin-top:4px;border-top:1px solid #27272a}
+.r2-routemap-total-lbl{font-size:12px;font-weight:700;color:#71717a;text-transform:uppercase;letter-spacing:.05em}
+.r2-routemap-total-val{font-size:14px;font-weight:800;color:#10b981;font-variant-numeric:tabular-nums;text-align:right}
+
+/* Owned-card hack fold in Phase 1 */
+.r2-fold--p1hack{margin-top:14px}
+
+/* Tile sizing scoped to Phase 1 carousel (replaces .r2-left--a scope) */
+.r2-phase1 .r2-pcard{width:210px;height:132px;border-radius:14px;padding:16px}
+.r2-phase1 .r2-chip{width:24px;height:17px;border-radius:3px;margin-bottom:9px}
+.r2-phase1 .r2-pc-name{font-size:13px}
+.r2-phase1 .r2-pc-cats{font-size:9.5px}
+.r2-phase1 .r2-pc-num{font-size:8.5px;bottom:32px}
+.r2-phase1 .r2-pc-holder{font-size:7px;bottom:14px}
+.r2-phase1 .r2-pc-verdict{margin-top:4px;gap:2px}
+.r2-phase1 .r2-pc-vbadge{font-size:7px;padding:1px 5px}
+.r2-phase1 .r2-pc-vline{font-size:10.5px}
+.r2-phase1 .r2-solo-stack{width:210px;height:168px;margin:0 auto 8px}
+.r2-phase1 .r2-hero-num{font-size:26px}
+.r2-phase1 .r2-hero-yr{font-size:16px}
 `;
 
 export default ResultsScreenV2;
