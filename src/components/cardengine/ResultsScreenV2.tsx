@@ -565,16 +565,32 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 </div>
                                 {sorted.map(([cat, route]) => {
                                   const isLeak = !route.cardId;
+                                  const isActiveWinner = route.cardId === activeCardId;
+                                  // Comparison line: show rates when another card wins
+                                  const activeProof = result.ownedPerCategory?.[activeCardId];
+                                  const activeCe = activeProof?.[cat as keyof typeof activeProof];
+                                  const activeRate = activeCe?.baseRatePer100 ?? 0;
+                                  const winnerProof = !isLeak && !isActiveWinner && route.cardId
+                                    ? result.ownedPerCategory?.[route.cardId] : null;
+                                  const winnerCe = winnerProof?.[cat as keyof typeof winnerProof];
+                                  const winnerRate = winnerCe?.baseRatePer100 ?? route.guaranteed / (monthlySpend[cat as keyof typeof monthlySpend] ?? 1) * 100;
+                                  const showCompare = !isLeak && !isActiveWinner && (winnerRate > 0 || activeRate > 0);
                                   return (
-                                    <div key={cat} className={'r2-routemap-row' + (isLeak ? ' leak' : '')}>
+                                    <div key={cat} className={'r2-routemap-row' + (isLeak ? ' leak' : '') + (isActiveWinner ? ' active-best' : '')}>
                                       <span className="r2-routemap-cat">{cat}</span>
                                       {isLeak ? (
                                         <span className="r2-routemap-leak-note">{route.noData ? 'no rate data' : 'none earn here'}</span>
                                       ) : (
                                         <>
-                                          <span className="r2-routemap-card">{route.cardName}</span>
+                                          <span className="r2-routemap-card">{isActiveWinner ? <b>{route.cardName}</b> : route.cardName}</span>
                                           <span className="r2-routemap-val">₹{Math.round(route.guaranteed * 12).toLocaleString('en-IN')}/yr</span>
                                         </>
+                                      )}
+                                      {showCompare && (
+                                        <span className="r2-routemap-compare">
+                                          {route.cardName} earns {winnerRate > 0 ? `${winnerRate.toFixed(2)}%` : 'more'} here
+                                          {activeRate > 0 ? ` vs your ${activeRate.toFixed(2)}%` : activeCe?.excluded ? ' · this card excludes this category' : activeCe?.guaranteed === 0 ? ' · this card earns nothing here' : ''}
+                                        </span>
                                       )}
                                     </div>
                                   );
@@ -1674,6 +1690,12 @@ const css = `
 .r2-routemap-leak-note{
   grid-column:2 / 4;text-align:right;
   font-size:11px;color:#52525b;font-style:italic}
+/* Active card is the winner in this category */
+.r2-routemap-row.active-best .r2-routemap-cat{color:#fafafa;font-weight:600}
+/* Comparison line — spans full width below the main row columns */
+.r2-routemap-compare{
+  grid-column:1 / 4;font-size:11px;color:#52525b;
+  padding-bottom:4px;line-height:1.5}
 
 /* ── "Why this recommendation" tag (Journey A — gap-fill and rate-beating variants) ── */
 .r2-gaptag{
@@ -1791,8 +1813,11 @@ const css = `
 /* Owned-card hack fold in Phase 1 */
 .r2-fold--p1hack{margin-top:14px}
 
-/* Phase 1 carousel card: same size as Phase 2 recommendation tile (sizing parity) */
-.r2-phase1 .r2-solo-stack{margin-bottom:20px}
+/* Phase 1 carousel card: center within the flex body; match Phase 2 tile width */
+.r2-owned-carousel .r2-solo-stack{width:260px;margin:0 auto 20px}
+
+/* Phase 2 recommendation tile: center-align to match Phase 1 carousel position */
+.r2-phase2 .r2-solo-stack{width:260px;margin:0 auto 12px}
 `;
 
 export default ResultsScreenV2;

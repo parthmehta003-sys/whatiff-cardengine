@@ -108,6 +108,12 @@ export const CardEngine: React.FC<Props> = ({ db }) => {
       const altCard = result.ranked.find((c) => c.cardId === altCardId);
       if (altCard && !result.recommended.some((c) => c.cardId === altCardId)) cards.push(altCard);
     }
+    // Also include owned cards so Phase 1 panels can show their hacks.
+    for (const v of result.ownedVerdicts ?? []) {
+      if (!cards.some(c => c.cardId === v.cardId)) {
+        map[v.cardId] = selectHackForCard(v.cardId, db.hacks, db.warnings, spend, totalMonthly);
+      }
+    }
     for (const c of cards) {
       map[c.cardId] = selectHackForCard(c.cardId, db.hacks, db.warnings, spend, totalMonthly);
     }
