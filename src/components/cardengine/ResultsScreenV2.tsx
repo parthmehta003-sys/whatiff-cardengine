@@ -784,6 +784,77 @@ export const ResultsScreenV2: React.FC<Props> = ({
                       />
                     </div>
 
+                    {/* Combined per-category verdict: owned + recommended */}
+                    {result.bestCardPerCategory && top.marginalPerCategory && (() => {
+                      const cats = Object.keys(monthlySpend).filter(c => (monthlySpend[c as keyof typeof monthlySpend] ?? 0) > 0);
+                      type CombinedRow = {
+                        cat: string;
+                        winnerName: string;
+                        winnerCardId: string | null;
+                        guaranteed: number; // ₹/month
+                        isRec: boolean;     // true = recommended card wins
+                        isLeak: boolean;
+                      };
+                      const rows: CombinedRow[] = cats.map(cat => {
+                        const owned = result.bestCardPerCategory![cat];
+                        const ownedGuaranteed = owned?.guaranteed ?? 0;
+                        const recGuaranteed = top.earn.perCategory[cat]?.guaranteed ?? 0;
+                        const isLeak = ownedGuaranteed === 0 && recGuaranteed === 0;
+                        const recWins = recGuaranteed > ownedGuaranteed;
+                        return {
+                          cat,
+                          winnerName: recWins ? top.meta.name : (owned?.cardName ?? '—'),
+                          winnerCardId: recWins ? top.cardId : (owned?.cardId ?? null),
+                          guaranteed: Math.max(ownedGuaranteed, recGuaranteed),
+                          isRec: recWins,
+                          isLeak,
+                        };
+                      });
+                      const sorted = rows.slice().sort((a, b) => {
+                        if (a.isLeak !== b.isLeak) return a.isLeak ? 1 : -1;
+                        return b.guaranteed - a.guaranteed;
+                      });
+                      const combinedGrossAnnual = rows.reduce((s, r) => s + r.guaranteed * 12, 0);
+                      const phase1GrossAnnual = Object.values(result.bestCardPerCategory).reduce((s, r) => s + (r.guaranteed ?? 0) * 12, 0);
+                      const addedAnnual = combinedGrossAnnual - phase1GrossAnnual;
+                      return (
+                        <div className="r2-routemap r2-combined-map">
+                          <div className="r2-routemap-heading-row">
+                            <span className="r2-eyebrow r2-routemap-heading">With {top.meta.name} added</span>
+                            <span className="r2-routemap-sub">best card per category</span>
+                          </div>
+                          {sorted.map(({ cat, winnerName, guaranteed, isRec, isLeak }) => (
+                            <div key={cat} className={'r2-routemap-row' + (isLeak ? ' leak' : '') + (isRec ? ' rec-wins' : '')}>
+                              <span className="r2-routemap-cat">{cat}</span>
+                              {isLeak ? (
+                                <span className="r2-routemap-leak-note">none earn here</span>
+                              ) : (
+                                <>
+                                  <span className="r2-routemap-card">
+                                    {winnerName}
+                                    {isRec && <span className="r2-combined-new">new</span>}
+                                  </span>
+                                  <span className="r2-routemap-val">₹{Math.round(guaranteed * 12).toLocaleString('en-IN')}/yr</span>
+                                </>
+                              )}
+                            </div>
+                          ))}
+                          <div className="r2-routemap-total">
+                            <span className="r2-routemap-total-lbl">Total with {top.meta.name} added</span>
+                            <span className="r2-routemap-total-val">~₹{Math.round(combinedGrossAnnual).toLocaleString('en-IN')}/yr</span>
+                          </div>
+                          {addedAnnual > 0 && (
+                            <div className="r2-combined-delta">
+                              ~{inr(addedAnnual)}/yr more than your current setup
+                              {Math.abs(addedAnnual - (top.marginalGainPerYear ?? 0)) > 500 && (
+                                <span className="r2-combined-delta-note"> · gross earn; after fees the net gain is {inr(top.marginalGainPerYear ?? 0)}/yr</span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+
                     {/* Icon row */}
                     <div className="r2-iconrow">
                       {ICONS.map(({ key, label, Icon, accent }) => (
@@ -1779,6 +1850,18 @@ const css = `
   color:#e4e4e7;font-family:'DM Sans',system-ui,sans-serif;font-size:13px;
   font-weight:600;padding:6px 10px;cursor:pointer;outline:none}
 .r2-fold-cardsel:focus{border-color:#71717a}
+
+/* ── Combined per-category map (Phase 2 — owned + recommended) ── */
+.r2-combined-map{margin-top:20px;margin-bottom:4px}
+.r2-routemap-row.rec-wins .r2-routemap-card{color:#10b981}
+.r2-combined-new{
+  display:inline-block;font-size:8px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.06em;color:#10b981;background:rgba(16,185,129,.13);
+  border:1px solid rgba(16,185,129,.25);border-radius:4px;
+  padding:1px 5px;margin-left:6px;vertical-align:middle}
+.r2-combined-delta{
+  font-size:11px;color:#52525b;padding:6px 0 2px;line-height:1.5}
+.r2-combined-delta-note{color:#3f3f46}
 
 /* ── Model B two-phase layout (Journey A) ── */
 .r2-grid--a .r2-left{display:none}
