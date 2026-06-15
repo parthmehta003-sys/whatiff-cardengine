@@ -266,8 +266,8 @@ export const ResultsScreenV2: React.FC<Props> = ({
   // Phase 2 (recommendation + icon panels) open/closed in Journey A Model B layout.
   const [phase2Open, setPhase2Open] = useState(false);
 
-  // Which detail panel is open (null = all closed).
-  const [activeIcon, setActiveIcon] = useState<IconKey | null>('pros');
+  // Which detail panel is open (null = all closed; user must click to open).
+  const [activeIcon, setActiveIcon] = useState<IconKey | null>(null);
   const toggleIcon = (key: IconKey) => setActiveIcon(prev => prev === key ? null : key);
 
   // Hack steps expansion (collapses when icon panel switches card).
@@ -1281,8 +1281,11 @@ const css = `
 @media(prefers-reduced-motion:reduce){
   .r2-bg-lines,.r2-floatcirc{animation:none}}
 
-/* ── Left column — sticky — matches prototype .left ── */
+/* ── Left column — sticky for Journey B (hero stays visible while scrolling icon panels) ── */
 .r2-left{position:sticky;top:24px;z-index:0;isolation:isolate}
+/* Journey A: carousel doesn't need to stick — scrolling it off-screen is fine,
+   and removing sticky eliminates any chance of it painting over Phase 2 content. */
+.r2-left--a{position:static;isolation:auto}
 @media(max-width:820px){.r2-left{position:static}}
 
 /* ── Eyebrow + hero numbers — scaled for desktop two-column layout ── */
