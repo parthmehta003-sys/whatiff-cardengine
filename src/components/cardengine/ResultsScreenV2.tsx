@@ -1691,6 +1691,8 @@ const css = `
   display:flex;align-items:center;justify-content:center;
   transition:background .15s,border-color .15s,color .15s;
   font-family:inherit;padding:0;
+  /* arrows must paint above the absolute-positioned card tile (z-index:5) */
+  position:relative;z-index:10;
   /* offset down by half the dots row height so arrow centres on the card, not card+dots */
   margin-bottom:20px}
 .r2-carousel-arrow:hover{background:#27272a;border-color:#71717a;color:#fafafa}
