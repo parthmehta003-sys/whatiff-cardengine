@@ -1016,12 +1016,15 @@ export const ResultsScreenV2: React.FC<Props> = ({
                           <span className="r2-routemap-total-lbl">Total with {top.meta.name} added</span>
                           <span className="r2-routemap-total-val">~₹{Math.round(combinedGrossAnnual).toLocaleString('en-IN')}/yr</span>
                         </div>
-                        {addedAnnual > 0 && (
+                        {top.marginalGainPerYear != null && top.marginalGainPerYear > 0 && (
                           <div className="r2-combined-delta">
-                            ~{inr(addedAnnual)}/yr more than your current setup
-                            {Math.abs(addedAnnual - (top.marginalGainPerYear ?? 0)) > 500 && (
-                              <span className="r2-combined-delta-note"> · gross earn; after fees the net gain is {inr(top.marginalGainPerYear ?? 0)}/yr</span>
-                            )}
+                            {inr(top.marginalGainPerYear)}/yr more than your current setup
+                            {(() => {
+                              const fee = (top.meta as CardMeta).annualFee;
+                              return fee && fee > 0
+                                ? <span className="r2-combined-delta-note"> · after {inr(fee)} annual fee</span>
+                                : null;
+                            })()}
                           </div>
                         )}
                       </div>
@@ -1845,7 +1848,7 @@ const css = `
 /* ── Model B two-phase layout (Journey A) ── */
 .r2-phase1{margin:0}
 /* Phase 2 spans full grid width */
-.r2-phase2{grid-column:1/-1;margin-top:0;padding-top:24px;border-top:1px solid #1f1f23}
+.r2-phase2{grid-column:1/-1;margin-top:0;padding-top:24px;border-top:1px solid #1f1f23;position:relative;z-index:1}
 
 /* Phase 2 inner sub-grid: left = hero + why-tag + card tile; right = combined map + icon row + detail panel */
 .r2-phase2-grid{display:grid;grid-template-columns:380px 1fr;gap:32px;align-items:start;margin-bottom:16px}
