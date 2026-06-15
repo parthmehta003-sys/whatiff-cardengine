@@ -458,9 +458,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
               Phase 2: recommendation + icon panels (collapsed behind CTA)
           ══════════════════════════════════════════════════════════════════ */}
           {journeyA ? (
-            <>
-              {/* ── Phase 1: carousel + icon panels for active owned card ── */}
-              <div className="r2-phase1">
+            <div className="r2-phase1">
 
                 {result.ownedVerdicts && result.ownedVerdicts.length > 0 && (() => {
                   const verdicts = result.ownedVerdicts!;
@@ -683,389 +681,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                       : `See what to add → ${top ? top.meta.name : ''}`}
                   </button>
                 )}
-              </div>{/* /r2-phase1 */}
-
-              {/* ── Phase 2: recommendation + icon panels (collapsed until CTA clicked) ── */}
-              {phase2Open && top && (() => {
-                const activeCard = top;
-                const cardId = activeCard.cardId;
-                const hack = hacks?.[cardId] ?? null;
-                const intel = intelligence?.[cardId] ?? [];
-                const narrative = narratives?.[cardId];
-                const activeIconCfg = ICONS.find(i => i.key === activeIcon);
-                const priorityKeys: PriorityKey[] = [
-                  ...(priorities?.top ? [priorities.top] : []),
-                  ...(priorities?.secondary ? [priorities.secondary] : []),
-                  ...(priorities?.niceToHave ? [priorities.niceToHave] : []),
-                ];
-                const cardCats = Object.entries(activeCard.earn.perCategory)
-                  .filter(([, v]) => v.guaranteed > 0)
-                  .sort(([, a], [, b]) => b.guaranteed - a.guaranteed)
-                  .slice(0, 3).map(([c]) => c).join(' · ');
-
-                return (
-                  <div className="r2-phase2">
-                    {/* Phase 2 inner sub-grid: left = hero + why-tag + card tile; right = icon row + detail panel */}
-                    <div className="r2-phase2-grid">
-                      {/* Left cell: header, marginal hero, why-tag, card tile */}
-                      <div className="r2-phase2-left">
-                        <div className="r2-eyebrow r2-phase2-eyebrow">Top addition for your setup</div>
-                        {top.marginalGainPerYear != null && (
-                          <>
-                            <div className="r2-hero-row">
-                              <div className="r2-hero-num">
-                                +{inr(top.marginalGainPerYear)}<span className="r2-hero-yr">/yr</span>
-                              </div>
-                              <button
-                                className={'r2-clarity-btn' + (clarityOpen ? ' on' : '')}
-                                onClick={() => setClarityOpen(v => !v)}
-                                aria-label="What does this mean?"
-                                aria-expanded={clarityOpen}
-                              >ⓘ</button>
-                            </div>
-                            <div className="r2-hero-sub">
-                              new value over your current setup · <b>{top.meta.name}</b>
-                            </div>
-                            {clarityOpen && (
-                              <div className="r2-clarity-popover">
-                                {top.meta.name} is worth ~{inr(top.netGuaranteedPerYear)}/yr on its own — about {inr(top.marginalGainPerYear)} of that is new value on top of your current cards (the rest overlaps with what you already earn).
-                              </div>
-                            )}
-                            {/* "Why this recommendation" tag */}
-                            {(() => {
-                              if (!top.marginalPerCategory) return null;
-                              const entries = Object.entries(top.marginalPerCategory)
-                                .filter(([, d]) => d.incrementalGuaranteed > 0)
-                                .sort(([, a], [, b]) => b.incrementalGuaranteed - a.incrementalGuaranteed);
-                              if (entries.length === 0) return null;
-                              const totalIncremental = entries.reduce((s, [, d]) => s + d.incrementalGuaranteed, 0);
-                              const [topCat, topDelta] = entries[0];
-                              if (topDelta.currentBestGuaranteed === 0 &&
-                                  topDelta.incrementalGuaranteed / totalIncremental >= 0.40) {
-                                const gapAnnual = Math.round(topDelta.incrementalGuaranteed * 12);
-                                return (
-                                  <div className="r2-gaptag r2-gaptag--gap">
-                                    <span className="r2-gaptag-pill">{topCat}</span>
-                                    <span className="r2-gaptag-text">
-                                      None of your cards earn on <b>{topCat}</b>. Adding this card captures <b>{inr(gapAnnual)}/yr</b> you&rsquo;re currently leaving behind.
-                                    </span>
-                                  </div>
-                                );
-                              }
-                              const topTwo = entries.slice(0, 2);
-                              const catNames = topTwo.map(([cat]) => cat);
-                              const beatAnnual = Math.round(topTwo.reduce((s, [, d]) => s + d.incrementalGuaranteed, 0) * 12);
-                              const catLabel = catNames.length >= 2 ? `${catNames[0]} & ${catNames[1]}` : catNames[0];
-                              return (
-                                <div className="r2-gaptag r2-gaptag--beat">
-                                  <span className="r2-gaptag-pill">{catLabel}</span>
-                                  <span className="r2-gaptag-text">
-                                    Earns more than your current cards on <b>{catLabel}</b> — adds <b>{inr(beatAnnual)}/yr</b> on those categories.
-                                  </span>
-                                </div>
-                              );
-                            })()}
-                          </>
-                        )}
-
-                        {/* Recommendation card tile */}
-                        <div className="r2-solo-stack">
-                          <PCard
-                            card={top}
-                            cats={Object.entries(top.earn.perCategory)
-                              .filter(([, v]) => v.guaranteed > 0)
-                              .sort(([, a], [, b]) => b.guaranteed - a.guaranteed)
-                              .slice(0, 4).map(([cat]) => cat).join(' · ')}
-                            net={top.netGuaranteedPerYear}
-                            hideNet
-                            className="r2-pcard-solo"
-                          />
-                        </div>
-                      </div>{/* /r2-phase2-left */}
-
-                      {/* Right cell: icon row + detail panel */}
-                      <div className="r2-phase2-right">
-                    {result.bestCardPerCategory && top.marginalPerCategory && (() => {
-                      const cats = Object.keys(monthlySpend).filter(c => (monthlySpend[c as keyof typeof monthlySpend] ?? 0) > 0);
-                      type CombinedRow = {
-                        cat: string;
-                        winnerName: string;
-                        winnerCardId: string | null;
-                        guaranteed: number; // ₹/month
-                        isRec: boolean;     // true = recommended card wins
-                        isLeak: boolean;
-                      };
-                      const rows: CombinedRow[] = cats.map(cat => {
-                        const owned = result.bestCardPerCategory![cat];
-                        const ownedGuaranteed = owned?.guaranteed ?? 0;
-                        const recGuaranteed = top.earn.perCategory[cat]?.guaranteed ?? 0;
-                        const isLeak = ownedGuaranteed === 0 && recGuaranteed === 0;
-                        const recWins = recGuaranteed > ownedGuaranteed;
-                        return {
-                          cat,
-                          winnerName: recWins ? top.meta.name : (owned?.cardName ?? '—'),
-                          winnerCardId: recWins ? top.cardId : (owned?.cardId ?? null),
-                          guaranteed: Math.max(ownedGuaranteed, recGuaranteed),
-                          isRec: recWins,
-                          isLeak,
-                        };
-                      });
-                      const sorted = rows.slice().sort((a, b) => {
-                        if (a.isLeak !== b.isLeak) return a.isLeak ? 1 : -1;
-                        return b.guaranteed - a.guaranteed;
-                      });
-                      const combinedGrossAnnual = rows.reduce((s, r) => s + r.guaranteed * 12, 0);
-                      const phase1GrossAnnual = Object.values(result.bestCardPerCategory).reduce((s, r) => s + (r.guaranteed ?? 0) * 12, 0);
-                      const addedAnnual = combinedGrossAnnual - phase1GrossAnnual;
-                      return (
-                        <div className="r2-routemap r2-combined-map">
-                          <div className="r2-routemap-heading-row">
-                            <span className="r2-eyebrow r2-routemap-heading">With {top.meta.name} added</span>
-                            <span className="r2-routemap-sub">best card per category</span>
-                          </div>
-                          {sorted.map(({ cat, winnerName, guaranteed, isRec, isLeak }) => (
-                            <div key={cat} className={'r2-routemap-row' + (isLeak ? ' leak' : '') + (isRec ? ' rec-wins' : '')}>
-                              <span className="r2-routemap-cat">{cat}</span>
-                              {isLeak ? (
-                                <span className="r2-routemap-leak-note">none earn here</span>
-                              ) : (
-                                <>
-                                  <span className="r2-routemap-card">
-                                    {winnerName}
-                                    {isRec && <span className="r2-combined-new">new</span>}
-                                  </span>
-                                  <span className="r2-routemap-val">₹{Math.round(guaranteed * 12).toLocaleString('en-IN')}/yr</span>
-                                </>
-                              )}
-                            </div>
-                          ))}
-                          <div className="r2-routemap-total">
-                            <span className="r2-routemap-total-lbl">Total with {top.meta.name} added</span>
-                            <span className="r2-routemap-total-val">~₹{Math.round(combinedGrossAnnual).toLocaleString('en-IN')}/yr</span>
-                          </div>
-                          {addedAnnual > 0 && (
-                            <div className="r2-combined-delta">
-                              ~{inr(addedAnnual)}/yr more than your current setup
-                              {Math.abs(addedAnnual - (top.marginalGainPerYear ?? 0)) > 500 && (
-                                <span className="r2-combined-delta-note"> · gross earn; after fees the net gain is {inr(top.marginalGainPerYear ?? 0)}/yr</span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })()}
-
-                    {/* Icon row */}
-                    <div className="r2-iconrow">
-                      {ICONS.map(({ key, label, Icon, accent }) => (
-                        <button
-                          key={key}
-                          className={'r2-iconcircle' + (activeIcon === key ? ' on' : '')}
-                          style={{ '--r2-accent': accent } as React.CSSProperties}
-                          onClick={() => toggleIcon(key)}
-                          aria-label={label}
-                          aria-pressed={activeIcon === key}
-                        >
-                          <div className="r2-circ"><Icon size={20} strokeWidth={1.75} /></div>
-                          <span className="r2-lbl">{label}</span>
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* Detail panel */}
-                    {activeIcon && activeIconCfg && (
-                      <div className="r2-detail" style={{ '--r2-accent': activeIconCfg.accent } as React.CSSProperties}>
-                        <div className="r2-detail-which">
-                          {activeCard.meta.name}{cardCats ? ` · ${cardCats}` : ''}
-                        </div>
-
-                        {activeIcon === 'pros' && (
-                          <div className="r2-panel-pros">
-                            {narrative ? (
-                              <>
-                                {narrative.topPros.length > 0 && (
-                                  <div className="r2-procon-group">
-                                    {narrative.topPros.map((p, i) => (
-                                      <div key={i} className="r2-item"><span className="r2-pl">+</span><span>{p.text}</span></div>
-                                    ))}
-                                  </div>
-                                )}
-                                {narrative.topCons.length > 0 && (
-                                  <div className="r2-procon-group" style={{ marginTop: narrative.topPros.length > 0 ? '10px' : 0 }}>
-                                    {narrative.topCons.map((c, i) => (
-                                      <div key={i} className="r2-item"><span className="r2-mn">−</span><span>{c.text}</span></div>
-                                    ))}
-                                  </div>
-                                )}
-                                {onKnowMore && (
-                                  <button className="r2-linkbtn" onClick={() => onKnowMore(cardId)}>See full pros &amp; cons →</button>
-                                )}
-                              </>
-                            ) : <div className="r2-empty">No pros/cons data available.</div>}
-                          </div>
-                        )}
-
-                        {activeIcon === 'hack' && (
-                          <div className="r2-panel-hack">
-                            {hack ? (hack.locked ? (
-                              <div className="r2-hackbox locked">
-                                <div className="r2-ht">{hack.name}</div>
-                                <div className="r2-hd">Unlocks at <b>₹{hack.locked.minMonthlySpend.toLocaleString('en-IN')}/month</b>. You&rsquo;re <b>₹{hack.locked.gap.toLocaleString('en-IN')}/month</b> away.</div>
-                              </div>
-                            ) : (
-                              <>
-                                <div className="r2-hackbox"><div className="r2-ht">{hack.name}</div><div className="r2-hd">{hack.whyItMatters}</div></div>
-                                {hack.executionSteps && (
-                                  <>
-                                    <button className="r2-hack-seehow" onClick={() => setHackStepsOpen(v => !v)}>
-                                      {hackStepsOpen ? 'Hide steps ↑' : 'See how →'}
-                                    </button>
-                                    {hackStepsOpen && <HackSteps steps={hack.executionSteps} />}
-                                  </>
-                                )}
-                                {hack.difficulty && (
-                                  <div className="r2-hack-meta">Difficulty: <b>{hack.difficulty}</b>{hack.commonFailure && <> · Watch out: {hack.commonFailure}</>}</div>
-                                )}
-                              </>
-                            )) : <div className="r2-empty">No hack available for this card yet.</div>}
-                          </div>
-                        )}
-
-                        {activeIcon === 'math' && (
-                          <div className="r2-panel-math">
-                            <div className="r2-math-hero">
-                              <span className="r2-math-hero-lbl">Your value</span>
-                              <span className="r2-math-hero-val">{inr(activeCard.netGuaranteedPerYear)}<span className="r2-math-hero-yr">/yr</span></span>
-                            </div>
-                            <CardMathBreakdown
-                              earn={activeCard.earn}
-                              effectiveAnnualFee={activeCard.effectiveAnnualFee}
-                              annualFee={(activeCard.meta as CardMeta).annualFee ?? 0}
-                              feeWaiverSpend={(activeCard.meta as CardMeta).feeWaiverSpend ?? 0}
-                              netGuaranteedPerYear={activeCard.netGuaranteedPerYear}
-                              annualUpside={activeCard.annualUpside}
-                              monthlySpend={monthlySpend}
-                            />
-                          </div>
-                        )}
-
-                        {activeIcon === 'priorities' && (
-                          <div className="r2-panel-priorities">
-                            {priorityKeys.length === 0 ? (
-                              <div className="r2-empty">You didn&rsquo;t set any priorities.</div>
-                            ) : priorityKeys.map(key => {
-                              const ev = evalPriorityForCard(key, activeCard, monthlySpend);
-                              return (
-                                <div key={key} className={'r2-pri-row ' + ev.status}>
-                                  <span className="r2-pri-glyph">{ev.status === 'met' ? '✓' : ev.status === 'partial' ? '⚠' : '✗'}</span>
-                                  <div>
-                                    <div className="r2-pri-label">{LABEL[key]}</div>
-                                    {ev.line && <div className="r2-pri-line">{ev.line}</div>}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                            {altForTop && (
-                              <div className="r2-alt-card">
-                                <div className="r2-alt-pill">Alternative for your {PRIORITY_LABEL[altForTop.key]} priority</div>
-                                <div className="r2-alt-line">
-                                  Your optimal setup earns <b>{inr(altForTop.optimalNet)}</b>. The closest setup that covers <b>{PRIORITY_LABEL[altForTop.key]}</b> is <b>{altForTop.card.meta.name}</b>, earning {inr(altForTop.altNet)} — that&rsquo;s <b>{inr(altForTop.costOfSwitch)} less</b>. Your call.
-                                </div>
-                                <button className="r2-alt-toggle" onClick={() => setAltExpanded(v => !v)}>
-                                  {altExpanded ? 'Hide details ↑' : 'See full details →'}
-                                </button>
-                                {altExpanded && (
-                                  <div className="r2-alt-detail">
-                                    <RecommendationCard
-                                      card={altForTop.card} monthlySpend={monthlySpend}
-                                      forexPct={(altForTop.card.meta as CardMeta).forexPct}
-                                      isTravelPriority={isTravelPriority}
-                                      devaluation={devaluations?.[altForTop.card.cardId]}
-                                      hack={hacks?.[altForTop.card.cardId] ?? undefined}
-                                      intelligence={intelligence?.[altForTop.card.cardId]}
-                                      narrative={narratives?.[altForTop.card.cardId]}
-                                      onKnowMore={onKnowMore ? () => onKnowMore(altForTop.card.cardId) : undefined}
-                                    />
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {activeIcon === 'know' && (
-                          <div className="r2-panel-know">
-                            {intel.length === 0 ? (
-                              <div className="r2-empty">No current alerts or notable changes for this card.</div>
-                            ) : intel.map((item, i) => (
-                              <div key={i} className={'r2-item know ' + (item.severity ?? '')}>
-                                <span className="r2-know-dot" /><span>{item.text}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                      </div>{/* /r2-phase2-right */}
-                    </div>{/* /r2-phase2-grid */}
-
-                    {/* Transfer callout for the recommendation card */}
-                    {(() => {
-                      const th = transferHacks?.[cardId];
-                      if (!th || !th.displayTravelHack) return null;
-                      const partners = transferPartners?.[cardId] ?? [];
-                      return <TransferCallout hack={th} partners={partners} cardName={activeCard.meta.name} />;
-                    })()}
-
-                    {/* Lower tabs */}
-                    {(() => {
-                      const t = result.transparency;
-                      const eligibleCount = t.totalEvaluated - t.failedIncome - t.failedFee;
-                      const premium = result.premiumWorthConsidering ?? [];
-                      const runners = result.runnersUp ?? [];
-                      const TAB_LABELS: Record<TabKey, string> = {
-                        fee: 'Other cards outside your fee preference',
-                        others: 'Also considered', how: 'How we picked',
-                      };
-                      return (
-                        <>
-                          <div className="r2-lowtabrow">
-                            {(['fee', 'others', 'how'] as TabKey[]).map(key => (
-                              <button key={key} className={'r2-lowtabbtn' + (activeTab === key ? ' on' : '')} onClick={() => toggleTab(key)}>
-                                {TAB_LABELS[key]}
-                              </button>
-                            ))}
-                          </div>
-                          {activeTab && (
-                            <div className="r2-lowcontent">
-                              {activeTab === 'fee' && (premium.length === 0 ? (
-                                <div className="r2-lc-note">No cards above your fee preference have significantly stronger value.{result.premiumWorthConsidering === undefined ? ' (Most relevant for Travel or Lounge priority.)' : ''}</div>
-                              ) : (
-                                <>{premium.map(c => (<div key={c.cardId} className="r2-lc-item"><span className="r2-lc-name">{c.meta.name}</span><span className="r2-lc-val">{(c.meta as CardMeta).annualFee ? `₹${(c.meta as CardMeta).annualFee!.toLocaleString('en-IN')} fee` : 'Lifetime Free'}</span></div>))}<div className="r2-lc-note">Above your fee comfort, but strong value if you&rsquo;d stretch.</div></>
-                              ))}
-                              {activeTab === 'others' && (runners.length === 0 ? <div className="r2-lc-note">No other cards to show.</div> :
-                                runners.map(c => (<div key={c.cardId} className="r2-lc-item"><span className="r2-lc-name">{c.meta.name}{c.inviteOnly && <span className="r2-lc-badge">invite</span>}</span><span className="r2-lc-val">+{inr(c.marginalGainPerYear ?? 0)}/yr additional</span></div>))
-                              )}
-                              {activeTab === 'how' && (
-                                <>
-                                  <div className="r2-elig yes"><span className="r2-elig-n">✓{eligibleCount}</span><span className="r2-elig-t">eligible for you</span></div>
-                                  {t.failedIncome > 0 && <div className="r2-elig no"><span className="r2-elig-n">✕{t.failedIncome}</span><span className="r2-elig-t">income mismatch</span></div>}
-                                  {t.failedFee > 0 && <div className="r2-elig no"><span className="r2-elig-n">✕{t.failedFee}</span><span className="r2-elig-t">above your fee comfort</span></div>}
-                                  {t.inviteOnly > 0 && <div className="r2-elig no"><span className="r2-elig-n">✕{t.inviteOnly}</span><span className="r2-elig-t">invite-only</span></div>}
-                                  {t.weakSpendMatch > 0 && <div className="r2-elig no"><span className="r2-elig-n">✕{t.weakSpendMatch}</span><span className="r2-elig-t">weak fit for your spend</span></div>}
-                                  <div className="r2-lc-note" style={{ marginTop: 14 }}>Ranked by net annual rupee value for your exact spends. No card pays to rank here.</div>
-                                </>
-                              )}
-                            </div>
-                          )}
-                        </>
-                      );
-                    })()}
-                  </div>
-                );
-              })()}{/* /phase2Open */}
-
-            </>
+              </div>
 
           ) : (
             /* ══════════════════════════════════════════════════════════════════
@@ -1243,6 +859,386 @@ export const ResultsScreenV2: React.FC<Props> = ({
             </>
           )}
         </div>
+
+        {/* ── Phase 2: full-width grid child (Journey A only) ── */}
+        {journeyA && phase2Open && top && (() => {
+          const activeCard = top;
+          const cardId = activeCard.cardId;
+          const hack = hacks?.[cardId] ?? null;
+          const intel = intelligence?.[cardId] ?? [];
+          const narrative = narratives?.[cardId];
+          const activeIconCfg = ICONS.find(i => i.key === activeIcon);
+          const priorityKeys: PriorityKey[] = [
+            ...(priorities?.top ? [priorities.top] : []),
+            ...(priorities?.secondary ? [priorities.secondary] : []),
+            ...(priorities?.niceToHave ? [priorities.niceToHave] : []),
+          ];
+          const cardCats = Object.entries(activeCard.earn.perCategory)
+            .filter(([, v]) => v.guaranteed > 0)
+            .sort(([, a], [, b]) => b.guaranteed - a.guaranteed)
+            .slice(0, 3).map(([c]) => c).join(' · ');
+
+          return (
+            <div className="r2-phase2">
+              {/* Phase 2 inner sub-grid: left = hero + why-tag + card tile; right = combined map + icon row + detail panel */}
+              <div className="r2-phase2-grid">
+                {/* Left cell: eyebrow, marginal hero, clarity popover, why-tag, card tile */}
+                <div className="r2-phase2-left">
+                  <div className="r2-eyebrow r2-phase2-eyebrow">Top addition for your setup</div>
+                  {top.marginalGainPerYear != null && (
+                    <>
+                      <div className="r2-hero-row">
+                        <div className="r2-hero-num">
+                          +{inr(top.marginalGainPerYear)}<span className="r2-hero-yr">/yr</span>
+                        </div>
+                        <button
+                          className={'r2-clarity-btn' + (clarityOpen ? ' on' : '')}
+                          onClick={() => setClarityOpen(v => !v)}
+                          aria-label="What does this mean?"
+                          aria-expanded={clarityOpen}
+                        >ⓘ</button>
+                      </div>
+                      <div className="r2-hero-sub">
+                        new value over your current setup · <b>{top.meta.name}</b>
+                      </div>
+                      {clarityOpen && (
+                        <div className="r2-clarity-popover">
+                          {top.meta.name} is worth ~{inr(top.netGuaranteedPerYear)}/yr on its own — about {inr(top.marginalGainPerYear)} of that is new value on top of your current cards (the rest overlaps with what you already earn).
+                        </div>
+                      )}
+                      {/* "Why this recommendation" tag */}
+                      {(() => {
+                        if (!top.marginalPerCategory) return null;
+                        const entries = Object.entries(top.marginalPerCategory)
+                          .filter(([, d]) => d.incrementalGuaranteed > 0)
+                          .sort(([, a], [, b]) => b.incrementalGuaranteed - a.incrementalGuaranteed);
+                        if (entries.length === 0) return null;
+                        const totalIncremental = entries.reduce((s, [, d]) => s + d.incrementalGuaranteed, 0);
+                        const [topCat, topDelta] = entries[0];
+                        if (topDelta.currentBestGuaranteed === 0 &&
+                            topDelta.incrementalGuaranteed / totalIncremental >= 0.40) {
+                          const gapAnnual = Math.round(topDelta.incrementalGuaranteed * 12);
+                          return (
+                            <div className="r2-gaptag r2-gaptag--gap">
+                              <span className="r2-gaptag-pill">{topCat}</span>
+                              <span className="r2-gaptag-text">
+                                None of your cards earn on <b>{topCat}</b>. Adding this card captures <b>{inr(gapAnnual)}/yr</b> you&rsquo;re currently leaving behind.
+                              </span>
+                            </div>
+                          );
+                        }
+                        const topTwo = entries.slice(0, 2);
+                        const catNames = topTwo.map(([cat]) => cat);
+                        const beatAnnual = Math.round(topTwo.reduce((s, [, d]) => s + d.incrementalGuaranteed, 0) * 12);
+                        const catLabel = catNames.length >= 2 ? `${catNames[0]} & ${catNames[1]}` : catNames[0];
+                        return (
+                          <div className="r2-gaptag r2-gaptag--beat">
+                            <span className="r2-gaptag-pill">{catLabel}</span>
+                            <span className="r2-gaptag-text">
+                              Earns more than your current cards on <b>{catLabel}</b> — adds <b>{inr(beatAnnual)}/yr</b> on those categories.
+                            </span>
+                          </div>
+                        );
+                      })()}
+                    </>
+                  )}
+
+                  {/* Recommendation card tile */}
+                  <div className="r2-solo-stack">
+                    <PCard
+                      card={top}
+                      cats={Object.entries(top.earn.perCategory)
+                        .filter(([, v]) => v.guaranteed > 0)
+                        .sort(([, a], [, b]) => b.guaranteed - a.guaranteed)
+                        .slice(0, 4).map(([cat]) => cat).join(' · ')}
+                      net={top.netGuaranteedPerYear}
+                      hideNet
+                      className="r2-pcard-solo"
+                    />
+                  </div>
+                </div>{/* /r2-phase2-left */}
+
+                {/* Right cell: combined per-category verdict map, icon row, detail panel */}
+                <div className="r2-phase2-right">
+                  {result.bestCardPerCategory && top.marginalPerCategory && (() => {
+                    const cats = Object.keys(monthlySpend).filter(c => (monthlySpend[c as keyof typeof monthlySpend] ?? 0) > 0);
+                    type CombinedRow = {
+                      cat: string;
+                      winnerName: string;
+                      winnerCardId: string | null;
+                      guaranteed: number; // ₹/month
+                      isRec: boolean;     // true = recommended card wins
+                      isLeak: boolean;
+                    };
+                    const rows: CombinedRow[] = cats.map(cat => {
+                      const owned = result.bestCardPerCategory![cat];
+                      const ownedGuaranteed = owned?.guaranteed ?? 0;
+                      const recGuaranteed = top.earn.perCategory[cat]?.guaranteed ?? 0;
+                      const isLeak = ownedGuaranteed === 0 && recGuaranteed === 0;
+                      const recWins = recGuaranteed > ownedGuaranteed;
+                      return {
+                        cat,
+                        winnerName: recWins ? top.meta.name : (owned?.cardName ?? '—'),
+                        winnerCardId: recWins ? top.cardId : (owned?.cardId ?? null),
+                        guaranteed: Math.max(ownedGuaranteed, recGuaranteed),
+                        isRec: recWins,
+                        isLeak,
+                      };
+                    });
+                    const sorted = rows.slice().sort((a, b) => {
+                      if (a.isLeak !== b.isLeak) return a.isLeak ? 1 : -1;
+                      return b.guaranteed - a.guaranteed;
+                    });
+                    const combinedGrossAnnual = rows.reduce((s, r) => s + r.guaranteed * 12, 0);
+                    const phase1GrossAnnual = Object.values(result.bestCardPerCategory).reduce((s, r) => s + (r.guaranteed ?? 0) * 12, 0);
+                    const addedAnnual = combinedGrossAnnual - phase1GrossAnnual;
+                    return (
+                      <div className="r2-routemap r2-combined-map">
+                        <div className="r2-routemap-heading-row">
+                          <span className="r2-eyebrow r2-routemap-heading">With {top.meta.name} added</span>
+                          <span className="r2-routemap-sub">best card per category</span>
+                        </div>
+                        {sorted.map(({ cat, winnerName, guaranteed, isRec, isLeak }) => (
+                          <div key={cat} className={'r2-routemap-row' + (isLeak ? ' leak' : '') + (isRec ? ' rec-wins' : '')}>
+                            <span className="r2-routemap-cat">{cat}</span>
+                            {isLeak ? (
+                              <span className="r2-routemap-leak-note">none earn here</span>
+                            ) : (
+                              <>
+                                <span className="r2-routemap-card">
+                                  {winnerName}
+                                  {isRec && <span className="r2-combined-new">new</span>}
+                                </span>
+                                <span className="r2-routemap-val">₹{Math.round(guaranteed * 12).toLocaleString('en-IN')}/yr</span>
+                              </>
+                            )}
+                          </div>
+                        ))}
+                        <div className="r2-routemap-total">
+                          <span className="r2-routemap-total-lbl">Total with {top.meta.name} added</span>
+                          <span className="r2-routemap-total-val">~₹{Math.round(combinedGrossAnnual).toLocaleString('en-IN')}/yr</span>
+                        </div>
+                        {addedAnnual > 0 && (
+                          <div className="r2-combined-delta">
+                            ~{inr(addedAnnual)}/yr more than your current setup
+                            {Math.abs(addedAnnual - (top.marginalGainPerYear ?? 0)) > 500 && (
+                              <span className="r2-combined-delta-note"> · gross earn; after fees the net gain is {inr(top.marginalGainPerYear ?? 0)}/yr</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+
+                  {/* Icon row */}
+                  <div className="r2-iconrow">
+                    {ICONS.map(({ key, label, Icon, accent }) => (
+                      <button
+                        key={key}
+                        className={'r2-iconcircle' + (activeIcon === key ? ' on' : '')}
+                        style={{ '--r2-accent': accent } as React.CSSProperties}
+                        onClick={() => toggleIcon(key)}
+                        aria-label={label}
+                        aria-pressed={activeIcon === key}
+                      >
+                        <div className="r2-circ"><Icon size={20} strokeWidth={1.75} /></div>
+                        <span className="r2-lbl">{label}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Detail panel */}
+                  {activeIcon && activeIconCfg && (
+                    <div className="r2-detail" style={{ '--r2-accent': activeIconCfg.accent } as React.CSSProperties}>
+                      <div className="r2-detail-which">
+                        {activeCard.meta.name}{cardCats ? ` · ${cardCats}` : ''}
+                      </div>
+
+                      {activeIcon === 'pros' && (
+                        <div className="r2-panel-pros">
+                          {narrative ? (
+                            <>
+                              {narrative.topPros.length > 0 && (
+                                <div className="r2-procon-group">
+                                  {narrative.topPros.map((p, i) => (
+                                    <div key={i} className="r2-item"><span className="r2-pl">+</span><span>{p.text}</span></div>
+                                  ))}
+                                </div>
+                              )}
+                              {narrative.topCons.length > 0 && (
+                                <div className="r2-procon-group" style={{ marginTop: narrative.topPros.length > 0 ? '10px' : 0 }}>
+                                  {narrative.topCons.map((c, i) => (
+                                    <div key={i} className="r2-item"><span className="r2-mn">−</span><span>{c.text}</span></div>
+                                  ))}
+                                </div>
+                              )}
+                              {onKnowMore && (
+                                <button className="r2-linkbtn" onClick={() => onKnowMore(cardId)}>See full pros &amp; cons →</button>
+                              )}
+                            </>
+                          ) : <div className="r2-empty">No pros/cons data available.</div>}
+                        </div>
+                      )}
+
+                      {activeIcon === 'hack' && (
+                        <div className="r2-panel-hack">
+                          {hack ? (hack.locked ? (
+                            <div className="r2-hackbox locked">
+                              <div className="r2-ht">{hack.name}</div>
+                              <div className="r2-hd">Unlocks at <b>₹{hack.locked.minMonthlySpend.toLocaleString('en-IN')}/month</b>. You&rsquo;re <b>₹{hack.locked.gap.toLocaleString('en-IN')}/month</b> away.</div>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="r2-hackbox"><div className="r2-ht">{hack.name}</div><div className="r2-hd">{hack.whyItMatters}</div></div>
+                              {hack.executionSteps && (
+                                <>
+                                  <button className="r2-hack-seehow" onClick={() => setHackStepsOpen(v => !v)}>
+                                    {hackStepsOpen ? 'Hide steps ↑' : 'See how →'}
+                                  </button>
+                                  {hackStepsOpen && <HackSteps steps={hack.executionSteps} />}
+                                </>
+                              )}
+                              {hack.difficulty && (
+                                <div className="r2-hack-meta">Difficulty: <b>{hack.difficulty}</b>{hack.commonFailure && <> · Watch out: {hack.commonFailure}</>}</div>
+                              )}
+                            </>
+                          )) : <div className="r2-empty">No hack available for this card yet.</div>}
+                        </div>
+                      )}
+
+                      {activeIcon === 'math' && (
+                        <div className="r2-panel-math">
+                          <div className="r2-math-hero">
+                            <span className="r2-math-hero-lbl">Your value</span>
+                            <span className="r2-math-hero-val">{inr(activeCard.netGuaranteedPerYear)}<span className="r2-math-hero-yr">/yr</span></span>
+                          </div>
+                          <CardMathBreakdown
+                            earn={activeCard.earn}
+                            effectiveAnnualFee={activeCard.effectiveAnnualFee}
+                            annualFee={(activeCard.meta as CardMeta).annualFee ?? 0}
+                            feeWaiverSpend={(activeCard.meta as CardMeta).feeWaiverSpend ?? 0}
+                            netGuaranteedPerYear={activeCard.netGuaranteedPerYear}
+                            annualUpside={activeCard.annualUpside}
+                            monthlySpend={monthlySpend}
+                          />
+                        </div>
+                      )}
+
+                      {activeIcon === 'priorities' && (
+                        <div className="r2-panel-priorities">
+                          {priorityKeys.length === 0 ? (
+                            <div className="r2-empty">You didn&rsquo;t set any priorities.</div>
+                          ) : priorityKeys.map(key => {
+                            const ev = evalPriorityForCard(key, activeCard, monthlySpend);
+                            return (
+                              <div key={key} className={'r2-pri-row ' + ev.status}>
+                                <span className="r2-pri-glyph">{ev.status === 'met' ? '✓' : ev.status === 'partial' ? '⚠' : '✗'}</span>
+                                <div>
+                                  <div className="r2-pri-label">{LABEL[key]}</div>
+                                  {ev.line && <div className="r2-pri-line">{ev.line}</div>}
+                                </div>
+                              </div>
+                            );
+                          })}
+                          {altForTop && (
+                            <div className="r2-alt-card">
+                              <div className="r2-alt-pill">Alternative for your {PRIORITY_LABEL[altForTop.key]} priority</div>
+                              <div className="r2-alt-line">
+                                Your optimal setup earns <b>{inr(altForTop.optimalNet)}</b>. The closest setup that covers <b>{PRIORITY_LABEL[altForTop.key]}</b> is <b>{altForTop.card.meta.name}</b>, earning {inr(altForTop.altNet)} — that&rsquo;s <b>{inr(altForTop.costOfSwitch)} less</b>. Your call.
+                              </div>
+                              <button className="r2-alt-toggle" onClick={() => setAltExpanded(v => !v)}>
+                                {altExpanded ? 'Hide details ↑' : 'See full details →'}
+                              </button>
+                              {altExpanded && (
+                                <div className="r2-alt-detail">
+                                  <RecommendationCard
+                                    card={altForTop.card} monthlySpend={monthlySpend}
+                                    forexPct={(altForTop.card.meta as CardMeta).forexPct}
+                                    isTravelPriority={isTravelPriority}
+                                    devaluation={devaluations?.[altForTop.card.cardId]}
+                                    hack={hacks?.[altForTop.card.cardId] ?? undefined}
+                                    intelligence={intelligence?.[altForTop.card.cardId]}
+                                    narrative={narratives?.[altForTop.card.cardId]}
+                                    onKnowMore={onKnowMore ? () => onKnowMore(altForTop.card.cardId) : undefined}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {activeIcon === 'know' && (
+                        <div className="r2-panel-know">
+                          {intel.length === 0 ? (
+                            <div className="r2-empty">No current alerts or notable changes for this card.</div>
+                          ) : intel.map((item, i) => (
+                            <div key={i} className={'r2-item know ' + (item.severity ?? '')}>
+                              <span className="r2-know-dot" /><span>{item.text}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>{/* /r2-phase2-right */}
+              </div>{/* /r2-phase2-grid */}
+
+              {/* Transfer callout for the recommendation card */}
+              {(() => {
+                const th = transferHacks?.[cardId];
+                if (!th || !th.displayTravelHack) return null;
+                const partners = transferPartners?.[cardId] ?? [];
+                return <TransferCallout hack={th} partners={partners} cardName={activeCard.meta.name} />;
+              })()}
+
+              {/* Lower tabs */}
+              {(() => {
+                const t = result.transparency;
+                const eligibleCount = t.totalEvaluated - t.failedIncome - t.failedFee;
+                const premium = result.premiumWorthConsidering ?? [];
+                const runners = result.runnersUp ?? [];
+                const TAB_LABELS: Record<TabKey, string> = {
+                  fee: 'Other cards outside your fee preference',
+                  others: 'Also considered', how: 'How we picked',
+                };
+                return (
+                  <>
+                    <div className="r2-lowtabrow">
+                      {(['fee', 'others', 'how'] as TabKey[]).map(key => (
+                        <button key={key} className={'r2-lowtabbtn' + (activeTab === key ? ' on' : '')} onClick={() => toggleTab(key)}>
+                          {TAB_LABELS[key]}
+                        </button>
+                      ))}
+                    </div>
+                    {activeTab && (
+                      <div className="r2-lowcontent">
+                        {activeTab === 'fee' && (premium.length === 0 ? (
+                          <div className="r2-lc-note">No cards above your fee preference have significantly stronger value.{result.premiumWorthConsidering === undefined ? ' (Most relevant for Travel or Lounge priority.)' : ''}</div>
+                        ) : (
+                          <>{premium.map(c => (<div key={c.cardId} className="r2-lc-item"><span className="r2-lc-name">{c.meta.name}</span><span className="r2-lc-val">{(c.meta as CardMeta).annualFee ? `₹${(c.meta as CardMeta).annualFee!.toLocaleString('en-IN')} fee` : 'Lifetime Free'}</span></div>))}<div className="r2-lc-note">Above your fee comfort, but strong value if you&rsquo;d stretch.</div></>
+                        ))}
+                        {activeTab === 'others' && (runners.length === 0 ? <div className="r2-lc-note">No other cards to show.</div> :
+                          runners.map(c => (<div key={c.cardId} className="r2-lc-item"><span className="r2-lc-name">{c.meta.name}{c.inviteOnly && <span className="r2-lc-badge">invite</span>}</span><span className="r2-lc-val">+{inr(c.marginalGainPerYear ?? 0)}/yr additional</span></div>))
+                        )}
+                        {activeTab === 'how' && (
+                          <>
+                            <div className="r2-elig yes"><span className="r2-elig-n">✓{eligibleCount}</span><span className="r2-elig-t">eligible for you</span></div>
+                            {t.failedIncome > 0 && <div className="r2-elig no"><span className="r2-elig-n">✕{t.failedIncome}</span><span className="r2-elig-t">income mismatch</span></div>}
+                            {t.failedFee > 0 && <div className="r2-elig no"><span className="r2-elig-n">✕{t.failedFee}</span><span className="r2-elig-t">above your fee comfort</span></div>}
+                            {t.inviteOnly > 0 && <div className="r2-elig no"><span className="r2-elig-n">✕{t.inviteOnly}</span><span className="r2-elig-t">invite-only</span></div>}
+                            {t.weakSpendMatch > 0 && <div className="r2-elig no"><span className="r2-elig-n">✕{t.weakSpendMatch}</span><span className="r2-elig-t">weak fit for your spend</span></div>}
+                            <div className="r2-lc-note" style={{ marginTop: 14 }}>Ranked by net annual rupee value for your exact spends. No card pays to rank here.</div>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+          );
+        })()}
 
       </div>
 
@@ -1705,25 +1701,8 @@ const css = `
   transition:background .15s,transform .15s}
 .r2-carousel-dot.on{background:#10b981;transform:scale(1.25)}
 
-/* ── Journey A: smaller tiles so both carousel + recommendation fit without scrolling ── */
-/* Scope under r2-left--a so combo stack (r2-left without modifier) is untouched. */
-.r2-left--a .r2-pcard{width:210px;height:132px;border-radius:14px;padding:16px}
-.r2-left--a .r2-chip{width:24px;height:17px;border-radius:3px;margin-bottom:9px}
-.r2-left--a .r2-pc-name{font-size:13px}
-.r2-left--a .r2-pc-cats{font-size:9.5px}
-.r2-left--a .r2-pc-num{font-size:8.5px;bottom:32px}
-.r2-left--a .r2-pc-holder{font-size:7px;bottom:14px}
-.r2-left--a .r2-pc-verdict{margin-top:4px;gap:2px}
-.r2-left--a .r2-pc-vbadge{font-size:7px;padding:1px 5px}
 /* Fix 3: verdict earn line — raise from 8px to readable size */
 .r2-left--a .r2-pc-vline{font-size:10.5px}
-/* Fix 1+2: center every solo-stack in Journey A to 210px.
-   Carousel card: centers within the flex body (arrow+gap offset cancelled).
-   Recommendation card: centers in the 380px column.
-   Both land at the same horizontal position → clean vertical column. */
-.r2-left--a .r2-solo-stack{width:210px;height:168px;margin:0 auto 8px}
-.r2-left--a .r2-hero-num{font-size:26px}
-.r2-left--a .r2-hero-yr{font-size:16px}
 
 /* ── Hero row — flex to place ⓘ button beside the number ── */
 .r2-hero-row{display:flex;align-items:center;gap:10px}
@@ -1866,10 +1845,11 @@ const css = `
 
 /* ── Model B two-phase layout (Journey A) ── */
 .r2-phase1{margin:0}
-.r2-phase2{margin-top:24px;padding-top:24px;border-top:1px solid #1f1f23}
+/* Phase 2 spans full grid width */
+.r2-phase2{grid-column:1/-1;margin-top:0;padding-top:24px;border-top:1px solid #1f1f23}
 
-/* Phase 2 inner sub-grid: left = hero + why-tag + card tile; right = icon row + detail panel */
-.r2-phase2-grid{display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:start;margin-bottom:16px}
+/* Phase 2 inner sub-grid: left = hero + why-tag + card tile; right = combined map + icon row + detail panel */
+.r2-phase2-grid{display:grid;grid-template-columns:380px 1fr;gap:32px;align-items:start;margin-bottom:16px}
 
 /* Phase 2 eyebrow */
 .r2-phase2-eyebrow{margin-bottom:4px}
