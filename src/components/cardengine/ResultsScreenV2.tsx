@@ -917,25 +917,23 @@ export const ResultsScreenV2: React.FC<Props> = ({
                         const [topCat, topDelta] = entries[0];
                         if (topDelta.currentBestGuaranteed === 0 &&
                             topDelta.incrementalGuaranteed / totalIncremental >= 0.40) {
-                          const gapAnnual = Math.round(topDelta.incrementalGuaranteed * 12);
                           return (
                             <div className="r2-gaptag r2-gaptag--gap">
                               <span className="r2-gaptag-pill">{topCat}</span>
                               <span className="r2-gaptag-text">
-                                None of your cards earn on <b>{topCat}</b>. Adding this card captures <b>{inr(gapAnnual)}/yr</b> you&rsquo;re currently leaving behind.
+                                None of your cards earn on <b>{topCat}</b>. Adding this card fills that gap.
                               </span>
                             </div>
                           );
                         }
                         const topTwo = entries.slice(0, 2);
                         const catNames = topTwo.map(([cat]) => cat);
-                        const beatAnnual = Math.round(topTwo.reduce((s, [, d]) => s + d.incrementalGuaranteed, 0) * 12);
                         const catLabel = catNames.length >= 2 ? `${catNames[0]} & ${catNames[1]}` : catNames[0];
                         return (
                           <div className="r2-gaptag r2-gaptag--beat">
                             <span className="r2-gaptag-pill">{catLabel}</span>
                             <span className="r2-gaptag-text">
-                              Earns more than your current cards on <b>{catLabel}</b> — adds <b>{inr(beatAnnual)}/yr</b> on those categories.
+                              Earns more than your current cards on <b>{catLabel}</b>.
                             </span>
                           </div>
                         );
@@ -1281,7 +1279,7 @@ const css = `
   .r2-bg-lines,.r2-floatcirc{animation:none}}
 
 /* ── Left column — sticky — matches prototype .left ── */
-.r2-left{position:sticky;top:24px}
+.r2-left{position:sticky;top:24px;z-index:0;isolation:isolate}
 @media(max-width:820px){.r2-left{position:static}}
 
 /* ── Eyebrow + hero numbers — scaled for desktop two-column layout ── */
@@ -1833,6 +1831,7 @@ const css = `
 
 /* ── Combined per-category map (Phase 2 — owned + recommended) ── */
 .r2-combined-map{margin-top:20px;margin-bottom:4px}
+.r2-phase2-right .r2-iconrow{margin-top:20px}
 .r2-routemap-row.rec-wins .r2-routemap-card{color:#10b981}
 .r2-combined-new{
   display:inline-block;font-size:8px;font-weight:800;text-transform:uppercase;
