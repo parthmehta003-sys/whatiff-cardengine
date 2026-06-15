@@ -319,11 +319,53 @@ export const ResultsScreenV2: React.FC<Props> = ({
         <div className="r2-floatcirc fc4" style={{ borderColor: '#f59e0b', color: '#f59e0b' }}>↗</div>
       </div>
 
-      <div className={'r2-grid' + (journeyA ? ' r2-grid--a' : '')}>
+      <div className="r2-grid">
 
         {/* ── LEFT: sticky hero column ── */}
         <div className={'r2-left' + (journeyA ? ' r2-left--a' : '')}>
-          {comboHero && front && back && combo ? (
+          {journeyA && result.ownedVerdicts && result.ownedVerdicts.length > 0 ? (
+            /* ── Journey A: owned-card carousel ── */
+            (() => {
+              const verdicts = result.ownedVerdicts!;
+              const N = verdicts.length;
+              const fi = ownedFrontIdx % N;
+              const activeV = verdicts[fi];
+              const toStub = (v: typeof activeV) => ({ meta: { name: v.cardName, bank: v.bank } });
+              const prev = () => { setOwnedFrontIdx(i => (i - 1 + N) % N); setP1ActiveIcon('why'); setP1HackStepsOpen(false); };
+              const next = () => { setOwnedFrontIdx(i => (i + 1) % N); setP1ActiveIcon('why'); setP1HackStepsOpen(false); };
+              return (
+                <>
+                  <div className="r2-eyebrow">Your cards</div>
+                  {N === 1 ? (
+                    <div className="r2-solo-stack">
+                      <PCard card={toStub(activeV)} cats="" net={activeV.netPerYear} hideNet
+                        verdictBadge={activeV.verdict.replace('_', ' ')} verdictLine={activeV.reason}
+                        className="r2-pcard-solo" />
+                    </div>
+                  ) : (
+                    <div className="r2-owned-carousel">
+                      <button className="r2-carousel-arrow" onClick={prev} aria-label="Previous card">‹</button>
+                      <div className="r2-carousel-body">
+                        <div className="r2-solo-stack">
+                          <PCard card={toStub(activeV)} cats="" net={activeV.netPerYear} hideNet
+                            verdictBadge={activeV.verdict.replace('_', ' ')} verdictLine={activeV.reason}
+                            className="r2-pcard-solo" />
+                        </div>
+                        <div className="r2-carousel-dots">
+                          {verdicts.map((_, i) => (
+                            <button key={i} className={'r2-carousel-dot' + (i === fi ? ' on' : '')}
+                              onClick={() => { setOwnedFrontIdx(i); setP1ActiveIcon('why'); setP1HackStepsOpen(false); }}
+                              aria-label={`Go to card ${i + 1}`} />
+                          ))}
+                        </div>
+                      </div>
+                      <button className="r2-carousel-arrow" onClick={next} aria-label="Next card">›</button>
+                    </div>
+                  )}
+                </>
+              );
+            })()
+          ) : comboHero && front && back && combo ? (
             /* ── Combo view ── */
             <>
               <div className="r2-eyebrow">Your best combo · both cards</div>
@@ -426,9 +468,6 @@ export const ResultsScreenV2: React.FC<Props> = ({
                   const fi = ownedFrontIdx % N;
                   const activeV = verdicts[fi];
                   const activeCardId = activeV.cardId;
-                  const toStub = (v: typeof activeV) => ({ meta: { name: v.cardName, bank: v.bank } });
-                  const prev = () => { setOwnedFrontIdx(i => (i - 1 + N) % N); setP1ActiveIcon('why'); setP1HackStepsOpen(false); };
-                  const next = () => { setOwnedFrontIdx(i => (i + 1) % N); setP1ActiveIcon('why'); setP1HackStepsOpen(false); };
 
                   const p1Hack = hacks?.[activeCardId] ?? null;
                   const p1Transfer = transferHacks?.[activeCardId];
@@ -446,50 +485,6 @@ export const ResultsScreenV2: React.FC<Props> = ({
 
                   return (
                     <>
-                      {/* Carousel */}
-                      <div className="r2-eyebrow">Your cards</div>
-                      {N === 1 ? (
-                        <div className="r2-solo-stack">
-                          <PCard
-                            card={toStub(activeV)}
-                            cats=""
-                            net={activeV.netPerYear}
-                            hideNet
-                            verdictBadge={activeV.verdict.replace('_', ' ')}
-                            verdictLine={activeV.reason}
-                            className="r2-pcard-solo"
-                          />
-                        </div>
-                      ) : (
-                        <div className="r2-owned-carousel">
-                          <button className="r2-carousel-arrow" onClick={prev} aria-label="Previous card">‹</button>
-                          <div className="r2-carousel-body">
-                            <div className="r2-solo-stack">
-                              <PCard
-                                card={toStub(activeV)}
-                                cats=""
-                                net={activeV.netPerYear}
-                                hideNet
-                                verdictBadge={activeV.verdict.replace('_', ' ')}
-                                verdictLine={activeV.reason}
-                                className="r2-pcard-solo"
-                              />
-                            </div>
-                            <div className="r2-carousel-dots">
-                              {verdicts.map((_, i) => (
-                                <button
-                                  key={i}
-                                  className={'r2-carousel-dot' + (i === fi ? ' on' : '')}
-                                  onClick={() => { setOwnedFrontIdx(i); setP1ActiveIcon('why'); setP1HackStepsOpen(false); }}
-                                  aria-label={`Go to card ${i + 1}`}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                          <button className="r2-carousel-arrow" onClick={next} aria-label="Next card">›</button>
-                        </div>
-                      )}
-
                       {/* Phase 1 icon row */}
                       <div className="r2-iconrow">
                         {P1_ICONS.map(({ key, label, Icon, accent }) => (
@@ -710,81 +705,86 @@ export const ResultsScreenV2: React.FC<Props> = ({
 
                 return (
                   <div className="r2-phase2">
-                    {/* Recommendation header */}
-                    <div className="r2-eyebrow r2-phase2-eyebrow">Top addition for your setup</div>
-                    {top.marginalGainPerYear != null && (
-                      <>
-                        <div className="r2-hero-row">
-                          <div className="r2-hero-num">
-                            +{inr(top.marginalGainPerYear)}<span className="r2-hero-yr">/yr</span>
-                          </div>
-                          <button
-                            className={'r2-clarity-btn' + (clarityOpen ? ' on' : '')}
-                            onClick={() => setClarityOpen(v => !v)}
-                            aria-label="What does this mean?"
-                            aria-expanded={clarityOpen}
-                          >ⓘ</button>
-                        </div>
-                        <div className="r2-hero-sub">
-                          new value over your current setup · <b>{top.meta.name}</b>
-                        </div>
-                        {clarityOpen && (
-                          <div className="r2-clarity-popover">
-                            {top.meta.name} is worth ~{inr(top.netGuaranteedPerYear)}/yr on its own — about {inr(top.marginalGainPerYear)} of that is new value on top of your current cards (the rest overlaps with what you already earn).
-                          </div>
-                        )}
-                        {/* "Why this recommendation" tag */}
-                        {(() => {
-                          if (!top.marginalPerCategory) return null;
-                          const entries = Object.entries(top.marginalPerCategory)
-                            .filter(([, d]) => d.incrementalGuaranteed > 0)
-                            .sort(([, a], [, b]) => b.incrementalGuaranteed - a.incrementalGuaranteed);
-                          if (entries.length === 0) return null;
-                          const totalIncremental = entries.reduce((s, [, d]) => s + d.incrementalGuaranteed, 0);
-                          const [topCat, topDelta] = entries[0];
-                          if (topDelta.currentBestGuaranteed === 0 &&
-                              topDelta.incrementalGuaranteed / totalIncremental >= 0.40) {
-                            const gapAnnual = Math.round(topDelta.incrementalGuaranteed * 12);
-                            return (
-                              <div className="r2-gaptag r2-gaptag--gap">
-                                <span className="r2-gaptag-pill">{topCat}</span>
-                                <span className="r2-gaptag-text">
-                                  None of your cards earn on <b>{topCat}</b>. Adding this card captures <b>{inr(gapAnnual)}/yr</b> you&rsquo;re currently leaving behind.
-                                </span>
+                    {/* Phase 2 inner sub-grid: left = hero + why-tag + card tile; right = icon row + detail panel */}
+                    <div className="r2-phase2-grid">
+                      {/* Left cell: header, marginal hero, why-tag, card tile */}
+                      <div className="r2-phase2-left">
+                        <div className="r2-eyebrow r2-phase2-eyebrow">Top addition for your setup</div>
+                        {top.marginalGainPerYear != null && (
+                          <>
+                            <div className="r2-hero-row">
+                              <div className="r2-hero-num">
+                                +{inr(top.marginalGainPerYear)}<span className="r2-hero-yr">/yr</span>
                               </div>
-                            );
-                          }
-                          const topTwo = entries.slice(0, 2);
-                          const catNames = topTwo.map(([cat]) => cat);
-                          const beatAnnual = Math.round(topTwo.reduce((s, [, d]) => s + d.incrementalGuaranteed, 0) * 12);
-                          const catLabel = catNames.length >= 2 ? `${catNames[0]} & ${catNames[1]}` : catNames[0];
-                          return (
-                            <div className="r2-gaptag r2-gaptag--beat">
-                              <span className="r2-gaptag-pill">{catLabel}</span>
-                              <span className="r2-gaptag-text">
-                                Earns more than your current cards on <b>{catLabel}</b> — adds <b>{inr(beatAnnual)}/yr</b> on those categories.
-                              </span>
+                              <button
+                                className={'r2-clarity-btn' + (clarityOpen ? ' on' : '')}
+                                onClick={() => setClarityOpen(v => !v)}
+                                aria-label="What does this mean?"
+                                aria-expanded={clarityOpen}
+                              >ⓘ</button>
                             </div>
-                          );
-                        })()}
-                      </>
-                    )}
+                            <div className="r2-hero-sub">
+                              new value over your current setup · <b>{top.meta.name}</b>
+                            </div>
+                            {clarityOpen && (
+                              <div className="r2-clarity-popover">
+                                {top.meta.name} is worth ~{inr(top.netGuaranteedPerYear)}/yr on its own — about {inr(top.marginalGainPerYear)} of that is new value on top of your current cards (the rest overlaps with what you already earn).
+                              </div>
+                            )}
+                            {/* "Why this recommendation" tag */}
+                            {(() => {
+                              if (!top.marginalPerCategory) return null;
+                              const entries = Object.entries(top.marginalPerCategory)
+                                .filter(([, d]) => d.incrementalGuaranteed > 0)
+                                .sort(([, a], [, b]) => b.incrementalGuaranteed - a.incrementalGuaranteed);
+                              if (entries.length === 0) return null;
+                              const totalIncremental = entries.reduce((s, [, d]) => s + d.incrementalGuaranteed, 0);
+                              const [topCat, topDelta] = entries[0];
+                              if (topDelta.currentBestGuaranteed === 0 &&
+                                  topDelta.incrementalGuaranteed / totalIncremental >= 0.40) {
+                                const gapAnnual = Math.round(topDelta.incrementalGuaranteed * 12);
+                                return (
+                                  <div className="r2-gaptag r2-gaptag--gap">
+                                    <span className="r2-gaptag-pill">{topCat}</span>
+                                    <span className="r2-gaptag-text">
+                                      None of your cards earn on <b>{topCat}</b>. Adding this card captures <b>{inr(gapAnnual)}/yr</b> you&rsquo;re currently leaving behind.
+                                    </span>
+                                  </div>
+                                );
+                              }
+                              const topTwo = entries.slice(0, 2);
+                              const catNames = topTwo.map(([cat]) => cat);
+                              const beatAnnual = Math.round(topTwo.reduce((s, [, d]) => s + d.incrementalGuaranteed, 0) * 12);
+                              const catLabel = catNames.length >= 2 ? `${catNames[0]} & ${catNames[1]}` : catNames[0];
+                              return (
+                                <div className="r2-gaptag r2-gaptag--beat">
+                                  <span className="r2-gaptag-pill">{catLabel}</span>
+                                  <span className="r2-gaptag-text">
+                                    Earns more than your current cards on <b>{catLabel}</b> — adds <b>{inr(beatAnnual)}/yr</b> on those categories.
+                                  </span>
+                                </div>
+                              );
+                            })()}
+                          </>
+                        )}
 
-                    {/* Recommendation card tile */}
-                    <div className="r2-solo-stack">
-                      <PCard
-                        card={top}
-                        cats={Object.entries(top.earn.perCategory)
-                          .filter(([, v]) => v.guaranteed > 0)
-                          .sort(([, a], [, b]) => b.guaranteed - a.guaranteed)
-                          .slice(0, 4).map(([cat]) => cat).join(' · ')}
-                        net={top.netGuaranteedPerYear}
-                        hideNet
-                        className="r2-pcard-solo"
-                      />
-                    </div>
+                        {/* Recommendation card tile */}
+                        <div className="r2-solo-stack">
+                          <PCard
+                            card={top}
+                            cats={Object.entries(top.earn.perCategory)
+                              .filter(([, v]) => v.guaranteed > 0)
+                              .sort(([, a], [, b]) => b.guaranteed - a.guaranteed)
+                              .slice(0, 4).map(([cat]) => cat).join(' · ')}
+                            net={top.netGuaranteedPerYear}
+                            hideNet
+                            className="r2-pcard-solo"
+                          />
+                        </div>
+                      </div>{/* /r2-phase2-left */}
 
-                    {/* Combined per-category verdict: owned + recommended */}
+                      {/* Right cell: icon row + detail panel */}
+                      <div className="r2-phase2-right">
                     {result.bestCardPerCategory && top.marginalPerCategory && (() => {
                       const cats = Object.keys(monthlySpend).filter(c => (monthlySpend[c as keyof typeof monthlySpend] ?? 0) > 0);
                       type CombinedRow = {
@@ -1006,6 +1006,8 @@ export const ResultsScreenV2: React.FC<Props> = ({
                         )}
                       </div>
                     )}
+                      </div>{/* /r2-phase2-right */}
+                    </div>{/* /r2-phase2-grid */}
 
                     {/* Transfer callout for the recommendation card */}
                     {(() => {
@@ -1252,7 +1254,6 @@ const css = `
 /* ── Shell & grid — matches prototype .shell ── */
 .r2-shell{font-family:'DM Sans',system-ui,sans-serif;color:#fafafa;max-width:1080px;margin:0 auto}
 .r2-grid{position:relative;z-index:1;display:grid;grid-template-columns:380px 1fr;gap:32px;align-items:start}
-.r2-grid--a{grid-template-columns:1fr}
 @media(max-width:820px){.r2-grid{grid-template-columns:1fr}}
 
 /* ── Stage 5: decorative background layer — fixed, behind all content, non-interactive ── */
@@ -1864,9 +1865,11 @@ const css = `
 .r2-combined-delta-note{color:#3f3f46}
 
 /* ── Model B two-phase layout (Journey A) ── */
-.r2-grid--a .r2-left{display:none}
-.r2-phase1{max-width:640px;margin:0 auto}
-.r2-phase2{max-width:640px;margin:0 auto;margin-top:24px;padding-top:24px;border-top:1px solid #1f1f23}
+.r2-phase1{margin:0}
+.r2-phase2{margin-top:24px;padding-top:24px;border-top:1px solid #1f1f23}
+
+/* Phase 2 inner sub-grid: left = hero + why-tag + card tile; right = icon row + detail panel */
+.r2-phase2-grid{display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:start;margin-bottom:16px}
 
 /* Phase 2 eyebrow */
 .r2-phase2-eyebrow{margin-bottom:4px}
