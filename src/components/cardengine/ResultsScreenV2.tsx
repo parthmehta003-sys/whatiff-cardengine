@@ -1254,7 +1254,6 @@ const css = `
 /* ── Shell & grid — matches prototype .shell ── */
 .r2-shell{font-family:'DM Sans',system-ui,sans-serif;color:#fafafa;max-width:1080px;margin:0 auto}
 .r2-grid{position:relative;z-index:1;display:grid;grid-template-columns:380px 1fr;gap:32px;align-items:start}
-.r2-grid--a{grid-template-columns:1fr}
 @media(max-width:820px){.r2-grid{grid-template-columns:1fr}}
 
 /* ── Stage 5: decorative background layer — fixed, behind all content, non-interactive ── */
@@ -1866,9 +1865,11 @@ const css = `
 .r2-combined-delta-note{color:#3f3f46}
 
 /* ── Model B two-phase layout (Journey A) ── */
-.r2-grid--a .r2-left{display:none}
-.r2-phase1{max-width:640px;margin:0 auto}
-.r2-phase2{max-width:640px;margin:0 auto;margin-top:24px;padding-top:24px;border-top:1px solid #1f1f23}
+.r2-phase1{margin:0}
+.r2-phase2{margin-top:24px;padding-top:24px;border-top:1px solid #1f1f23}
+
+/* Phase 2 inner sub-grid: left = hero + why-tag + card tile; right = icon row + detail panel */
+.r2-phase2-grid{display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:start;margin-bottom:16px}
 
 /* Phase 2 eyebrow */
 .r2-phase2-eyebrow{margin-bottom:4px}
