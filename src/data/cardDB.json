@@ -5962,7 +5962,7 @@
       "cardId": "CC21",
       "ladderId": "HDFC_DINERSPRIVILEGE",
       "category": "Dining",
-      "rowType": "spend_threshold",
+      "rowType": "channel_conditional",
       "earnNum": 20,
       "earnPer": 150,
       "rewardUnit": "RP",
