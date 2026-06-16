@@ -513,41 +513,75 @@ export const ResultsScreenV2: React.FC<Props> = ({
                             const spendCats = (Object.keys(monthlySpend) as (keyof typeof monthlySpend)[])
                               .filter(c => (monthlySpend[c] ?? 0) > 0);
 
-                            /* UNDERUSED: show strength-vs-spend mismatch */
+                            /* UNDERUSED: honest proof — strong card, bonuses not triggered */
                             if (activeV.verdict === 'underused') {
-                              // All spend cats with their rate and actual earn
                               const rows = spendCats.map(cat => {
                                 const ce = cardProof[cat as keyof typeof cardProof];
                                 return {
                                   cat,
+                                  guaranteed: (ce?.guaranteed ?? 0) * 12,
+                                  upside: (ce?.upside ?? 0) * 12,
                                   rate: ce?.baseRatePer100 ?? 0,
-                                  earn: (ce?.guaranteed ?? 0) * 12,
-                                  spend: monthlySpend[cat as keyof typeof monthlySpend] ?? 0,
                                 };
-                              }).sort((a, b) => b.rate - a.rate);
-                              const maxRate = Math.max(1, ...rows.map(r => r.rate));
-                              const highRateCats = rows.filter(r => r.rate >= maxRate * 0.5 && r.rate > 0);
-                              const lowSpendOnHighRate = highRateCats.filter(r => r.spend < 3000);
+                              }).sort((a, b) => (b.guaranteed + b.upside) - (a.guaranteed + a.upside));
+                              const totalUpside = rows.reduce((s, r) => s + r.upside, 0);
+                              const hasAccelerators = totalUpside > 0;
+                              const totalPotential = rows.reduce((s, r) => s + r.guaranteed + r.upside, 0);
+
+                              if (hasAccelerators) {
+                                // Card has unused merchant/channel bonuses — the core UNDERUSED case
+                                return (
+                                  <div className="r2-vproof">
+                                    <div className="r2-vproof-head">{activeV.cardName} · strong card, bonuses not triggered</div>
+                                    <div className="r2-underused-note">
+                                      This card earns extra on specific merchants and channels — but your spend isn&rsquo;t going through them, so you&rsquo;re capturing only the base rate.
+                                    </div>
+                                    <div className="r2-underused-cols-head">
+                                      <span>Category</span>
+                                      <span>Base earned</span>
+                                      <span>Bonus missed</span>
+                                    </div>
+                                    {rows.map(r => (
+                                      <div key={r.cat} className={'r2-underused-cols' + (r.upside > 0 ? ' r2-underused-cols--bonus' : '')}>
+                                        <span className="r2-vproof-cat">{r.cat === 'Other(base)' ? 'Everything else' : r.cat}</span>
+                                        <span className="r2-underused-base">
+                                          {r.guaranteed > 0 ? inr(r.guaranteed) + '/yr' : <span className="r2-vproof-zero">—</span>}
+                                        </span>
+                                        <span className="r2-underused-bonus">
+                                          {r.upside > 0
+                                            ? <span className="r2-underused-bonus-val">up to +{inr(r.upside)}/yr <span className="r2-underused-cond">conditional</span></span>
+                                            : <span className="r2-vproof-zero">—</span>}
+                                        </span>
+                                      </div>
+                                    ))}
+                                    <div className="r2-underused-footer">
+                                      <span>Capturing now: <b>{inr(activeV.netPerYear)}/yr</b></span>
+                                      <span className="r2-underused-potential">Potential if bonuses triggered: up to {inr(Math.round(totalPotential))}/yr</span>
+                                    </div>
+                                  </div>
+                                );
+                              }
+
+                              // Fallback: no accelerators — card just earns a low base rate on this spend mix
                               return (
                                 <div className="r2-vproof">
-                                  <div className="r2-vproof-head">{activeV.cardName} · strength vs your spend</div>
-                                  {lowSpendOnHighRate.length > 0 && (
-                                    <div className="r2-underused-note">
-                                      Best rates on {lowSpendOnHighRate.map(r => r.cat).join(', ')} — but your spend there is low, so little value is captured.
-                                    </div>
-                                  )}
+                                  <div className="r2-vproof-head">{activeV.cardName} · low capture on this spend mix</div>
+                                  <div className="r2-underused-note">
+                                    Earns only its base rate across your spend categories — no merchant-specific bonuses apply to your current pattern.
+                                  </div>
                                   {rows.map(r => (
-                                    <div key={r.cat} className={'r2-vproof-row' + (r.earn === 0 ? ' zero' : '') + (r.rate >= maxRate * 0.5 && r.rate > 0 ? ' r2-vproof-row--strength' : '')}>
-                                      <span className="r2-vproof-cat">
-                                        {r.cat === 'Other(base)' ? 'Everything else' : r.cat}
-                                      </span>
+                                    <div key={r.cat} className={'r2-vproof-row' + (r.guaranteed === 0 ? ' zero' : '')}>
+                                      <span className="r2-vproof-cat">{r.cat === 'Other(base)' ? 'Everything else' : r.cat}</span>
                                       <span className="r2-vproof-earn">
-                                        {r.earn > 0
-                                          ? <>{inr(r.earn)}/yr{r.rate > 0 && <span className="r2-vproof-rate"> · {r.rate.toFixed(2)}%</span>}</>
+                                        {r.guaranteed > 0
+                                          ? <>{inr(r.guaranteed)}/yr{r.rate > 0 && <span className="r2-vproof-rate"> · {r.rate.toFixed(2)}%</span>}</>
                                           : <span className="r2-vproof-zero">not earned</span>}
                                       </span>
                                     </div>
                                   ))}
+                                  <div className="r2-underused-footer">
+                                    <span>Total: <b>{inr(activeV.netPerYear)}/yr</b> — low for this spend pattern.</span>
+                                  </div>
                                 </div>
                               );
                             }
@@ -1996,11 +2030,26 @@ const css = `
   font-size:12px;color:#fbbf24;background:rgba(251,191,36,.07);
   border:1px solid rgba(251,191,36,.2);border-radius:8px;
   padding:8px 10px;margin-bottom:10px;line-height:1.5}
-.r2-vproof-row--strength .r2-vproof-cat{color:#fbbf24}
-.r2-vproof-strength-tag{
+.r2-underused-cols-head{
+  display:grid;grid-template-columns:1fr auto auto;gap:4px 10px;
+  font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:#52525b;padding:0 0 4px;border-bottom:1px solid #27272a;margin-bottom:4px}
+.r2-underused-cols-head span:nth-child(2),.r2-underused-cols-head span:nth-child(3){text-align:right}
+.r2-underused-cols{
+  display:grid;grid-template-columns:1fr auto auto;gap:2px 10px;
+  align-items:center;padding:5px 0;border-bottom:1px solid #1f1f23;font-size:12.5px}
+.r2-underused-cols--bonus .r2-vproof-cat{color:#e4e4e7}
+.r2-underused-base{text-align:right;color:#a1a1aa;font-size:12px;white-space:nowrap}
+.r2-underused-bonus{text-align:right;white-space:nowrap}
+.r2-underused-bonus-val{color:#fbbf24;font-size:12px;display:flex;align-items:center;gap:4px;justify-content:flex-end}
+.r2-underused-cond{
   font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
-  color:#fbbf24;border:1px solid rgba(251,191,36,.35);border-radius:4px;
-  padding:1px 5px;margin-left:6px;white-space:nowrap;vertical-align:middle}
+  color:#fbbf24;border:1px solid rgba(251,191,36,.3);border-radius:4px;padding:1px 4px}
+.r2-underused-footer{
+  margin-top:8px;padding-top:8px;border-top:1px solid #27272a;
+  font-size:11.5px;color:#71717a;display:flex;flex-direction:column;gap:3px}
+.r2-underused-footer b{color:#e4e4e7}
+.r2-underused-potential{color:#fbbf24;font-size:11px}
 
 /* ── AprEmiCalculator font overrides for V2's compact right column ── */
 .r2-fold .wf-apr-title{font-size:14px!important}
