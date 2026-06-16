@@ -137,8 +137,15 @@ export const CardEngine: React.FC<Props> = ({ db }) => {
       const items = cardIntelligence(c.cardId, db.warnings, db.intelligence);
       if (items.length) map[c.cardId] = items;
     }
+    // Also compute intelligence for owned cards (Journey A) — they were previously excluded,
+    // causing "Things to know" to always show "No current alerts" for held cards.
+    for (const v of result.ownedVerdicts ?? []) {
+      if (map[v.cardId] !== undefined) continue; // already computed (card is also recommended)
+      const items = cardIntelligence(v.cardId, db.warnings, db.intelligence);
+      if (items.length) map[v.cardId] = items;
+    }
     return map;
-  }, [result, altCardId, db.warnings]);
+  }, [result, altCardId, db.warnings, db.intelligence]);
 
   const narratives = useMemo(() => {
     if (!result) return {};
