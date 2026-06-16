@@ -526,7 +526,6 @@ export const ResultsScreenV2: React.FC<Props> = ({
                               }).sort((a, b) => (b.guaranteed + b.upside) - (a.guaranteed + a.upside));
                               const totalUpside = rows.reduce((s, r) => s + r.upside, 0);
                               const hasAccelerators = totalUpside > 0;
-                              const totalPotential = rows.reduce((s, r) => s + r.guaranteed + r.upside, 0);
 
                               if (hasAccelerators) {
                                 // Card has unused merchant/channel bonuses — the core UNDERUSED case
@@ -549,14 +548,13 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                         </span>
                                         <span className="r2-underused-bonus">
                                           {r.upside > 0
-                                            ? <span className="r2-underused-bonus-val">up to +{inr(r.upside)}/yr <span className="r2-underused-cond">conditional</span></span>
+                                            ? <span className="r2-underused-bonus-val">up to +{inr(r.upside)}/yr <span className="r2-underused-cap">≤ {inr(Math.round(r.upside / 12))}/mo</span> <span className="r2-underused-cond">conditional</span></span>
                                             : <span className="r2-vproof-zero">—</span>}
                                         </span>
                                       </div>
                                     ))}
                                     <div className="r2-underused-footer">
-                                      <span>Capturing now: <b>{inr(activeV.netPerYear)}/yr</b></span>
-                                      <span className="r2-underused-potential">Potential if bonuses triggered: up to {inr(Math.round(totalPotential))}/yr</span>
+                                      <span>Capturing now: <b>{inr(activeV.netPerYear)}/yr</b> — each bonus above is a conditional ceiling, not guaranteed.</span>
                                     </div>
                                   </div>
                                 );
@@ -2041,15 +2039,16 @@ const css = `
 .r2-underused-cols--bonus .r2-vproof-cat{color:#e4e4e7}
 .r2-underused-base{text-align:right;color:#a1a1aa;font-size:12px;white-space:nowrap}
 .r2-underused-bonus{text-align:right;white-space:nowrap}
-.r2-underused-bonus-val{color:#fbbf24;font-size:12px;display:flex;align-items:center;gap:4px;justify-content:flex-end}
+.r2-underused-bonus-val{color:#fbbf24;font-size:12px;display:flex;align-items:center;gap:4px;justify-content:flex-end;flex-wrap:wrap}
+.r2-underused-cap{
+  font-size:10px;color:#a16207;white-space:nowrap}
 .r2-underused-cond{
   font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
   color:#fbbf24;border:1px solid rgba(251,191,36,.3);border-radius:4px;padding:1px 4px}
 .r2-underused-footer{
   margin-top:8px;padding-top:8px;border-top:1px solid #27272a;
-  font-size:11.5px;color:#71717a;display:flex;flex-direction:column;gap:3px}
+  font-size:11.5px;color:#71717a}
 .r2-underused-footer b{color:#e4e4e7}
-.r2-underused-potential{color:#fbbf24;font-size:11px}
 
 /* ── AprEmiCalculator font overrides for V2's compact right column ── */
 .r2-fold .wf-apr-title{font-size:14px!important}
