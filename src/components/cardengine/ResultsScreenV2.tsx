@@ -928,14 +928,18 @@ export const ResultsScreenV2: React.FC<Props> = ({
                           );
                         }
                         const catNames = entries.map(([cat]) => cat);
-                        const catLabel = catNames.length === 1
+                        const MAX_SHOW = 2;
+                        const pillLabel = catNames.length <= MAX_SHOW
+                          ? catNames.join(' & ')
+                          : catNames.slice(0, MAX_SHOW).join(', ') + ` & ${catNames.length - MAX_SHOW} more`;
+                        const proseLabel = catNames.length === 1
                           ? catNames[0]
                           : catNames.slice(0, -1).join(', ') + ' & ' + catNames[catNames.length - 1];
                         return (
                           <div className="r2-gaptag r2-gaptag--beat">
-                            <span className="r2-gaptag-pill">{catLabel}</span>
+                            <span className="r2-gaptag-pill">{pillLabel}</span>
                             <span className="r2-gaptag-text">
-                              Earns more than your current cards on <b>{catLabel}</b>.
+                              Earns more than your current cards on <b>{proseLabel}</b>.
                             </span>
                           </div>
                         );
@@ -1958,7 +1962,7 @@ const css = `
   flex-shrink:0;font-size:9px;font-weight:800;text-transform:uppercase;
   letter-spacing:.07em;padding:2px 7px;border-radius:5px;
   align-self:flex-start;margin-top:1px;white-space:nowrap}
-.r2-gaptag-text{font-size:12px}
+.r2-gaptag-text{font-size:12px;min-width:0;word-break:break-word}
 .r2-gaptag-text b{color:#fafafa;font-weight:700}
 
 /* ── Verdict proof (Journey A owned card expandable breakdown) ── */
