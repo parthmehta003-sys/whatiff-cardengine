@@ -527,6 +527,31 @@ export const ResultsScreenV2: React.FC<Props> = ({
                               const totalUpside = rows.reduce((s, r) => s + r.upside, 0);
                               const hasAccelerators = totalUpside > 0;
 
+                              // Routing explanation: column shows standalone earn, netPerYear shows wallet capture (won cats only)
+                              const bpc = result.bestCardPerCategory ?? {};
+                              const wonCats = spendCats.filter(c => bpc[c]?.cardId === activeCardId && (bpc[c]?.guaranteed ?? 0) > 0);
+                              const lostCats = spendCats.filter(c => bpc[c]?.cardId && bpc[c].cardId !== activeCardId);
+                              const colSum = rows.reduce((s, r) => s + r.guaranteed, 0);
+                              const hasRoutingGap = colSum > activeV.netPerYear + 50;
+                              const beaterNames = [...new Set(
+                                lostCats.map(c => bpc[c]?.cardName).filter((n): n is string => !!n)
+                              )].slice(0, 2);
+                              const wonLabel = wonCats.length > 0
+                                ? wonCats.map(c => c === 'Other(base)' ? 'everything else' : c).join(' & ')
+                                : 'no category';
+                              const lostLabel = lostCats.length > 0
+                                ? lostCats.map(c => c === 'Other(base)' ? 'everything else' : c).join(', ')
+                                : null;
+                              const routingLine = hasRoutingGap ? (
+                                <div className="r2-underused-routing">
+                                  The figures above show what this card earns if your spend went through it —
+                                  but {beaterNames.length > 0
+                                    ? <>your <b>{beaterNames.join(' and ')}</b> earn more on {lostLabel ?? 'most categories'}</>
+                                    : <>your other cards earn more on {lostLabel ?? 'most categories'}</>
+                                  }. In your wallet it only comes out ahead on <b>{wonLabel}</b>, capturing <b>{inr(activeV.netPerYear)}/yr</b>.
+                                </div>
+                              ) : null;
+
                               if (hasAccelerators) {
                                 // Card has unused merchant/channel bonuses — the core UNDERUSED case
                                 return (
@@ -553,8 +578,9 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                         </span>
                                       </div>
                                     ))}
+                                    {routingLine}
                                     <div className="r2-underused-footer">
-                                      <span>Capturing now: <b>{inr(activeV.netPerYear)}/yr</b> — each bonus above is a conditional ceiling, not guaranteed.</span>
+                                      <span>Each bonus above is a conditional ceiling, not guaranteed.</span>
                                     </div>
                                   </div>
                                 );
@@ -577,8 +603,9 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                       </span>
                                     </div>
                                   ))}
+                                  {routingLine}
                                   <div className="r2-underused-footer">
-                                    <span>Total: <b>{inr(activeV.netPerYear)}/yr</b> — low for this spend pattern.</span>
+                                    <span>Low earn on this spend pattern.</span>
                                   </div>
                                 </div>
                               );
@@ -2045,9 +2072,14 @@ const css = `
 .r2-underused-cond{
   font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
   color:#fbbf24;border:1px solid rgba(251,191,36,.3);border-radius:4px;padding:1px 4px}
+.r2-underused-routing{
+  margin:10px 0 2px;padding:9px 11px;border-radius:8px;
+  background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.18);
+  font-size:12px;color:#a1a1aa;line-height:1.55}
+.r2-underused-routing b{color:#e4e4e7}
 .r2-underused-footer{
   margin-top:8px;padding-top:8px;border-top:1px solid #27272a;
-  font-size:11.5px;color:#71717a}
+  font-size:11px;color:#52525b}
 .r2-underused-footer b{color:#e4e4e7}
 
 /* ── AprEmiCalculator font overrides for V2's compact right column ── */
