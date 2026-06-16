@@ -1165,7 +1165,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                               .filter(r => r.spend > 0)
                               .sort((a, b) => b.annual - a.annual);
                             const standaloneGross = rows.reduce((s, r) => s + r.annual, 0);
-                            const marginalGross = rows.reduce((s, r) => s + r.incremental * r.spend * 12, 0);
+                            const marginalGross = rows.reduce((s, r) => s + r.incremental * 12, 0);
                             const maxAnnual = Math.max(1, ...rows.map(r => r.annual));
                             const hasMarginal = rows.some(r => r.incremental > 0);
                             return (
