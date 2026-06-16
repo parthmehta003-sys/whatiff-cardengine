@@ -274,7 +274,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
   const [hackStepsOpen, setHackStepsOpen] = useState(false);
 
   // Phase 1 icon panels for active owned card (separate from Phase 2's activeIcon).
-  type P1IconKey = 'why' | 'cat' | 'hack' | 'transfer';
+  type P1IconKey = 'why' | 'cat' | 'hack' | 'transfer' | 'know';
   const [p1ActiveIcon, setP1ActiveIcon] = useState<P1IconKey | null>('why');
   const toggleP1Icon = (key: P1IconKey) => setP1ActiveIcon(prev => prev === key ? null : key);
 
@@ -473,11 +473,13 @@ export const ResultsScreenV2: React.FC<Props> = ({
                   const p1Partners = transferPartners?.[activeCardId] ?? [];
                   const hasTransfer = !!(p1Transfer?.displayTravelHack);
 
+                  const p1Intel = intelligence?.[activeCardId] ?? [];
                   const P1_ICONS: { key: P1IconKey; label: string; Icon: typeof Scale; accent: string }[] = [
                     { key: 'why',      label: 'See why',          Icon: Scale,      accent: '#10b981' },
                     { key: 'cat',      label: 'Per category',     Icon: Target,     accent: '#06b6d4' },
                     { key: 'hack',     label: 'Hacks',            Icon: Zap,        accent: '#8b5cf6' },
                     ...(hasTransfer ? [{ key: 'transfer' as P1IconKey, label: 'Flights & hotels', Icon: Plane, accent: '#f59e0b' }] : []),
+                    { key: 'know',     label: 'Things to know',   Icon: Info,       accent: '#f59e0b' },
                   ];
 
                   const p1IconCfg = P1_ICONS.find(i => i.key === p1ActiveIcon);
@@ -732,6 +734,20 @@ export const ResultsScreenV2: React.FC<Props> = ({
                           {/* Icon 4 — Flights & hotels: transfer hack (only shown when hasTransfer) */}
                           {p1ActiveIcon === 'transfer' && hasTransfer && (
                             <TransferCallout hack={p1Transfer!} partners={p1Partners} cardName={activeV.cardName} />
+                          )}
+
+                          {/* Icon 5 — Things to know: devaluation / change alerts for this owned card */}
+                          {p1ActiveIcon === 'know' && (
+                            <div className="r2-panel-know">
+                              {p1Intel.length === 0
+                                ? <div className="r2-empty">No current alerts or notable changes for this card.</div>
+                                : p1Intel.map((item, i) => (
+                                  <div key={i} className={'r2-item know ' + (item.severity ?? '')}>
+                                    <span className="r2-know-dot" />
+                                    <span>{item.text}</span>
+                                  </div>
+                                ))}
+                            </div>
                           )}
                         </div>
                       )}
