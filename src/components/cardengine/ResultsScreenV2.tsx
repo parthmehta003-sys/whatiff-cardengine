@@ -942,8 +942,8 @@ export const ResultsScreenV2: React.FC<Props> = ({
                     </>
                   )}
 
-                  {/* "See how" derivation */}
-                  {top.marginalGainPerYear != null && (
+                  {/* "See how" derivation — only when fee is charged (waived = gross equals net, no breakdown needed) */}
+                  {top.marginalGainPerYear != null && (top.effectiveAnnualFee ?? 0) > 0 && (
                     <div className="r2-seehow">
                       <button
                         className="r2-seehow-btn"
@@ -1929,7 +1929,7 @@ const css = `
 .r2-pcard-flow{position:relative!important;left:auto!important;width:100%!important;max-width:260px;margin:0 auto 12px;display:block}
 
 /* ── See-how derivation ── */
-.r2-seehow{margin:10px 0 2px}
+.r2-seehow{margin:10px 0 14px}
 .r2-seehow-btn{background:none;border:none;padding:0;font-size:12px;color:#6ee7b7;cursor:pointer;font-family:inherit;letter-spacing:.02em}
 .r2-seehow-btn:hover{color:#34d399}
 .r2-seehow-rows{margin-top:8px;display:flex;flex-direction:column;gap:4px;background:#18181b;border:1px solid #27272a;border-radius:8px;padding:10px 12px}
