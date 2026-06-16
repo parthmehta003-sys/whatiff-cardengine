@@ -284,6 +284,9 @@ export const ResultsScreenV2: React.FC<Props> = ({
   // Alt-card expansion (single-card view only).
   const [altExpanded, setAltExpanded] = useState(false);
 
+  // "See how" breakdown open/closed in Phase 2.
+  const [seeHowOpen, setSeeHowOpen] = useState(false);
+
   // Lower horizontal tabs (none open initially).
   type TabKey = 'fee' | 'others' | 'how';
   const [activeTab, setActiveTab] = useState<TabKey | null>(null);
@@ -346,11 +349,9 @@ export const ResultsScreenV2: React.FC<Props> = ({
                     <div className="r2-owned-carousel">
                       <button className="r2-carousel-arrow" onClick={prev} aria-label="Previous card">‹</button>
                       <div className="r2-carousel-body">
-                        <div className="r2-solo-stack">
-                          <PCard card={toStub(activeV)} cats="" net={activeV.netPerYear} hideNet
-                            verdictBadge={activeV.verdict.replace('_', ' ')} verdictLine={activeV.reason}
-                            className="r2-pcard-solo" />
-                        </div>
+                        <PCard card={toStub(activeV)} cats="" net={activeV.netPerYear} hideNet
+                          verdictBadge={activeV.verdict.replace('_', ' ')} verdictLine={activeV.reason}
+                          className="r2-pcard-solo r2-pcard-flow" />
                         <div className="r2-carousel-dots">
                           {verdicts.map((_, i) => (
                             <button key={i} className={'r2-carousel-dot' + (i === fi ? ' on' : '')}
@@ -939,6 +940,41 @@ export const ResultsScreenV2: React.FC<Props> = ({
                         );
                       })()}
                     </>
+                  )}
+
+                  {/* "See how" derivation */}
+                  {top.marginalGainPerYear != null && (
+                    <div className="r2-seehow">
+                      <button
+                        className="r2-seehow-btn"
+                        onClick={() => setSeeHowOpen(v => !v)}
+                        aria-expanded={seeHowOpen}
+                      >
+                        {seeHowOpen ? 'hide breakdown ↑' : 'see how →'}
+                      </button>
+                      {seeHowOpen && (() => {
+                        const fee = top.effectiveAnnualFee ?? 0;
+                        const gross = top.marginalGainPerYear! + fee;
+                        return (
+                          <div className="r2-seehow-rows">
+                            <div className="r2-seehow-row">
+                              <span className="r2-seehow-label">Gross gain on your spend</span>
+                              <span className="r2-seehow-val r2-seehow-val--pos">+{inr(gross)}/yr</span>
+                            </div>
+                            <div className="r2-seehow-row">
+                              <span className="r2-seehow-label">Annual fee</span>
+                              <span className="r2-seehow-val r2-seehow-val--neg">
+                                {fee > 0 ? `−${inr(fee)}/yr` : 'waived'}
+                              </span>
+                            </div>
+                            <div className="r2-seehow-row r2-seehow-row--total">
+                              <span className="r2-seehow-label">Net gain</span>
+                              <span className="r2-seehow-val r2-seehow-val--pos">+{inr(top.marginalGainPerYear!)}/yr</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
                   )}
 
                   {/* Recommendation card tile */}
@@ -1886,11 +1922,22 @@ const css = `
 /* Owned-card hack fold in Phase 1 */
 .r2-fold--p1hack{margin-top:14px}
 
-/* Phase 1 carousel card: center within the flex body; match Phase 2 tile width */
-.r2-owned-carousel .r2-solo-stack{width:260px;margin:0 auto 20px}
-
 /* Phase 2 recommendation tile: center-align to match Phase 1 carousel position */
 .r2-phase2 .r2-solo-stack{width:260px;margin:0 auto 12px}
+
+/* Carousel card: in-flow so it cannot overflow carousel body and cover the right arrow */
+.r2-pcard-flow{position:relative!important;left:auto!important;width:100%!important;max-width:260px;margin:0 auto 12px;display:block}
+
+/* ── See-how derivation ── */
+.r2-seehow{margin:10px 0 2px}
+.r2-seehow-btn{background:none;border:none;padding:0;font-size:12px;color:#6ee7b7;cursor:pointer;font-family:inherit;letter-spacing:.02em}
+.r2-seehow-btn:hover{color:#34d399}
+.r2-seehow-rows{margin-top:8px;display:flex;flex-direction:column;gap:4px;background:#18181b;border:1px solid #27272a;border-radius:8px;padding:10px 12px}
+.r2-seehow-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#a1a1aa}
+.r2-seehow-row--total{border-top:1px solid #3f3f46;margin-top:4px;padding-top:6px;color:#f4f4f5;font-weight:600}
+.r2-seehow-val{font-variant-numeric:tabular-nums}
+.r2-seehow-val--pos{color:#10b981}
+.r2-seehow-val--neg{color:#f87171}
 `;
 
 export default ResultsScreenV2;
