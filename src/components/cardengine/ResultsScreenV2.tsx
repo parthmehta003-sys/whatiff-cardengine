@@ -1056,23 +1056,34 @@ export const ResultsScreenV2: React.FC<Props> = ({
                             )}
                           </div>
                         ))}
-                        {/* Net equation: current + gain = total, all in same unit (net of all fees) */}
-                        {netTotal != null && top.marginalGainPerYear != null && (
-                          <div className="r2-net-equation">
-                            <div className="r2-net-eq-row r2-net-eq-row--current">
-                              <span className="r2-net-eq-lbl">What you earn today</span>
-                              <span className="r2-net-eq-val">{inr(currentNet)}/yr</span>
+                        {/* Plain-language scenario box — before→after story */}
+                        {netTotal != null && top.marginalGainPerYear != null && (() => {
+                          const recCats = sorted.filter(r => r.isRec && !r.isLeak).map(r => r.cat);
+                          const ownedCats = sorted.filter(r => !r.isRec && !r.isLeak).map(r => r.cat);
+                          const isOverpower = ownedCats.length === 0;
+                          const joinCats = (cats: string[]) =>
+                            cats.length <= 2
+                              ? cats.join(' & ')
+                              : cats.slice(0, -1).join(', ') + ' & ' + cats[cats.length - 1];
+                          return (
+                            <div className="r2-scenario-box">
+                              {isOverpower ? (
+                                <span>
+                                  Adding <b>{top.meta.name}</b> would cover nearly all your spending.
+                                  You&rsquo;d earn about <b>{inr(netTotal)}/yr</b> in total —{' '}
+                                  <b>{inr(top.marginalGainPerYear)}/yr more than today</b>, after all fees.
+                                </span>
+                              ) : (
+                                <span>
+                                  Your current cards keep earning on <b>{joinCats(ownedCats)}</b>.{' '}
+                                  <b>{top.meta.name}</b> adds value on <b>{joinCats(recCats)}</b>.{' '}
+                                  Together you&rsquo;d earn about <b>{inr(netTotal)}/yr</b> —{' '}
+                                  <b>{inr(top.marginalGainPerYear)}/yr more than today</b>, after all fees.
+                                </span>
+                              )}
                             </div>
-                            <div className="r2-net-eq-row r2-net-eq-row--gain">
-                              <span className="r2-net-eq-lbl">+ Gain from {top.meta.name}, after all fees</span>
-                              <span className="r2-net-eq-val r2-net-eq-val--gain">+{inr(top.marginalGainPerYear)}/yr</span>
-                            </div>
-                            <div className="r2-net-eq-row r2-net-eq-row--total">
-                              <span className="r2-net-eq-lbl">= Total with {top.meta.name}</span>
-                              <span className="r2-net-eq-val r2-net-eq-val--total">{inr(netTotal)}/yr</span>
-                            </div>
-                          </div>
-                        )}
+                          );
+                        })()}
                       </div>
                     );
                   })()}
@@ -2034,19 +2045,11 @@ const css = `
 .r2-combined-delta-note{color:#3f3f46}
 
 /* ── Net equation: current + gain = total ── */
-.r2-net-equation{
+/* ── Plain-language scenario box (replaces net equation) ── */
+.r2-scenario-box{
   margin-top:10px;border-top:1px solid #1f1f23;padding-top:10px;
-  display:flex;flex-direction:column;gap:0}
-.r2-net-eq-row{
-  display:flex;justify-content:space-between;align-items:baseline;
-  padding:4px 0;font-size:12.5px;color:#71717a}
-.r2-net-eq-row--gain .r2-net-eq-lbl{color:#a1a1aa}
-.r2-net-eq-row--total{
-  border-top:1px solid #27272a;margin-top:4px;padding-top:8px;
-  font-weight:700;color:#fafafa}
-.r2-net-eq-val{font-variant-numeric:tabular-nums;font-weight:600}
-.r2-net-eq-val--gain{color:#10b981}
-.r2-net-eq-val--total{color:#10b981;font-size:14px}
+  font-size:13px;color:#a1a1aa;line-height:1.6}
+.r2-scenario-box b{color:#fafafa;font-weight:600}
 
 /* ── Model B two-phase layout (Journey A) ── */
 .r2-phase1{margin:0}
