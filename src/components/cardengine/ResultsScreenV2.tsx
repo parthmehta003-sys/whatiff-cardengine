@@ -540,7 +540,6 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                     <div key={r.cat} className={'r2-vproof-row' + (r.earn === 0 ? ' zero' : '') + (r.rate >= maxRate * 0.5 && r.rate > 0 ? ' r2-vproof-row--strength' : '')}>
                                       <span className="r2-vproof-cat">
                                         {r.cat === 'Other(base)' ? 'Everything else' : r.cat}
-                                        {r.rate >= maxRate * 0.5 && r.rate > 0 && <span className="r2-vproof-strength-tag">high rate</span>}
                                       </span>
                                       <span className="r2-vproof-earn">
                                         {r.earn > 0
@@ -889,18 +888,8 @@ export const ResultsScreenV2: React.FC<Props> = ({
             </>
           )}
 
-          {/* Credit note + nav — Journey A (outside phase sections, always visible) */}
-          {journeyA && (
-            <>
-              {result.creditNote && <div className="r2-creditnote">{result.creditNote}</div>}
-              {(onBack || onRestart) && (
-                <div className="r2-nav">
-                  {onBack && <button className="r2-back" onClick={onBack}>Back</button>}
-                  {onRestart && <button className="r2-restart" onClick={onRestart}>Start over</button>}
-                </div>
-              )}
-            </>
-          )}
+          {/* Credit note — Journey A */}
+          {journeyA && result.creditNote && <div className="r2-creditnote">{result.creditNote}</div>}
         </div>
 
         {/* ── Phase 2: full-width grid child (Journey A only) ── */}
@@ -925,8 +914,22 @@ export const ResultsScreenV2: React.FC<Props> = ({
             <div className="r2-phase2">
               {/* Phase 2 inner sub-grid: left = hero + why-tag + card tile; right = combined map + icon row + detail panel */}
               <div className="r2-phase2-grid">
-                {/* Left cell: eyebrow, marginal hero, clarity popover, why-tag, card tile */}
+                {/* Left cell: card tile first, then eyebrow, hero, why-tag */}
                 <div className="r2-phase2-left">
+                  {/* Recommendation card tile — leads the section */}
+                  <div className="r2-solo-stack">
+                    <PCard
+                      card={top}
+                      cats={Object.entries(top.earn.perCategory)
+                        .filter(([, v]) => v.guaranteed > 0)
+                        .sort(([, a], [, b]) => b.guaranteed - a.guaranteed)
+                        .slice(0, 4).map(([cat]) => cat).join(' · ')}
+                      net={top.netGuaranteedPerYear}
+                      hideNet
+                      className="r2-pcard-solo"
+                    />
+                  </div>
+
                   <div className="r2-eyebrow r2-phase2-eyebrow">Top addition for your setup</div>
                   {top.marginalGainPerYear != null && (
                     <>
@@ -989,52 +992,6 @@ export const ResultsScreenV2: React.FC<Props> = ({
                     </>
                   )}
 
-                  {/* "See how" — three-row net equation: current + gain = total */}
-                  {top.marginalGainPerYear != null && (
-                    <div className="r2-seehow">
-                      <button
-                        className="r2-seehow-btn"
-                        onClick={() => setSeeHowOpen(v => !v)}
-                        aria-expanded={seeHowOpen}
-                      >
-                        {seeHowOpen ? 'hide breakdown ↑' : 'see how →'}
-                      </button>
-                      {seeHowOpen && (() => {
-                        const cNet = (result.ownedVerdicts ?? []).reduce((s, v) => s + v.netPerYear, 0);
-                        const total = cNet + top.marginalGainPerYear!;
-                        return (
-                          <div className="r2-seehow-rows">
-                            <div className="r2-seehow-row">
-                              <span className="r2-seehow-label">Your current setup</span>
-                              <span className="r2-seehow-val">{inr(cNet)}/yr</span>
-                            </div>
-                            <div className="r2-seehow-row">
-                              <span className="r2-seehow-label">+ Gain from {top.meta.name}, after all fees</span>
-                              <span className="r2-seehow-val r2-seehow-val--pos">+{inr(top.marginalGainPerYear!)}/yr</span>
-                            </div>
-                            <div className="r2-seehow-row r2-seehow-row--total">
-                              <span className="r2-seehow-label">= Total with {top.meta.name}</span>
-                              <span className="r2-seehow-val r2-seehow-val--pos">{inr(total)}/yr</span>
-                            </div>
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  )}
-
-                  {/* Recommendation card tile */}
-                  <div className="r2-solo-stack">
-                    <PCard
-                      card={top}
-                      cats={Object.entries(top.earn.perCategory)
-                        .filter(([, v]) => v.guaranteed > 0)
-                        .sort(([, a], [, b]) => b.guaranteed - a.guaranteed)
-                        .slice(0, 4).map(([cat]) => cat).join(' · ')}
-                      net={top.netGuaranteedPerYear}
-                      hideNet
-                      className="r2-pcard-solo"
-                    />
-                  </div>
                 </div>{/* /r2-phase2-left */}
 
                 {/* Right cell: combined per-category verdict map, icon row, detail panel */}
@@ -1103,7 +1060,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                         {netTotal != null && top.marginalGainPerYear != null && (
                           <div className="r2-net-equation">
                             <div className="r2-net-eq-row r2-net-eq-row--current">
-                              <span className="r2-net-eq-lbl">Your current setup</span>
+                              <span className="r2-net-eq-lbl">What you earn today</span>
                               <span className="r2-net-eq-val">{inr(currentNet)}/yr</span>
                             </div>
                             <div className="r2-net-eq-row r2-net-eq-row--gain">
@@ -1394,6 +1351,14 @@ export const ResultsScreenV2: React.FC<Props> = ({
             </div>
           );
         })()}
+
+        {/* Back / Start over — bottom of page, Journey A only */}
+        {journeyA && (onBack || onRestart) && (
+          <div className="r2-nav r2-nav--bottom">
+            {onBack && <button className="r2-back" onClick={onBack}>Back</button>}
+            {onRestart && <button className="r2-restart" onClick={onRestart}>Start over</button>}
+          </div>
+        )}
 
       </div>
 
@@ -1858,6 +1823,7 @@ const css = `
 
 /* ── Nav ── */
 .r2-nav{display:flex;gap:8px;margin-top:16px}
+.r2-nav--bottom{margin-top:32px;grid-column:1/-1}
 .r2-back{flex:1;background:#27272a;border:1px solid #52525b;color:#fafafa;
   font-family:inherit;font-size:13px;font-weight:700;padding:11px;border-radius:10px;cursor:pointer}
 .r2-back:hover{background:#3f3f46;border-color:#71717a}
