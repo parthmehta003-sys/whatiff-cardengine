@@ -927,9 +927,10 @@ export const ResultsScreenV2: React.FC<Props> = ({
                             </div>
                           );
                         }
-                        const topTwo = entries.slice(0, 2);
-                        const catNames = topTwo.map(([cat]) => cat);
-                        const catLabel = catNames.length >= 2 ? `${catNames[0]} & ${catNames[1]}` : catNames[0];
+                        const catNames = entries.map(([cat]) => cat);
+                        const catLabel = catNames.length === 1
+                          ? catNames[0]
+                          : catNames.slice(0, -1).join(', ') + ' & ' + catNames[catNames.length - 1];
                         return (
                           <div className="r2-gaptag r2-gaptag--beat">
                             <span className="r2-gaptag-pill">{catLabel}</span>
@@ -1160,7 +1161,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                               .filter(r => r.spend > 0)
                               .sort((a, b) => b.annual - a.annual);
                             const standaloneGross = rows.reduce((s, r) => s + r.annual, 0);
-                            const marginalGross = rows.reduce((s, r) => s + r.incremental, 0);
+                            const marginalGross = rows.reduce((s, r) => s + r.incremental * r.spend * 12, 0);
                             const maxAnnual = Math.max(1, ...rows.map(r => r.annual));
                             const hasMarginal = rows.some(r => r.incremental > 0);
                             return (
