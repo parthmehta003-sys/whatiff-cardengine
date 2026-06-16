@@ -512,6 +512,48 @@ export const ResultsScreenV2: React.FC<Props> = ({
                             if (!cardProof) return <div className="r2-empty">No breakdown available.</div>;
                             const spendCats = (Object.keys(monthlySpend) as (keyof typeof monthlySpend)[])
                               .filter(c => (monthlySpend[c] ?? 0) > 0);
+
+                            /* UNDERUSED: show strength-vs-spend mismatch */
+                            if (activeV.verdict === 'underused') {
+                              // All spend cats with their rate and actual earn
+                              const rows = spendCats.map(cat => {
+                                const ce = cardProof[cat as keyof typeof cardProof];
+                                return {
+                                  cat,
+                                  rate: ce?.baseRatePer100 ?? 0,
+                                  earn: (ce?.guaranteed ?? 0) * 12,
+                                  spend: monthlySpend[cat as keyof typeof monthlySpend] ?? 0,
+                                };
+                              }).sort((a, b) => b.rate - a.rate);
+                              const maxRate = Math.max(1, ...rows.map(r => r.rate));
+                              const highRateCats = rows.filter(r => r.rate >= maxRate * 0.5 && r.rate > 0);
+                              const lowSpendOnHighRate = highRateCats.filter(r => r.spend < 3000);
+                              return (
+                                <div className="r2-vproof">
+                                  <div className="r2-vproof-head">{activeV.cardName} · strength vs your spend</div>
+                                  {lowSpendOnHighRate.length > 0 && (
+                                    <div className="r2-underused-note">
+                                      Best rates on {lowSpendOnHighRate.map(r => r.cat).join(', ')} — but your spend there is low, so little value is captured.
+                                    </div>
+                                  )}
+                                  {rows.map(r => (
+                                    <div key={r.cat} className={'r2-vproof-row' + (r.earn === 0 ? ' zero' : '') + (r.rate >= maxRate * 0.5 && r.rate > 0 ? ' r2-vproof-row--strength' : '')}>
+                                      <span className="r2-vproof-cat">
+                                        {r.cat === 'Other(base)' ? 'Everything else' : r.cat}
+                                        {r.rate >= maxRate * 0.5 && r.rate > 0 && <span className="r2-vproof-strength-tag">high rate</span>}
+                                      </span>
+                                      <span className="r2-vproof-earn">
+                                        {r.earn > 0
+                                          ? <>{inr(r.earn)}/yr{r.rate > 0 && <span className="r2-vproof-rate"> · {r.rate.toFixed(2)}%</span>}</>
+                                          : <span className="r2-vproof-zero">not earned</span>}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            }
+
+                            /* KEEP / WRONG_FIT: existing earn table */
                             return (
                               <div className="r2-vproof">
                                 <div className="r2-vproof-head">{activeV.cardName} · earn on your spend</div>
@@ -1164,8 +1206,6 @@ export const ResultsScreenV2: React.FC<Props> = ({
                               }))
                               .filter(r => r.spend > 0)
                               .sort((a, b) => b.annual - a.annual);
-                            const standaloneGross = rows.reduce((s, r) => s + r.annual, 0);
-                            const marginalGross = rows.reduce((s, r) => s + r.incremental * 12, 0);
                             const maxAnnual = Math.max(1, ...rows.map(r => r.annual));
                             const hasMarginal = rows.some(r => r.incremental > 0);
                             return (
@@ -1221,32 +1261,6 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                   <span>Standalone net</span>
                                   <span className="r2-math-net-val">{inr(activeCard.netGuaranteedPerYear)}/yr</span>
                                 </div>
-
-                                {/* Marginal reconciliation — shows relationship to hero */}
-                                {hasMarginal && top.marginalGainPerYear != null && (
-                                  <div className="r2-math-marginal">
-                                    <div className="r2-math-marginal-hd">Of which new for you</div>
-                                    <div className="r2-math-marginal-row">
-                                      <span>New value across categories</span>
-                                      <span className="r2-math-marginal-approx">~{inr(marginalGross)}/yr</span>
-                                    </div>
-                                    {fee > 0 && (
-                                      <div className="r2-math-marginal-row">
-                                        <span>Annual fee</span>
-                                        <span>−{inr(fee)}</span>
-                                      </div>
-                                    )}
-                                    <div className="r2-math-marginal-row r2-math-marginal-row--total">
-                                      <span>Net new gain</span>
-                                      <span className="r2-math-marginal-net">+{inr(top.marginalGainPerYear)}/yr</span>
-                                    </div>
-                                    {marginalGross - fee !== top.marginalGainPerYear && (
-                                      <div className="r2-math-marginal-note">
-                                        ~ per-category figures are indicative; net gain matches the headline exactly.
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
 
                                 {activeCard.annualUpside > 0 && (
                                   <div className="r2-math-upside">
@@ -1994,6 +2008,16 @@ const css = `
   font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
   color:#10b981;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.2);
   border-radius:4px;padding:1px 5px;white-space:nowrap}
+/* UNDERUSED proof */
+.r2-underused-note{
+  font-size:12px;color:#fbbf24;background:rgba(251,191,36,.07);
+  border:1px solid rgba(251,191,36,.2);border-radius:8px;
+  padding:8px 10px;margin-bottom:10px;line-height:1.5}
+.r2-vproof-row--strength .r2-vproof-cat{color:#fbbf24}
+.r2-vproof-strength-tag{
+  font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  color:#fbbf24;border:1px solid rgba(251,191,36,.35);border-radius:4px;
+  padding:1px 5px;margin-left:6px;white-space:nowrap;vertical-align:middle}
 
 /* ── AprEmiCalculator font overrides for V2's compact right column ── */
 .r2-fold .wf-apr-title{font-size:14px!important}
