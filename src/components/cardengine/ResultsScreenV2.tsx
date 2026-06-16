@@ -1145,19 +1145,112 @@ export const ResultsScreenV2: React.FC<Props> = ({
 
                       {activeIcon === 'math' && (
                         <div className="r2-panel-math">
-                          <div className="r2-math-hero">
-                            <span className="r2-math-hero-lbl">Your value</span>
-                            <span className="r2-math-hero-val">{inr(activeCard.netGuaranteedPerYear)}<span className="r2-math-hero-yr">/yr</span></span>
-                          </div>
-                          <CardMathBreakdown
-                            earn={activeCard.earn}
-                            effectiveAnnualFee={activeCard.effectiveAnnualFee}
-                            annualFee={(activeCard.meta as CardMeta).annualFee ?? 0}
-                            feeWaiverSpend={(activeCard.meta as CardMeta).feeWaiverSpend ?? 0}
-                            netGuaranteedPerYear={activeCard.netGuaranteedPerYear}
-                            annualUpside={activeCard.annualUpside}
-                            monthlySpend={monthlySpend}
-                          />
+                          {(() => {
+                            const margCat = top.marginalPerCategory ?? {};
+                            const fee = activeCard.effectiveAnnualFee;
+                            const annualFee = (activeCard.meta as CardMeta).annualFee ?? 0;
+                            const feeWaiverSpend = (activeCard.meta as CardMeta).feeWaiverSpend ?? 0;
+                            const rows = (Object.keys(activeCard.earn.perCategory) as Array<keyof typeof activeCard.earn.perCategory>)
+                              .map(cat => ({
+                                cat,
+                                annual: (activeCard.earn.perCategory[cat]?.guaranteed ?? 0) * 12,
+                                incremental: margCat[cat]?.incrementalGuaranteed ?? 0,
+                                spend: monthlySpend[cat as keyof typeof monthlySpend] ?? 0,
+                              }))
+                              .filter(r => r.spend > 0)
+                              .sort((a, b) => b.annual - a.annual);
+                            const standaloneGross = rows.reduce((s, r) => s + r.annual, 0);
+                            const marginalGross = rows.reduce((s, r) => s + r.incremental, 0);
+                            const maxAnnual = Math.max(1, ...rows.map(r => r.annual));
+                            const hasMarginal = rows.some(r => r.incremental > 0);
+                            return (
+                              <>
+                                <div className="r2-math-hero">
+                                  <span className="r2-math-hero-lbl">Standalone value</span>
+                                  <span className="r2-math-hero-val">{inr(activeCard.netGuaranteedPerYear)}<span className="r2-math-hero-yr">/yr</span></span>
+                                </div>
+
+                                {hasMarginal && (
+                                  <div className="r2-math-legend">
+                                    <span className="r2-math-legend-dot r2-math-legend-dot--new" />
+                                    <span>New value over your existing cards</span>
+                                    <span className="r2-math-legend-dot r2-math-legend-dot--covered" />
+                                    <span>Already covered by your cards</span>
+                                  </div>
+                                )}
+
+                                <div className="r2-math-rows">
+                                  {rows.map(r => {
+                                    const isMarginal = r.incremental > 0;
+                                    const barPct = Math.round((r.annual / maxAnnual) * 100);
+                                    return (
+                                      <div key={r.cat} className={'r2-math-row' + (isMarginal ? ' r2-math-row--new' : ' r2-math-row--covered')}>
+                                        <div className="r2-math-row-top">
+                                          <span className="r2-math-row-cat">
+                                            {r.cat}
+                                            {isMarginal && <span className="r2-math-row-pill">new</span>}
+                                          </span>
+                                          <span className="r2-math-row-val">{inr(r.annual)}/yr</span>
+                                        </div>
+                                        <div className="r2-math-bar-track">
+                                          <div className="r2-math-bar-fill" style={{ width: `${barPct}%`, background: isMarginal ? '#10b981' : '#3f3f46' }} />
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+
+                                {/* Fee line */}
+                                <div className="r2-math-feeline">
+                                  <span className="r2-math-feeline-lbl">
+                                    {fee === 0 && annualFee > 0
+                                      ? <><span className="r2-math-strike">{inr(annualFee)}</span> <span className="r2-math-waived">waived (you exceed {inr(feeWaiverSpend)}/yr)</span></>
+                                      : fee === 0 ? <span className="r2-math-waived">Lifetime free — no annual fee</span>
+                                      : 'Annual fee'}
+                                  </span>
+                                  <span className="r2-math-feeline-val">{fee === 0 ? '−₹0' : `−${inr(fee)}`}</span>
+                                </div>
+
+                                {/* Standalone net */}
+                                <div className="r2-math-net">
+                                  <span>Standalone net</span>
+                                  <span className="r2-math-net-val">{inr(activeCard.netGuaranteedPerYear)}/yr</span>
+                                </div>
+
+                                {/* Marginal reconciliation — shows relationship to hero */}
+                                {hasMarginal && top.marginalGainPerYear != null && (
+                                  <div className="r2-math-marginal">
+                                    <div className="r2-math-marginal-hd">Of which new for you</div>
+                                    <div className="r2-math-marginal-row">
+                                      <span>New value across categories</span>
+                                      <span className="r2-math-marginal-approx">~{inr(marginalGross)}/yr</span>
+                                    </div>
+                                    {fee > 0 && (
+                                      <div className="r2-math-marginal-row">
+                                        <span>Annual fee</span>
+                                        <span>−{inr(fee)}</span>
+                                      </div>
+                                    )}
+                                    <div className="r2-math-marginal-row r2-math-marginal-row--total">
+                                      <span>Net new gain</span>
+                                      <span className="r2-math-marginal-net">+{inr(top.marginalGainPerYear)}/yr</span>
+                                    </div>
+                                    {marginalGross - fee !== top.marginalGainPerYear && (
+                                      <div className="r2-math-marginal-note">
+                                        ~ per-category figures are indicative; net gain matches the headline exactly.
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+
+                                {activeCard.annualUpside > 0 && (
+                                  <div className="r2-math-upside">
+                                    + up to {inr(activeCard.annualUpside)}/yr extra via card portal/app <span className="r2-math-upside-tag">conditional</span>
+                                  </div>
+                                )}
+                              </>
+                            );
+                          })()}
                         </div>
                       )}
 
@@ -1529,6 +1622,59 @@ const css = `
 .r2-math-cardnet>span:first-child{font-size:13px;font-weight:700;color:#fafafa}
 .r2-math-cardnet-val{font-size:22px;font-weight:800;color:#10b981;
   font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+
+/* ── Phase 2 Math panel: per-category rows with marginal highlight ── */
+.r2-math-legend{display:flex;align-items:center;gap:6px;font-size:11px;color:#71717a;margin-bottom:12px;flex-wrap:wrap}
+.r2-math-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.r2-math-legend-dot--new{background:#10b981}
+.r2-math-legend-dot--covered{background:#3f3f46}
+/* Override .r2-math-row for Phase 2 per-category rows */
+.r2-panel-math .r2-math-row{
+  display:block;padding:6px 0 6px 8px;border-bottom:none;border-left:3px solid transparent;
+  margin-bottom:6px;border-radius:0 6px 6px 0}
+.r2-panel-math .r2-math-row--new{border-left-color:#10b981;background:rgba(16,185,129,.06)}
+.r2-panel-math .r2-math-row--covered{border-left-color:#27272a}
+.r2-math-row-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.r2-math-row-cat{font-size:13px;color:#d4d4d8;display:flex;align-items:center;gap:6px}
+.r2-math-row--covered .r2-math-row-cat{color:#52525b}
+.r2-math-row-val{font-size:13px;font-weight:600;color:#fafafa;font-variant-numeric:tabular-nums}
+.r2-math-row--covered .r2-math-row-val{color:#52525b}
+.r2-math-row-pill{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:#10b981;border:1px solid #10b981;border-radius:4px;padding:1px 5px;vertical-align:middle}
+.r2-math-bar-track{height:4px;background:#18181b;border-radius:2px;overflow:hidden}
+.r2-math-bar-fill{height:100%;border-radius:2px;transition:width .3s}
+/* Fee + net lines for Phase 2 math */
+.r2-math-feeline{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding:8px 0 0;margin-top:10px;border-top:1px solid #1f1f23;font-size:13px}
+.r2-math-feeline-lbl{color:#a1a1aa;display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
+.r2-math-feeline-val{color:#a1a1aa;font-weight:600;font-variant-numeric:tabular-nums}
+.r2-math-strike{text-decoration:line-through;color:#52525b}
+.r2-math-waived{color:#10b981;font-weight:600;font-size:12px}
+.r2-math-net{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding:8px 0 0;margin-top:4px;border-top:1px solid #27272a;
+  font-size:13px;font-weight:700;color:#fafafa}
+.r2-math-net-val{font-size:18px;font-weight:800;color:#10b981;font-variant-numeric:tabular-nums}
+/* Marginal reconciliation block */
+.r2-math-marginal{
+  margin-top:14px;padding:10px 12px;background:#09130f;
+  border:1px solid #1a3327;border-radius:9px}
+.r2-math-marginal-hd{font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:#6ee7b7;margin-bottom:8px}
+.r2-math-marginal-row{display:flex;justify-content:space-between;font-size:12.5px;
+  color:#a1a1aa;padding:3px 0}
+.r2-math-marginal-row--total{
+  border-top:1px solid #1a3327;margin-top:4px;padding-top:7px;
+  font-weight:700;color:#fafafa}
+.r2-math-marginal-approx{color:#10b981;font-variant-numeric:tabular-nums}
+.r2-math-marginal-net{color:#10b981;font-variant-numeric:tabular-nums;font-size:14px}
+.r2-math-marginal-note{
+  font-size:10.5px;color:#52525b;margin-top:6px;line-height:1.4;font-style:italic}
+/* Upside note Phase 2 */
+.r2-math-upside{
+  margin-top:10px;font-size:12px;color:#a1a1aa;line-height:1.5;
+  background:#18140a;border:1px solid #3a2f10;border-radius:9px;padding:9px 11px}
 
 /* ── Priorities panel context note (combo) ── */
 .r2-pri-context{
