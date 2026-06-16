@@ -989,8 +989,8 @@ export const ResultsScreenV2: React.FC<Props> = ({
                     </>
                   )}
 
-                  {/* "See how" derivation — only when fee is charged (waived = gross equals net, no breakdown needed) */}
-                  {top.marginalGainPerYear != null && (top.effectiveAnnualFee ?? 0) > 0 && (
+                  {/* "See how" — three-row net equation: current + gain = total */}
+                  {top.marginalGainPerYear != null && (
                     <div className="r2-seehow">
                       <button
                         className="r2-seehow-btn"
@@ -1000,23 +1000,21 @@ export const ResultsScreenV2: React.FC<Props> = ({
                         {seeHowOpen ? 'hide breakdown ↑' : 'see how →'}
                       </button>
                       {seeHowOpen && (() => {
-                        const fee = top.effectiveAnnualFee ?? 0;
-                        const gross = top.marginalGainPerYear! + fee;
+                        const cNet = (result.ownedVerdicts ?? []).reduce((s, v) => s + v.netPerYear, 0);
+                        const total = cNet + top.marginalGainPerYear!;
                         return (
                           <div className="r2-seehow-rows">
                             <div className="r2-seehow-row">
-                              <span className="r2-seehow-label">Gross gain on your spend</span>
-                              <span className="r2-seehow-val r2-seehow-val--pos">+{inr(gross)}/yr</span>
+                              <span className="r2-seehow-label">Your current setup</span>
+                              <span className="r2-seehow-val">{inr(cNet)}/yr</span>
                             </div>
                             <div className="r2-seehow-row">
-                              <span className="r2-seehow-label">Annual fee</span>
-                              <span className="r2-seehow-val r2-seehow-val--neg">
-                                {fee > 0 ? `−${inr(fee)}/yr` : 'waived'}
-                              </span>
+                              <span className="r2-seehow-label">+ Gain from {top.meta.name}, after all fees</span>
+                              <span className="r2-seehow-val r2-seehow-val--pos">+{inr(top.marginalGainPerYear!)}/yr</span>
                             </div>
                             <div className="r2-seehow-row r2-seehow-row--total">
-                              <span className="r2-seehow-label">Net gain</span>
-                              <span className="r2-seehow-val r2-seehow-val--pos">+{inr(top.marginalGainPerYear!)}/yr</span>
+                              <span className="r2-seehow-label">= Total with {top.meta.name}</span>
+                              <span className="r2-seehow-val r2-seehow-val--pos">{inr(total)}/yr</span>
                             </div>
                           </div>
                         );
@@ -1073,6 +1071,12 @@ export const ResultsScreenV2: React.FC<Props> = ({
                     const combinedGrossAnnual = rows.reduce((s, r) => s + r.guaranteed * 12, 0);
                     const phase1GrossAnnual = Object.values(result.bestCardPerCategory).reduce((s, r) => s + (r.guaranteed ?? 0) * 12, 0);
                     const addedAnnual = combinedGrossAnnual - phase1GrossAnnual;
+                    // Net current value: sum of per-card net contributions (= setup.value from engine)
+                    const currentNet = (result.ownedVerdicts ?? []).reduce((s, v) => s + v.netPerYear, 0);
+                    // Net total: current + gain (both net of all fees, reconciles exactly)
+                    const netTotal = top.marginalGainPerYear != null
+                      ? currentNet + top.marginalGainPerYear
+                      : null;
                     return (
                       <div className="r2-routemap r2-combined-map">
                         <div className="r2-routemap-heading-row">
@@ -1095,19 +1099,21 @@ export const ResultsScreenV2: React.FC<Props> = ({
                             )}
                           </div>
                         ))}
-                        <div className="r2-routemap-total">
-                          <span className="r2-routemap-total-lbl">Total with {top.meta.name} added</span>
-                          <span className="r2-routemap-total-val">~₹{Math.round(combinedGrossAnnual).toLocaleString('en-IN')}/yr</span>
-                        </div>
-                        {top.marginalGainPerYear != null && top.marginalGainPerYear > 0 && (
-                          <div className="r2-combined-delta">
-                            {inr(top.marginalGainPerYear)}/yr more than your current setup
-                            {(() => {
-                              const fee = (top.meta as CardMeta).annualFee;
-                              return fee && fee > 0
-                                ? <span className="r2-combined-delta-note"> · after {inr(fee)} annual fee</span>
-                                : null;
-                            })()}
+                        {/* Net equation: current + gain = total, all in same unit (net of all fees) */}
+                        {netTotal != null && top.marginalGainPerYear != null && (
+                          <div className="r2-net-equation">
+                            <div className="r2-net-eq-row r2-net-eq-row--current">
+                              <span className="r2-net-eq-lbl">Your current setup</span>
+                              <span className="r2-net-eq-val">{inr(currentNet)}/yr</span>
+                            </div>
+                            <div className="r2-net-eq-row r2-net-eq-row--gain">
+                              <span className="r2-net-eq-lbl">+ Gain from {top.meta.name}, after all fees</span>
+                              <span className="r2-net-eq-val r2-net-eq-val--gain">+{inr(top.marginalGainPerYear)}/yr</span>
+                            </div>
+                            <div className="r2-net-eq-row r2-net-eq-row--total">
+                              <span className="r2-net-eq-lbl">= Total with {top.meta.name}</span>
+                              <span className="r2-net-eq-val r2-net-eq-val--total">{inr(netTotal)}/yr</span>
+                            </div>
                           </div>
                         )}
                       </div>
@@ -2060,6 +2066,21 @@ const css = `
 .r2-combined-delta{
   font-size:11px;color:#52525b;padding:6px 0 2px;line-height:1.5}
 .r2-combined-delta-note{color:#3f3f46}
+
+/* ── Net equation: current + gain = total ── */
+.r2-net-equation{
+  margin-top:10px;border-top:1px solid #1f1f23;padding-top:10px;
+  display:flex;flex-direction:column;gap:0}
+.r2-net-eq-row{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding:4px 0;font-size:12.5px;color:#71717a}
+.r2-net-eq-row--gain .r2-net-eq-lbl{color:#a1a1aa}
+.r2-net-eq-row--total{
+  border-top:1px solid #27272a;margin-top:4px;padding-top:8px;
+  font-weight:700;color:#fafafa}
+.r2-net-eq-val{font-variant-numeric:tabular-nums;font-weight:600}
+.r2-net-eq-val--gain{color:#10b981}
+.r2-net-eq-val--total{color:#10b981;font-size:14px}
 
 /* ── Model B two-phase layout (Journey A) ── */
 .r2-phase1{margin:0}
