@@ -78,7 +78,6 @@ const PCard: React.FC<{
       {verdictBadge ? (
         <div className="r2-pc-verdict">
           <span className={'r2-pc-vbadge r2-vpc-' + verdictBadge.replace(' ', '_')}>{verdictBadge}</span>
-          {verdictLine && <span className="r2-pc-vline">{verdictLine}</span>}
         </div>
       ) : (
         <div className="r2-pc-cats">{cats}</div>
@@ -365,28 +364,34 @@ export const ResultsScreenV2: React.FC<Props> = ({
                 <>
                   <div className="r2-eyebrow">Your cards</div>
                   {N === 1 ? (
-                    <div className="r2-solo-stack">
-                      <PCard card={toStub(activeV)} cats="" net={activeV.netPerYear} hideNet
-                        verdictBadge={activeV.verdict.replace('_', ' ')} verdictLine={activeV.reason}
-                        className="r2-pcard-solo" />
-                    </div>
-                  ) : (
-                    <div className="r2-owned-carousel">
-                      <button className="r2-carousel-arrow" onClick={prev} aria-label="Previous card">‹</button>
-                      <div className="r2-carousel-body">
+                    <>
+                      <div className="r2-solo-stack">
                         <PCard card={toStub(activeV)} cats="" net={activeV.netPerYear} hideNet
-                          verdictBadge={activeV.verdict.replace('_', ' ')} verdictLine={activeV.reason}
-                          className="r2-pcard-solo r2-pcard-flow" />
-                        <div className="r2-carousel-dots">
-                          {verdicts.map((_, i) => (
-                            <button key={i} className={'r2-carousel-dot' + (i === fi ? ' on' : '')}
-                              onClick={() => { setOwnedFrontIdx(i); setP1ActiveIcon('why'); setP1HackStepsOpen(false); }}
-                              aria-label={`Go to card ${i + 1}`} />
-                          ))}
-                        </div>
+                          verdictBadge={activeV.verdict.replace('_', ' ')}
+                          className="r2-pcard-solo" />
                       </div>
-                      <button className="r2-carousel-arrow" onClick={next} aria-label="Next card">›</button>
-                    </div>
+                      {activeV.reason && <div className="r2-owned-earn-line">{activeV.reason}</div>}
+                    </>
+                  ) : (
+                    <>
+                      <div className="r2-owned-carousel">
+                        <button className="r2-carousel-arrow" onClick={prev} aria-label="Previous card">‹</button>
+                        <div className="r2-carousel-body">
+                          <PCard card={toStub(activeV)} cats="" net={activeV.netPerYear} hideNet
+                            verdictBadge={activeV.verdict.replace('_', ' ')}
+                            className="r2-pcard-solo r2-pcard-flow" />
+                          <div className="r2-carousel-dots">
+                            {verdicts.map((_, i) => (
+                              <button key={i} className={'r2-carousel-dot' + (i === fi ? ' on' : '')}
+                                onClick={() => { setOwnedFrontIdx(i); setP1ActiveIcon('why'); setP1HackStepsOpen(false); }}
+                                aria-label={`Go to card ${i + 1}`} />
+                            ))}
+                          </div>
+                        </div>
+                        <button className="r2-carousel-arrow" onClick={next} aria-label="Next card">›</button>
+                      </div>
+                      {activeV.reason && <div className="r2-owned-earn-line">{activeV.reason}</div>}
+                    </>
                   )}
                 </>
               );
@@ -607,7 +612,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                     ))}
                                     {routingLine}
                                     <div className="r2-underused-footer">
-                                      <span>Each bonus above is a conditional ceiling, not guaranteed.</span>
+                                      <span>Each bonus above is a conditional ceiling, not guaranteed. This card has strong potential — route the right spend through it to unlock it.</span>
                                     </div>
                                   </div>
                                 );
@@ -639,6 +644,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                             }
 
                             /* KEEP / WRONG_FIT: existing earn table */
+                            const isWrongFit = activeV.verdict === 'wrong_fit';
                             return (
                               <div className="r2-vproof">
                                 <div className="r2-vproof-head">{activeV.cardName} · earn on your spend</div>
@@ -664,6 +670,12 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                     </div>
                                   );
                                 })}
+                                <div className="r2-underused-footer">
+                                  <span>{isWrongFit
+                                    ? 'Earns almost nothing on what you actually spend on.'
+                                    : 'Earns well across your main spending — worth keeping.'
+                                  }</span>
+                                </div>
                               </div>
                             );
                           })()}
@@ -1067,7 +1079,6 @@ export const ResultsScreenV2: React.FC<Props> = ({
                           : catNames.slice(0, -1).join(', ') + ' & ' + catNames[catNames.length - 1];
                         return (
                           <div className="r2-gaptag r2-gaptag--beat">
-                            <span className="r2-gaptag-pill">{pillLabel}</span>
                             <span className="r2-gaptag-text">
                               Earns more than your current cards on <b>{proseLabel}</b>.
                             </span>
@@ -1957,6 +1968,7 @@ const css = `
 
 /* ── Owned-card carousel (Journey A) ── */
 .r2-owned-carousel{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.r2-owned-earn-line{font-size:12px;color:#a1a1aa;text-align:center;margin:6px 0 10px;line-height:1.4}
 .r2-carousel-arrow{
   flex-shrink:0;width:32px;height:32px;border-radius:50%;
   background:#18181b;border:1px solid #3f3f46;color:#a1a1aa;
@@ -2167,7 +2179,10 @@ const css = `
 .r2-phase2-grid{display:grid;grid-template-columns:380px 1fr;gap:32px;align-items:start;margin-bottom:16px}
 
 /* Phase 2 eyebrow */
+.r2-phase2-left{text-align:center}
+.r2-phase2-left .r2-hero-row{justify-content:center}
 .r2-phase2-eyebrow{margin-bottom:4px}
+.r2-phase2-left .r2-gaptag{text-align:left}
 
 /* CTA button between Phase 1 and Phase 2 */
 .r2-phase2-cta{
