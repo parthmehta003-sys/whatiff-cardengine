@@ -60,7 +60,21 @@ export function cardIntelligence(
   const items: CardIntelligenceItem[] = [];
   // 1) devaluations / benefit changes from warnings
   for (const w of warnings) {
-    if (!w.affectedCardIds) continue;
+    if (!w.affectedCardIds) {
+      // Issuer-general warning: surface as broader for cards whose issuer appears in text
+      if (!cardName) continue;
+      const issuer = cardName.split(/\s+/)[0];
+      if (!issuer || issuer.length < 3) continue;
+      const text = w.whatUserShouldKnow || w.whatChanged || '';
+      if (!text) continue;
+      if (!new RegExp(`\\b${issuer.toLowerCase()}\\b`).test(text.toLowerCase())) continue;
+      const type: CardIntelligenceItem['type'] =
+        w.changeType === 'devaluation' ? 'devaluation'
+          : w.changeType === 'benefit_change' ? 'benefit_change'
+          : 'note';
+      items.push({ type, text, severity: w.severity, isGroup: true });
+      continue;
+    }
     const ids = w.affectedCardIds.split(/[,\s]+/).filter(Boolean);
     if (!ids.includes(cardId)) continue;
     const type: CardIntelligenceItem['type'] =

@@ -11050,18 +11050,6 @@
       "replacement": "If the Sony LIV benefit was the draw, reconsider — for OTT/entertainment value compare against current LTF options before renewing.",
       "severity": "important",
       "triggerWhen": "user_owns_card,user_considers_card"
-    },
-    {
-      "warningId": "W###",
-      "changeType": "devaluation/discontinuation/category_removal/hack_dead/partner_removed",
-      "affectedCardIds": "[CC##,CC##]",
-      "affectedHackIds": "[H###]",
-      "changeDate": "[Month YYYY]",
-      "whatChanged": "[What changed]",
-      "whatUserShouldKnow": "[Advice]",
-      "replacement": "[Replacement]",
-      "severity": "critical/important/fyi",
-      "triggerWhen": "user_owns_card/user_considers_card/user_mentions_hack"
     }
   ],
   "hacks": [
