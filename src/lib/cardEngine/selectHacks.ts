@@ -48,8 +48,15 @@ export interface CardIntelligenceItem {
 export function cardIntelligence(
   cardId: string,
   warnings: Warning[],
-  intelligence: { intelId?: string; cardId: string; type: string | null; title: string | null; description: string | null; severity: string | null }[] = []
+  intelligence: { intelId?: string; cardId: string; type: string | null; title: string | null; description: string | null; severity: string | null }[] = [],
+  cardName?: string
 ): CardIntelligenceItem[] {
+  // Distinguishing words: name words after the first (issuer), ≥ 3 chars.
+  // Used to classify a multi-card warning as card-specific when the text names this card.
+  const distinguishingWords = cardName
+    ? cardName.split(/\s+/).slice(1).filter(w => w.length >= 3)
+    : [];
+
   const items: CardIntelligenceItem[] = [];
   // 1) devaluations / benefit changes from warnings
   for (const w of warnings) {
@@ -61,7 +68,16 @@ export function cardIntelligence(
         : w.changeType === 'benefit_change' ? 'benefit_change'
         : 'note';
     const text = w.whatUserShouldKnow || w.whatChanged || '';
-    if (text) items.push({ type, text, severity: w.severity, isGroup: ids.length > 1 });
+    if (!text) continue;
+    // isGroup: multi-card warning is broader UNLESS this card's distinguishing name appears in the text.
+    let isGroup = ids.length > 1;
+    if (isGroup && distinguishingWords.length > 0) {
+      const lower = text.toLowerCase();
+      if (distinguishingWords.some(w => new RegExp(`\\b${w.toLowerCase()}\\b`).test(lower))) {
+        isGroup = false; // text names this card → card-specific
+      }
+    }
+    items.push({ type, text, severity: w.severity, isGroup });
   }
   // 2) positive/neutral facts from the CARD_INTELLIGENCE table
   for (const it of intelligence) {

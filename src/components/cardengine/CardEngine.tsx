@@ -134,14 +134,14 @@ export const CardEngine: React.FC<Props> = ({ db }) => {
       if (altCard && !result.recommended.some((c) => c.cardId === altCardId)) cards.push(altCard);
     }
     for (const c of cards) {
-      const items = cardIntelligence(c.cardId, db.warnings, db.intelligence);
+      const items = cardIntelligence(c.cardId, db.warnings, db.intelligence, c.meta.name);
       if (items.length) map[c.cardId] = items;
     }
     // Also compute intelligence for owned cards (Journey A) — they were previously excluded,
     // causing "Things to know" to always show "No current alerts" for held cards.
     for (const v of result.ownedVerdicts ?? []) {
       if (map[v.cardId] !== undefined) continue; // already computed (card is also recommended)
-      const items = cardIntelligence(v.cardId, db.warnings, db.intelligence);
+      const items = cardIntelligence(v.cardId, db.warnings, db.intelligence, v.cardName);
       if (items.length) map[v.cardId] = items;
     }
     return map;
