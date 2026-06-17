@@ -641,7 +641,7 @@ export function reviewOwnedCards(
     let reason: string;
     if (contribution >= 3000) {
       verdict = 'keep';
-      reason = `Earns ~₹${Math.round(contribution).toLocaleString('en-IN')}/yr on your spend — pulling its weight.`;
+      reason = `Earns ₹${Math.round(contribution).toLocaleString('en-IN')}/yr across your spending — worth keeping.`;
     } else if (contribution > 0) {
       verdict = 'underused';
       reason = `Only ~₹${Math.round(contribution).toLocaleString('en-IN')}/yr on your spend — you're not using its strengths.`;
