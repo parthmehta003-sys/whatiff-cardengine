@@ -51,7 +51,7 @@ interface Props {
     locked?: { minMonthlySpend: number; gap: number };
   };
   /** Layer 3 — "Things to Know" intelligence items (benefit changes, devaluations, hidden perks). */
-  intelligence?: { type: string; text: string; severity?: string | null }[];
+  intelligence?: { type: string; text: string; severity?: string | null; isGroup?: boolean }[];
   /** Value-first pros/cons (from buildCardNarrative). */
   narrative?: {
     topPros: { text: string; valuePerYear: number }[];
@@ -281,13 +281,26 @@ export const RecommendationCard: React.FC<Props> = ({
           </div>
         )}
 
-        {detailTab === 'know' && intelligence && (
-          <div className="wf-detail-body">
-            <ul className="wf-intel-list">
-              {intelligence.map((it, i) => <li key={i} className={'wf-intel-' + it.type}>{it.text}</li>)}
-            </ul>
-          </div>
-        )}
+        {detailTab === 'know' && intelligence && (() => {
+          const specific = intelligence.filter(it => !it.isGroup);
+          const group = intelligence.filter(it => it.isGroup);
+          return (
+            <div className="wf-detail-body">
+              <ul className="wf-intel-list">
+                {specific.map((it, i) => <li key={i} className={'wf-intel-' + it.type}>{it.text}</li>)}
+              </ul>
+              {group.length > 0 && (
+                <>
+                  {specific.length > 0 && <div className="wf-intel-group-sep" />}
+                  <div className="wf-intel-group-label">Broader changes affecting {m.bank} cards</div>
+                  <ul className="wf-intel-list">
+                    {group.map((it, i) => <li key={i} className={'wf-intel-' + it.type}>{it.text}</li>)}
+                  </ul>
+                </>
+              )}
+            </div>
+          );
+        })()}
       </div>
 
       {/* CTA */}
@@ -402,6 +415,8 @@ const css = `
 .wf-intel-devaluation:before{content:'⚠';color:#f59e0b !important;left:2px}
 .wf-intel-benefit_change:before{content:'↻';color:#06b6d4 !important;left:2px}
 .wf-intel-hidden_benefit:before{content:'✦';color:#10b981 !important;left:2px}
+.wf-intel-group-sep{height:1px;background:#27272a;margin:10px 0}
+.wf-intel-group-label{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#52525b;margin-bottom:6px}
 .wf-toggle{margin-top:15px;width:100%;background:#111113;border:1px solid #27272a;color:#a1a1aa;
   font-family:inherit;font-size:12px;font-weight:600;padding:9px;border-radius:9px;cursor:pointer;
   transition:background .15s,border-color .15s}

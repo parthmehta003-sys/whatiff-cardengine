@@ -273,6 +273,31 @@ export const ResultsScreenV2: React.FC<Props> = ({
   // Hack steps expansion (collapses when icon panel switches card).
   const [hackStepsOpen, setHackStepsOpen] = useState(false);
 
+  // Shared "Things to know" panel — splits card-specific (single-card warnings) from group (multi-card).
+  const KnowPanel = ({ intel, bank }: { intel: { type: string; text: string; severity?: string | null; isGroup?: boolean }[]; bank: string }) => {
+    if (intel.length === 0) return <div className="r2-panel-know"><div className="r2-empty">No current alerts or notable changes for this card.</div></div>;
+    const specific = intel.filter(it => !it.isGroup);
+    const group = intel.filter(it => it.isGroup);
+    const groupHeading = `Broader changes affecting ${bank} cards`;
+    const renderItem = (item: typeof intel[0], i: number) => (
+      <div key={i} className={'r2-item know ' + (item.severity ?? '')}>
+        <span className="r2-know-dot" /><span>{item.text}</span>
+      </div>
+    );
+    return (
+      <div className="r2-panel-know">
+        {specific.map(renderItem)}
+        {specific.length > 0 && group.length > 0 && (
+          <div className="r2-know-group-sep"><span className="r2-know-group-label">{groupHeading}</span></div>
+        )}
+        {specific.length === 0 && group.length > 0 && (
+          <div className="r2-know-group-only-label">{groupHeading}</div>
+        )}
+        {group.map(renderItem)}
+      </div>
+    );
+  };
+
   // Phase 1 icon panels for active owned card (separate from Phase 2's activeIcon).
   type P1IconKey = 'why' | 'cat' | 'hack' | 'transfer' | 'know';
   const [p1ActiveIcon, setP1ActiveIcon] = useState<P1IconKey | null>('why');
@@ -737,34 +762,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                           )}
 
                           {/* Icon 5 — Things to know: devaluation / change alerts for this owned card */}
-                          {p1ActiveIcon === 'know' && (() => {
-                            const specific = p1Intel.filter(it => !it.isGroup);
-                            const group = p1Intel.filter(it => it.isGroup);
-                            const groupHeading = `Broader changes affecting ${activeV.bank} cards`;
-                            const renderItem = (item: typeof p1Intel[0], i: number) => (
-                              <div key={i} className={'r2-item know ' + (item.severity ?? '')}>
-                                <span className="r2-know-dot" />
-                                <span>{item.text}</span>
-                              </div>
-                            );
-                            if (p1Intel.length === 0) {
-                              return <div className="r2-panel-know"><div className="r2-empty">No current alerts or notable changes for this card.</div></div>;
-                            }
-                            return (
-                              <div className="r2-panel-know">
-                                {specific.map(renderItem)}
-                                {specific.length > 0 && group.length > 0 && (
-                                  <div className="r2-know-group-sep">
-                                    <span className="r2-know-group-label">{groupHeading}</span>
-                                  </div>
-                                )}
-                                {specific.length === 0 && group.length > 0 && (
-                                  <div className="r2-know-group-only-label">{groupHeading}</div>
-                                )}
-                                {group.map(renderItem)}
-                              </div>
-                            );
-                          })()}
+                          {p1ActiveIcon === 'know' && <KnowPanel intel={p1Intel} bank={activeV.bank} />}
                         </div>
                       )}
 
@@ -922,11 +920,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                             )}
                           </div>
                         )}
-                        {activeIcon === 'know' && (
-                          <div className="r2-panel-know">
-                            {intel.length === 0 ? <div className="r2-empty">No current alerts or notable changes for this card.</div> : intel.map((item, i) => (<div key={i} className={'r2-item know ' + (item.severity ?? '')}><span className="r2-know-dot" /><span>{item.text}</span></div>))}
-                          </div>
-                        )}
+                        {activeIcon === 'know' && <KnowPanel intel={intel} bank={(activeCard.meta as CardMeta).bank ?? ''} />}
                       </div>
                     )}
                   </>
@@ -1382,17 +1376,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                         </div>
                       )}
 
-                      {activeIcon === 'know' && (
-                        <div className="r2-panel-know">
-                          {intel.length === 0 ? (
-                            <div className="r2-empty">No current alerts or notable changes for this card.</div>
-                          ) : intel.map((item, i) => (
-                            <div key={i} className={'r2-item know ' + (item.severity ?? '')}>
-                              <span className="r2-know-dot" /><span>{item.text}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      {activeIcon === 'know' && <KnowPanel intel={intel} bank={(activeCard.meta as CardMeta).bank ?? ''} />}
                     </div>
                   )}
                 </div>{/* /r2-phase2-right */}
