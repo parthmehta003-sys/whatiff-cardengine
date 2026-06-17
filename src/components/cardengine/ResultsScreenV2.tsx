@@ -273,26 +273,16 @@ export const ResultsScreenV2: React.FC<Props> = ({
   const [hackStepsOpen, setHackStepsOpen] = useState(false);
 
   // Shared "Things to know" panel — splits card-specific (single-card warnings) from group (multi-card).
-  const KnowPanel = ({ intel, bank }: { intel: { type: string; text: string; severity?: string | null; isGroup?: boolean }[]; bank: string }) => {
-    if (intel.length === 0) return <div className="r2-panel-know"><div className="r2-empty">No current alerts or notable changes for this card.</div></div>;
+  const KnowPanel = ({ intel }: { intel: { type: string; text: string; severity?: string | null; isGroup?: boolean }[] }) => {
     const specific = intel.filter(it => !it.isGroup);
-    const group = intel.filter(it => it.isGroup);
-    const groupHeading = `Broader changes affecting ${bank} cards`;
-    const renderItem = (item: typeof intel[0], i: number) => (
-      <div key={i} className={'r2-item know ' + (item.severity ?? '')}>
-        <span className="r2-know-dot" /><span>{item.text}</span>
-      </div>
-    );
+    if (specific.length === 0) return <div className="r2-panel-know"><div className="r2-empty">No current alerts or notable changes for this card.</div></div>;
     return (
       <div className="r2-panel-know">
-        {specific.map(renderItem)}
-        {specific.length > 0 && group.length > 0 && (
-          <div className="r2-know-group-sep"><span className="r2-know-group-label">{groupHeading}</span></div>
-        )}
-        {specific.length === 0 && group.length > 0 && (
-          <div className="r2-know-group-only-label">{groupHeading}</div>
-        )}
-        {group.map(renderItem)}
+        {specific.map((item, i) => (
+          <div key={i} className={'r2-item know ' + (item.severity ?? '')}>
+            <span className="r2-know-dot" /><span>{item.text}</span>
+          </div>
+        ))}
       </div>
     );
   };
@@ -774,7 +764,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                           )}
 
                           {/* Icon 5 — Things to know: devaluation / change alerts for this owned card */}
-                          {p1ActiveIcon === 'know' && <KnowPanel intel={p1Intel} bank={activeV.bank} />}
+                          {p1ActiveIcon === 'know' && <KnowPanel intel={p1Intel} />}
                         </div>
                       )}
 
@@ -804,6 +794,42 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 storedAprAnnualPct={balLiq?.aprAnnualPct ?? null}
                                 storedEmiAprAnnualPct={balLiq?.emiConversionAprPct ?? null}
                               />
+                            </div>
+                          </details>
+                        );
+                      })()}
+
+                      {/* Broader changes collapsible — global/issuer-level warnings across all owned cards */}
+                      {(() => {
+                        const ownedVerdicts = result.ownedVerdicts!;
+                        // Collect isGroup:true items across all owned cards, grouped by bank, de-duped by text.
+                        const globalByBank = new Map<string, { text: string; severity?: string | null }[]>();
+                        for (const v of ownedVerdicts) {
+                          const items = (intelligence?.[v.cardId] ?? []).filter(it => it.isGroup);
+                          if (items.length === 0) continue;
+                          if (!globalByBank.has(v.bank)) globalByBank.set(v.bank, []);
+                          const list = globalByBank.get(v.bank)!;
+                          for (const it of items) {
+                            if (!list.some(x => x.text === it.text)) {
+                              list.push({ text: it.text, severity: it.severity });
+                            }
+                          }
+                        }
+                        if (globalByBank.size === 0) return null;
+                        return (
+                          <details className="r2-fold">
+                            <summary>Broader changes affecting your banks</summary>
+                            <div className="r2-fold-body r2-fold-global-warns">
+                              {[...globalByBank.entries()].map(([bank, items]) => (
+                                <div key={bank} className="r2-global-bank-group">
+                                  <div className="r2-global-bank-label">{bank}</div>
+                                  {items.map((it, i) => (
+                                    <div key={i} className={'r2-item know ' + (it.severity ?? '')}>
+                                      <span className="r2-know-dot" /><span>{it.text}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              ))}
                             </div>
                           </details>
                         );
@@ -932,7 +958,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                             )}
                           </div>
                         )}
-                        {activeIcon === 'know' && <KnowPanel intel={intel} bank={(activeCard.meta as CardMeta).bank ?? ''} />}
+                        {activeIcon === 'know' && <KnowPanel intel={intel} />}
                       </div>
                     )}
                   </>
@@ -1387,7 +1413,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                         </div>
                       )}
 
-                      {activeIcon === 'know' && <KnowPanel intel={intel} bank={(activeCard.meta as CardMeta).bank ?? ''} />}
+                      {activeIcon === 'know' && <KnowPanel intel={intel} />}
                     </div>
                   )}
                 </div>{/* /r2-phase2-right */}
@@ -2140,6 +2166,10 @@ const css = `
 .r2-fold[open]>summary::after{transform:rotate(180deg)}
 .r2-fold[open]>summary{border-bottom:1px solid #1f1f23}
 .r2-fold-body{padding:8px 0 0}
+.r2-fold-global-warns{padding:12px 16px 8px}
+.r2-global-bank-group{margin-bottom:14px}
+.r2-global-bank-group:last-child{margin-bottom:4px}
+.r2-global-bank-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#52525b;margin-bottom:6px}
 
 /* ── Balance calc card picker (Journey A) ── */
 .r2-fold-cardpick{display:flex;align-items:center;gap:8px;padding:10px 16px 0}
