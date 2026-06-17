@@ -42,6 +42,7 @@ export interface CardIntelligenceItem {
   type: 'benefit_change' | 'devaluation' | 'hidden_benefit' | 'note';
   text: string;
   severity?: string | null;
+  isGroup?: boolean; // true when the source warning affects multiple cards (group-level change)
 }
 
 export function cardIntelligence(
@@ -60,7 +61,7 @@ export function cardIntelligence(
         : w.changeType === 'benefit_change' ? 'benefit_change'
         : 'note';
     const text = w.whatUserShouldKnow || w.whatChanged || '';
-    if (text) items.push({ type, text, severity: w.severity });
+    if (text) items.push({ type, text, severity: w.severity, isGroup: ids.length > 1 });
   }
   // 2) positive/neutral facts from the CARD_INTELLIGENCE table
   for (const it of intelligence) {

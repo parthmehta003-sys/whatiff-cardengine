@@ -32,7 +32,7 @@ interface Props {
   isTravelPriority?: boolean;
   devaluations?: Record<string, DevaluationFlag>;
   hacks?: Record<string, SelectedHack | null>;
-  intelligence?: Record<string, { type: string; text: string; severity?: string | null }[]>;
+  intelligence?: Record<string, { type: string; text: string; severity?: string | null; isGroup?: boolean }[]>;
   narratives?: Record<string, { topPros: { text: string; valuePerYear: number }[]; topCons: { text: string; valuePerYear: number }[] }>;
   onKnowMore?: (cardId: string) => void;
   insights?: SurfacedInsight[];
@@ -737,18 +737,34 @@ export const ResultsScreenV2: React.FC<Props> = ({
                           )}
 
                           {/* Icon 5 — Things to know: devaluation / change alerts for this owned card */}
-                          {p1ActiveIcon === 'know' && (
-                            <div className="r2-panel-know">
-                              {p1Intel.length === 0
-                                ? <div className="r2-empty">No current alerts or notable changes for this card.</div>
-                                : p1Intel.map((item, i) => (
-                                  <div key={i} className={'r2-item know ' + (item.severity ?? '')}>
-                                    <span className="r2-know-dot" />
-                                    <span>{item.text}</span>
+                          {p1ActiveIcon === 'know' && (() => {
+                            const specific = p1Intel.filter(it => !it.isGroup);
+                            const group = p1Intel.filter(it => it.isGroup);
+                            const groupHeading = `Broader changes affecting ${activeV.bank} cards`;
+                            const renderItem = (item: typeof p1Intel[0], i: number) => (
+                              <div key={i} className={'r2-item know ' + (item.severity ?? '')}>
+                                <span className="r2-know-dot" />
+                                <span>{item.text}</span>
+                              </div>
+                            );
+                            if (p1Intel.length === 0) {
+                              return <div className="r2-panel-know"><div className="r2-empty">No current alerts or notable changes for this card.</div></div>;
+                            }
+                            return (
+                              <div className="r2-panel-know">
+                                {specific.map(renderItem)}
+                                {specific.length > 0 && group.length > 0 && (
+                                  <div className="r2-know-group-sep">
+                                    <span className="r2-know-group-label">{groupHeading}</span>
                                   </div>
-                                ))}
-                            </div>
-                          )}
+                                )}
+                                {specific.length === 0 && group.length > 0 && (
+                                  <div className="r2-know-group-only-label">{groupHeading}</div>
+                                )}
+                                {group.map(renderItem)}
+                              </div>
+                            );
+                          })()}
                         </div>
                       )}
 
@@ -1770,6 +1786,17 @@ const css = `
 
 /* ── Things to know panel ── */
 .r2-item.know{align-items:flex-start}
+.r2-know-group-sep{
+  display:flex;align-items:center;gap:8px;margin:10px 0 6px;
+}
+.r2-know-group-sep::before,.r2-know-group-sep::after{
+  content:'';flex:1;height:1px;background:#27272a}
+.r2-know-group-label{
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:#52525b;white-space:nowrap}
+.r2-know-group-only-label{
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:#52525b;margin-bottom:6px}
 .r2-know-dot{
   width:7px;height:7px;border-radius:50%;background:#3f3f46;
   flex-shrink:0;margin-top:5px}
