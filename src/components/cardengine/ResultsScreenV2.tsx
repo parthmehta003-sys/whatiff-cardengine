@@ -229,7 +229,7 @@ const TransferCallout: React.FC<{
 // ── Icon row configuration ───────────────────────────────────────────────────
 const ICONS = [
   { key: 'pros',       label: 'Pros & cons',     Icon: Scale,      accent: '#10b981' },
-  { key: 'hack',       label: 'Hack',             Icon: Zap,        accent: '#8b5cf6' },
+  { key: 'hack',       label: 'Pro Tips',         Icon: Zap,        accent: '#8b5cf6' },
   { key: 'math',       label: 'The math',         Icon: Calculator, accent: '#06b6d4' },
   { key: 'priorities', label: 'Priorities',       Icon: Target,     accent: '#f59e0b' },
   { key: 'know',       label: 'Things to know',   Icon: Info,       accent: '#f59e0b' },
@@ -665,25 +665,25 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 : null;
                               const routingLine = hasRoutingGap ? (
                                 <div className="r2-underused-routing">
-                                  The figures above show what this card earns if your spend went through it —
-                                  but {beaterNames.length > 0
-                                    ? <>your <b>{beaterNames.join(' and ')}</b> earn more on {lostLabel ?? 'most categories'}</>
+                                  These are what it could earn. But {beaterNames.length > 0
+                                    ? <>your <b>{beaterNames.join(' and ')}</b> already earn more on {lostLabel ?? 'most categories'}</>
                                     : <>your other cards earn more on {lostLabel ?? 'most categories'}</>
-                                  }. In your wallet it only comes out ahead on <b>{wonLabel}</b>, capturing <b>{inr(activeV.netPerYear)}/yr</b>.
+                                  }. So in real life this card only wins on <b>{wonLabel}</b> — {inr(activeV.netPerYear)} a year.
                                 </div>
                               ) : null;
 
                               if (hasAccelerators) {
+                                const topBonus = rows.reduce((best, r) => r.upside > best.upside ? r : best, rows[0]);
                                 level1 = (
                                   <>
-                                    <div className="r2-vproof-head">{activeV.cardName} · strong card, bonuses not triggered</div>
+                                    <div className="r2-vproof-head">{activeV.cardName} · a good card you&rsquo;re not using fully</div>
                                     <div className="r2-underused-note">
-                                      This card earns extra on specific merchants and channels — but your spend isn&rsquo;t going through them, so you&rsquo;re capturing only the base rate.
+                                      This card pays extra only at certain shops and payment apps. You&rsquo;re not using it there — so right now it only pays the basic rate.
                                     </div>
                                     <div className="r2-underused-cols-head">
                                       <span>Category</span>
-                                      <span>Base earned</span>
-                                      <span>Bonus missed</span>
+                                      <span>Earning now</span>
+                                      <span>Could earn</span>
                                     </div>
                                     {rows.map(r => (
                                       <div key={r.cat} className={'r2-underused-cols' + (r.upside > 0 ? ' r2-underused-cols--bonus' : '')}>
@@ -693,24 +693,29 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                         </span>
                                         <span className="r2-underused-bonus">
                                           {r.upside > 0
-                                            ? <span className="r2-underused-bonus-val">up to +{inr(r.upside)}/yr <span className="r2-underused-cap">≤ {inr(Math.round(r.upside / 12))}/mo</span> <span className="r2-underused-cond">conditional</span></span>
+                                            ? <span className="r2-underused-bonus-val">+{inr(r.upside)}/yr more — only if you use it right</span>
                                             : <span className="r2-vproof-zero">—</span>}
                                         </span>
                                       </div>
                                     ))}
                                     {routingLine}
+                                    <div className="r2-underused-unlock">
+                                      <div className="r2-underused-unlock-head">How to unlock the extra</div>
+                                      <div>This card pays a bonus when you book or pay through its own app or website — not by tapping the card directly. Your biggest bonus is on {catName(topBonus.cat)} — up to {inr(topBonus.upside)} a year. Try routing that spend through the card&rsquo;s app to earn it.</div>
+                                      <div className="r2-underused-unlock-caveat">These bonuses depend on the card&rsquo;s current offers, so check the app before you rely on them.</div>
+                                    </div>
                                     <div className="r2-underused-footer">
-                                      <span>Each bonus above is a conditional ceiling, not guaranteed. This card has strong potential — route the right spend through it to unlock it.</span>
+                                      <span>These bonuses aren&rsquo;t guaranteed — you only get them if you use the card for the right things. The potential is there; you&rsquo;re just not using it yet.</span>
                                     </div>
                                   </>
                                 );
                               } else {
-                                // Fallback: no accelerators — card just earns a low base rate on this spend mix
+                                // Fallback: no accelerators — card earns less than it could on this spend mix
                                 level1 = (
                                   <>
-                                    <div className="r2-vproof-head">{activeV.cardName} · low capture on this spend mix</div>
+                                    <div className="r2-vproof-head">{activeV.cardName} · earning less than it could</div>
                                     <div className="r2-underused-note">
-                                      Earns only its base rate across your spend categories — no merchant-specific bonuses apply to your current pattern.
+                                      This card only pays its basic rate on what you spend on. No special bonuses apply to your spending right now.
                                     </div>
                                     {rows.map(r => (
                                       <div key={r.cat} className={'r2-vproof-row' + (r.guaranteed === 0 ? ' zero' : '')}>
@@ -724,7 +729,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                     ))}
                                     {routingLine}
                                     <div className="r2-underused-footer">
-                                      <span>Low earn on this spend pattern.</span>
+                                      <span>Earns less than it could on how you spend.</span>
                                     </div>
                                   </>
                                 );
@@ -2330,6 +2335,10 @@ const css = `
   margin-top:8px;padding-top:8px;border-top:1px solid #27272a;
   font-size:11px;color:#52525b}
 .r2-underused-footer b{color:#e4e4e7}
+.r2-underused-unlock{margin-top:10px;background:#1c1200;border:1px solid #92400e;border-radius:8px;padding:10px 12px}
+.r2-underused-unlock-head{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#f59e0b;margin-bottom:6px}
+.r2-underused-unlock{font-size:12.5px;color:#d4d4d8;line-height:1.55}
+.r2-underused-unlock-caveat{margin-top:6px;font-size:11px;color:#71717a}
 
 /* ── Why-panel 3-level structure ── */
 .r2-why-levels{display:flex;flex-direction:column;gap:16px}
