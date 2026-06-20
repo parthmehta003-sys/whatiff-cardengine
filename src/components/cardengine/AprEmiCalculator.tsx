@@ -71,9 +71,9 @@ export const AprEmiCalculator: React.FC<Props> = ({
 
       <div className="wf-apr-head">
         <div>
-          <div className="wf-apr-title">Cost of carrying a balance</div>
+          <div className="wf-apr-title">What unpaid card money costs you</div>
           <div className="wf-apr-sub">
-            {cardName ? cardName + ' · ' : ''}see what debt actually costs — so you can avoid it
+            {cardName ? cardName + ' · ' : ''}see the real cost of not paying in full — so you can avoid it
           </div>
         </div>
       </div>
@@ -89,29 +89,29 @@ export const AprEmiCalculator: React.FC<Props> = ({
 
       {mode === 'revolving' ? (
         <>
-          <Field label="Outstanding balance">
+          <Field label="Amount left unpaid">
             <Money value={outstanding} onChange={setOutstanding} />
           </Field>
 
           <RateField
-            label="Card APR"
+            label="Interest rate on your card"
             value={revApr}
             isEstimate={revAprIsEstimate}
             onChange={(v) => setAprEdited(v)}
           />
 
-          <Field label="How you'll pay">
+          <Field label="How will you pay it back?">
             <div className="wf-seg">
               <button className={payStrategy === 'min' ? 'on' : ''} onClick={() => setPayStrategy('min')}>
-                Minimum due
+                Only the minimum
               </button>
               <button className={payStrategy === 'fixed' ? 'on' : ''} onClick={() => setPayStrategy('fixed')}>
-                Fixed amount
+                A fixed amount
               </button>
             </div>
           </Field>
           {payStrategy === 'fixed' && (
-            <Field label="Monthly payment">
+            <Field label="How much per month">
               <Money value={fixedPayment} onChange={setFixedPayment} />
             </Field>
           )}
@@ -119,14 +119,14 @@ export const AprEmiCalculator: React.FC<Props> = ({
           <div className="wf-apr-out">
             {rev.neverClears ? (
               <div className="wf-apr-never">
-                <div className="wf-apr-never-big">This never gets paid off</div>
+                <div className="wf-apr-never-big">Paying this little, it never clears</div>
                 <div className="wf-apr-never-sub">{rev.caveat}</div>
               </div>
             ) : (
               <>
-                <Stat label="Total interest you'll pay" value={inr(rev.totalInterest)} danger />
-                <Stat label="Months to clear" value={rev.monthsToClear + ' months'} />
-                <Stat label="Total you'll pay back" value={inr(rev.totalPaid)} sub={`on ${inr(outstanding)} borrowed`} />
+                <Stat label="Extra you pay as interest" value={inr(rev.totalInterest)} danger />
+                <Stat label="How long to clear it" value={rev.monthsToClear + ' months'} />
+                <Stat label="Total you pay in the end" value={inr(rev.totalPaid)} sub={`on ${inr(outstanding)} unpaid`} />
               </>
             )}
           </div>
@@ -134,7 +134,7 @@ export const AprEmiCalculator: React.FC<Props> = ({
         </>
       ) : (
         <>
-          <Field label="Amount to convert">
+          <Field label="Amount to convert to EMI">
             <Money value={principal} onChange={setPrincipal} />
           </Field>
           <Field label="Tenure">
@@ -153,10 +153,10 @@ export const AprEmiCalculator: React.FC<Props> = ({
 
           <div className="wf-apr-out">
             <Stat label="Monthly EMI" value={inr(emi.monthlyEmi)} />
-            <Stat label="Total interest" value={inr(emi.totalInterest)} danger />
-            <Stat label="Processing fee" value={inr(emi.processingFee)} />
-            <Stat label="Cost over paying in full" value={inr(emi.costOverPayingInFull)} danger
-              sub="the premium you pay to finance" />
+            <Stat label="Extra you pay as interest" value={inr(emi.totalInterest)} danger />
+            <Stat label="One-time processing fee" value={inr(emi.processingFee)} />
+            <Stat label="Extra cost vs paying it all now" value={inr(emi.costOverPayingInFull)} danger
+              sub="what spreading it out costs you" />
           </div>
           <div className="wf-apr-caveat">{emi.caveat}</div>
         </>

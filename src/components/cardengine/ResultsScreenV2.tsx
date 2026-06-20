@@ -866,7 +866,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                         const balLiq = liquidity?.get(balCard.cardId);
                         return (
                           <details className="r2-fold">
-                            <summary>Thinking of carrying a balance? See what it costs</summary>
+                            <summary>What if you don't pay the full bill? See what it costs</summary>
                             <div className="r2-fold-body">
                               {ownedVerdicts.length > 1 && (
                                 <div className="r2-fold-cardpick">
