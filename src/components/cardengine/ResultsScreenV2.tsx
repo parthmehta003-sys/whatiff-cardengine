@@ -494,8 +494,13 @@ export const ResultsScreenV2: React.FC<Props> = ({
                   const hasTransfer = !!(p1Transfer?.displayTravelHack);
 
                   const p1Intel = intelligence?.[activeCardId] ?? [];
+                  const whyLabel =
+                    activeV.verdict === 'keep'       ? 'Why keep this'   :
+                    activeV.verdict === 'wrong_fit'  ? 'Why drop this'   :
+                    activeV.verdict === 'underused'  ? 'Why use it more' :
+                                                       'Why we say this';
                   const P1_ICONS: { key: P1IconKey; label: string; Icon: typeof Scale; accent: string }[] = [
-                    { key: 'why',      label: 'Why this card',    Icon: Scale,      accent: '#10b981' },
+                    { key: 'why',      label: whyLabel,           Icon: Scale,      accent: '#10b981' },
                     { key: 'cat',      label: 'Where you earn',   Icon: Target,     accent: '#06b6d4' },
                     { key: 'hack',     label: 'Pro Tips',         Icon: Zap,        accent: '#8b5cf6' },
                     ...(hasTransfer ? [{ key: 'transfer' as P1IconKey, label: 'Flights & hotels', Icon: Plane, accent: '#f59e0b' }] : []),
