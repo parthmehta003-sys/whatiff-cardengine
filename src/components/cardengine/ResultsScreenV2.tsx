@@ -295,6 +295,9 @@ export const ResultsScreenV2: React.FC<Props> = ({
   // Hack steps for Phase 1 owned card (separate from Phase 2 hackStepsOpen).
   const [p1HackStepsOpen, setP1HackStepsOpen] = useState(false);
 
+  // Reward-rate % toggle inside owned-card "Why" panel.
+  const [showRates, setShowRates] = useState(false);
+
   // Alt-card expansion (single-card view only).
   const [altExpanded, setAltExpanded] = useState(false);
 
@@ -618,15 +621,21 @@ export const ResultsScreenV2: React.FC<Props> = ({
                         <div className="r2-detail" style={{ '--r2-accent': p1IconCfg.accent } as React.CSSProperties}>
                           <div className="r2-detail-which">{activeV.cardName}</div>
 
-                          {/* Icon 1 — See why: verdict proof */}
+                          {/* Icon 1 — Why [verdict]: 3-level owned-card breakdown */}
                           {p1ActiveIcon === 'why' && (() => {
                             const cardProof = result.ownedPerCategory?.[activeCardId];
                             if (!cardProof) return <div className="r2-empty">No breakdown available.</div>;
                             const spendCats = (Object.keys(monthlySpend) as (keyof typeof monthlySpend)[])
                               .filter(c => (monthlySpend[c] ?? 0) > 0);
 
-                            /* UNDERUSED: honest proof — strong card, bonuses not triggered */
+                            // Plain category name helper
+                            const catName = (cat: string) => CAT_LABEL[cat] ?? (cat === 'Other(base)' ? 'Everything else' : cat);
+
+                            // ── Level ①: earn breakdown (all three verdict branches) ──────────
+                            let level1: React.ReactNode;
+
                             if (activeV.verdict === 'underused') {
+                              /* UNDERUSED: honest proof — strong card, bonuses not triggered */
                               const rows = spendCats.map(cat => {
                                 const ce = cardProof[cat as keyof typeof cardProof];
                                 return {
@@ -665,9 +674,8 @@ export const ResultsScreenV2: React.FC<Props> = ({
                               ) : null;
 
                               if (hasAccelerators) {
-                                // Card has unused merchant/channel bonuses — the core UNDERUSED case
-                                return (
-                                  <div className="r2-vproof">
+                                level1 = (
+                                  <>
                                     <div className="r2-vproof-head">{activeV.cardName} · strong card, bonuses not triggered</div>
                                     <div className="r2-underused-note">
                                       This card earns extra on specific merchants and channels — but your spend isn&rsquo;t going through them, so you&rsquo;re capturing only the base rate.
@@ -679,7 +687,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                     </div>
                                     {rows.map(r => (
                                       <div key={r.cat} className={'r2-underused-cols' + (r.upside > 0 ? ' r2-underused-cols--bonus' : '')}>
-                                        <span className="r2-vproof-cat">{r.cat === 'Other(base)' ? 'Everything else' : r.cat}</span>
+                                        <span className="r2-vproof-cat">{catName(r.cat)}</span>
                                         <span className="r2-underused-base">
                                           {r.guaranteed > 0 ? inr(r.guaranteed) + '/yr' : <span className="r2-vproof-zero">—</span>}
                                         </span>
@@ -694,68 +702,140 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                     <div className="r2-underused-footer">
                                       <span>Each bonus above is a conditional ceiling, not guaranteed. This card has strong potential — route the right spend through it to unlock it.</span>
                                     </div>
-                                  </div>
+                                  </>
+                                );
+                              } else {
+                                // Fallback: no accelerators — card just earns a low base rate on this spend mix
+                                level1 = (
+                                  <>
+                                    <div className="r2-vproof-head">{activeV.cardName} · low capture on this spend mix</div>
+                                    <div className="r2-underused-note">
+                                      Earns only its base rate across your spend categories — no merchant-specific bonuses apply to your current pattern.
+                                    </div>
+                                    {rows.map(r => (
+                                      <div key={r.cat} className={'r2-vproof-row' + (r.guaranteed === 0 ? ' zero' : '')}>
+                                        <span className="r2-vproof-cat">{catName(r.cat)}</span>
+                                        <span className="r2-vproof-earn">
+                                          {r.guaranteed > 0
+                                            ? <>{inr(r.guaranteed)}/yr{showRates && r.rate > 0 && <span className="r2-vproof-rate"> · {r.rate.toFixed(2)}%</span>}</>
+                                            : <span className="r2-vproof-zero">not earned</span>}
+                                        </span>
+                                      </div>
+                                    ))}
+                                    {routingLine}
+                                    <div className="r2-underused-footer">
+                                      <span>Low earn on this spend pattern.</span>
+                                    </div>
+                                  </>
                                 );
                               }
-
-                              // Fallback: no accelerators — card just earns a low base rate on this spend mix
-                              return (
-                                <div className="r2-vproof">
-                                  <div className="r2-vproof-head">{activeV.cardName} · low capture on this spend mix</div>
-                                  <div className="r2-underused-note">
-                                    Earns only its base rate across your spend categories — no merchant-specific bonuses apply to your current pattern.
-                                  </div>
-                                  {rows.map(r => (
-                                    <div key={r.cat} className={'r2-vproof-row' + (r.guaranteed === 0 ? ' zero' : '')}>
-                                      <span className="r2-vproof-cat">{r.cat === 'Other(base)' ? 'Everything else' : r.cat}</span>
-                                      <span className="r2-vproof-earn">
-                                        {r.guaranteed > 0
-                                          ? <>{inr(r.guaranteed)}/yr{r.rate > 0 && <span className="r2-vproof-rate"> · {r.rate.toFixed(2)}%</span>}</>
-                                          : <span className="r2-vproof-zero">not earned</span>}
-                                      </span>
-                                    </div>
-                                  ))}
-                                  {routingLine}
+                            } else {
+                              /* KEEP / WRONG_FIT: earn table */
+                              const isWrongFit = activeV.verdict === 'wrong_fit';
+                              level1 = (
+                                <>
+                                  {spendCats.map(cat => {
+                                    const ce = cardProof[cat as keyof typeof cardProof];
+                                    const isBest = result.bestCardPerCategory?.[cat]?.cardId === activeCardId;
+                                    const earn = ce?.guaranteed ?? 0;
+                                    return (
+                                      <div key={cat} className={'r2-vproof-row' + (isBest && earn > 0 ? ' best' : '') + (earn === 0 ? ' zero' : '')}>
+                                        <span className="r2-vproof-cat">{catName(cat)}</span>
+                                        <span className="r2-vproof-earn">
+                                          {earn > 0 ? (
+                                            <>{inr(earn * 12)}/yr{showRates && ce!.baseRatePer100 > 0 && <span className="r2-vproof-rate"> · {ce!.baseRatePer100.toFixed(2)}%</span>}</>
+                                          ) : ce?.excluded ? (
+                                            <span className="r2-vproof-excl">excluded</span>
+                                          ) : ce?.noData ? (
+                                            <span className="r2-vproof-nodata">no data</span>
+                                          ) : (
+                                            <span className="r2-vproof-zero">not earned</span>
+                                          )}
+                                        </span>
+                                        {isBest && earn > 0 && <span className="r2-vproof-best">best</span>}
+                                      </div>
+                                    );
+                                  })}
                                   <div className="r2-underused-footer">
-                                    <span>Low earn on this spend pattern.</span>
+                                    <span>{isWrongFit
+                                      ? 'Earns almost nothing on what you actually spend on.'
+                                      : 'Earns well across your main spending — worth keeping.'
+                                    }</span>
                                   </div>
-                                </div>
+                                </>
                               );
                             }
 
-                            /* KEEP / WRONG_FIT: existing earn table */
-                            const isWrongFit = activeV.verdict === 'wrong_fit';
-                            return (
-                              <div className="r2-vproof">
-                                <div className="r2-vproof-head">{activeV.cardName} · earn on your spend</div>
-                                {spendCats.map(cat => {
-                                  const ce = cardProof[cat as keyof typeof cardProof];
-                                  const isBest = result.bestCardPerCategory?.[cat]?.cardId === activeCardId;
-                                  const earn = ce?.guaranteed ?? 0;
-                                  return (
-                                    <div key={cat} className={'r2-vproof-row' + (isBest && earn > 0 ? ' best' : '') + (earn === 0 ? ' zero' : '')}>
-                                      <span className="r2-vproof-cat">{cat === 'Other(base)' ? 'Everything else' : cat}</span>
-                                      <span className="r2-vproof-earn">
-                                        {earn > 0 ? (
-                                          <>{inr(earn * 12)}/yr{ce!.baseRatePer100 > 0 && <span className="r2-vproof-rate"> · {ce!.baseRatePer100.toFixed(2)}%</span>}</>
-                                        ) : ce?.excluded ? (
-                                          <span className="r2-vproof-excl">excluded</span>
-                                        ) : ce?.noData ? (
-                                          <span className="r2-vproof-nodata">no data</span>
-                                        ) : (
-                                          <span className="r2-vproof-zero">not earned</span>
-                                        )}
-                                      </span>
-                                      {isBest && earn > 0 && <span className="r2-vproof-best">best</span>}
+                            // ── Level ②: priorities ───────────────────────────────────────────
+                            const p1PriorityKeys: PriorityKey[] = (
+                              [priorities?.top, priorities?.secondary, priorities?.niceToHave]
+                                .filter(Boolean) as PriorityKey[]
+                            );
+                            const ownedCardObj = result.ranked.find(c => c.cardId === activeCardId);
+                            const level2 = ownedCardObj && p1PriorityKeys.length > 0 ? (
+                              p1PriorityKeys.map(key => {
+                                const ev = evalPriorityForCard(key, ownedCardObj, monthlySpend);
+                                const displayLine = priLine(key, ownedCardObj, monthlySpend);
+                                return (
+                                  <div key={key} className={'r2-pri-row ' + ev.status}>
+                                    <span className="r2-pri-glyph">{ev.status === 'met' ? '✓' : ev.status === 'partial' ? '○' : '✗'}</span>
+                                    <div>
+                                      <div className="r2-pri-label">{LABEL[key]}</div>
+                                      {displayLine && <div className="r2-pri-line">{displayLine}</div>}
                                     </div>
-                                  );
-                                })}
-                                <div className="r2-underused-footer">
-                                  <span>{isWrongFit
-                                    ? 'Earns almost nothing on what you actually spend on.'
-                                    : 'Earns well across your main spending — worth keeping.'
-                                  }</span>
+                                  </div>
+                                );
+                              })
+                            ) : null;
+
+                            // ── Level ③: excluded categories the user spends in ───────────────
+                            const excludedCats = spendCats.filter(cat => {
+                              const ce = cardProof[cat as keyof typeof cardProof];
+                              return ce?.excluded === true && (monthlySpend[cat as keyof typeof monthlySpend] ?? 0) > 0;
+                            });
+                            const excludedAnnualSpend = excludedCats.reduce(
+                              (s, cat) => s + (monthlySpend[cat as keyof typeof monthlySpend] ?? 0) * 12, 0
+                            );
+                            const level3 = excludedCats.length > 0 ? (
+                              <div className="r2-why-excluded">
+                                Pays nothing on <b>{excludedCats.map(catName).join(', ')}</b>. You spend about <b>{inr(excludedAnnualSpend)}</b> a year there — use a different card for {excludedCats.map(catName).join(', ')}.
+                              </div>
+                            ) : null;
+
+                            return (
+                              <div className="r2-why-levels">
+                                {/* Level ① */}
+                                <div className="r2-why-level">
+                                  <div className="r2-why-level-head">
+                                    <span>What you get back in a year</span>
+                                    <span className="r2-why-total">{inr(activeV.netPerYear)} back</span>
+                                  </div>
+                                  <div className="r2-vproof">
+                                    {level1}
+                                  </div>
+                                  <button className="r2-why-rate-toggle" onClick={() => setShowRates(v => !v)}>
+                                    {showRates ? '▾ Hide reward rates' : '▸ Show reward rates'}
+                                  </button>
                                 </div>
+
+                                {/* Level ② */}
+                                <div className="r2-why-level">
+                                  <div className="r2-why-level-head">
+                                    <span>How {activeV.cardName} does on your priorities</span>
+                                  </div>
+                                  {p1PriorityKeys.length === 0 || !ownedCardObj
+                                    ? <div className="r2-empty">You didn&rsquo;t set anything you care about.</div>
+                                    : <div className="r2-panel-priorities">{level2}</div>
+                                  }
+                                </div>
+
+                                {/* Level ③ — only if there are excluded cats with spend */}
+                                {level3 && (
+                                  <div className="r2-why-level">
+                                    <div className="r2-why-level-head"><span>What it doesn&rsquo;t cover</span></div>
+                                    {level3}
+                                  </div>
+                                )}
                               </div>
                             );
                           })()}
@@ -2249,6 +2329,20 @@ const css = `
   margin-top:8px;padding-top:8px;border-top:1px solid #27272a;
   font-size:11px;color:#52525b}
 .r2-underused-footer b{color:#e4e4e7}
+
+/* ── Why-panel 3-level structure ── */
+.r2-why-levels{display:flex;flex-direction:column;gap:16px}
+.r2-why-level{background:#0c0c0e;border:1px solid #27272a;border-radius:12px;padding:14px 16px}
+.r2-why-level-head{display:flex;align-items:center;justify-content:space-between;
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:#52525b;margin-bottom:10px}
+.r2-why-total{font-size:12px;font-weight:800;color:#10b981;letter-spacing:0}
+.r2-why-rate-toggle{margin-top:10px;background:none;border:none;color:#52525b;
+  font-size:11px;font-weight:600;cursor:pointer;padding:0;text-decoration:underline}
+.r2-why-rate-toggle:hover{color:#a1a1aa}
+.r2-why-excluded{font-size:12.5px;color:#d4d4d8;line-height:1.55;
+  background:#1c1506;border:1px solid #6b5410;border-radius:8px;padding:10px 12px}
+.r2-why-excluded b{color:#f59e0b}
 
 /* ── AprEmiCalculator font overrides for V2's compact right column ── */
 .r2-fold .wf-apr-title{font-size:14px!important}
