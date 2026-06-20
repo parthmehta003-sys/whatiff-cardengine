@@ -49,11 +49,14 @@ export const ChoicesPanel: React.FC<Props> = ({
 }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const hidden = step === 'journey' || step === 'results';
+  const hidden = step === 'journey';
   if (hidden) return null;
+
+  const isResults = step === 'results';
 
   const order = journey === 'owns_cards' ? STEP_ORDER_OWNED : STEP_ORDER_NEW;
   const currentIdx = order.indexOf(step);
+  // On results every input step is "past", so all sections are editable.
   const pastStep = (s: Step) => order.indexOf(s) < currentIdx;
 
   const jumpTo = (s: Step) => {
@@ -162,15 +165,15 @@ export const ChoicesPanel: React.FC<Props> = ({
   );
 
   return (
-    <>
+    <div className={isResults ? 'wf-cp--results' : undefined}>
       <style>{css}</style>
 
-      {/* Desktop sidebar */}
+      {/* Desktop sidebar (hidden on results via .wf-cp--results) */}
       <aside className="wf-cp-sidebar">
         {content}
       </aside>
 
-      {/* Mobile pill + drawer */}
+      {/* Mobile pill + drawer (always shown on results, including desktop) */}
       <button
         className="wf-cp-pill"
         onClick={() => setDrawerOpen(true)}
@@ -187,7 +190,7 @@ export const ChoicesPanel: React.FC<Props> = ({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
@@ -268,6 +271,10 @@ const css = `
   transition:color .12s;
 }
 .wf-cp-close:hover{color:#a1a1aa}
+
+/* Results: hide sidebar, always show pill (override desktop media query) */
+.wf-cp--results .wf-cp-sidebar{display:none!important}
+@media(min-width:900px){.wf-cp--results .wf-cp-pill{display:flex!important}}
 `;
 
 export default ChoicesPanel;
