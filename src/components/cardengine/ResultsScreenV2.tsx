@@ -767,11 +767,12 @@ export const ResultsScreenV2: React.FC<Props> = ({
                             }
 
                             // ── Level ②: priorities ───────────────────────────────────────────
-                            const p1PriorityKeys: PriorityKey[] = (
-                              [priorities?.top, priorities?.secondary, priorities?.niceToHave]
-                                .filter(Boolean) as PriorityKey[]
-                            );
-                            const ownedCardObj = result.ranked.find(c => c.cardId === activeCardId);
+                            const p1PriorityKeys: PriorityKey[] = [
+                              ...(priorities?.top ? [priorities.top] : []),
+                              ...(priorities?.secondary ? [priorities.secondary] : []),
+                              ...(priorities?.niceToHave ? [priorities.niceToHave] : []),
+                            ];
+                            const ownedCardObj = result.ownedRanked?.find(c => c.cardId === activeCardId);
                             const level2 = ownedCardObj && p1PriorityKeys.length > 0 ? (
                               p1PriorityKeys.map(key => {
                                 const ev = evalPriorityForCard(key, ownedCardObj, monthlySpend);
