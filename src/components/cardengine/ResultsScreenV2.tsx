@@ -229,7 +229,7 @@ const TransferCallout: React.FC<{
 // ── Icon row configuration ───────────────────────────────────────────────────
 const ICONS = [
   { key: 'pros',       label: 'Pros & cons',     Icon: Scale,      accent: '#10b981' },
-  { key: 'hack',       label: 'Hack',             Icon: Zap,        accent: '#8b5cf6' },
+  { key: 'hack',       label: 'Pro Tips',         Icon: Zap,        accent: '#8b5cf6' },
   { key: 'math',       label: 'The math',         Icon: Calculator, accent: '#06b6d4' },
   { key: 'priorities', label: 'Priorities',       Icon: Target,     accent: '#f59e0b' },
   { key: 'know',       label: 'Things to know',   Icon: Info,       accent: '#f59e0b' },
