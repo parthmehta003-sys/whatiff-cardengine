@@ -960,7 +960,48 @@ export const ResultsScreenV2: React.FC<Props> = ({
                         </div>
                       )}
 
-                      {/* Balance calculator — stays as collapsible (not an icon panel) */}
+                      {/* Best cards per category — shared collapsible, not per-card (Fix 2: above balance) */}
+                      {result.bestCardPerCategory && (() => {
+                        const routes = Object.entries(result.bestCardPerCategory) as [string, OwnedCategoryRoute][];
+                        const sorted = routes.slice().sort((a, b) => {
+                          const aLeak = !a[1].cardId; const bLeak = !b[1].cardId;
+                          if (aLeak !== bLeak) return aLeak ? 1 : -1;
+                          return b[1].guaranteed - a[1].guaranteed;
+                        });
+                        const totalAnnual = routes.reduce((s, [, r]) => s + (r.guaranteed ?? 0) * 12, 0);
+                        return (
+                          <details className="r2-fold">
+                            <summary>Best cards in your portfolio for each spend</summary>
+                            <div className="r2-fold-body">
+                              <span className="r2-routemap-sub">among cards you own today</span>
+                              {sorted.map(([cat, route]) => {
+                                const isLeak = !route.cardId;
+                                return (
+                                  <div key={cat} className={'r2-routemap-row' + (isLeak ? ' leak' : '')}>
+                                    <span className="r2-routemap-cat">{cat}</span>
+                                    {isLeak ? (
+                                      <span className="r2-routemap-leak-note">{route.noData ? 'no rate data' : 'none earn here'}</span>
+                                    ) : (
+                                      <>
+                                        <span className="r2-routemap-card">{route.cardName}</span>
+                                        <span className="r2-routemap-val">₹{Math.round(route.guaranteed * 12).toLocaleString('en-IN')}/yr</span>
+                                      </>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                              {totalAnnual > 0 && (
+                                <div className="r2-routemap-total">
+                                  <span className="r2-routemap-total-lbl">Total with current setup</span>
+                                  <span className="r2-routemap-total-val">₹{Math.round(totalAnnual).toLocaleString('en-IN')}/yr</span>
+                                </div>
+                              )}
+                            </div>
+                          </details>
+                        );
+                      })()}
+
+                      {/* Balance calculator */}
                       {(() => {
                         const ownedVerdicts = result.ownedVerdicts!;
                         const safeIdx = balanceCardIdx % ownedVerdicts.length;
@@ -986,50 +1027,6 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 storedAprAnnualPct={balLiq?.aprAnnualPct ?? null}
                                 storedEmiAprAnnualPct={balLiq?.emiConversionAprPct ?? null}
                               />
-                            </div>
-                          </details>
-                        );
-                      })()}
-
-                      {/* "Where you earn across your cards" — shared collapsible, not per-card */}
-                      {result.bestCardPerCategory && (() => {
-                        const routes = Object.entries(result.bestCardPerCategory) as [string, OwnedCategoryRoute][];
-                        const sorted = routes.slice().sort((a, b) => {
-                          const aLeak = !a[1].cardId; const bLeak = !b[1].cardId;
-                          if (aLeak !== bLeak) return aLeak ? 1 : -1;
-                          return b[1].guaranteed - a[1].guaranteed;
-                        });
-                        const totalAnnual = routes.reduce((s, [, r]) => s + (r.guaranteed ?? 0) * 12, 0);
-                        return (
-                          <details className="r2-fold">
-                            <summary>Where you earn across your cards</summary>
-                            <div className="r2-fold-body">
-                              <div className="r2-routemap-heading-row" style={{ marginBottom: 8 }}>
-                                <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.06em', color: '#52525b' }}>Your best card per category</span>
-                                <span className="r2-routemap-sub">among cards you own today</span>
-                              </div>
-                              {sorted.map(([cat, route]) => {
-                                const isLeak = !route.cardId;
-                                return (
-                                  <div key={cat} className={'r2-routemap-row' + (isLeak ? ' leak' : '')}>
-                                    <span className="r2-routemap-cat">{cat}</span>
-                                    {isLeak ? (
-                                      <span className="r2-routemap-leak-note">{route.noData ? 'no rate data' : 'none earn here'}</span>
-                                    ) : (
-                                      <>
-                                        <span className="r2-routemap-card">{route.cardName}</span>
-                                        <span className="r2-routemap-val">₹{Math.round(route.guaranteed * 12).toLocaleString('en-IN')}/yr</span>
-                                      </>
-                                    )}
-                                  </div>
-                                );
-                              })}
-                              {totalAnnual > 0 && (
-                                <div className="r2-routemap-total">
-                                  <span className="r2-routemap-total-lbl">Total with current setup</span>
-                                  <span className="r2-routemap-total-val">₹{Math.round(totalAnnual).toLocaleString('en-IN')}/yr</span>
-                                </div>
-                              )}
                             </div>
                           </details>
                         );
@@ -2439,7 +2436,7 @@ const css = `
 .r2-fold>summary::after{content:'⌄';font-size:16px;color:#52525b;transition:transform .2s}
 .r2-fold[open]>summary::after{transform:rotate(180deg)}
 .r2-fold[open]>summary{border-bottom:1px solid #1f1f23}
-.r2-fold-body{padding:8px 0 0}
+.r2-fold-body{padding:8px 14px 4px}
 .r2-fold-global-warns{padding:12px 16px 8px}
 .r2-global-bank-group{margin-bottom:14px}
 .r2-global-bank-group:last-child{margin-bottom:4px}
