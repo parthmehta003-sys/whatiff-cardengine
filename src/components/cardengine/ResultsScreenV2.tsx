@@ -674,48 +674,17 @@ export const ResultsScreenV2: React.FC<Props> = ({
 
                               if (hasAccelerators) {
                                 const topBonus = rows.reduce((best, r) => r.upside > best.upside ? r : best, rows[0]);
+                                const wonSentence = wonCats.length > 0
+                                  ? <>Your other cards already earn more on almost everything, so this is only your best card for <b>{wonLabel}</b>.</>
+                                  : <>Your other cards already earn more on almost everything, so it isn&rsquo;t your best card for anything right now.</>;
                                 level1 = (
                                   <>
-                                    <div className="r2-vproof-head">{activeV.cardName} · a good card you&rsquo;re not using fully</div>
-                                    <div className="r2-underused-note">
-                                      This card pays extra only at certain shops and payment apps. You&rsquo;re not using it there — so right now it only pays the basic rate.
-                                    </div>
-                                    <div className="r2-underused-cols-head">
-                                      <span>Category</span>
-                                      <span>Earning now</span>
-                                      <span>Could earn</span>
-                                    </div>
-                                    {rows.map(r => (
-                                      <div key={r.cat} className={'r2-underused-cols' + (r.upside > 0 ? ' r2-underused-cols--bonus' : '')}>
-                                        <span className="r2-vproof-cat">{catName(r.cat)}</span>
-                                        <span className="r2-underused-base">
-                                          {r.guaranteed > 0 ? inr(r.guaranteed) + '/yr' : <span className="r2-vproof-zero">—</span>}
-                                        </span>
-                                        <span className="r2-underused-bonus">
-                                          {r.upside > 0
-                                            ? <span className="r2-underused-bonus-val">+{inr(r.upside)}/yr more — only if you use it right</span>
-                                            : <span className="r2-vproof-zero">—</span>}
-                                        </span>
-                                      </div>
-                                    ))}
-                                    {routingLine}
-                                    <div className="r2-underused-unlock">
-                                      <div className="r2-underused-unlock-head">How to unlock the extra</div>
-                                      <div>This card pays a bonus when you book or pay through its own app or website — not by tapping the card directly. Your biggest bonus is on {catName(topBonus.cat)} — up to {inr(topBonus.upside)} a year. Try routing that spend through the card&rsquo;s app to earn it.</div>
-                                      <div className="r2-underused-unlock-caveat">These bonuses depend on the card&rsquo;s current offers, so check the app before you rely on them.</div>
-                                    </div>
-                                    <div className="r2-underused-footer">
-                                      <span>These bonuses aren&rsquo;t guaranteed — you only get them if you use the card for the right things. The potential is there; you&rsquo;re just not using it yet.</span>
-                                    </div>
-                                  </>
-                                );
-                              } else {
-                                // Fallback: no accelerators — card earns less than it could on this spend mix
-                                level1 = (
-                                  <>
-                                    <div className="r2-vproof-head">{activeV.cardName} · earning less than it could</div>
-                                    <div className="r2-underused-note">
-                                      This card only pays its basic rate on what you spend on. No special bonuses apply to your spending right now.
+                                    <div className="r2-vproof-head">A good card — but not for how you spend.</div>
+                                    <div className="r2-underused-sentences">
+                                      <p>Right now it gives you back only <b>{inr(activeV.netPerYear)}</b> a year. {wonSentence}</p>
+                                      {topBonus.upside > 0 && (
+                                        <p className="r2-underused-upside-line">Used right, it could earn up to <b>{inr(topBonus.upside)}</b> more a year — but only if you use the card&rsquo;s own app or website.</p>
+                                      )}
                                     </div>
                                     {rows.map(r => (
                                       <div key={r.cat} className={'r2-vproof-row' + (r.guaranteed === 0 ? ' zero' : '')}>
@@ -723,14 +692,33 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                         <span className="r2-vproof-earn">
                                           {r.guaranteed > 0
                                             ? <>{inr(r.guaranteed)}/yr{showRates && r.rate > 0 && <span className="r2-vproof-rate"> · {r.rate.toFixed(2)}%</span>}</>
-                                            : <span className="r2-vproof-zero">not earned</span>}
+                                            : <span className="r2-vproof-zero">—</span>}
                                         </span>
                                       </div>
                                     ))}
-                                    {routingLine}
-                                    <div className="r2-underused-footer">
-                                      <span>Earns less than it could on how you spend.</span>
+                                  </>
+                                );
+                              } else {
+                                // Fallback: no accelerators
+                                const wonSentence = wonCats.length > 0
+                                  ? <>Your other cards already earn more on almost everything, so this is only your best card for <b>{wonLabel}</b>.</>
+                                  : <>Your other cards already earn more on almost everything, so it isn&rsquo;t your best card for anything right now.</>;
+                                level1 = (
+                                  <>
+                                    <div className="r2-vproof-head">A good card — but not for how you spend.</div>
+                                    <div className="r2-underused-sentences">
+                                      <p>Right now it gives you back only <b>{inr(activeV.netPerYear)}</b> a year. {wonSentence}</p>
                                     </div>
+                                    {rows.map(r => (
+                                      <div key={r.cat} className={'r2-vproof-row' + (r.guaranteed === 0 ? ' zero' : '')}>
+                                        <span className="r2-vproof-cat">{catName(r.cat)}</span>
+                                        <span className="r2-vproof-earn">
+                                          {r.guaranteed > 0
+                                            ? <>{inr(r.guaranteed)}/yr{showRates && r.rate > 0 && <span className="r2-vproof-rate"> · {r.rate.toFixed(2)}%</span>}</>
+                                            : <span className="r2-vproof-zero">—</span>}
+                                        </span>
+                                      </div>
+                                    ))}
                                   </>
                                 );
                               }
@@ -2335,10 +2323,11 @@ const css = `
   margin-top:8px;padding-top:8px;border-top:1px solid #27272a;
   font-size:11px;color:#52525b}
 .r2-underused-footer b{color:#e4e4e7}
-.r2-underused-unlock{margin-top:10px;background:#1c1200;border:1px solid #92400e;border-radius:8px;padding:10px 12px}
-.r2-underused-unlock-head{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#f59e0b;margin-bottom:6px}
-.r2-underused-unlock{font-size:12.5px;color:#d4d4d8;line-height:1.55}
-.r2-underused-unlock-caveat{margin-top:6px;font-size:11px;color:#71717a}
+.r2-underused-sentences{font-size:13px;color:#a1a1aa;line-height:1.6;margin-bottom:12px}
+.r2-underused-sentences p{margin:0 0 6px}
+.r2-underused-sentences p:last-child{margin-bottom:0}
+.r2-underused-sentences b{color:#e4e4e7}
+.r2-underused-upside-line{color:#71717a!important}
 
 /* ── Why-panel 3-level structure ── */
 .r2-why-levels{display:flex;flex-direction:column;gap:16px}
