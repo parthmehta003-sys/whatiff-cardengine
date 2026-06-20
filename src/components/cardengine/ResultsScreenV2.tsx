@@ -297,6 +297,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
 
   // Reward-rate % toggle inside owned-card "Why" panel.
   const [showRates, setShowRates] = useState(false);
+  const [showWhyTable, setShowWhyTable] = useState(false);
 
   // Alt-card expansion (single-card view only).
   const [altExpanded, setAltExpanded] = useState(false);
@@ -589,7 +590,6 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                                        'Why we say this';
                   const P1_ICONS: { key: P1IconKey; label: string; Icon: typeof Scale; accent: string }[] = [
                     { key: 'why',      label: whyLabel,           Icon: Scale,      accent: '#10b981' },
-                    { key: 'cat',      label: 'Where you earn',   Icon: Target,     accent: '#06b6d4' },
                     { key: 'hack',     label: 'Pro Tips',         Icon: Zap,        accent: '#8b5cf6' },
                     ...(hasTransfer ? [{ key: 'transfer' as P1IconKey, label: 'Flights & hotels', Icon: Plane, accent: '#f59e0b' }] : []),
                     { key: 'know',     label: 'Things to know',   Icon: Info,       accent: '#f59e0b' },
@@ -631,6 +631,17 @@ export const ResultsScreenV2: React.FC<Props> = ({
                             // Plain category name helper
                             const catName = (cat: string) => CAT_LABEL[cat] ?? (cat === 'Other(base)' ? 'Everything else' : cat);
 
+                            // ── Shared routing vars for all verdict branches ──
+                            const bpcShared = result.bestCardPerCategory ?? {};
+                            const wonCatsShared = spendCats.filter(c => bpcShared[c]?.cardId === activeCardId && (bpcShared[c]?.guaranteed ?? 0) > 0);
+                            const wonLabelShared = wonCatsShared.length > 0
+                              ? wonCatsShared.map(c => CAT_LABEL[c] ?? (c === 'Other(base)' ? 'everything else' : c)).join(' & ')
+                              : null;
+                            const standaloneTotalShared = spendCats.reduce((s, cat) => {
+                              const ce = cardProof[cat as keyof typeof cardProof];
+                              return s + (ce?.guaranteed ?? 0) * 12;
+                            }, 0);
+
                             // ── Level ①: earn breakdown (all three verdict branches) ──────────
                             let level1: React.ReactNode;
 
@@ -649,17 +660,15 @@ export const ResultsScreenV2: React.FC<Props> = ({
                               const hasAccelerators = totalUpside > 0;
 
                               // Routing explanation: column shows standalone earn, netPerYear shows wallet capture (won cats only)
-                              const bpc = result.bestCardPerCategory ?? {};
-                              const wonCats = spendCats.filter(c => bpc[c]?.cardId === activeCardId && (bpc[c]?.guaranteed ?? 0) > 0);
+                              const bpc = bpcShared;
+                              const wonCats = wonCatsShared;
+                              const wonLabel = wonLabelShared ?? 'no category';
                               const lostCats = spendCats.filter(c => bpc[c]?.cardId && bpc[c].cardId !== activeCardId);
                               const colSum = rows.reduce((s, r) => s + r.guaranteed, 0);
                               const hasRoutingGap = colSum > activeV.netPerYear + 50;
                               const beaterNames = [...new Set(
                                 lostCats.map(c => bpc[c]?.cardName).filter((n): n is string => !!n)
                               )].slice(0, 2);
-                              const wonLabel = wonCats.length > 0
-                                ? wonCats.map(c => c === 'Other(base)' ? 'everything else' : c).join(' & ')
-                                : 'no category';
                               const lostLabel = lostCats.length > 0
                                 ? lostCats.map(c => c === 'Other(base)' ? 'everything else' : c).join(', ')
                                 : null;
@@ -724,6 +733,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                               }
                             } else {
                               /* KEEP / WRONG_FIT: earn table */
+                              // No additional vars needed — use wonLabelShared / standaloneTotalShared
                               const isWrongFit = activeV.verdict === 'wrong_fit';
                               level1 = (
                                 <>
@@ -749,12 +759,6 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                       </div>
                                     );
                                   })}
-                                  <div className="r2-underused-footer">
-                                    <span>{isWrongFit
-                                      ? 'Earns almost nothing on what you actually spend on.'
-                                      : 'Earns well across your main spending — worth keeping.'
-                                    }</span>
-                                  </div>
                                 </>
                               );
                             }
@@ -798,18 +802,42 @@ export const ResultsScreenV2: React.FC<Props> = ({
 
                             return (
                               <div className="r2-why-levels">
+                                {/* Verdict one-liner — always visible */}
+                                <div className="r2-verdict-oneliner">
+                                  {activeV.verdict === 'keep' && (
+                                    wonLabelShared
+                                      ? <>Keep this card — you earn the best rate on <b>{wonLabelShared}</b>. It gives you back <b>{inr(standaloneTotalShared)}</b> a year.</>
+                                      : <>Keep this card — it earns well across your spending. It gives you back <b>{inr(standaloneTotalShared)}</b> a year.</>
+                                  )}
+                                  {activeV.verdict === 'wrong_fit' && (
+                                    <>You can drop this — on everything you spend on, your other cards earn you more, at a better rate. So it adds nothing new to your wallet.</>
+                                  )}
+                                  {activeV.verdict === 'underused' && (
+                                    wonLabelShared
+                                      ? <>Right now this is only your best card for <b>{wonLabelShared}</b>. It can earn a lot more — see Pro Tips to unlock it.</>
+                                      : <>Right now it isn&rsquo;t your best card for anything. It can earn more — see Pro Tips.</>
+                                  )}
+                                </div>
+
                                 {/* Level ① */}
                                 <div className="r2-why-level">
                                   <div className="r2-why-level-head">
                                     <span>What you get back in a year</span>
-                                    <span className="r2-why-total">{inr(activeV.netPerYear)} back</span>
+                                    <span className="r2-why-total">{inr(standaloneTotalShared)} back</span>
                                   </div>
-                                  <div className="r2-vproof">
-                                    {level1}
-                                  </div>
-                                  <button className="r2-why-rate-toggle" onClick={() => setShowRates(v => !v)}>
-                                    {showRates ? '▾ Hide reward rates' : '▸ Show reward rates'}
+                                  <button className="r2-why-rate-toggle" onClick={() => setShowWhyTable(v => !v)}>
+                                    {showWhyTable ? '▾ Hide the numbers' : '▸ See the numbers'}
                                   </button>
+                                  {showWhyTable && (
+                                    <>
+                                      <div className="r2-vproof">
+                                        {level1}
+                                      </div>
+                                      <button className="r2-why-rate-toggle" onClick={() => setShowRates(v => !v)} style={{ marginTop: 6 }}>
+                                        {showRates ? '▾ Hide reward rates' : '▸ Show reward rates'}
+                                      </button>
+                                    </>
+                                  )}
                                 </div>
 
                                 {/* Level ② */}
@@ -958,6 +986,50 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 storedAprAnnualPct={balLiq?.aprAnnualPct ?? null}
                                 storedEmiAprAnnualPct={balLiq?.emiConversionAprPct ?? null}
                               />
+                            </div>
+                          </details>
+                        );
+                      })()}
+
+                      {/* "Where you earn across your cards" — shared collapsible, not per-card */}
+                      {result.bestCardPerCategory && (() => {
+                        const routes = Object.entries(result.bestCardPerCategory) as [string, OwnedCategoryRoute][];
+                        const sorted = routes.slice().sort((a, b) => {
+                          const aLeak = !a[1].cardId; const bLeak = !b[1].cardId;
+                          if (aLeak !== bLeak) return aLeak ? 1 : -1;
+                          return b[1].guaranteed - a[1].guaranteed;
+                        });
+                        const totalAnnual = routes.reduce((s, [, r]) => s + (r.guaranteed ?? 0) * 12, 0);
+                        return (
+                          <details className="r2-fold">
+                            <summary>Where you earn across your cards</summary>
+                            <div className="r2-fold-body">
+                              <div className="r2-routemap-heading-row" style={{ marginBottom: 8 }}>
+                                <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.06em', color: '#52525b' }}>Your best card per category</span>
+                                <span className="r2-routemap-sub">among cards you own today</span>
+                              </div>
+                              {sorted.map(([cat, route]) => {
+                                const isLeak = !route.cardId;
+                                return (
+                                  <div key={cat} className={'r2-routemap-row' + (isLeak ? ' leak' : '')}>
+                                    <span className="r2-routemap-cat">{cat}</span>
+                                    {isLeak ? (
+                                      <span className="r2-routemap-leak-note">{route.noData ? 'no rate data' : 'none earn here'}</span>
+                                    ) : (
+                                      <>
+                                        <span className="r2-routemap-card">{route.cardName}</span>
+                                        <span className="r2-routemap-val">₹{Math.round(route.guaranteed * 12).toLocaleString('en-IN')}/yr</span>
+                                      </>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                              {totalAnnual > 0 && (
+                                <div className="r2-routemap-total">
+                                  <span className="r2-routemap-total-lbl">Total with current setup</span>
+                                  <span className="r2-routemap-total-val">₹{Math.round(totalAnnual).toLocaleString('en-IN')}/yr</span>
+                                </div>
+                              )}
                             </div>
                           </details>
                         );
@@ -2328,6 +2400,12 @@ const css = `
 .r2-underused-sentences p:last-child{margin-bottom:0}
 .r2-underused-sentences b{color:#e4e4e7}
 .r2-underused-upside-line{color:#71717a!important}
+.r2-underused-unlock{margin-top:10px;background:#1c1200;border:1px solid #92400e;border-radius:8px;padding:10px 12px}
+.r2-underused-unlock-head{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#f59e0b;margin-bottom:6px}
+.r2-underused-unlock{font-size:12.5px;color:#d4d4d8;line-height:1.55}
+.r2-underused-unlock-caveat{margin-top:6px;font-size:11px;color:#71717a}
+.r2-verdict-oneliner{font-size:13px;color:#a1a1aa;line-height:1.6;margin-bottom:12px}
+.r2-verdict-oneliner b{color:#e4e4e7}
 
 /* ── Why-panel 3-level structure ── */
 .r2-why-levels{display:flex;flex-direction:column;gap:16px}
