@@ -145,6 +145,8 @@ export interface RankResult {
   transparency: TransparencySummary;
   combo?: ComboRecommendation;    // when a 2-card combo wins (clustered/flat opt-in)
   ownedVerdicts?: OwnedVerdict[]; // Journey A only
+  /** Journey A only: owned cards as RankedCard objects (for display-layer priority evaluation). */
+  ownedRanked?: RankedCard[];
   /** Journey A only: best-earning owned card per spend category the user has. */
   bestCardPerCategory?: Record<string, OwnedCategoryRoute>;
   /** Journey A only: per-category earn for each owned card (cardId → category → CategoryEarn). */
@@ -672,6 +674,11 @@ export function reviewOwnedCards(
     ownedPerCategory[cardId] = earnResult.perCategory as Record<string, CategoryEarn>;
   }
 
+  // Build RankedCard objects for owned cards — needed by the display layer for priority evaluation.
+  const ownedRanked: RankedCard[] = owned.map((m) =>
+    scoreCard(m, earnByCard.get(m.cardId) ?? [], user, strengths.get(m.cardId))
+  );
+
   // Candidates = all cards minus owned, ranked by MARGINAL GAIN over the current setup.
   const { eligible, filteredOut } = filterEligible(
     cards.filter((c) => !ownedIds.includes(c.cardId)), user, user.feeTolerance
@@ -734,6 +741,7 @@ export function reviewOwnedCards(
       fitCount: recommended.length,
     },
     ownedVerdicts,
+    ownedRanked,
     bestCardPerCategory,
     ownedPerCategory,
     creditNote: creditNote(user.creditScore),
