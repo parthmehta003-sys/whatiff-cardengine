@@ -54,13 +54,12 @@ export const PrioritySelector: React.FC<Props> = ({ initial, onContinue, onBack,
     <div className="wf-pr">
       <style>{css}</style>
       <h2>What matters most to you?</h2>
-      <p className="wf-pr-sub">Optional. Spending decides the ranking — these break close ties and shape what we surface. Pick up to three.</p>
+      <p className="wf-pr-sub">Optional. Pick what matters most to you. We use this to choose between cards that are close.</p>
 
       {TIERS.map((t) => (
         <div className="wf-pr-tier" key={t.slot}>
           <div className="wf-pr-tlabel">
             <span style={{ color: t.accent }}>{t.label}</span>
-            <span className="wf-pr-w">{t.weight}</span>
           </div>
           <div className="wf-pr-chips">
             {OPTIONS.map((o) => {
