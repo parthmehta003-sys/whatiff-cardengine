@@ -15,7 +15,7 @@ import React, { useState } from 'react';
 import { Scale, Zap, Calculator, Target, Info, Plane } from 'lucide-react';
 import AprEmiCalculator from './AprEmiCalculator';
 import type { TransferHack, TransferPartner } from '../../lib/cardEngine/loadCardDB';
-import type { RankResult, RankedCard, CardMeta, Priorities, PriorityKey, OwnedCategoryRoute } from '../../lib/cardEngine/rankCards';
+import type { RankResult, RankedCard, CardMeta, LoungeBlock, Priorities, PriorityKey, OwnedCategoryRoute } from '../../lib/cardEngine/rankCards';
 import type { MonthlySpend, CategoryEarn } from '../../lib/cardEngine/computeEarn';
 import { evalPriorityForCard, LABEL, type AlternativeForPriority } from '../../lib/cardEngine/evaluatePriorities';
 import { resolveTileColor } from './CardTile';
@@ -315,6 +315,91 @@ export const ResultsScreenV2: React.FC<Props> = ({
 
   const front = comboHero && combo ? result.recommended[frontIdx] : null;
   const back  = comboHero && combo ? result.recommended[1 - frontIdx] : null;
+
+  // ── Plain-English priority line formatter (display layer only) ────────────
+  const FOREX_BENCHMARK_PCT = 3.5;
+  const CAT_LABEL: Partial<Record<string, string>> = {
+    Dining: 'Eating out', Online: 'Online shopping', Fuel: 'Petrol',
+    Travel: 'Travel', Grocery: 'Groceries', Utility: 'Bills',
+  };
+  function periodMult(period: string | null): number {
+    switch ((period ?? 'month').toLowerCase()) {
+      case 'year': return 12; case 'quarter': return 3; default: return 1;
+    }
+  }
+  function priLine(key: PriorityKey, card: RankedCard, spend: MonthlySpend): string {
+    const meta = card.meta as CardMeta;
+    switch (key) {
+      case 'Forex': {
+        const f = meta.forexPct ?? 0;
+        if (f < FOREX_BENCHMARK_PCT)
+          return `Spending abroad: charges ${f}% extra. Most cards charge ${FOREX_BENCHMARK_PCT}% — so it's cheaper on foreign trips.`;
+        return `Spending abroad: charges ${f}% extra — that's on the higher side.`;
+      }
+      case 'Lounge': {
+        const ls = meta.loungeStructured;
+        const blocks: { label: string; block: LoungeBlock | null }[] = [
+          { label: 'domestic', block: ls?.domestic ?? null },
+          { label: 'international', block: ls?.international ?? null },
+          { label: 'railway', block: ls?.railway ?? null },
+        ];
+        const monthly = Object.values(spend).reduce((s, v) => s + (v ?? 0), 0);
+        let best: { rank: number; line: string } | null = null;
+        for (const { label, block } of blocks) {
+          if (!block) continue;
+          const threshold = block.spendThreshold ?? 0;
+          const tPeriod = block.thresholdPeriod;
+          const userPeriodSpend = monthly * periodMult(tPeriod);
+          const qty = block.unlimited
+            ? 'unlimited'
+            : `${block.visits ?? 0} ${label}${block.visitPeriod ? `/${block.visitPeriod}` : ''}`;
+          let rank: number; let line: string;
+          if (threshold <= 0) {
+            rank = 2;
+            line = `Airport lounge: ${qty} free visits a year — no conditions.`;
+          } else if (userPeriodSpend >= threshold) {
+            rank = 1;
+            line = `Airport lounge: ${qty} free visits. You already spend enough to get these.`;
+          } else {
+            rank = 0;
+            const periodLabel = tPeriod ?? 'month';
+            line = `Airport lounge: ${qty} free visits, but only if you spend ${inr(threshold)}/${periodLabel}. You spend ${inr(userPeriodSpend)} — so you won't get them.`;
+          }
+          if (!best || rank > best.rank) best = { rank, line };
+        }
+        return best?.line ?? 'No free airport lounge visits.';
+      }
+      case 'Movies': {
+        const m = meta.movieStructured;
+        if (!m || m.type === 'NONE') return 'No discount on movie tickets.';
+        const desc =
+          m.type === 'BOGO' ? 'Buy-one-get-one on movie tickets' :
+          m.type === 'DISCOUNT' ? 'Discount on movie tickets' : 'Movie ticket benefit';
+        const value = m.annualValueComputed;
+        return value != null ? `${desc} — worth about ${inr(value)} a year.` : `${desc}.`;
+      }
+      case 'Cashback':
+        if (meta.rewardType === 'cashback')
+          return 'Gives you real cashback — money straight back, nothing to collect or redeem.';
+        return 'You wanted cashback. This card gives points instead — you collect them and use them later, not money straight back.';
+      case 'Rewards':
+        if (meta.rewardType === 'points')
+          return 'Earns reward points you can redeem for travel, vouchers, or cashback.';
+        return 'Earns direct cashback rather than points.';
+      default: {
+        // Category priorities: Travel, Dining, Fuel, Online
+        const catMap: Partial<Record<PriorityKey, string>> = {
+          Travel: 'Travel', Dining: 'Dining', Fuel: 'Fuel', Online: 'Online',
+        };
+        const cat = catMap[key];
+        if (!cat) return '';
+        const label = CAT_LABEL[cat] ?? cat;
+        const perYear = (card.earn.perCategory[cat as keyof typeof card.earn.perCategory]?.guaranteed ?? 0) * 12;
+        if (perYear > 0) return `${label}: gives you back ${inr(perYear)} a year.`;
+        return `${label}: gives you nothing back.`;
+      }
+    }
+  }
 
   return (
     <div className="r2-shell">
@@ -952,7 +1037,19 @@ export const ResultsScreenV2: React.FC<Props> = ({
                         {activeIcon === 'priorities' && (
                           <div className="r2-panel-priorities">
                             {comboHero && <div className="r2-pri-context">Showing <b>{activeCard.meta.name}</b>&rsquo;s coverage — swap cards to compare</div>}
-                            {priorityKeys.length === 0 ? <div className="r2-empty">You didn&rsquo;t set any priorities.</div> : priorityKeys.map(key => { const ev = evalPriorityForCard(key, activeCard, monthlySpend); return (<div key={key} className={'r2-pri-row ' + ev.status}><span className="r2-pri-glyph">{ev.status === 'met' ? '✓' : ev.status === 'partial' ? '⚠' : '✗'}</span><div><div className="r2-pri-label">{LABEL[key]}</div>{ev.line && <div className="r2-pri-line">{ev.line}</div>}</div></div>); })}
+                            {priorityKeys.length === 0 ? <div className="r2-empty">You didn&rsquo;t set any priorities.</div> : priorityKeys.map(key => {
+                              const ev = evalPriorityForCard(key, activeCard, monthlySpend);
+                              const displayLine = priLine(key, activeCard, monthlySpend);
+                              return (
+                                <div key={key} className={'r2-pri-row ' + ev.status}>
+                                  <span className="r2-pri-glyph">{ev.status === 'met' ? '✓' : ev.status === 'partial' ? '⚠' : '✗'}</span>
+                                  <div>
+                                    <div className="r2-pri-label">{LABEL[key]}</div>
+                                    {displayLine && <div className="r2-pri-line">{displayLine}</div>}
+                                  </div>
+                                </div>
+                              );
+                            })}
                             {!comboHero && altForTop && (
                               <div className="r2-alt-card">
                                 <div className="r2-alt-pill">Alternative for your {PRIORITY_LABEL[altForTop.key]} priority</div>
@@ -1380,12 +1477,13 @@ export const ResultsScreenV2: React.FC<Props> = ({
                             <div className="r2-empty">You didn&rsquo;t set any priorities.</div>
                           ) : priorityKeys.map(key => {
                             const ev = evalPriorityForCard(key, activeCard, monthlySpend);
+                            const displayLine = priLine(key, activeCard, monthlySpend);
                             return (
                               <div key={key} className={'r2-pri-row ' + ev.status}>
                                 <span className="r2-pri-glyph">{ev.status === 'met' ? '✓' : ev.status === 'partial' ? '⚠' : '✗'}</span>
                                 <div>
                                   <div className="r2-pri-label">{LABEL[key]}</div>
-                                  {ev.line && <div className="r2-pri-line">{ev.line}</div>}
+                                  {displayLine && <div className="r2-pri-line">{displayLine}</div>}
                                 </div>
                               </div>
                             );
