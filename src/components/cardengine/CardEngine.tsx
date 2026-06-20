@@ -190,10 +190,9 @@ export const CardEngine: React.FC<Props> = ({ db }) => {
     return <CardTileGallery cards={db.cards} />;
   }
 
-  // DEV: V2 results layout preview — go through the normal flow, results step renders V2.
-  // Access via ?v2 on any URL (e.g. /?v2 or /index.html?v2). Case-insensitive: ?V2 also works.
-  const useV2 = typeof window !== 'undefined' &&
-    new URLSearchParams(window.location.search.toLowerCase()).has('v2');
+  // Default results screen is V2. Append ?v1 to any URL to view the old ResultsScreen (escape hatch).
+  const useLegacy = typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search.toLowerCase()).has('v1');
 
   return (
     <div className="wf-shell">
@@ -243,7 +242,25 @@ export const CardEngine: React.FC<Props> = ({ db }) => {
                 onContinue={(p) => { setPriorities(p); setStep('results'); }}
               />
             )}
-            {step === 'results' && result && (useV2 ? (
+            {step === 'results' && result && (useLegacy ? (
+              <ResultsScreen
+                result={result}
+                monthlySpend={spend}
+                isTravelPriority={priorities.top === 'Travel' || priorities.top === 'Lounge'}
+                devaluations={devaluations}
+                hacks={hacks}
+                insights={insights}
+                intelligence={intelligence}
+                narratives={narratives}
+                onKnowMore={(cardId) => setKnowMoreCardId(cardId)}
+                baselineNet={baselineNet}
+                liquidity={liquidity}
+                priorities={priorities}
+                altForTop={altForTop}
+                onBack={() => setStep('priorities')}
+                onRestart={restart}
+              />
+            ) : (
               <ResultsScreenV2
                 result={result}
                 monthlySpend={spend}
@@ -260,24 +277,6 @@ export const CardEngine: React.FC<Props> = ({ db }) => {
                 altForTop={altForTop}
                 transferHacks={transferHacksMap}
                 transferPartners={transferPartnersMap}
-                onBack={() => setStep('priorities')}
-                onRestart={restart}
-              />
-            ) : (
-              <ResultsScreen
-                result={result}
-                monthlySpend={spend}
-                isTravelPriority={priorities.top === 'Travel' || priorities.top === 'Lounge'}
-                devaluations={devaluations}
-                hacks={hacks}
-                insights={insights}
-                intelligence={intelligence}
-                narratives={narratives}
-                onKnowMore={(cardId) => setKnowMoreCardId(cardId)}
-                baselineNet={baselineNet}
-                liquidity={liquidity}
-                priorities={priorities}
-                altForTop={altForTop}
                 onBack={() => setStep('priorities')}
                 onRestart={restart}
               />
