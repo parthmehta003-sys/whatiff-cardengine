@@ -495,9 +495,9 @@ export const ResultsScreenV2: React.FC<Props> = ({
 
                   const p1Intel = intelligence?.[activeCardId] ?? [];
                   const P1_ICONS: { key: P1IconKey; label: string; Icon: typeof Scale; accent: string }[] = [
-                    { key: 'why',      label: 'See why',          Icon: Scale,      accent: '#10b981' },
-                    { key: 'cat',      label: 'Per category',     Icon: Target,     accent: '#06b6d4' },
-                    { key: 'hack',     label: 'Hacks',            Icon: Zap,        accent: '#8b5cf6' },
+                    { key: 'why',      label: 'Why this card',    Icon: Scale,      accent: '#10b981' },
+                    { key: 'cat',      label: 'Where you earn',   Icon: Target,     accent: '#06b6d4' },
+                    { key: 'hack',     label: 'Pro Tips',         Icon: Zap,        accent: '#8b5cf6' },
                     ...(hasTransfer ? [{ key: 'transfer' as P1IconKey, label: 'Flights & hotels', Icon: Plane, accent: '#f59e0b' }] : []),
                     { key: 'know',     label: 'Things to know',   Icon: Info,       accent: '#f59e0b' },
                   ];
@@ -754,7 +754,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                     <div className="r2-hack-meta">Difficulty: <b>{p1Hack.difficulty}</b>{p1Hack.commonFailure && <> · Watch out: {p1Hack.commonFailure}</>}</div>
                                   )}
                                 </>
-                              )) : <div className="r2-empty">No hack available for this card yet.</div>}
+                              )) : <div className="r2-empty">No pro tip for this card yet.</div>}
                             </div>
                           )}
 
@@ -914,7 +914,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 {hack.executionSteps && (<><button className="r2-hack-seehow" onClick={() => setHackStepsOpen(v => !v)}>{hackStepsOpen ? 'Hide steps ↑' : 'See how →'}</button>{hackStepsOpen && <HackSteps steps={hack.executionSteps} />}</>)}
                                 {hack.difficulty && <div className="r2-hack-meta">Difficulty: <b>{hack.difficulty}</b>{hack.commonFailure && <> · Watch out: {hack.commonFailure}</>}</div>}
                               </>
-                            )) : <div className="r2-empty">No hack available for this card yet.</div>}
+                            )) : <div className="r2-empty">No pro tip for this card yet.</div>}
                           </div>
                         )}
                         {activeIcon === 'math' && (
@@ -1282,7 +1282,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 <div className="r2-hack-meta">Difficulty: <b>{hack.difficulty}</b>{hack.commonFailure && <> · Watch out: {hack.commonFailure}</>}</div>
                               )}
                             </>
-                          )) : <div className="r2-empty">No hack available for this card yet.</div>}
+                          )) : <div className="r2-empty">No pro tip for this card yet.</div>}
                         </div>
                       )}
 
