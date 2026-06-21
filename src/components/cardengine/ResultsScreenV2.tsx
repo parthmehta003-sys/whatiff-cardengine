@@ -1198,27 +1198,66 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 </div>
                               );
                             })}
-                            {/* Bridge line: top priority unmet, no altForTop (altForTop already handles in-budget case) */}
+                            {/* Bridge line: type-aware explanation when top priority is unmet */}
                             {!comboHero && !altForTop && priorities?.top && (() => {
                               const topKey = priorities.top;
                               const topEv = evalPriorityForCard(topKey, activeCard, monthlySpend);
                               if (topEv.status === 'met') return null;
+
+                              // Ranked pool: all evaluated cards, best-net-first (excludes the recommended card itself)
+                              const rankedPool = (result.ranked ?? []).filter(
+                                c => c.cardId !== activeCard.cardId && c.netGuaranteedPerYear > 0
+                              );
                               const premium = result.premiumWorthConsidering ?? [];
-                              // Cards (across all buckets) that meet the top priority
-                              const allCandidates = [...(result.runnersUp ?? []), ...premium];
-                              const coversIt = allCandidates.filter(c => evalPriorityForCard(topKey, c, monthlySpend).status === 'met');
-                              const premiumCovers = premium.filter(c => evalPriorityForCard(topKey, c, monthlySpend).status === 'met');
+
+                              const CATEGORY_KEYS = new Set<PriorityKey>(['Travel', 'Dining', 'Fuel', 'Online']);
+                              const REWARD_KEYS   = new Set<PriorityKey>(['Cashback', 'Rewards', 'Forex', 'Movies']);
+
                               let msg: React.ReactNode;
-                              if (premiumCovers.some(c => c.netGuaranteedPerYear > 0)) {
-                                // Case A — a fee-excluded card with positive value covers it
-                                msg = <>Your top priority — <b>{PRIORITY_LABEL[topKey]}</b> — isn&rsquo;t covered by cards within your fee budget. Cards that offer it are under &lsquo;Other cards outside your fee preference&rsquo; below. Raise your fee limit to include them.</>;
-                              } else if (coversIt.length > 0 && coversIt.every(c => c.netGuaranteedPerYear <= 0)) {
-                                // Case B — cards exist that cover it but all are net-negative
-                                msg = <>Your top priority — <b>{PRIORITY_LABEL[topKey]}</b> — is only offered by cards that wouldn&rsquo;t earn you enough to be worth it on your spending.</>;
+
+                              if (CATEGORY_KEYS.has(topKey)) {
+                                // Type 1 — Category priority: name the best card for that category
+                                const catKey = topKey === 'Online' ? 'Online' : topKey === 'Dining' ? 'Dining' : topKey === 'Fuel' ? 'Fuel' : 'Travel';
+                                const bestCard = rankedPool
+                                  .map(c => ({ c, earn: (c.earn.perCategory[catKey as keyof typeof c.earn.perCategory]?.guaranteed ?? 0) * 12 }))
+                                  .filter(x => x.earn > 0)
+                                  .sort((a, b) => b.earn - a.earn)[0];
+                                if (bestCard) {
+                                  msg = <>Your top priority is <b>{PRIORITY_LABEL[topKey]}</b>, but this card earns nothing on it. <b>{bestCard.c.meta.name}</b> earns the most on {PRIORITY_LABEL[topKey]} — worth considering if {PRIORITY_LABEL[topKey]} matters most to you.</>;
+                                } else {
+                                  msg = <>Your top priority is <b>{PRIORITY_LABEL[topKey]}</b>, but none of the cards we checked earn much on it.</>;
+                                }
+
+                              } else if (topKey === 'Lounge') {
+                                // Type 2 — Perk priority: fee-bucket routing
+                                const premiumCovers = premium.filter(c => evalPriorityForCard(topKey, c, monthlySpend).status === 'met');
+                                const allCandidates = [...rankedPool, ...premium];
+                                const coversIt = allCandidates.filter(c => evalPriorityForCard(topKey, c, monthlySpend).status === 'met');
+                                if (premiumCovers.some(c => c.netGuaranteedPerYear > 0)) {
+                                  msg = <>Your top priority — <b>{PRIORITY_LABEL[topKey]}</b> — isn&rsquo;t covered by cards within your fee budget. Cards that offer it are under &lsquo;Other cards outside your fee preference&rsquo; below. Raise your fee limit to include them.</>;
+                                } else if (coversIt.length > 0 && coversIt.every(c => c.netGuaranteedPerYear <= 0)) {
+                                  msg = <>Your top priority — <b>{PRIORITY_LABEL[topKey]}</b> — is only offered by cards that wouldn&rsquo;t earn you enough to be worth it on your spending.</>;
+                                } else {
+                                  msg = <>None of the cards we checked cover your top priority — <b>{PRIORITY_LABEL[topKey]}</b>.</>;
+                                }
+
+                              } else if (REWARD_KEYS.has(topKey)) {
+                                // Type 3 — Reward-type priority: explain the mismatch, name a card that does cover it
+                                const evalLine = topEv.line;
+                                const altCard = rankedPool.find(c => evalPriorityForCard(topKey, c, monthlySpend).status === 'met');
+                                msg = (
+                                  <>
+                                    Your top priority is <b>{PRIORITY_LABEL[topKey]}</b>, but this card doesn&rsquo;t give you that.
+                                    {evalLine ? <> {evalLine}.</> : null}
+                                    {altCard ? <> <b>{altCard.meta.name}</b> does — consider it if this matters most.</> : null}
+                                  </>
+                                );
+
                               } else {
-                                // Case C — no card we checked covers it at all
-                                msg = <>None of the cards we checked cover your top priority — <b>{PRIORITY_LABEL[topKey]}</b>.</>;
+                                // Fallback
+                                msg = <>Your top priority — <b>{PRIORITY_LABEL[topKey]}</b> — isn&rsquo;t met by this card.</>;
                               }
+
                               return <div className="r2-pri-bridge">{msg}</div>;
                             })()}
                             {!comboHero && altForTop && (
