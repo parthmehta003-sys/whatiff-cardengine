@@ -960,42 +960,44 @@ export const ResultsScreenV2: React.FC<Props> = ({
                         </div>
                       )}
 
-                      {/* Best cards per category — shared collapsible, not per-card (Fix 2: above balance) */}
-                      {result.bestCardPerCategory && (() => {
-                        const routes = Object.entries(result.bestCardPerCategory) as [string, OwnedCategoryRoute][];
-                        const sorted = routes.slice().sort((a, b) => {
-                          const aLeak = !a[1].cardId; const bLeak = !b[1].cardId;
-                          if (aLeak !== bLeak) return aLeak ? 1 : -1;
-                          return b[1].guaranteed - a[1].guaranteed;
-                        });
-                        const totalAnnual = routes.reduce((s, [, r]) => s + (r.guaranteed ?? 0) * 12, 0);
+                      {/* Best cards per category — per-card contribution table */}
+                      {result.bestCardPerCategory && result.ownedVerdicts && (() => {
+                        const ownedVerdicts = result.ownedVerdicts!;
+                        const bpc = result.bestCardPerCategory!;
+                        // Build a map of cardId → won plain-category names
+                        const wonByCard = new Map<string, string[]>();
+                        for (const v of ownedVerdicts) wonByCard.set(v.cardId, []);
+                        for (const [cat, route] of Object.entries(bpc)) {
+                          if (route.cardId && wonByCard.has(route.cardId)) {
+                            const label = CAT_LABEL[cat] ?? (cat === 'Other(base)' ? 'Everything else' : cat);
+                            wonByCard.get(route.cardId)!.push(label);
+                          }
+                        }
+                        const currentNet = ownedVerdicts.reduce((s, v) => s + v.netPerYear, 0);
                         return (
                           <details className="r2-fold">
                             <summary>Best cards in your portfolio for each spend</summary>
                             <div className="r2-fold-body">
-                              <span className="r2-routemap-sub">among cards you own today</span>
-                              {sorted.map(([cat, route]) => {
-                                const isLeak = !route.cardId;
+                              <div className="r2-portcard-eyebrow">What each card really earns you</div>
+                              {ownedVerdicts.map(v => {
+                                const won = wonByCard.get(v.cardId) ?? [];
+                                const catsLabel = won.length > 0 ? won.join(', ') : "doesn't win any category";
                                 return (
-                                  <div key={cat} className={'r2-routemap-row' + (isLeak ? ' leak' : '')}>
-                                    <span className="r2-routemap-cat">{cat}</span>
-                                    {isLeak ? (
-                                      <span className="r2-routemap-leak-note">{route.noData ? 'no rate data' : 'none earn here'}</span>
-                                    ) : (
-                                      <>
-                                        <span className="r2-routemap-card">{route.cardName}</span>
-                                        <span className="r2-routemap-val">₹{Math.round(route.guaranteed * 12).toLocaleString('en-IN')}/yr</span>
-                                      </>
-                                    )}
+                                  <div key={v.cardId} className="r2-portcard-row">
+                                    <span className="r2-portcard-name">
+                                      {v.cardName} <span className="r2-portcard-cats">({catsLabel})</span>
+                                    </span>
+                                    <span className="r2-portcard-val">{inr(v.netPerYear)}/yr</span>
                                   </div>
                                 );
                               })}
-                              {totalAnnual > 0 && (
-                                <div className="r2-routemap-total">
-                                  <span className="r2-routemap-total-lbl">Total with current setup</span>
-                                  <span className="r2-routemap-total-val">₹{Math.round(totalAnnual).toLocaleString('en-IN')}/yr</span>
-                                </div>
-                              )}
+                              <div className="r2-routemap-total">
+                                <span className="r2-routemap-total-lbl">All together</span>
+                                <span className="r2-routemap-total-val">{inr(currentNet)}/yr</span>
+                              </div>
+                              <div className="r2-portcard-explainer">
+                                No single card does everything well. Each one is best for a few things. Use all of them the right way and you earn <b>{inr(currentNet)}</b> a year — more than any card alone.
+                              </div>
                             </div>
                           </details>
                         );
@@ -2506,6 +2508,14 @@ const css = `
   gap:6px 10px;padding:8px 0 2px;margin-top:4px;border-top:1px solid #27272a}
 .r2-routemap-total-lbl{font-size:12px;font-weight:700;color:#71717a;text-transform:uppercase;letter-spacing:.05em}
 .r2-routemap-total-val{font-size:14px;font-weight:800;color:#10b981;font-variant-numeric:tabular-nums;text-align:right}
+.r2-portcard-eyebrow{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#3f3f46;margin-bottom:8px}
+.r2-portcard-row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:7px 0;border-bottom:1px solid #18181b}
+.r2-portcard-row:last-of-type{border-bottom:none}
+.r2-portcard-name{font-size:13px;font-weight:600;color:#d4d4d8;line-height:1.4}
+.r2-portcard-cats{color:#fff;font-weight:500}
+.r2-portcard-val{font-size:13px;font-weight:700;color:#a1a1aa;white-space:nowrap;font-variant-numeric:tabular-nums}
+.r2-portcard-explainer{font-size:12px;color:#52525b;line-height:1.6;margin-top:10px}
+.r2-portcard-explainer b{color:#a1a1aa}
 
 /* Owned-card hack fold in Phase 1 */
 .r2-fold--p1hack{margin-top:14px}
