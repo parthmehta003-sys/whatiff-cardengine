@@ -1198,6 +1198,29 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 </div>
                               );
                             })}
+                            {/* Bridge line: top priority unmet, no altForTop (altForTop already handles in-budget case) */}
+                            {!comboHero && !altForTop && priorities?.top && (() => {
+                              const topKey = priorities.top;
+                              const topEv = evalPriorityForCard(topKey, activeCard, monthlySpend);
+                              if (topEv.status === 'met') return null;
+                              const premium = result.premiumWorthConsidering ?? [];
+                              // Cards (across all buckets) that meet the top priority
+                              const allCandidates = [...(result.runnersUp ?? []), ...premium];
+                              const coversIt = allCandidates.filter(c => evalPriorityForCard(topKey, c, monthlySpend).status === 'met');
+                              const premiumCovers = premium.filter(c => evalPriorityForCard(topKey, c, monthlySpend).status === 'met');
+                              let msg: React.ReactNode;
+                              if (premiumCovers.some(c => c.netGuaranteedPerYear > 0)) {
+                                // Case A — a fee-excluded card with positive value covers it
+                                msg = <>Your top priority — <b>{PRIORITY_LABEL[topKey]}</b> — isn&rsquo;t covered by cards within your fee budget. Cards that offer it are under &lsquo;Other cards outside your fee preference&rsquo; below. Raise your fee limit to include them.</>;
+                              } else if (coversIt.length > 0 && coversIt.every(c => c.netGuaranteedPerYear <= 0)) {
+                                // Case B — cards exist that cover it but all are net-negative
+                                msg = <>Your top priority — <b>{PRIORITY_LABEL[topKey]}</b> — is only offered by cards that wouldn&rsquo;t earn you enough to be worth it on your spending.</>;
+                              } else {
+                                // Case C — no card we checked covers it at all
+                                msg = <>None of the cards we checked cover your top priority — <b>{PRIORITY_LABEL[topKey]}</b>.</>;
+                              }
+                              return <div className="r2-pri-bridge">{msg}</div>;
+                            })()}
                             {!comboHero && altForTop && (
                               <div className="r2-alt-card">
                                 <div className="r2-alt-pill">Alternative for your {PRIORITY_LABEL[altForTop.key]} priority</div>
@@ -2157,6 +2180,8 @@ const css = `
 .r2-alt-line{
   font-size:13.5px;color:#d4d4d8;line-height:1.55;margin-bottom:10px}
 .r2-alt-line b{color:#fafafa}
+.r2-pri-bridge{font-size:13px;color:#fafafa;line-height:1.55;margin-top:12px;padding:10px 12px;background:#18181b;border-radius:8px;border:1px solid #27272a}
+.r2-pri-bridge b{color:#fafafa;font-weight:600}
 .r2-alt-toggle{
   background:none;border:none;color:#8b5cf6;font-family:inherit;
   font-size:13px;font-weight:600;cursor:pointer;padding:4px 0;display:block}
