@@ -168,7 +168,7 @@ export function selectHackForCard(
       const g = gated[0];
       return {
         cardId,
-        name: g.hackName ?? 'Optimisation tip',
+        name: g.hackName ?? 'Pro Tip',
         whyItMatters: '',
         executionSteps: null,
         status: g.status,
@@ -202,7 +202,7 @@ export function selectHackForCard(
   };
   return {
     cardId,
-    name: top.h.hackName ?? 'Optimisation tip',
+    name: top.h.hackName ?? 'Pro Tip',
     whyItMatters: fillTokens(top.h.whyItMatters ?? '', ctx),
     executionSteps: fillTokens(top.h.executionSteps ?? '', ctx) || null,
     status: top.h.status,
