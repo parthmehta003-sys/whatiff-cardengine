@@ -991,10 +991,15 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 );
                               })}
                               {totalAnnual > 0 && (
-                                <div className="r2-routemap-total">
-                                  <span className="r2-routemap-total-lbl">Total with current setup</span>
-                                  <span className="r2-routemap-total-val">₹{Math.round(totalAnnual).toLocaleString('en-IN')}/yr</span>
-                                </div>
+                                <>
+                                  <div className="r2-routemap-total">
+                                    <span className="r2-routemap-total-lbl">Total with current setup</span>
+                                    <span className="r2-routemap-total-val">₹{Math.round(totalAnnual).toLocaleString('en-IN')}/yr</span>
+                                  </div>
+                                  <div className="r2-portcard-explainer">
+                                    No single card does everything well. Each one is best for a few things. Use all of them the right way and you earn <b>₹{Math.round(totalAnnual).toLocaleString('en-IN')}</b> a year — more than any card alone.
+                                  </div>
+                                </>
                               )}
                             </div>
                           </details>
@@ -2506,6 +2511,8 @@ const css = `
   gap:6px 10px;padding:8px 0 2px;margin-top:4px;border-top:1px solid #27272a}
 .r2-routemap-total-lbl{font-size:12px;font-weight:700;color:#71717a;text-transform:uppercase;letter-spacing:.05em}
 .r2-routemap-total-val{font-size:14px;font-weight:800;color:#10b981;font-variant-numeric:tabular-nums;text-align:right}
+.r2-portcard-explainer{font-size:12px;color:#52525b;line-height:1.6;margin-top:10px}
+.r2-portcard-explainer b{color:#a1a1aa}
 
 /* Owned-card hack fold in Phase 1 */
 .r2-fold--p1hack{margin-top:14px}
