@@ -15,18 +15,29 @@ import {
 } from 'lucide-react';
 import type { SpendCategory, MonthlySpend } from '../../lib/cardEngine/computeEarn';
 
+export const CATEGORY_LABELS: Partial<Record<SpendCategory, string>> = {
+  Online:        'Online shopping',
+  Dining:        'Dining & food',
+  Grocery:       'Groceries',
+  Fuel:          'Fuel',
+  Travel:        'Travel',
+  Utility:       'Utility bills',
+  Subscriptions: 'Subscriptions',
+  International: 'International',
+};
+
 const CATEGORIES: {
   key: SpendCategory; label: string; hint: string; accent: string;
   presets: number[]; Icon: React.ElementType;
 }[] = [
-  { key: 'Online',        label: 'Online shopping',      hint: 'Amazon, Flipkart, Myntra…',      accent: '#06b6d4', presets: [5000,  15000, 35000], Icon: ShoppingCart    },
-  { key: 'Dining',        label: 'Dining & food',         hint: 'Swiggy, Zomato, restaurants',    accent: '#f59e0b', presets: [3000,  8000,  20000], Icon: UtensilsCrossed },
-  { key: 'Grocery',       label: 'Groceries',             hint: 'BigBasket, supermarkets',        accent: '#10b981', presets: [4000,  10000, 25000], Icon: ShoppingBasket  },
-  { key: 'Fuel',          label: 'Fuel',                  hint: 'Petrol, diesel',                 accent: '#8b5cf6', presets: [3000,  8000,  15000], Icon: Fuel            },
-  { key: 'Travel',        label: 'Travel',                hint: 'Flights, hotels, cabs',          accent: '#f97316', presets: [5000,  15000, 40000], Icon: Plane           },
-  { key: 'Utility',       label: 'Utility bills',         hint: 'Electricity, mobile, DTH',       accent: '#a78bfa', presets: [2000,  5000,  12000], Icon: Zap             },
-  { key: 'Subscriptions', label: 'Subscriptions',         hint: 'OTT, SaaS, memberships',         accent: '#38bdf8', presets: [500,   1500,  4000],  Icon: Repeat          },
-  { key: 'International', label: 'International',         hint: 'Forex, overseas online',         accent: '#34d399', presets: [0,     5000,  20000], Icon: Globe           },
+  { key: 'Online',        label: CATEGORY_LABELS.Online!,        hint: 'Amazon, Flipkart, Myntra…',      accent: '#06b6d4', presets: [5000,  15000, 35000], Icon: ShoppingCart    },
+  { key: 'Dining',        label: CATEGORY_LABELS.Dining!,        hint: 'Swiggy, Zomato, restaurants',    accent: '#f59e0b', presets: [3000,  8000,  20000], Icon: UtensilsCrossed },
+  { key: 'Grocery',       label: CATEGORY_LABELS.Grocery!,       hint: 'BigBasket, supermarkets',        accent: '#10b981', presets: [4000,  10000, 25000], Icon: ShoppingBasket  },
+  { key: 'Fuel',          label: CATEGORY_LABELS.Fuel!,          hint: 'Petrol, diesel',                 accent: '#8b5cf6', presets: [3000,  8000,  15000], Icon: Fuel            },
+  { key: 'Travel',        label: CATEGORY_LABELS.Travel!,        hint: 'Flights, hotels, cabs',          accent: '#f97316', presets: [5000,  15000, 40000], Icon: Plane           },
+  { key: 'Utility',       label: CATEGORY_LABELS.Utility!,       hint: 'Electricity, mobile, DTH',       accent: '#a78bfa', presets: [2000,  5000,  12000], Icon: Zap             },
+  { key: 'Subscriptions', label: CATEGORY_LABELS.Subscriptions!, hint: 'OTT, SaaS, memberships',         accent: '#38bdf8', presets: [500,   1500,  4000],  Icon: Repeat          },
+  { key: 'International', label: CATEGORY_LABELS.International!, hint: 'Forex, overseas online',         accent: '#34d399', presets: [0,     5000,  20000], Icon: Globe           },
 ];
 
 const PRESET_LABELS = ['Light', 'Medium', 'Heavy'];

@@ -23,6 +23,7 @@ import { CardMathBreakdown } from './CardMathBreakdown';
 import RecommendationCard, { type DevaluationFlag } from './RecommendationCard';
 import type { SelectedHack, SurfacedInsight } from '../../lib/cardEngine/selectHacks';
 import { LABEL as PRIORITY_LABEL } from '../../lib/cardEngine/evaluatePriorities';
+import { CATEGORY_LABELS } from './SpendInput';
 
 const inr = (n: number) => '₹' + Math.round(n).toLocaleString('en-IN');
 const difficultyLabel = (d: string) =>
@@ -324,10 +325,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
 
   // ── Plain-English priority line formatter (display layer only) ────────────
   const FOREX_BENCHMARK_PCT = 3.5;
-  const CAT_LABEL: Partial<Record<string, string>> = {
-    Dining: 'Eating out', Online: 'Online shopping', Fuel: 'Petrol',
-    Travel: 'Travel', Grocery: 'Groceries', Utility: 'Bills',
-  };
+  const CAT_LABEL = CATEGORY_LABELS;
   function periodMult(period: string | null): number {
     switch ((period ?? 'month').toLowerCase()) {
       case 'year': return 12; case 'quarter': return 3; default: return 1;
@@ -399,7 +397,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
         };
         const cat = catMap[key];
         if (!cat) return '';
-        const label = CAT_LABEL[cat] ?? cat;
+        const label = (CAT_LABEL as Record<string, string>)[cat] ?? cat;
         const perYear = (card.earn.perCategory[cat as keyof typeof card.earn.perCategory]?.guaranteed ?? 0) * 12;
         if (perYear > 0) return `${label}: gives you back ${inr(perYear)} a year.`;
         return `${label}: gives you nothing back.`;
@@ -631,13 +629,13 @@ export const ResultsScreenV2: React.FC<Props> = ({
                               .filter(c => (monthlySpend[c] ?? 0) > 0);
 
                             // Plain category name helper
-                            const catName = (cat: string) => CAT_LABEL[cat] ?? (cat === 'Other(base)' ? 'Everything else' : cat);
+                            const catName = (cat: string) => (CAT_LABEL as Record<string, string>)[cat] ?? (cat === 'Other(base)' ? 'Everything else' : cat);
 
                             // ── Shared routing vars for all verdict branches ──
                             const bpcShared = result.bestCardPerCategory ?? {};
                             const wonCatsShared = spendCats.filter(c => bpcShared[c]?.cardId === activeCardId && (bpcShared[c]?.guaranteed ?? 0) > 0);
                             const wonLabelShared = wonCatsShared.length > 0
-                              ? wonCatsShared.map(c => CAT_LABEL[c] ?? (c === 'Other(base)' ? 'everything else' : c)).join(' & ')
+                              ? wonCatsShared.map(c => (CAT_LABEL as Record<string, string>)[c] ?? (c === 'Other(base)' ? 'everything else' : c)).join(' & ')
                               : null;
                             const standaloneTotalShared = spendCats.reduce((s, cat) => {
                               const ce = cardProof[cat as keyof typeof cardProof];
@@ -1336,18 +1334,19 @@ export const ResultsScreenV2: React.FC<Props> = ({
                         if (entries.length === 0) return null;
                         const totalIncremental = entries.reduce((s, [, d]) => s + d.incrementalGuaranteed, 0);
                         const [topCat, topDelta] = entries[0];
+                        const topCatLabel = CATEGORY_LABELS[topCat as keyof typeof CATEGORY_LABELS] ?? topCat;
                         if (topDelta.currentBestGuaranteed === 0 &&
                             topDelta.incrementalGuaranteed / totalIncremental >= 0.40) {
                           return (
                             <div className="r2-gaptag r2-gaptag--gap">
-                              <span className="r2-gaptag-pill">{topCat}</span>
+                              <span className="r2-gaptag-pill">{topCatLabel}</span>
                               <span className="r2-gaptag-text">
-                                None of your cards earn on <b>{topCat}</b>. Adding this card fills that gap.
+                                None of your cards earn on <b>{topCatLabel}</b>. Adding this card fills that gap.
                               </span>
                             </div>
                           );
                         }
-                        const catNames = entries.map(([cat]) => cat);
+                        const catNames = entries.map(([cat]) => CATEGORY_LABELS[cat as keyof typeof CATEGORY_LABELS] ?? cat);
                         const MAX_SHOW = 2;
                         const pillLabel = catNames.length <= MAX_SHOW
                           ? catNames.join(' & ')
