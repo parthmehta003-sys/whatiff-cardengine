@@ -1454,6 +1454,32 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                   <b>{inr(top.marginalGainPerYear)}/yr more than today</b>, after all fees.
                                 </span>
                               )}
+                              {/* Line 1 — priorities match summary */}
+                              {priorityKeys.length > 0 && (() => {
+                                const matched = priorityKeys.filter(k => evalPriorityForCard(k, top, monthlySpend).status === 'met');
+                                const matchedNames = matched.map(k => PRIORITY_LABEL[k]).join(', ');
+                                return (
+                                  <div className="r2-scenario-meta">
+                                    {matched.length > 0
+                                      ? <>Matches <b>{matched.length}</b> of your {priorityKeys.length} {priorityKeys.length === 1 ? 'priority' : 'priorities'} — {matchedNames}. <span className="r2-scenario-tab-hint">See Priorities for details.</span></>
+                                      : <>It doesn&rsquo;t match any of your {priorityKeys.length} {priorityKeys.length === 1 ? 'priority' : 'priorities'}. <span className="r2-scenario-tab-hint">See Priorities for details.</span></>
+                                    }
+                                  </div>
+                                );
+                              })()}
+                              {/* Line 2 — excluded categories the user spends in */}
+                              {(() => {
+                                const excCats = (Object.keys(monthlySpend) as Array<keyof typeof monthlySpend>)
+                                  .filter(cat => top.earn.perCategory[cat]?.excluded === true && (monthlySpend[cat] ?? 0) > 0);
+                                if (excCats.length === 0) return null;
+                                const excAnnual = excCats.reduce((s, cat) => s + (monthlySpend[cat] ?? 0) * 12, 0);
+                                const excNames = excCats.map(cat => (CATEGORY_LABELS as Record<string, string>)[cat] ?? cat).join(', ');
+                                return (
+                                  <div className="r2-scenario-meta r2-scenario-excl">
+                                    Pays nothing on <b>{excNames}</b>, where you spend <b>{inr(excAnnual)}/yr</b> — keep another card for that.
+                                  </div>
+                                );
+                              })()}
                             </div>
                           );
                         })()}
@@ -2476,6 +2502,10 @@ const css = `
   margin-top:10px;border-top:1px solid #1f1f23;padding-top:10px;
   font-size:13px;color:#fafafa;line-height:1.6}
 .r2-scenario-box b{color:#fafafa;font-weight:600}
+.r2-scenario-meta{font-size:12px;color:#a1a1aa;line-height:1.55;margin-top:8px}
+.r2-scenario-meta b{color:#d4d4d8;font-weight:600}
+.r2-scenario-tab-hint{color:#71717a}
+.r2-scenario-excl b{color:#f59e0b}
 
 /* ── Model B two-phase layout (Journey A) ── */
 .r2-phase1{margin:0}
