@@ -1782,10 +1782,10 @@ const css = `
 @media(max-width:820px){.r2-left{position:static}}
 
 /* ── Eyebrow + hero numbers — scaled for desktop two-column layout ── */
-.r2-eyebrow{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#52525b;margin-bottom:6px}
+.r2-eyebrow{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#71717a;margin-bottom:6px}
 .r2-hero-num{font-size:32px;font-weight:800;color:#10b981;letter-spacing:-0.02em;line-height:1.05;font-variant-numeric:tabular-nums}
 .r2-hero-yr{font-size:20px;font-weight:800;color:#10b981;letter-spacing:-.01em}
-.r2-hero-sub{font-size:13px;color:#a1a1aa;margin-top:5px;margin-bottom:20px;line-height:1.4}
+.r2-hero-sub{font-size:13px;color:#fafafa;margin-top:5px;margin-bottom:20px;line-height:1.4}
 .r2-hero-sub b{color:#fafafa;font-weight:600}
 
 /* ── Card stack — height must clear the back card's full visual extent.
@@ -1848,15 +1848,15 @@ const css = `
   pointer-events:none}
 
 /* ── Swap hint — matches prototype .swaphint ── */
-.r2-swaphint{font-size:12px;color:#52525b;margin-bottom:10px}
-.r2-swaphint b{color:#a1a1aa;font-weight:600}
+.r2-swaphint{font-size:12px;color:#71717a;margin-bottom:10px}
+.r2-swaphint b{color:#fafafa;font-weight:600}
 
 /* ── Combo footnote ── */
-.r2-footnote{font-size:12.5px;color:#6b7280;line-height:1.55;margin-top:4px}
+.r2-footnote{font-size:12.5px;color:#fafafa;line-height:1.55;margin-top:4px}
 .r2-footnote b{color:#10b981;font-weight:700;font-variant-numeric:tabular-nums}
 
 /* ── Single-card baseline — matches prototype .betterline ── */
-.r2-betterline{margin-top:12px;font-size:15px;color:#a1a1aa;line-height:1.4}
+.r2-betterline{margin-top:12px;font-size:15px;color:#fafafa;line-height:1.4}
 .r2-betterline b{color:#10b981;font-size:22px;font-weight:800;letter-spacing:-0.01em;font-variant-numeric:tabular-nums}
 
 /* ── Icon row ── */
@@ -1868,15 +1868,15 @@ const css = `
   width:48px;height:48px;border-radius:50%;
   background:#0c0c0e;border:1px solid #27272a;
   display:flex;align-items:center;justify-content:center;
-  color:#71717a;transition:all .18s}
+  color:#fafafa;transition:all .18s}
 .r2-iconcircle.on .r2-circ{
   border-color:var(--r2-accent,#10b981);
   background-color:color-mix(in srgb,var(--r2-accent,#10b981) 10%,#0c0c0e);
   box-shadow:0 0 0 1px color-mix(in srgb,var(--r2-accent,#10b981) 30%,transparent),
              0 0 14px color-mix(in srgb,var(--r2-accent,#10b981) 18%,transparent);
   color:var(--r2-accent,#10b981)}
-.r2-iconcircle:hover:not(.on) .r2-circ{border-color:#3f3f46;color:#a1a1aa}
-.r2-lbl{font-size:10px;font-weight:600;color:#52525b;text-align:center;line-height:1.3}
+.r2-iconcircle:hover:not(.on) .r2-circ{border-color:#3f3f46;color:#fafafa}
+.r2-lbl{font-size:10px;font-weight:600;color:#71717a;text-align:center;line-height:1.3}
 .r2-iconcircle.on .r2-lbl{color:#d4d4d8}
 
 /* ── Detail panel ── */
@@ -1886,14 +1886,14 @@ const css = `
   border-top-color:color-mix(in srgb,var(--r2-accent,#10b981) 35%,#1f1f23)}
 .r2-detail-which{
   font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
-  color:#52525b;margin-bottom:14px}
+  color:#71717a;margin-bottom:14px}
 
 /* ── Shared item rows ── */
 .r2-item{display:flex;gap:9px;font-size:13px;color:#d4d4d8;line-height:1.55;margin-bottom:8px}
 .r2-pl{color:#10b981;font-weight:800;flex-shrink:0}
 .r2-mn{color:#f59e0b;font-weight:800;flex-shrink:0}
-.r2-item-val{color:#71717a;font-size:12px}
-.r2-empty{font-size:13px;color:#52525b;line-height:1.5}
+.r2-item-val{color:#fafafa;font-size:12px}
+.r2-empty{font-size:13px;color:#71717a;line-height:1.5}
 
 /* ── Link button ── */
 .r2-linkbtn{
@@ -1907,15 +1907,15 @@ const css = `
   padding:13px;margin-bottom:10px}
 .r2-hackbox.locked{background:#111113;border-color:#27272a}
 .r2-ht{color:#8b5cf6;font-weight:700;font-size:13.5px;margin-bottom:5px}
-.r2-hd{color:#a1a1aa;font-size:13px;line-height:1.55}
-.r2-hackbox.locked .r2-ht{color:#52525b}
+.r2-hd{color:#fafafa;font-size:13px;line-height:1.55}
+.r2-hackbox.locked .r2-ht{color:#71717a}
 .r2-steps{margin-top:10px}
 .r2-step{display:flex;gap:10px;font-size:13px;color:#d4d4d8;line-height:1.5;margin-bottom:9px}
 .r2-sn{
   width:20px;height:20px;border-radius:50%;background:#18181b;color:#8b5cf6;
   font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.r2-hack-meta{font-size:11.5px;color:#52525b;margin-top:4px;line-height:1.5}
-.r2-hack-meta b{color:#71717a}
+.r2-hack-meta{font-size:11.5px;color:#71717a;margin-top:4px;line-height:1.5}
+.r2-hack-meta b{color:#fafafa}
 .r2-hack-seehow{
   background:none;border:none;color:#8b5cf6;font-family:inherit;font-size:13px;
   font-weight:600;cursor:pointer;padding:8px 0 2px;display:block}
@@ -1925,7 +1925,7 @@ const css = `
 .r2-math-hero{
   display:flex;align-items:baseline;justify-content:space-between;
   margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #1f1f23}
-.r2-math-hero-lbl{font-size:12px;font-weight:600;color:#a1a1aa}
+.r2-math-hero-lbl{font-size:12px;font-weight:600;color:#fafafa}
 .r2-math-hero-val{font-size:26px;font-weight:800;color:#10b981;
   letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .r2-math-hero-yr{font-size:15px;font-weight:700;color:#10b981}
@@ -1938,8 +1938,8 @@ const css = `
 .r2-cat-name{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#fafafa}
 .r2-cat-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
 .r2-cat-val{font-size:14px;font-weight:700;color:#fafafa;font-variant-numeric:tabular-nums}
-.r2-cat-spend{font-size:11.5px;color:#71717a;margin:3px 0 5px 16px}
-.r2-cat-rate{color:#a1a1aa}
+.r2-cat-spend{font-size:11.5px;color:#fafafa;margin:3px 0 5px 16px}
+.r2-cat-rate{color:#fafafa}
 .r2-bar-track{height:5px;background:#18181b;border-radius:3px;overflow:hidden;margin-left:16px}
 .r2-bar{height:100%;border-radius:3px}
 .r2-caphit{font-size:11px;color:#f59e0b;margin:5px 0 0 16px;display:flex;flex-wrap:wrap;gap:8px}
@@ -1949,19 +1949,19 @@ const css = `
 .r2-math-row{
   display:flex;justify-content:space-between;align-items:baseline;
   font-size:13px;padding:7px 0;border-bottom:1px solid #141416}
-.r2-math-row.excluded .r2-math-row-cat{color:#3f3f46}
-.r2-math-row-val.excluded{color:#3f3f46}
-.r2-math-attributed{font-size:11px;color:#3f3f46;font-style:italic}
+.r2-math-row.excluded .r2-math-row-cat{color:#71717a}
+.r2-math-row-val.excluded{color:#71717a}
+.r2-math-attributed{font-size:11px;color:#71717a;font-style:italic}
 /* Total line */
 .r2-math-total{
   display:flex;justify-content:space-between;align-items:baseline;
   padding:10px 0 0;margin-top:8px;border-top:1px solid #27272a}
-.r2-math-total>span:first-child{font-size:13px;font-weight:600;color:#a1a1aa}
+.r2-math-total>span:first-child{font-size:13px;font-weight:600;color:#fafafa}
 .r2-math-total-val{font-size:20px;font-weight:800;color:#10b981;
   font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 /* Upside note (combo) */
 .r2-math-upside{
-  margin-top:10px;font-size:12px;color:#a1a1aa;line-height:1.5;
+  margin-top:10px;font-size:12px;color:#fafafa;line-height:1.5;
   background:#18140a;border:1px solid #3a2f10;border-radius:9px;padding:9px 11px}
 .r2-math-upside-tag{
   display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;
@@ -1969,17 +1969,17 @@ const css = `
   padding:1px 5px;margin-left:5px;letter-spacing:.05em;vertical-align:middle}
 
 /* ── Combo hero fee note ── */
-.r2-combo-feenote{font-size:12px;color:#52525b;margin-top:-12px;margin-bottom:18px;line-height:1.4}
+.r2-combo-feenote{font-size:12px;color:#71717a;margin-top:-12px;margin-bottom:18px;line-height:1.4}
 .r2-combo-feenote.waived{color:#10b981}
 
 /* ── Combo Math fee line + net line (mirrors CardMathBreakdown) ── */
 .r2-math-feeline{
   display:flex;justify-content:space-between;align-items:baseline;
   padding:8px 0 0;margin-top:6px;border-top:1px solid #1f1f23;font-size:13px}
-.r2-math-fee-label{color:#a1a1aa;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
-.r2-math-fee-strike{text-decoration:line-through;color:#52525b}
+.r2-math-fee-label{color:#fafafa;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.r2-math-fee-strike{text-decoration:line-through;color:#71717a}
 .r2-math-fee-waived{color:#10b981;font-weight:600;font-size:12px}
-.r2-math-fee-val{color:#a1a1aa;font-weight:600;font-variant-numeric:tabular-nums;flex-shrink:0}
+.r2-math-fee-val{color:#fafafa;font-weight:600;font-variant-numeric:tabular-nums;flex-shrink:0}
 .r2-math-cardnet{
   display:flex;justify-content:space-between;align-items:baseline;
   padding:8px 0 0;margin-top:4px;border-top:1px solid #27272a}
@@ -1988,7 +1988,7 @@ const css = `
   font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 
 /* ── Phase 2 Math panel: per-category rows with marginal highlight ── */
-.r2-math-legend{display:flex;align-items:center;gap:6px;font-size:11px;color:#71717a;margin-bottom:12px;flex-wrap:wrap}
+.r2-math-legend{display:flex;align-items:center;gap:6px;font-size:11px;color:#fafafa;margin-bottom:12px;flex-wrap:wrap}
 .r2-math-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .r2-math-legend-dot--new{background:#10b981}
 .r2-math-legend-dot--covered{background:#3f3f46}
@@ -2000,9 +2000,9 @@ const css = `
 .r2-panel-math .r2-math-row--covered{border-left-color:#27272a}
 .r2-math-row-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
 .r2-math-row-cat{font-size:13px;color:#d4d4d8;display:flex;align-items:center;gap:6px}
-.r2-math-row--covered .r2-math-row-cat{color:#52525b}
+.r2-math-row--covered .r2-math-row-cat{color:#71717a}
 .r2-math-row-val{font-size:13px;font-weight:600;color:#fafafa;font-variant-numeric:tabular-nums}
-.r2-math-row--covered .r2-math-row-val{color:#52525b}
+.r2-math-row--covered .r2-math-row-val{color:#71717a}
 .r2-math-row-pill{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
   color:#10b981;border:1px solid #10b981;border-radius:4px;padding:1px 5px;vertical-align:middle}
 .r2-math-bar-track{height:4px;background:#18181b;border-radius:2px;overflow:hidden}
@@ -2011,9 +2011,9 @@ const css = `
 .r2-math-feeline{
   display:flex;justify-content:space-between;align-items:baseline;
   padding:8px 0 0;margin-top:10px;border-top:1px solid #1f1f23;font-size:13px}
-.r2-math-feeline-lbl{color:#a1a1aa;display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
-.r2-math-feeline-val{color:#a1a1aa;font-weight:600;font-variant-numeric:tabular-nums}
-.r2-math-strike{text-decoration:line-through;color:#52525b}
+.r2-math-feeline-lbl{color:#fafafa;display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
+.r2-math-feeline-val{color:#fafafa;font-weight:600;font-variant-numeric:tabular-nums}
+.r2-math-strike{text-decoration:line-through;color:#71717a}
 .r2-math-waived{color:#10b981;font-weight:600;font-size:12px}
 .r2-math-net{
   display:flex;justify-content:space-between;align-items:baseline;
@@ -2027,23 +2027,23 @@ const css = `
 .r2-math-marginal-hd{font-size:11px;font-weight:700;text-transform:uppercase;
   letter-spacing:.06em;color:#6ee7b7;margin-bottom:8px}
 .r2-math-marginal-row{display:flex;justify-content:space-between;font-size:12.5px;
-  color:#a1a1aa;padding:3px 0}
+  color:#fafafa;padding:3px 0}
 .r2-math-marginal-row--total{
   border-top:1px solid #1a3327;margin-top:4px;padding-top:7px;
   font-weight:700;color:#fafafa}
 .r2-math-marginal-approx{color:#10b981;font-variant-numeric:tabular-nums}
 .r2-math-marginal-net{color:#10b981;font-variant-numeric:tabular-nums;font-size:14px}
 .r2-math-marginal-note{
-  font-size:10.5px;color:#52525b;margin-top:6px;line-height:1.4;font-style:italic}
+  font-size:10.5px;color:#71717a;margin-top:6px;line-height:1.4;font-style:italic}
 /* Upside note Phase 2 */
 .r2-math-upside{
-  margin-top:10px;font-size:12px;color:#a1a1aa;line-height:1.5;
+  margin-top:10px;font-size:12px;color:#fafafa;line-height:1.5;
   background:#18140a;border:1px solid #3a2f10;border-radius:9px;padding:9px 11px}
 
 /* ── Priorities panel context note (combo) ── */
 .r2-pri-context{
-  font-size:12px;color:#52525b;margin-bottom:12px;line-height:1.4}
-.r2-pri-context b{color:#71717a}
+  font-size:12px;color:#71717a;margin-bottom:12px;line-height:1.4}
+.r2-pri-context b{color:#fafafa}
 
 /* ── Priorities panel ── */
 .r2-pri-row{display:flex;gap:10px;font-size:13px;padding:8px 0;
@@ -2052,9 +2052,9 @@ const css = `
 .r2-pri-glyph{font-size:14px;font-weight:800;width:18px;flex-shrink:0;margin-top:1px}
 .r2-pri-row.met .r2-pri-glyph{color:#10b981}
 .r2-pri-row.partial .r2-pri-glyph{color:#f59e0b}
-.r2-pri-row.unmet .r2-pri-glyph{color:#52525b}
+.r2-pri-row.unmet .r2-pri-glyph{color:#71717a}
 .r2-pri-label{color:#fafafa;font-weight:600;font-size:13px}
-.r2-pri-line{color:#a1a1aa;font-size:12.5px;margin-top:2px;line-height:1.45}
+.r2-pri-line{color:#fafafa;font-size:12.5px;margin-top:2px;line-height:1.45}
 
 /* ── Things to know panel ── */
 .r2-item.know{align-items:flex-start}
@@ -2065,10 +2065,10 @@ const css = `
   content:'';flex:1;height:1px;background:#27272a}
 .r2-know-group-label{
   font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
-  color:#52525b;white-space:nowrap}
+  color:#71717a;white-space:nowrap}
 .r2-know-group-only-label{
   font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
-  color:#52525b;margin-bottom:6px}
+  color:#71717a;margin-bottom:6px}
 .r2-know-dot{
   width:7px;height:7px;border-radius:50%;background:#3f3f46;
   flex-shrink:0;margin-top:5px}
@@ -2081,14 +2081,14 @@ const css = `
   margin-top:20px;padding-top:4px}
 .r2-lowtabbtn{
   flex:1;font-family:'DM Sans',system-ui,sans-serif;background:none;border:none;
-  padding:12px 6px 13px;font-size:11.5px;font-weight:600;color:#52525b;
+  padding:12px 6px 13px;font-size:11.5px;font-weight:600;color:#71717a;
   cursor:pointer;text-align:center;border-bottom:2px solid transparent;
   margin-bottom:-1px;transition:color .15s,border-color .15s;line-height:1.3;
   position:relative}
 .r2-lowtabbtn:not(:last-child)::after{
   content:'';position:absolute;right:0;top:22%;height:56%;
   width:1px;background:#27272a}
-.r2-lowtabbtn:hover{color:#a1a1aa}
+.r2-lowtabbtn:hover{color:#fafafa}
 .r2-lowtabbtn.on{color:#fafafa;border-bottom-color:#10b981}
 
 .r2-lowcontent{
@@ -2102,12 +2102,12 @@ const css = `
   border-bottom:1px solid #141416}
 .r2-lc-item:last-of-type{border-bottom:none}
 .r2-lc-name{color:#fafafa;font-weight:600;display:flex;align-items:center;gap:8px}
-.r2-lc-val{color:#a1a1aa;flex-shrink:0;font-variant-numeric:tabular-nums}
+.r2-lc-val{color:#fafafa;flex-shrink:0;font-variant-numeric:tabular-nums}
 .r2-lc-badge{
   background:#18181b;color:#a78bfa;font-size:9.5px;font-weight:700;
   text-transform:uppercase;letter-spacing:.04em;padding:2px 6px;
   border-radius:5px;border:1px solid #8b5cf633}
-.r2-lc-note{font-size:12px;color:#52525b;line-height:1.55;padding-top:2px}
+.r2-lc-note{font-size:12px;color:#71717a;line-height:1.55;padding-top:2px}
 
 /* eligibility rows */
 .r2-elig{display:flex;align-items:center;gap:10px;font-size:13px;
@@ -2115,9 +2115,9 @@ const css = `
 .r2-elig:last-of-type{border-bottom:none}
 .r2-elig-n{font-size:15px;font-weight:700;width:46px;flex-shrink:0}
 .r2-elig.yes .r2-elig-n{color:#10b981}
-.r2-elig.no .r2-elig-n{color:#3f3f46}
+.r2-elig.no .r2-elig-n{color:#71717a}
 .r2-elig-t{color:#d4d4d8}
-.r2-elig.no .r2-elig-t{color:#71717a}
+.r2-elig.no .r2-elig-t{color:#fafafa}
 
 /* ── Alt card — single-card path, purple-bordered, desktop-sized ── */
 .r2-alt-card{
@@ -2158,14 +2158,14 @@ const css = `
 .r2-xfr-head:hover{background:rgba(255,255,255,.02)}
 .r2-xfr-icon{color:#06b6d4;flex-shrink:0}
 .r2-xfr-chev{
-  margin-left:auto;color:#52525b;font-size:18px;line-height:1;
+  margin-left:auto;color:#71717a;font-size:18px;line-height:1;
   transition:transform .2s;display:inline-block;transform:rotate(90deg)}
 .r2-xfr-chev.open{transform:rotate(-90deg)}
 
 /* Expanded body */
 .r2-xfr-body{padding:0 18px 16px;border-top:1px solid rgba(255,255,255,.05)}
 .r2-xfr-desc{
-  font-size:12.5px;color:#71717a;line-height:1.6;margin:12px 0 14px}
+  font-size:12.5px;color:#fafafa;line-height:1.6;margin:12px 0 14px}
 
 .r2-xfr-rows{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
 .r2-xfr-row{display:flex;gap:10px;align-items:flex-start}
@@ -2174,7 +2174,7 @@ const css = `
   letter-spacing:.06em;padding:3px 8px;border-radius:6px;margin-top:2px}
 .r2-xfr-pill.flight{background:rgba(6,182,212,.12);color:#06b6d4;border:1px solid rgba(6,182,212,.2)}
 .r2-xfr-pill.hotel{background:rgba(139,92,246,.12);color:#a78bfa;border:1px solid rgba(139,92,246,.2)}
-.r2-xfr-text{font-size:12.5px;color:#a1a1aa;line-height:1.6}
+.r2-xfr-text{font-size:12.5px;color:#fafafa;line-height:1.6}
 
 .r2-xfr-partners{
   display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
@@ -2197,7 +2197,7 @@ const css = `
 .r2-sn.xfr{background:rgba(6,182,212,.12);color:#06b6d4}
 
 .r2-xfr-foot{
-  font-size:10.5px;color:#3f3f46;line-height:1.5;
+  font-size:10.5px;color:#71717a;line-height:1.5;
   padding-top:10px;border-top:1px solid rgba(255,255,255,.05)}
 
 /* ── Credit note ── */
@@ -2245,10 +2245,10 @@ const css = `
 
 /* ── Owned-card carousel (Journey A) ── */
 .r2-owned-carousel{display:flex;align-items:center;gap:8px;margin-bottom:4px}
-.r2-owned-earn-line{font-size:12px;color:#a1a1aa;text-align:center;margin:6px 0 10px;line-height:1.4}
+.r2-owned-earn-line{font-size:12px;color:#fafafa;text-align:center;margin:6px 0 10px;line-height:1.4}
 .r2-carousel-arrow{
   flex-shrink:0;width:32px;height:32px;border-radius:50%;
-  background:#18181b;border:1px solid #3f3f46;color:#a1a1aa;
+  background:#18181b;border:1px solid #3f3f46;color:#fafafa;
   font-size:20px;line-height:1;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   transition:background .15s,border-color .15s,color .15s;
@@ -2275,11 +2275,11 @@ const css = `
 /* ── Clarity info button + popover ── */
 .r2-clarity-btn{
   flex-shrink:0;background:none;border:none;cursor:pointer;
-  font-size:16px;color:#52525b;line-height:1;padding:2px;
+  font-size:16px;color:#71717a;line-height:1;padding:2px;
   transition:color .15s;margin-bottom:2px}
-.r2-clarity-btn:hover,.r2-clarity-btn.on{color:#a1a1aa}
+.r2-clarity-btn:hover,.r2-clarity-btn.on{color:#fafafa}
 .r2-clarity-popover{
-  font-size:12px;color:#71717a;line-height:1.6;
+  font-size:12px;color:#fafafa;line-height:1.6;
   background:#0c0c0e;border:1px solid #27272a;border-radius:10px;
   padding:10px 13px;margin-top:6px;margin-bottom:10px}
 
@@ -2295,22 +2295,22 @@ const css = `
   display:grid;grid-template-columns:1fr auto auto;align-items:center;
   gap:6px 10px;padding:7px 0;border-bottom:1px solid #141416;font-size:13px}
 .r2-routemap-row:last-child{border-bottom:none}
-.r2-routemap-cat{color:#a1a1aa;font-weight:600;font-size:12px}
+.r2-routemap-cat{color:#fafafa;font-weight:600;font-size:12px}
 .r2-routemap-card{color:#fafafa;font-weight:600;text-align:right}
 .r2-routemap-val{
   color:#10b981;font-weight:700;font-variant-numeric:tabular-nums;
   text-align:right;white-space:nowrap;font-size:12px}
 /* Leaking spend — muted, flagged, no value column */
 .r2-routemap-row.leak{opacity:.55}
-.r2-routemap-row.leak .r2-routemap-cat{color:#71717a}
+.r2-routemap-row.leak .r2-routemap-cat{color:#fafafa}
 .r2-routemap-leak-note{
   grid-column:2 / 4;text-align:right;
-  font-size:11px;color:#52525b;font-style:italic}
+  font-size:11px;color:#71717a;font-style:italic}
 /* Active card is the winner in this category */
 .r2-routemap-row.active-best .r2-routemap-cat{color:#fafafa;font-weight:600}
 /* Comparison line — spans full width below the main row columns */
 .r2-routemap-compare{
-  grid-column:1 / 4;font-size:11px;color:#52525b;
+  grid-column:1 / 4;font-size:11px;color:#71717a;
   padding-bottom:4px;line-height:1.5}
 
 /* ── "Why this recommendation" tag (Journey A — gap-fill and rate-beating variants) ── */
@@ -2340,28 +2340,28 @@ const css = `
 /* ── Verdict proof (Journey A owned card expandable breakdown) ── */
 .r2-vproof-wrap{margin-top:2px;margin-bottom:4px}
 .r2-vproof-toggle{
-  background:none;border:none;color:#71717a;font-family:inherit;
+  background:none;border:none;color:#fafafa;font-family:inherit;
   font-size:12px;font-weight:600;cursor:pointer;padding:6px 0 2px;display:block;
   width:100%;text-align:center;transition:color .15s}
-.r2-vproof-toggle:hover{color:#a1a1aa}
+.r2-vproof-toggle:hover{color:#fafafa}
 .r2-vproof{
   background:#0c0c0e;border:1px solid #1f1f23;border-radius:10px;
   padding:10px 13px;margin-top:4px}
 .r2-vproof-head{
   font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
-  color:#3f3f46;margin-bottom:8px}
+  color:#71717a;margin-bottom:8px}
 .r2-vproof-row{
   display:grid;grid-template-columns:1fr auto auto;align-items:center;
   gap:4px 8px;padding:5px 0;border-bottom:1px solid #141416;font-size:12px}
 .r2-vproof-row:last-child{border-bottom:none}
 .r2-vproof-row.best .r2-vproof-cat{color:#fafafa;font-weight:600}
 .r2-vproof-row.zero{opacity:.55}
-.r2-vproof-cat{color:#71717a}
+.r2-vproof-cat{color:#fafafa}
 .r2-vproof-earn{color:#fafafa;font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
-.r2-vproof-rate{font-size:10.5px;color:#71717a;font-weight:400}
-.r2-vproof-excl{color:#52525b;font-style:italic;font-weight:400}
-.r2-vproof-nodata{color:#52525b;font-style:italic;font-weight:400}
-.r2-vproof-zero{color:#3f3f46;font-weight:400}
+.r2-vproof-rate{font-size:10.5px;color:#fafafa;font-weight:400}
+.r2-vproof-excl{color:#71717a;font-style:italic;font-weight:400}
+.r2-vproof-nodata{color:#71717a;font-style:italic;font-weight:400}
+.r2-vproof-zero{color:#71717a;font-weight:400}
 .r2-vproof-best{
   font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
   color:#10b981;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.2);
@@ -2374,13 +2374,13 @@ const css = `
 .r2-underused-cols-head{
   display:grid;grid-template-columns:1fr auto auto;gap:4px 10px;
   font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
-  color:#52525b;padding:0 0 4px;border-bottom:1px solid #27272a;margin-bottom:4px}
+  color:#71717a;padding:0 0 4px;border-bottom:1px solid #27272a;margin-bottom:4px}
 .r2-underused-cols-head span:nth-child(2),.r2-underused-cols-head span:nth-child(3){text-align:right}
 .r2-underused-cols{
   display:grid;grid-template-columns:1fr auto auto;gap:2px 10px;
   align-items:center;padding:5px 0;border-bottom:1px solid #1f1f23;font-size:12.5px}
 .r2-underused-cols--bonus .r2-vproof-cat{color:#e4e4e7}
-.r2-underused-base{text-align:right;color:#a1a1aa;font-size:12px;white-space:nowrap}
+.r2-underused-base{text-align:right;color:#fafafa;font-size:12px;white-space:nowrap}
 .r2-underused-bonus{text-align:right;white-space:nowrap}
 .r2-underused-bonus-val{color:#fbbf24;font-size:12px;display:flex;align-items:center;gap:4px;justify-content:flex-end;flex-wrap:wrap}
 .r2-underused-cap{
@@ -2391,22 +2391,22 @@ const css = `
 .r2-underused-routing{
   margin:10px 0 2px;padding:9px 11px;border-radius:8px;
   background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.18);
-  font-size:12px;color:#a1a1aa;line-height:1.55}
+  font-size:12px;color:#fafafa;line-height:1.55}
 .r2-underused-routing b{color:#e4e4e7}
 .r2-underused-footer{
   margin-top:8px;padding-top:8px;border-top:1px solid #27272a;
-  font-size:11px;color:#52525b}
+  font-size:11px;color:#71717a}
 .r2-underused-footer b{color:#e4e4e7}
-.r2-underused-sentences{font-size:13px;color:#a1a1aa;line-height:1.6;margin-bottom:12px}
+.r2-underused-sentences{font-size:13px;color:#fafafa;line-height:1.6;margin-bottom:12px}
 .r2-underused-sentences p{margin:0 0 6px}
 .r2-underused-sentences p:last-child{margin-bottom:0}
 .r2-underused-sentences b{color:#e4e4e7}
-.r2-underused-upside-line{color:#71717a!important}
+.r2-underused-upside-line{color:#fafafa!important}
 .r2-underused-unlock{margin-top:10px;background:#1c1200;border:1px solid #92400e;border-radius:8px;padding:10px 12px}
 .r2-underused-unlock-head{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#f59e0b;margin-bottom:6px}
 .r2-underused-unlock{font-size:12.5px;color:#d4d4d8;line-height:1.55}
-.r2-underused-unlock-caveat{margin-top:6px;font-size:11px;color:#71717a}
-.r2-verdict-oneliner{font-size:13px;color:#a1a1aa;line-height:1.6;margin-bottom:12px}
+.r2-underused-unlock-caveat{margin-top:6px;font-size:11px;color:#fafafa}
+.r2-verdict-oneliner{font-size:13px;color:#fafafa;line-height:1.6;margin-bottom:12px}
 .r2-verdict-oneliner b{color:#e4e4e7}
 
 /* ── Why-panel 3-level structure ── */
@@ -2414,11 +2414,11 @@ const css = `
 .r2-why-level{background:#0c0c0e;border:1px solid #27272a;border-radius:12px;padding:14px 16px}
 .r2-why-level-head{display:flex;align-items:center;justify-content:space-between;
   font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
-  color:#52525b;margin-bottom:10px}
+  color:#71717a;margin-bottom:10px}
 .r2-why-total{font-size:12px;font-weight:800;color:#10b981;letter-spacing:0}
-.r2-why-rate-toggle{margin-top:10px;background:none;border:none;color:#52525b;
+.r2-why-rate-toggle{margin-top:10px;background:none;border:none;color:#71717a;
   font-size:11px;font-weight:600;cursor:pointer;padding:0;text-decoration:underline}
-.r2-why-rate-toggle:hover{color:#a1a1aa}
+.r2-why-rate-toggle:hover{color:#fafafa}
 .r2-why-excluded{font-size:12.5px;color:#d4d4d8;line-height:1.55;
   background:#1c1506;border:1px solid #6b5410;border-radius:8px;padding:10px 12px}
 .r2-why-excluded b{color:#f59e0b}
@@ -2435,21 +2435,21 @@ const css = `
   overflow:hidden;margin-top:14px}
 .r2-fold>summary{
   list-style:none;cursor:pointer;padding:14px 16px;font-size:13px;
-  font-weight:600;color:#a1a1aa;display:flex;justify-content:space-between;align-items:center}
+  font-weight:600;color:#fafafa;display:flex;justify-content:space-between;align-items:center}
 .r2-fold>summary::-webkit-details-marker{display:none}
 .r2-fold>summary:hover{color:#e4e4e7}
-.r2-fold>summary::after{content:'⌄';font-size:16px;color:#52525b;transition:transform .2s}
+.r2-fold>summary::after{content:'⌄';font-size:16px;color:#71717a;transition:transform .2s}
 .r2-fold[open]>summary::after{transform:rotate(180deg)}
 .r2-fold[open]>summary{border-bottom:1px solid #1f1f23}
 .r2-fold-body{padding:8px 14px 4px}
 .r2-fold-global-warns{padding:12px 16px 8px}
 .r2-global-bank-group{margin-bottom:14px}
 .r2-global-bank-group:last-child{margin-bottom:4px}
-.r2-global-bank-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#52525b;margin-bottom:6px}
+.r2-global-bank-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#71717a;margin-bottom:6px}
 
 /* ── Balance calc card picker (Journey A) ── */
 .r2-fold-cardpick{display:flex;align-items:center;gap:8px;padding:10px 16px 0}
-.r2-fold-cardlabel{font-size:11px;font-weight:700;color:#71717a;flex-shrink:0;text-transform:uppercase;letter-spacing:.05em}
+.r2-fold-cardlabel{font-size:11px;font-weight:700;color:#fafafa;flex-shrink:0;text-transform:uppercase;letter-spacing:.05em}
 .r2-fold-cardsel{
   flex:1;background:#18181b;border:1px solid #3f3f46;border-radius:8px;
   color:#e4e4e7;font-family:'DM Sans',system-ui,sans-serif;font-size:13px;
@@ -2466,14 +2466,14 @@ const css = `
   border:1px solid rgba(16,185,129,.25);border-radius:4px;
   padding:1px 5px;margin-left:6px;vertical-align:middle}
 .r2-combined-delta{
-  font-size:11px;color:#52525b;padding:6px 0 2px;line-height:1.5}
-.r2-combined-delta-note{color:#3f3f46}
+  font-size:11px;color:#71717a;padding:6px 0 2px;line-height:1.5}
+.r2-combined-delta-note{color:#71717a}
 
 /* ── Net equation: current + gain = total ── */
 /* ── Plain-language scenario box (replaces net equation) ── */
 .r2-scenario-box{
   margin-top:10px;border-top:1px solid #1f1f23;padding-top:10px;
-  font-size:13px;color:#a1a1aa;line-height:1.6}
+  font-size:13px;color:#fafafa;line-height:1.6}
 .r2-scenario-box b{color:#fafafa;font-weight:600}
 
 /* ── Model B two-phase layout (Journey A) ── */
@@ -2494,7 +2494,7 @@ const css = `
 .r2-phase2-cta{
   display:block;width:100%;margin-top:20px;
   background:#18181b;border:1px solid #3f3f46;border-radius:12px;
-  color:#a1a1aa;font-family:'DM Sans',system-ui,sans-serif;font-size:14px;
+  color:#fafafa;font-family:'DM Sans',system-ui,sans-serif;font-size:14px;
   font-weight:700;padding:14px 20px;cursor:pointer;text-align:center;
   transition:background .15s,border-color .15s,color .15s}
 .r2-phase2-cta:hover{background:#1f1f23;border-color:#52525b;color:#e4e4e7}
@@ -2505,14 +2505,14 @@ const css = `
 .r2-routemap--p1{margin-top:16px}
 .r2-routemap-heading-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
 .r2-routemap-heading-row .r2-routemap-heading{margin-bottom:0}
-.r2-routemap-sub{font-size:11px;color:#52525b;font-style:italic}
+.r2-routemap-sub{font-size:11px;color:#71717a;font-style:italic}
 .r2-routemap-total{
   display:grid;grid-template-columns:1fr auto;align-items:center;
   gap:6px 10px;padding:8px 0 2px;margin-top:4px;border-top:1px solid #27272a}
-.r2-routemap-total-lbl{font-size:12px;font-weight:700;color:#71717a;text-transform:uppercase;letter-spacing:.05em}
+.r2-routemap-total-lbl{font-size:12px;font-weight:700;color:#fafafa;text-transform:uppercase;letter-spacing:.05em}
 .r2-routemap-total-val{font-size:14px;font-weight:800;color:#10b981;font-variant-numeric:tabular-nums;text-align:right}
-.r2-portcard-explainer{font-size:12px;color:#52525b;line-height:1.6;margin-top:10px}
-.r2-portcard-explainer b{color:#a1a1aa}
+.r2-portcard-explainer{font-size:12px;color:#71717a;line-height:1.6;margin-top:10px}
+.r2-portcard-explainer b{color:#fafafa}
 
 /* Owned-card hack fold in Phase 1 */
 .r2-fold--p1hack{margin-top:14px}
@@ -2528,7 +2528,7 @@ const css = `
 .r2-seehow-btn{background:none;border:none;padding:0;font-size:12px;color:#6ee7b7;cursor:pointer;font-family:inherit;letter-spacing:.02em}
 .r2-seehow-btn:hover{color:#34d399}
 .r2-seehow-rows{margin-top:8px;display:flex;flex-direction:column;gap:4px;background:#18181b;border:1px solid #27272a;border-radius:8px;padding:10px 12px}
-.r2-seehow-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#a1a1aa}
+.r2-seehow-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#fafafa}
 .r2-seehow-row--total{border-top:1px solid #3f3f46;margin-top:4px;padding-top:6px;color:#f4f4f5;font-weight:600}
 .r2-seehow-val{font-variant-numeric:tabular-nums}
 .r2-seehow-val--pos{color:#10b981}
