@@ -51,6 +51,13 @@ export function cardIntelligence(
   intelligence: { intelId?: string; cardId: string; type: string | null; title: string | null; description: string | null; severity: string | null }[] = [],
   cardName?: string
 ): CardIntelligenceItem[] {
+  // BACKLOG / KNOWN GAP: This function does NOT filter warnings by `triggerWhen`.
+  // Warnings are surfaced based on card/issuer name matching in the text only.
+  // As a result, any `triggerWhen` condition (e.g. "user_owns_card") is currently ignored —
+  // W006's correct suppression today is COINCIDENTAL, not principled, and may break when
+  // new warnings are added. TODO: filter by `triggerWhen` against the actual user context
+  // (ownership view) before relying on this for correctness. See BACKLOG.md.
+
   // Distinguishing words: name words after the first (issuer), ≥ 3 chars.
   // Used to classify a multi-card warning as card-specific when the text names this card.
   const distinguishingWords = cardName
