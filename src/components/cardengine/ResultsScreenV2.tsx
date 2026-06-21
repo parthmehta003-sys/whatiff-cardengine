@@ -1461,8 +1461,8 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 return (
                                   <div className="r2-scenario-meta">
                                     {matched.length > 0
-                                      ? <>Matches <b>{matched.length}</b> of your {priorityKeys.length} {priorityKeys.length === 1 ? 'priority' : 'priorities'} — {matchedNames}. <span className="r2-scenario-tab-hint">See Priorities for details.</span></>
-                                      : <>It doesn&rsquo;t match any of your {priorityKeys.length} {priorityKeys.length === 1 ? 'priority' : 'priorities'}. <span className="r2-scenario-tab-hint">See Priorities for details.</span></>
+                                      ? <>Matches <b>{matched.length}</b> of your {priorityKeys.length} {priorityKeys.length === 1 ? 'priority' : 'priorities'} — {matchedNames}. <span className="r2-scenario-tab-hint">Tap the Priorities icon below for details.</span></>
+                                      : <>It doesn&rsquo;t match any of your {priorityKeys.length} {priorityKeys.length === 1 ? 'priority' : 'priorities'}. <span className="r2-scenario-tab-hint">Tap the Priorities icon below for details.</span></>
                                     }
                                   </div>
                                 );
