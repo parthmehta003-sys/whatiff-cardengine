@@ -649,7 +649,7 @@ export function reviewOwnedCards(
       reason = `Only ~₹${Math.round(contribution).toLocaleString('en-IN')}/yr on your spend — you're not using its strengths.`;
     } else {
       verdict = 'wrong_fit';
-      reason = `Earns nothing on your current spending pattern.`;
+      reason = `Your other cards already earn more on all of these — so it adds nothing extra.`;
     }
     return { cardId: m.cardId, cardName: m.name, bank: m.bank, verdict, netPerYear: Math.round(contribution), reason };
   });
