@@ -25,6 +25,8 @@ import type { SelectedHack, SurfacedInsight } from '../../lib/cardEngine/selectH
 import { LABEL as PRIORITY_LABEL } from '../../lib/cardEngine/evaluatePriorities';
 
 const inr = (n: number) => '₹' + Math.round(n).toLocaleString('en-IN');
+const difficultyLabel = (d: string) =>
+  d === 'Beginner' ? 'Easy' : d === 'Intermediate' ? 'Medium' : d === 'Advanced' ? 'Hard' : d;
 
 interface Props {
   result: RankResult;
@@ -943,7 +945,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                     </>
                                   )}
                                   {p1Hack.difficulty && (
-                                    <div className="r2-hack-meta">Difficulty: <b>{p1Hack.difficulty}</b>{p1Hack.commonFailure && <> · Watch out: {p1Hack.commonFailure}</>}</div>
+                                    <div className="r2-hack-meta">Effort: <b>{difficultyLabel(p1Hack.difficulty)}</b>{p1Hack.commonFailure && <> · Watch out: {p1Hack.commonFailure}</>}</div>
                                   )}
                                 </>
                               )) : <div className="r2-empty">No pro tip for this card yet.</div>}
@@ -1150,7 +1152,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                               <>
                                 <div className="r2-hackbox"><div className="r2-ht">{hack.name}</div><div className="r2-hd">{hack.whyItMatters}</div></div>
                                 {hack.executionSteps && (<><button className="r2-hack-seehow" onClick={() => setHackStepsOpen(v => !v)}>{hackStepsOpen ? 'Hide steps ↑' : 'See how →'}</button>{hackStepsOpen && <HackSteps steps={hack.executionSteps} />}</>)}
-                                {hack.difficulty && <div className="r2-hack-meta">Difficulty: <b>{hack.difficulty}</b>{hack.commonFailure && <> · Watch out: {hack.commonFailure}</>}</div>}
+                                {hack.difficulty && <div className="r2-hack-meta">Effort: <b>{difficultyLabel(hack.difficulty)}</b>{hack.commonFailure && <> · Watch out: {hack.commonFailure}</>}</div>}
                               </>
                             )) : <div className="r2-empty">No pro tip for this card yet.</div>}
                           </div>
@@ -1529,7 +1531,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 </>
                               )}
                               {hack.difficulty && (
-                                <div className="r2-hack-meta">Difficulty: <b>{hack.difficulty}</b>{hack.commonFailure && <> · Watch out: {hack.commonFailure}</>}</div>
+                                <div className="r2-hack-meta">Effort: <b>{difficultyLabel(hack.difficulty)}</b>{hack.commonFailure && <> · Watch out: {hack.commonFailure}</>}</div>
                               )}
                             </>
                           )) : <div className="r2-empty">No pro tip for this card yet.</div>}
