@@ -2502,9 +2502,9 @@ const css = `
   margin-top:10px;border-top:1px solid #1f1f23;padding-top:10px;
   font-size:13px;color:#fafafa;line-height:1.6}
 .r2-scenario-box b{color:#fafafa;font-weight:600}
-.r2-scenario-meta{font-size:12px;color:#a1a1aa;line-height:1.55;margin-top:8px}
-.r2-scenario-meta b{color:#d4d4d8;font-weight:600}
-.r2-scenario-tab-hint{color:#71717a}
+.r2-scenario-meta{font-size:12px;color:#fafafa;line-height:1.55;margin-top:8px}
+.r2-scenario-meta b{color:#fafafa;font-weight:600}
+.r2-scenario-tab-hint{color:#a1a1aa}
 .r2-scenario-excl b{color:#f59e0b}
 
 /* ── Model B two-phase layout (Journey A) ── */
