@@ -77,6 +77,8 @@ export interface CardMeta {
   movieStructured?: MovieStructured | null;
   /** Derived in the loader from earn-row redemption data. Read-only display signal. */
   rewardType?: RewardType;
+  /** Redemption optimizer data — present for all 40 cards. Display-only; never feeds ranking math. */
+  redemption?: import('./loadCardDB').Redemption;
 }
 
 /** 1-10 editorial scores from CATEGORY_STRENGTHS. Tiebreak only — never primary ranking. */

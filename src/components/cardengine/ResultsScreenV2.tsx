@@ -12,7 +12,7 @@
  * Deferred to Stage 3: math two-figure treatment, per-card combo priority coverage.
  */
 import React, { useState } from 'react';
-import { Scale, Zap, Calculator, Target, Info, Plane } from 'lucide-react';
+import { Scale, Zap, Calculator, Target, Info, Plane, Coins } from 'lucide-react';
 import AprEmiCalculator from './AprEmiCalculator';
 import type { TransferHack, TransferPartner } from '../../lib/cardEngine/loadCardDB';
 import type { RankResult, RankedCard, CardMeta, LoungeBlock, Priorities, PriorityKey, OwnedCategoryRoute } from '../../lib/cardEngine/rankCards';
@@ -24,6 +24,7 @@ import RecommendationCard, { type DevaluationFlag } from './RecommendationCard';
 import type { SelectedHack, SurfacedInsight } from '../../lib/cardEngine/selectHacks';
 import { LABEL as PRIORITY_LABEL } from '../../lib/cardEngine/evaluatePriorities';
 import { CATEGORY_LABELS } from './SpendInput';
+import { optimizeRedemption } from '../../lib/cardEngine/optimizeRedemption';
 
 const inr = (n: number) => '₹' + Math.round(n).toLocaleString('en-IN');
 const difficultyLabel = (d: string) =>
@@ -291,9 +292,12 @@ export const ResultsScreenV2: React.FC<Props> = ({
   };
 
   // Phase 1 icon panels for active owned card (separate from Phase 2's activeIcon).
-  type P1IconKey = 'why' | 'cat' | 'hack' | 'transfer' | 'know';
+  type P1IconKey = 'why' | 'cat' | 'hack' | 'transfer' | 'know' | 'points';
   const [p1ActiveIcon, setP1ActiveIcon] = useState<P1IconKey | null>('why');
   const toggleP1Icon = (key: P1IconKey) => setP1ActiveIcon(prev => prev === key ? null : key);
+
+  // "Your points" redemption balances, keyed by cardId.
+  const [pointsBalance, setPointsBalance] = useState<Record<string, number>>({});
 
   // Hack steps for Phase 1 owned card (separate from Phase 2 hackStepsOpen).
   const [p1HackStepsOpen, setP1HackStepsOpen] = useState(false);
@@ -588,11 +592,15 @@ export const ResultsScreenV2: React.FC<Props> = ({
                     activeV.verdict === 'wrong_fit'  ? 'Why drop this'   :
                     activeV.verdict === 'underused'  ? 'Why use it more' :
                                                        'Why we say this';
+                  const activeOwnedCard = result.ownedRanked?.find(c => c.cardId === activeCardId);
+                  const hasRedemption = !!activeOwnedCard?.meta.redemption;
+
                   const P1_ICONS: { key: P1IconKey; label: string; Icon: typeof Scale; accent: string }[] = [
                     { key: 'why',      label: whyLabel,           Icon: Scale,      accent: '#10b981' },
                     { key: 'hack',     label: 'Pro Tips',         Icon: Zap,        accent: '#8b5cf6' },
                     ...(hasTransfer ? [{ key: 'transfer' as P1IconKey, label: 'Flights & hotels', Icon: Plane, accent: '#f59e0b' }] : []),
                     { key: 'know',     label: 'Things to know',   Icon: Info,       accent: '#f59e0b' },
+                    ...(hasRedemption ? [{ key: 'points' as P1IconKey, label: 'Your points', Icon: Coins, accent: '#10b981' }] : []),
                   ];
 
                   const p1IconCfg = P1_ICONS.find(i => i.key === p1ActiveIcon);
@@ -957,6 +965,112 @@ export const ResultsScreenV2: React.FC<Props> = ({
 
                           {/* Icon 5 — Things to know: devaluation / change alerts for this owned card */}
                           {p1ActiveIcon === 'know' && <KnowPanel intel={p1Intel} />}
+
+                          {/* Icon 6 — Your points: redemption optimizer (owned journey only) */}
+                          {p1ActiveIcon === 'points' && hasRedemption && activeOwnedCard && (() => {
+                            const redemption = activeOwnedCard.meta.redemption!;
+                            const balance = pointsBalance[activeCardId] ?? 0;
+                            const optResult = optimizeRedemption(redemption, balance);
+                            const QUICK = [5_000, 10_000, 50_000, 1_00_000, 2_00_000];
+                            const fmtPts = (n: number) => n.toLocaleString('en-IN');
+
+                            return (
+                              <div className="r2-pts-panel">
+                                <div className="r2-pts-summary">{redemption.plainSummary}</div>
+
+                                {optResult.isCashback ? (
+                                  <div className="r2-pts-cashback">
+                                    Nothing to redeem — cashback is automatic. It credits straight to your bill, so there are no points to collect or convert.
+                                  </div>
+                                ) : (
+                                  <>
+                                    <div className="r2-pts-input-row">
+                                      <label className="r2-pts-label" htmlFor={`pts-bal-${activeCardId}`}>
+                                        How many {redemption.currencyName.toLowerCase()} do you have on this card?
+                                      </label>
+                                      <input
+                                        id={`pts-bal-${activeCardId}`}
+                                        type="number"
+                                        min={0}
+                                        step={1000}
+                                        className="r2-pts-input"
+                                        value={balance || ''}
+                                        placeholder="0"
+                                        onChange={e => setPointsBalance(prev => ({ ...prev, [activeCardId]: Math.max(0, Number(e.target.value) || 0) }))}
+                                      />
+                                      <div className="r2-pts-quick">
+                                        {QUICK.map(q => (
+                                          <button
+                                            key={q}
+                                            className={'r2-pts-qbtn' + (balance === q ? ' on' : '')}
+                                            onClick={() => setPointsBalance(prev => ({ ...prev, [activeCardId]: q }))}
+                                          >
+                                            {fmtPts(q)}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+
+                                    {balance > 0 && optResult.best && (
+                                      <>
+                                        {/* Best method highlight box */}
+                                        <div className="r2-hackbox r2-pts-best">
+                                          <div className="r2-ht">Best way to use them</div>
+                                          <div className="r2-hd">
+                                            <b>{optResult.best.channel}</b>
+                                            {' — '}
+                                            <b style={{ color: '#10b981' }}>{inr(optResult.best.valueRupeesFloor)}</b>
+                                            {optResult.best.valueIsVariable && optResult.best.valueRupees > optResult.best.valueRupeesFloor && (
+                                              <span className="r2-pts-upside">
+                                                {' '}— up to <b>{inr(optResult.best.valueRupees)}</b> if you find the right award; confirm before you transfer.
+                                              </span>
+                                            )}
+                                          </div>
+                                          {optResult.best.note && (
+                                            <div className="r2-hack-meta">{optResult.best.note}</div>
+                                          )}
+                                          {optResult.best.staged && (
+                                            <div className="r2-hack-meta r2-pts-staged">
+                                              You can use {fmtPts(redemption.methods.find(m => m.channel === optResult.best!.channel)?.capPerCycle ?? 0)} {redemption.currencyName.toLowerCase()} this cycle — the rest carries over ({optResult.best.cyclesNeeded} cycles total).
+                                            </div>
+                                          )}
+                                        </div>
+
+                                        {/* Other methods */}
+                                        {optResult.all.length > 1 && (
+                                          <div className="r2-pts-others">
+                                            <div className="r2-pts-others-hd">Other options</div>
+                                            {optResult.all.slice(1).map((m, i) => {
+                                              const isWorst = !!(m.worst && !m.best);
+                                              const locked = m.usablePoints === 0 || (optResult.all[0].usablePoints === 0);
+                                              const floorStr = m.valueIsVariable
+                                                ? `${inr(m.valueRupeesFloor)}–${inr(m.valueRupees)}`
+                                                : inr(m.valueRupeesFloor);
+                                              return (
+                                                <div key={i} className={'r2-pts-other-row' + (isWorst ? ' muted' : '')}>
+                                                  <span className="r2-pts-other-ch">{m.channel}{isWorst && <span className="r2-pts-avoid"> · avoid</span>}</span>
+                                                  <span className="r2-pts-other-val">{floorStr}</span>
+                                                  {m.note && <span className="r2-pts-other-note">{m.note}</span>}
+                                                </div>
+                                              );
+                                            })}
+                                          </div>
+                                        )}
+
+                                        {/* Caps note + disclaimer */}
+                                        {redemption.caps && (
+                                          <div className="r2-pts-caps">{redemption.caps}</div>
+                                        )}
+                                        <div className="r2-pts-disc">
+                                          Values are estimates based on current redemption rates. Transfer values vary by route and availability — always confirm before you transfer.
+                                        </div>
+                                      </>
+                                    )}
+                                  </>
+                                )}
+                              </div>
+                            );
+                          })()}
                         </div>
                       )}
 
@@ -2617,6 +2731,32 @@ const css = `
 
 /* Carousel card: in-flow so it cannot overflow carousel body and cover the right arrow */
 .r2-pcard-flow{position:relative!important;left:auto!important;width:100%!important;max-width:260px;margin:0 auto 12px;display:block}
+
+/* ── Your points — redemption optimizer panel ── */
+.r2-pts-panel{display:flex;flex-direction:column;gap:14px}
+.r2-pts-summary{font-size:13px;color:#a1a1aa;line-height:1.55}
+.r2-pts-cashback{font-size:13px;color:#d4d4d8;line-height:1.6;background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.18);border-radius:10px;padding:12px 14px}
+.r2-pts-input-row{display:flex;flex-direction:column;gap:8px}
+.r2-pts-label{font-size:12px;color:#a1a1aa;line-height:1.4}
+.r2-pts-input{background:#111113;border:1px solid #27272a;border-radius:8px;color:#fafafa;font-size:15px;font-weight:600;padding:8px 12px;width:100%;box-sizing:border-box;outline:none}
+.r2-pts-input:focus{border-color:#10b981}
+.r2-pts-quick{display:flex;flex-wrap:wrap;gap:6px}
+.r2-pts-qbtn{background:#1c1c1e;border:1px solid #27272a;border-radius:6px;color:#a1a1aa;font-size:12px;padding:4px 10px;cursor:pointer;transition:border-color .15s,color .15s}
+.r2-pts-qbtn:hover{border-color:#10b981;color:#10b981}
+.r2-pts-qbtn.on{border-color:#10b981;color:#10b981;background:rgba(16,185,129,.08)}
+.r2-pts-best{border-left-color:#10b981!important}
+.r2-pts-upside{color:#a1a1aa;font-size:12.5px}
+.r2-pts-staged{color:#f59e0b!important;margin-top:6px}
+.r2-pts-others{display:flex;flex-direction:column;gap:0}
+.r2-pts-others-hd{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#71717a;margin-bottom:6px}
+.r2-pts-other-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding:7px 0;border-bottom:1px solid #1c1c1e;font-size:13px}
+.r2-pts-other-row.muted{opacity:.55}
+.r2-pts-other-ch{color:#d4d4d8;flex:1 1 120px}
+.r2-pts-avoid{color:#ef4444;font-size:11.5px}
+.r2-pts-other-val{color:#10b981;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.r2-pts-other-note{color:#71717a;font-size:11.5px;width:100%;line-height:1.4}
+.r2-pts-caps{font-size:12px;color:#a1a1aa;line-height:1.5;padding:8px 10px;background:#111113;border-radius:7px;border:1px solid #27272a}
+.r2-pts-disc{font-size:11px;color:#52525b;line-height:1.5;margin-top:2px}
 
 /* ── See-how derivation ── */
 .r2-seehow{margin:10px 0 14px}
