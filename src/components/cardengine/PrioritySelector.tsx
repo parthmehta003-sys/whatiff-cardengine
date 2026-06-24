@@ -41,7 +41,6 @@ function tiersToPicksArray(p: Priorities | undefined): PriorityKey[] {
 
 const RANK_LABEL = ['#1', '#2', '#3'];
 const RANK_ACCENT = ['#10b981', '#06b6d4', '#8b5cf6'];
-const RANK_WEIGHT = ['×3 weight', '×2 weight', '×1 weight'];
 
 interface Props {
   initial?: Priorities;
@@ -94,7 +93,6 @@ export const PrioritySelector: React.FC<Props> = ({ initial, onContinue, onBack,
               {key ? (
                 <>
                   <span className="wf-pr-slot-lbl">{label}</span>
-                  <span className="wf-pr-slot-wt" style={{ color: RANK_ACCENT[i] }}>{RANK_WEIGHT[i]}</span>
                   <button className="wf-pr-slot-x" onClick={() => remove(i)} aria-label={`Remove ${label}`}>✕</button>
                 </>
               ) : (
@@ -154,7 +152,6 @@ const css = `
 .wf-pr-slot.filled{background:#0e1a14}
 .wf-pr-slot-num{font-size:11px;font-weight:800;color:#52525b;min-width:18px;letter-spacing:.02em}
 .wf-pr-slot-lbl{font-size:13px;font-weight:600;color:#fafafa;flex:1}
-.wf-pr-slot-wt{font-size:10px;font-weight:700;white-space:nowrap;opacity:.8}
 .wf-pr-slot-empty{font-size:12px;color:#3f3f46;flex:1}
 .wf-pr-slot-x{background:none;border:none;color:#52525b;cursor:pointer;font-size:11px;padding:0 0 0 4px;
   line-height:1;transition:color .12s}
