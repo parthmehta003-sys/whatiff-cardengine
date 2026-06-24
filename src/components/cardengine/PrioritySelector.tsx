@@ -74,7 +74,7 @@ export const PrioritySelector: React.FC<Props> = ({ initial, onContinue, onBack,
       <style>{css}</style>
       <h2>What matters most to you?</h2>
       <p className="wf-pr-sub">
-        Pick up to 3 — we optimise hardest for your <b>#1</b>. Tap in order of importance.
+        Pick up to 3, most important first — we'll match as many as we can.
       </p>
 
       {/* Selected order strip */}
