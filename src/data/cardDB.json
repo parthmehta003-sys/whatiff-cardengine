@@ -535,28 +535,30 @@
       "redemption": {
         "currency": "points",
         "currencyName": "Reward Points",
-        "plainSummary": "Points can transfer to Accor hotels (2 points = 1 Accor point) or go toward the rewards catalogue. Standard redemption value is modest — this card is better for its travel and lifestyle perks than for point value.",
+        "plainSummary": "HSBC does not publish a fixed point value — it's app-based and changes. Estimated at ~₹0.30 per point for catalogue/standard redemptions. Accor hotel transfer (2:1) may give more for hotel stays.",
         "methods": [
           {
-            "channel": "Accor (ALL) hotel transfer",
-            "valuePerPoint": null,
-            "valueRange": null,
-            "valueIsVariable": true,
-            "minPoints": null,
-            "feePerRedemption": 0,
-            "capPerCycle": null,
-            "best": true,
-            "note": "2 points = 1 Accor point. Value depends on the hotel booking."
-          },
-          {
-            "channel": "Rewards catalogue / vouchers",
-            "valuePerPoint": 0.25,
+            "channel": "Standard redemptions (catalogue / cashback)",
+            "valuePerPoint": 0.3,
             "valueRange": null,
             "valueIsVariable": false,
             "minPoints": null,
-            "feePerRedemption": 0,
+            "feePerRedemption": null,
             "capPerCycle": null,
-            "note": "Around ₹0.25 per point (modest)."
+            "note": "HSBC doesn't publish a fixed point value; this is an estimate. Check the HSBC rewards app for current rates."
+          },
+          {
+            "channel": "Accor (ALL) hotel transfer (2:1)",
+            "valuePerPoint": null,
+            "valueRange": [
+              0.3,
+              0.8
+            ],
+            "valueIsVariable": true,
+            "minPoints": null,
+            "feePerRedemption": null,
+            "capPerCycle": null,
+            "note": "2 HSBC points = 1 Accor point. Value depends on property and rate — check before transferring."
           }
         ],
         "caps": null,
@@ -778,29 +780,28 @@
       "redemption": {
         "currency": "cashback-points",
         "currencyName": "CashPoints",
-        "plainSummary": "Your CashPoints are worth more on SmartBuy (₹0.25 each) than as statement cashback (₹0.20). Redeem via SmartBuy and don't let them sit — they expire after 24 months.",
+        "plainSummary": "Every route pays ₹0.15 per CashPoint — there is no better option. Simplest is statement cashback: no portal needed, just automatic credit.",
         "methods": [
           {
-            "channel": "SmartBuy (flights/hotels/vouchers)",
-            "valuePerPoint": 0.25,
+            "channel": "Statement cashback",
+            "valuePerPoint": 0.15,
             "valueRange": null,
             "valueIsVariable": false,
             "minPoints": null,
-            "feePerRedemption": 0,
+            "feePerRedemption": null,
             "capPerCycle": null,
-            "note": "₹0.25 per point — best value.",
-            "best": true
+            "best": "Simplest — no portal needed",
+            "note": "All Freedom CashPoints routes (SmartBuy, cashback, vouchers) pay ₹0.15 each."
           },
           {
-            "channel": "Statement cashback",
-            "valuePerPoint": 0.2,
+            "channel": "SmartBuy (flights, hotels, vouchers)",
+            "valuePerPoint": 0.15,
             "valueRange": null,
             "valueIsVariable": false,
             "minPoints": null,
-            "feePerRedemption": 0,
+            "feePerRedemption": null,
             "capPerCycle": null,
-            "note": "₹0.20 per point — lower value.",
-            "worst": true
+            "note": "Same ₹0.15/pt as cashback — no value gain from using the portal."
           }
         ],
         "caps": "CashPoints expire 24 months after earning.",
@@ -1950,31 +1951,40 @@
       "redemption": {
         "currency": "miles",
         "currencyName": "EDGE Miles",
-        "plainSummary": "Your EDGE Miles are best transferred 1:1 to airline partners (Air India, Aeroplan) for travel. Renewal miles are worth about ₹1 each.",
+        "plainSummary": "Your EDGE Miles are worth ₹1 each on the Travel EDGE portal. Airline/hotel transfers can give slightly more — but confirm the award before transferring.",
         "methods": [
           {
-            "channel": "Airline transfer (Air India, Aeroplan)",
-            "valuePerPoint": null,
-            "valueRange": [
-              0.5,
-              1.5
-            ],
-            "valueIsVariable": true,
-            "minPoints": null,
-            "feePerRedemption": 0,
-            "capPerCycle": null,
-            "note": "1:1 transfer — premium-cabin value varies, confirm the award first.",
-            "best": true
-          },
-          {
-            "channel": "Travel EDGE bookings",
+            "channel": "Travel EDGE portal",
             "valuePerPoint": 1.0,
             "valueRange": null,
             "valueIsVariable": false,
             "minPoints": null,
-            "feePerRedemption": 0,
+            "feePerRedemption": null,
             "capPerCycle": null,
-            "note": "~₹1 per mile on travel bookings."
+            "best": "Reliable ₹1 per EDGE Mile — book directly on the EDGE portal."
+          },
+          {
+            "channel": "Airline / hotel transfer (1:1)",
+            "valuePerPoint": null,
+            "valueRange": [
+              1.0,
+              1.5
+            ],
+            "valueIsVariable": true,
+            "minPoints": null,
+            "feePerRedemption": null,
+            "capPerCycle": null,
+            "note": "1:1 to Air India, Aeroplan, and others. Value varies by route — confirm before transferring."
+          },
+          {
+            "channel": "Catalogue / vouchers",
+            "valuePerPoint": 0.25,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": null,
+            "capPerCycle": null,
+            "worst": "Poor value — use the travel portal instead."
           }
         ],
         "caps": null,
@@ -2137,42 +2147,49 @@
       "redemption": {
         "currency": "points",
         "currencyName": "Reward Points",
-        "plainSummary": "Best value comes from SmartBuy travel (~₹0.50/pt) or transferring to airline/hotel partners. Cashback is poor value — avoid it.",
+        "plainSummary": "SmartBuy gives a reliable ₹1 per point on flights and hotels. Airline/hotel transfers can go higher but value varies — confirm before transferring.",
         "methods": [
           {
             "channel": "SmartBuy — flights & hotels",
-            "valuePerPoint": 0.5,
+            "valuePerPoint": 1.0,
             "valueRange": null,
             "valueIsVariable": false,
             "minPoints": null,
-            "feePerRedemption": 0,
+            "feePerRedemption": null,
             "capPerCycle": null,
-            "note": "Up to ₹0.50 per point via SmartBuy.",
-            "best": true
+            "best": "Reliable ₹1 per point — the safe default."
           },
           {
             "channel": "Airline / hotel transfer",
             "valuePerPoint": null,
             "valueRange": [
-              0.5,
+              1.0,
               2.0
             ],
             "valueIsVariable": true,
             "minPoints": null,
-            "feePerRedemption": 0,
+            "feePerRedemption": null,
             "capPerCycle": null,
-            "note": "1:1 to KrisFlyer, Flying Blue, Finnair; 2:1 Accor. Premium-cabin value varies — confirm the award first."
+            "note": "Value varies by award route — confirm availability before transferring."
           },
           {
-            "channel": "Statement cashback",
-            "valuePerPoint": 0.2,
+            "channel": "Products & vouchers",
+            "valuePerPoint": 0.5,
             "valueRange": null,
             "valueIsVariable": false,
             "minPoints": null,
-            "feePerRedemption": 0,
+            "feePerRedemption": null,
+            "capPerCycle": null
+          },
+          {
+            "channel": "Statement cashback",
+            "valuePerPoint": 0.3,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": null,
             "capPerCycle": null,
-            "note": "₹0.20 per point — avoid.",
-            "worst": true
+            "worst": "Worst value — use SmartBuy instead."
           }
         ],
         "caps": null,
@@ -2319,31 +2336,40 @@
       "redemption": {
         "currency": "miles",
         "currencyName": "EDGE Reward Points",
-        "plainSummary": "Use points for airline/hotel transfers and travel redemptions for the best value. Note: Magnus lost several transfer partners in 2024–26, so confirm current partners before relying on this.",
+        "plainSummary": "Catalogue and portal redemptions give a modest ₹0.20 per point. The real value is in airline/hotel transfers (5:2 ratio) — up to ₹0.80–₹2+ per point on premium awards, capped at 5 lakh points per year.",
         "methods": [
           {
-            "channel": "Travel partner transfer",
-            "valuePerPoint": null,
-            "valueRange": [
-              0.5,
-              1.5
-            ],
-            "valueIsVariable": true,
-            "minPoints": null,
-            "feePerRedemption": 0,
-            "capPerCycle": null,
-            "note": "Value varies; partners reduced since 2024 — check what's live before transferring.",
-            "best": true
-          },
-          {
-            "channel": "Travel EDGE bookings",
-            "valuePerPoint": 1.0,
+            "channel": "Catalogue / travel portal",
+            "valuePerPoint": 0.2,
             "valueRange": null,
             "valueIsVariable": false,
             "minPoints": null,
-            "feePerRedemption": 0,
+            "feePerRedemption": null,
             "capPerCycle": null,
-            "note": "~₹1 per point on travel."
+            "best": "Reliable floor — predictable if you don't want to manage transfers."
+          },
+          {
+            "channel": "Airline / hotel transfer (5:2)",
+            "valuePerPoint": null,
+            "valueRange": [
+              0.8,
+              2.0
+            ],
+            "valueIsVariable": true,
+            "minPoints": null,
+            "feePerRedemption": null,
+            "capPerCycle": 500000,
+            "note": "5:2 transfer to 20+ partners, capped 5L pts/yr. Value varies by route — confirm award first."
+          },
+          {
+            "channel": "Statement cashback",
+            "valuePerPoint": 0.2,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": null,
+            "capPerCycle": null,
+            "worst": "Same as catalogue but with no flexibility."
           }
         ],
         "caps": null,
@@ -6765,7 +6791,7 @@
       "earnPer": 150,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.35,
+      "redeemValue": 0.5,
       "trigger": "General online",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -6807,7 +6833,7 @@
       "earnPer": 150,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.35,
+      "redeemValue": 0.5,
       "trigger": "Travel (SmartBuy redemption ₹0.50/RP)",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -6849,7 +6875,7 @@
       "earnPer": 150,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.35,
+      "redeemValue": 0.5,
       "trigger": "All eligible retail spend",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -6891,7 +6917,7 @@
       "earnPer": 150,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.35,
+      "redeemValue": 0.5,
       "trigger": "Grocery (capped 2,000 RP/month)",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -6912,7 +6938,7 @@
       "earnPer": 150,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.35,
+      "redeemValue": 0.5,
       "trigger": "All eligible retail spend",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -6933,7 +6959,7 @@
       "earnPer": 150,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.35,
+      "redeemValue": 0.5,
       "trigger": "All eligible retail spend",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -6954,7 +6980,7 @@
       "earnPer": 150,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.35,
+      "redeemValue": 0.5,
       "trigger": "All eligible retail spend",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -6975,7 +7001,7 @@
       "earnPer": 200,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.35,
+      "redeemValue": 0.5,
       "trigger": "Eligible categories",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -6996,7 +7022,7 @@
       "earnPer": 200,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.35,
+      "redeemValue": 0.5,
       "trigger": "Travel (SmartBuy ₹0.50/RP)",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -7038,7 +7064,7 @@
       "earnPer": 200,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.35,
+      "redeemValue": 0.5,
       "trigger": "General dining",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -7101,7 +7127,7 @@
       "earnPer": 200,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.35,
+      "redeemValue": 0.5,
       "trigger": "Eligible categories",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -7122,7 +7148,7 @@
       "earnPer": 200,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.35,
+      "redeemValue": 0.5,
       "trigger": "Eligible categories",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -7143,7 +7169,7 @@
       "earnPer": 200,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.35,
+      "redeemValue": 0.5,
       "trigger": "Eligible categories",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -7164,7 +7190,7 @@
       "earnPer": 200,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.35,
+      "redeemValue": 0.5,
       "trigger": "Eligible categories",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -9978,7 +10004,7 @@
       "earnPer": 150,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.25,
+      "redeemValue": 0.5,
       "trigger": "Online/offline/international spend",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -9999,7 +10025,7 @@
       "earnPer": 150,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.25,
+      "redeemValue": 0.5,
       "trigger": "General travel",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -10062,7 +10088,7 @@
       "earnPer": 150,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.25,
+      "redeemValue": 0.5,
       "trigger": "Online/offline/international spend",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -10104,7 +10130,7 @@
       "earnPer": 150,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.25,
+      "redeemValue": 0.5,
       "trigger": "Online/offline/international spend",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -10125,7 +10151,7 @@
       "earnPer": 150,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.25,
+      "redeemValue": 0.5,
       "trigger": "Insurance/utility/FASTag/railway",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -10146,7 +10172,7 @@
       "earnPer": 150,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.25,
+      "redeemValue": 0.5,
       "trigger": "International spend",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -10167,7 +10193,7 @@
       "earnPer": 150,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.25,
+      "redeemValue": 0.5,
       "trigger": "Online/offline/international spend",
       "thresholdAmount": null,
       "thresholdPeriod": null,
