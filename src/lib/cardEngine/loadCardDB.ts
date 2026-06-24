@@ -22,6 +22,29 @@ interface RawCard {
   pros: string | null; cons: string | null; tips: string | null;
   loungeStructured?: LoungeStructured | null;
   movieStructured?: MovieStructured | null;
+  redemption?: Redemption;
+}
+
+export interface RedemptionMethod {
+  channel: string;
+  valuePerPoint: number;
+  valueRange: [number, number] | null;
+  valueIsVariable: boolean;
+  minPoints: number | null;
+  feePerRedemption: number | null;
+  capPerCycle: number | null;
+  best?: string;
+  worst?: string;
+  note?: string;
+}
+
+export interface Redemption {
+  currency: 'points' | 'cashback-points' | 'cashback' | 'miles';
+  currencyName: string;
+  plainSummary: string;
+  methods: RedemptionMethod[];
+  caps?: string | null;
+  fees?: string | null;
 }
 interface RawEarn {
   cardId: string; ladderId: string | null; category: string; rowType: string;

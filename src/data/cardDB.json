@@ -43,6 +43,26 @@
         "usesPerPeriod": 1,
         "annualValue": null,
         "annualValueComputed": 1200
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Reward Points",
+        "plainSummary": "Your points are worth ₹0.25 each through FIRST Rewards. There's a ₹99 + GST fee per redemption, so redeem in larger batches — frequent small redemptions waste value.",
+        "methods": [
+          {
+            "channel": "FIRST Rewards (vouchers/credit)",
+            "valuePerPoint": 0.25,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 118,
+            "capPerCycle": null,
+            "note": "₹0.25 per point. Redeem in big batches — the ₹99+GST fee hurts small redemptions.",
+            "best": true
+          }
+        ],
+        "caps": "A ₹99 + GST fee applies per redemption.",
+        "fees": null
       }
     },
     {
@@ -92,6 +112,26 @@
         "usesPerPeriod": 2,
         "annualValue": null,
         "annualValueComputed": 3000
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Reward Points",
+        "plainSummary": "Your points are worth ₹0.25 each through FIRST Rewards. There's a ₹99 + GST fee per redemption, so redeem in larger batches — frequent small redemptions waste value.",
+        "methods": [
+          {
+            "channel": "FIRST Rewards (vouchers/credit)",
+            "valuePerPoint": 0.25,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 118,
+            "capPerCycle": null,
+            "note": "₹0.25 per point. Redeem in big batches — the ₹99+GST fee hurts small redemptions.",
+            "best": true
+          }
+        ],
+        "caps": "A ₹99 + GST fee applies per redemption.",
+        "fees": null
       }
     },
     {
@@ -147,6 +187,26 @@
         "usesPerPeriod": 2,
         "annualValue": null,
         "annualValueComputed": 12000
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Reward Points",
+        "plainSummary": "Your points are worth ₹0.25 each through FIRST Rewards. There's a ₹99 + GST fee per redemption, so redeem in larger batches — frequent small redemptions waste value.",
+        "methods": [
+          {
+            "channel": "FIRST Rewards (vouchers/credit)",
+            "valuePerPoint": 0.25,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 118,
+            "capPerCycle": null,
+            "note": "₹0.25 per point. Redeem in big batches — the ₹99+GST fee hurts small redemptions.",
+            "best": true
+          }
+        ],
+        "caps": "A ₹99 + GST fee applies per redemption.",
+        "fees": null
       }
     },
     {
@@ -184,6 +244,26 @@
         "usesPerPeriod": 1,
         "annualValue": null,
         "annualValueComputed": 3600
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Reward Points",
+        "plainSummary": "Your points are worth ₹0.25 each. A flat, modest value — redeem when convenient, no big difference between options.",
+        "methods": [
+          {
+            "channel": "Vouchers / statement credit",
+            "valuePerPoint": 0.25,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "₹0.25 per point.",
+            "best": true
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -221,6 +301,26 @@
         "usesPerPeriod": 1,
         "annualValue": null,
         "annualValueComputed": 3000
+      },
+      "redemption": {
+        "currency": "cashback",
+        "currencyName": "Cashback",
+        "plainSummary": "Nothing to redeem — cashback is automatic and credited to your statement.",
+        "methods": [
+          {
+            "channel": "Automatic statement credit",
+            "valuePerPoint": null,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "Auto-credited. No action needed.",
+            "best": true
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -258,6 +358,26 @@
         "usesPerPeriod": 1,
         "annualValue": null,
         "annualValueComputed": 1200
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "EDGE Reward Points",
+        "plainSummary": "EDGE points here are weak (~₹0.20 each) and the earn rate is low. The real value is partner discounts — don't rely on point redemption.",
+        "methods": [
+          {
+            "channel": "EDGE rewards catalogue",
+            "valuePerPoint": 0.2,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "~₹0.20 per point. Forfeited 30 days after card closure.",
+            "best": true
+          }
+        ],
+        "caps": "Unredeemed points forfeited 30 days after card closure.",
+        "fees": null
       }
     },
     {
@@ -291,6 +411,26 @@
       "movieStructured": {
         "type": "NONE",
         "annualValueComputed": 0
+      },
+      "redemption": {
+        "currency": "cashback",
+        "currencyName": "Cashback",
+        "plainSummary": "Nothing to redeem — Amazon Pay cashback credits automatically to your Amazon Pay balance / statement.",
+        "methods": [
+          {
+            "channel": "Automatic credit",
+            "valuePerPoint": null,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "Auto-credited. No action needed.",
+            "best": true
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -334,6 +474,26 @@
         "usesPerPeriod": 2,
         "annualValue": null,
         "annualValueComputed": 2400
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Reward Points",
+        "plainSummary": "Your points are worth ₹0.25 each whichever way you redeem. It's a low value — this is a starter/backup card, not one to chase point value on.",
+        "methods": [
+          {
+            "channel": "Statement credit / vouchers",
+            "valuePerPoint": 0.25,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "₹0.25 per point.",
+            "best": true
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -371,6 +531,36 @@
         "usesPerPeriod": 1,
         "annualValue": null,
         "annualValueComputed": 3000
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Reward Points",
+        "plainSummary": "Points can transfer to Accor hotels (2 points = 1 Accor point) or go toward the rewards catalogue. Standard redemption value is modest — this card is better for its travel and lifestyle perks than for point value.",
+        "methods": [
+          {
+            "channel": "Accor (ALL) hotel transfer",
+            "valuePerPoint": null,
+            "valueRange": null,
+            "valueIsVariable": true,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "best": true,
+            "note": "2 points = 1 Accor point. Value depends on the hotel booking."
+          },
+          {
+            "channel": "Rewards catalogue / vouchers",
+            "valuePerPoint": 0.25,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "Around ₹0.25 per point (modest)."
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -414,6 +604,26 @@
         "usesPerPeriod": 1,
         "annualValue": null,
         "annualValueComputed": 1800
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Scapia Coins",
+        "plainSummary": "Your rewards become Scapia Coins, worth ₹0.20 each (5 coins = ₹1). Best used inside the Scapia app for travel bookings.",
+        "methods": [
+          {
+            "channel": "Scapia app — travel bookings",
+            "valuePerPoint": 0.2,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "5 coins = ₹1. Use within the Scapia app.",
+            "best": true
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -447,6 +657,37 @@
       "movieStructured": {
         "type": "NONE",
         "annualValueComputed": 0
+      },
+      "redemption": {
+        "currency": "cashback-points",
+        "currencyName": "CashPoints",
+        "plainSummary": "Your CashPoints are worth more on SmartBuy (₹0.25 each) than as statement cashback (₹0.20). Redeem via SmartBuy and don't let them sit — they expire after 24 months.",
+        "methods": [
+          {
+            "channel": "SmartBuy (flights/hotels/vouchers)",
+            "valuePerPoint": 0.25,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "₹0.25 per point — best value.",
+            "best": true
+          },
+          {
+            "channel": "Statement cashback",
+            "valuePerPoint": 0.2,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "₹0.20 per point — lower value.",
+            "worst": true
+          }
+        ],
+        "caps": "CashPoints expire 24 months after earning.",
+        "fees": null
       }
     },
     {
@@ -480,6 +721,26 @@
       "movieStructured": {
         "type": "NONE",
         "annualValueComputed": 0
+      },
+      "redemption": {
+        "currency": "cashback",
+        "currencyName": "Cashback",
+        "plainSummary": "Nothing to redeem — Swiggy cashback applies automatically as Swiggy Money.",
+        "methods": [
+          {
+            "channel": "Automatic (Swiggy Money)",
+            "valuePerPoint": null,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "Auto-applied. No action needed.",
+            "best": true
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -513,6 +774,37 @@
       "movieStructured": {
         "type": "NONE",
         "annualValueComputed": 0
+      },
+      "redemption": {
+        "currency": "cashback-points",
+        "currencyName": "CashPoints",
+        "plainSummary": "Your CashPoints are worth more on SmartBuy (₹0.25 each) than as statement cashback (₹0.20). Redeem via SmartBuy and don't let them sit — they expire after 24 months.",
+        "methods": [
+          {
+            "channel": "SmartBuy (flights/hotels/vouchers)",
+            "valuePerPoint": 0.25,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "₹0.25 per point — best value.",
+            "best": true
+          },
+          {
+            "channel": "Statement cashback",
+            "valuePerPoint": 0.2,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "₹0.20 per point — lower value.",
+            "worst": true
+          }
+        ],
+        "caps": "CashPoints expire 24 months after earning.",
+        "fees": null
       }
     },
     {
@@ -552,6 +844,26 @@
       "movieStructured": {
         "type": "NONE",
         "annualValueComputed": 0
+      },
+      "redemption": {
+        "currency": "cashback",
+        "currencyName": "Direct cashback",
+        "plainSummary": "Nothing to redeem — cashback is automatic. It credits straight to your bill, so there are no points to collect, convert, or lose value on.",
+        "methods": [
+          {
+            "channel": "Automatic statement credit",
+            "valuePerPoint": null,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "best": true,
+            "note": "Auto-credits to your bill. No action needed."
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -585,6 +897,26 @@
       "movieStructured": {
         "type": "NONE",
         "annualValueComputed": 0
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Reward Points",
+        "plainSummary": "Your points are worth ₹0.25 each. The card's real value is the 10X on partner brands and GyFTR vouchers — redemption value itself is modest.",
+        "methods": [
+          {
+            "channel": "Vouchers / catalogue",
+            "valuePerPoint": 0.25,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "₹0.25 per point.",
+            "best": true
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -634,6 +966,26 @@
         "usesPerPeriod": 1,
         "annualValue": null,
         "annualValueComputed": 3000
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Reward Points",
+        "plainSummary": "Your points are worth roughly ₹0.25 each through the YES rewards catalogue. Redeem for vouchers or products.",
+        "methods": [
+          {
+            "channel": "Rewards catalogue / vouchers",
+            "valuePerPoint": 0.25,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "~₹0.25 per point.",
+            "best": true
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -683,6 +1035,26 @@
         "usesPerPeriod": 2,
         "annualValue": null,
         "annualValueComputed": 2400
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Reward Points",
+        "plainSummary": "Your points are worth ₹0.25 each. Modest value — use Coral for its movie, lounge and railway benefits rather than for point redemption.",
+        "methods": [
+          {
+            "channel": "Statement credit / vouchers",
+            "valuePerPoint": 0.25,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "₹0.25 per point.",
+            "best": true
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -722,6 +1094,36 @@
       "movieStructured": {
         "type": "NONE",
         "annualValueComputed": 0
+      },
+      "redemption": {
+        "currency": "cashback-points",
+        "currencyName": "CashPoints",
+        "plainSummary": "Simplest as statement cashback — 1 CashPoint = ₹1 off your bill. But you can only redeem ₹3,000 worth a month, so a large balance clears over several months.",
+        "methods": [
+          {
+            "channel": "Statement cashback",
+            "valuePerPoint": 1.0,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": 3000,
+            "best": true,
+            "note": "₹1 each, but capped at 3,000 a month."
+          },
+          {
+            "channel": "SmartBuy flights/hotels & catalogue",
+            "valuePerPoint": null,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "Also possible; statement cashback is the easy default."
+          }
+        ],
+        "caps": "Statement-cashback redemption capped at 3,000 CashPoints per month.",
+        "fees": null
       }
     },
     {
@@ -755,6 +1157,26 @@
       "movieStructured": {
         "type": "NONE",
         "annualValueComputed": 0
+      },
+      "redemption": {
+        "currency": "cashback",
+        "currencyName": "Cashback",
+        "plainSummary": "Nothing to redeem — cashback is auto-credited to your statement within two days of your bill, no points or portals.",
+        "methods": [
+          {
+            "channel": "Automatic statement credit",
+            "valuePerPoint": null,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "Auto-credited within ~2 days of statement. No action needed.",
+            "best": true
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -800,6 +1222,46 @@
       "movieStructured": {
         "type": "NONE",
         "annualValueComputed": 0
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Reward Points",
+        "plainSummary": "Redeem through SmartBuy. Best value is the Gold Catalogue (₹0.65 each), then flights and hotels (₹0.50). You can only use 50,000 points a cycle, so a big balance is spread over months.",
+        "methods": [
+          {
+            "channel": "Gold Catalogue (SmartBuy)",
+            "valuePerPoint": 0.65,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": 50000,
+            "best": true,
+            "note": "Best value, ₹0.65 per point."
+          },
+          {
+            "channel": "SmartBuy — flights & hotels",
+            "valuePerPoint": 0.5,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": 50000,
+            "note": "₹0.50 per point."
+          },
+          {
+            "channel": "Airline miles",
+            "valuePerPoint": 0.5,
+            "valueRange": null,
+            "valueIsVariable": true,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": 50000,
+            "note": "Up to 0.5 miles per point; real value varies by airline — usually weaker than the catalogue."
+          }
+        ],
+        "caps": "Each path capped at 50,000 points per statement cycle.",
+        "fees": null
       }
     },
     {
@@ -849,6 +1311,37 @@
         "usesPerPeriod": 2,
         "annualValue": null,
         "annualValueComputed": 6000
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Reward Points",
+        "plainSummary": "Route redemptions through SmartBuy for ₹0.50 per point on flights and hotels. Never redeem as cashback (₹0.20) — it destroys value. Build points for travel instead.",
+        "methods": [
+          {
+            "channel": "SmartBuy — flights & hotels",
+            "valuePerPoint": 0.5,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "₹0.50 per point — the right way.",
+            "best": true
+          },
+          {
+            "channel": "Statement cashback",
+            "valuePerPoint": 0.2,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "₹0.20 per point — avoid.",
+            "worst": true
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -898,6 +1391,36 @@
         "usesPerPeriod": 2,
         "annualValue": null,
         "annualValueComputed": 12000
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Reward Points",
+        "plainSummary": "Your points are worth about ₹0.25 each, whichever way you use them — statement credit or travel/shopping vouchers. Low per-point value, so the card's real value is its welcome vouchers and category use, not point redemption.",
+        "methods": [
+          {
+            "channel": "Statement credit",
+            "valuePerPoint": 0.25,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "best": true,
+            "note": "₹0.25 per point."
+          },
+          {
+            "channel": "Travel / shopping vouchers",
+            "valuePerPoint": 0.25,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "Also ₹0.25 — no better than statement credit."
+          }
+        ],
+        "caps": "Milestone bonus points capped at 20,000 per year.",
+        "fees": null
       }
     },
     {
@@ -947,6 +1470,26 @@
         "usesPerPeriod": 2,
         "annualValue": null,
         "annualValueComputed": 3600
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Reward Points",
+        "plainSummary": "Your points are worth ₹0.25 each, redeemed as statement credit or travel/shopping vouchers. Same value across options.",
+        "methods": [
+          {
+            "channel": "Statement credit / travel & shopping vouchers",
+            "valuePerPoint": 0.25,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "₹0.25 per point.",
+            "best": true
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -992,6 +1535,26 @@
       "movieStructured": {
         "type": "NONE",
         "annualValueComputed": 0
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Reward Points",
+        "plainSummary": "Your points are worth ₹0.25 each. Redeem through the SBI rewards catalogue or as vouchers — value is the same across options, so redeem when convenient.",
+        "methods": [
+          {
+            "channel": "SBI rewards catalogue / vouchers",
+            "valuePerPoint": 0.25,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "₹0.25 per point.",
+            "best": true
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -1041,6 +1604,26 @@
         "usesPerPeriod": 1,
         "annualValue": null,
         "annualValueComputed": 6000
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Reward Points",
+        "plainSummary": "Your points are worth ₹0.25 each. Redeem through the SBI rewards catalogue or as vouchers — value is the same across options, so redeem when convenient.",
+        "methods": [
+          {
+            "channel": "SBI rewards catalogue / vouchers",
+            "valuePerPoint": 0.25,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "₹0.25 per point.",
+            "best": true
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -1090,6 +1673,26 @@
         "usesPerPeriod": 2,
         "annualValue": null,
         "annualValueComputed": 6000
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "EDGE Reward Points",
+        "plainSummary": "Your EDGE points are worth about ₹0.20 each in the EDGE rewards catalogue. The card's bigger value is partner app discounts, not point redemption.",
+        "methods": [
+          {
+            "channel": "EDGE rewards catalogue",
+            "valuePerPoint": 0.2,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "~₹0.20 per point.",
+            "best": true
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -1139,6 +1742,26 @@
         "usesPerPeriod": 1,
         "annualValue": null,
         "annualValueComputed": 28800
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Reward Points",
+        "plainSummary": "Your points are worth up to ₹0.25 each, best on flight and hotel redemptions. The 40,000 bonus is worth about ₹10,000 toward travel.",
+        "methods": [
+          {
+            "channel": "Flights / hotels",
+            "valuePerPoint": 0.25,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "Up to ₹0.25 per point on travel.",
+            "best": true
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -1178,6 +1801,37 @@
       "movieStructured": {
         "type": "NONE",
         "annualValueComputed": 0
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Membership Rewards",
+        "plainSummary": "Save your Membership Rewards for larger travel redemptions and the milestone vouchers (like the ₹10,000 Taj e-Gift at ₹7L spend). Statement credit dilutes value.",
+        "methods": [
+          {
+            "channel": "Travel / milestone redemptions",
+            "valuePerPoint": 0.5,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "Best on travel and milestone vouchers.",
+            "best": true
+          },
+          {
+            "channel": "Statement credit",
+            "valuePerPoint": 0.3,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "Dilutes value — avoid.",
+            "worst": true
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -1227,6 +1881,26 @@
         "usesPerPeriod": 2,
         "annualValue": null,
         "annualValueComputed": 12000
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Reward Points",
+        "plainSummary": "Your points are worth ₹0.25 each through FIRST Rewards. There's a ₹99 + GST fee per redemption, so redeem in larger batches — frequent small redemptions waste value.",
+        "methods": [
+          {
+            "channel": "FIRST Rewards (vouchers/credit)",
+            "valuePerPoint": 0.25,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 118,
+            "capPerCycle": null,
+            "note": "₹0.25 per point. Redeem in big batches — the ₹99+GST fee hurts small redemptions.",
+            "best": true
+          }
+        ],
+        "caps": "A ₹99 + GST fee applies per redemption.",
+        "fees": null
       }
     },
     {
@@ -1272,6 +1946,39 @@
       "movieStructured": {
         "type": "NONE",
         "annualValueComputed": 0
+      },
+      "redemption": {
+        "currency": "miles",
+        "currencyName": "EDGE Miles",
+        "plainSummary": "Your EDGE Miles are best transferred 1:1 to airline partners (Air India, Aeroplan) for travel. Renewal miles are worth about ₹1 each.",
+        "methods": [
+          {
+            "channel": "Airline transfer (Air India, Aeroplan)",
+            "valuePerPoint": null,
+            "valueRange": [
+              0.5,
+              1.5
+            ],
+            "valueIsVariable": true,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "1:1 transfer — premium-cabin value varies, confirm the award first.",
+            "best": true
+          },
+          {
+            "channel": "Travel EDGE bookings",
+            "valuePerPoint": 1.0,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "~₹1 per mile on travel bookings."
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -1317,6 +2024,70 @@
       "movieStructured": {
         "type": "NONE",
         "annualValueComputed": 0
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Reward Points",
+        "plainSummary": "Your points are worth the most on flights, hotels, Apple or Tanishq via SmartBuy (₹1 each). With a big balance, transferring to airline partners can be worth even more — but confirm seats first. Avoid cashback (₹0.30) and generic vouchers (₹0.50).",
+        "methods": [
+          {
+            "channel": "SmartBuy — flights & hotels",
+            "valuePerPoint": 1.0,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": 150000,
+            "best": true,
+            "note": "Reliable ₹1 per point."
+          },
+          {
+            "channel": "Apple & Tanishq",
+            "valuePerPoint": 1.0,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "Also ₹1 per point."
+          },
+          {
+            "channel": "Airline / hotel transfer",
+            "valuePerPoint": null,
+            "valueRange": [
+              0.5,
+              2.0
+            ],
+            "valueIsVariable": true,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": 150000,
+            "note": "1:1 to KrisFlyer, Flying Blue, Finnair; 2:1 to Accor. Best on premium-cabin awards — value varies by route, confirm the award is available before you transfer."
+          },
+          {
+            "channel": "Generic vouchers",
+            "valuePerPoint": 0.5,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "Half the value of travel. Use only if you can't use travel."
+          },
+          {
+            "channel": "Statement cashback",
+            "valuePerPoint": 0.3,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "worst": true,
+            "note": "Worst value — avoid."
+          }
+        ],
+        "caps": "Up to 2 lakh points per cycle; 1.5 lakh/month for flights, hotels, airmiles.",
+        "fees": null
       }
     },
     {
@@ -1362,6 +2133,50 @@
       "movieStructured": {
         "type": "NONE",
         "annualValueComputed": 0
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Reward Points",
+        "plainSummary": "Best value comes from SmartBuy travel (~₹0.50/pt) or transferring to airline/hotel partners. Cashback is poor value — avoid it.",
+        "methods": [
+          {
+            "channel": "SmartBuy — flights & hotels",
+            "valuePerPoint": 0.5,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "Up to ₹0.50 per point via SmartBuy.",
+            "best": true
+          },
+          {
+            "channel": "Airline / hotel transfer",
+            "valuePerPoint": null,
+            "valueRange": [
+              0.5,
+              2.0
+            ],
+            "valueIsVariable": true,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "1:1 to KrisFlyer, Flying Blue, Finnair; 2:1 Accor. Premium-cabin value varies — confirm the award first."
+          },
+          {
+            "channel": "Statement cashback",
+            "valuePerPoint": 0.2,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "₹0.20 per point — avoid.",
+            "worst": true
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -1411,6 +2226,50 @@
         "usesPerPeriod": 2,
         "annualValue": null,
         "annualValueComputed": 18000
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Reward Points",
+        "plainSummary": "Use your points for flights, hotels and premium vouchers where they're worth ₹1 each. Avoid statement credit, where value drops to ₹0.40.",
+        "methods": [
+          {
+            "channel": "Flights / hotels / premium vouchers",
+            "valuePerPoint": 1.0,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "₹1 per point — the best use.",
+            "best": true
+          },
+          {
+            "channel": "Airline transfer (Air India)",
+            "valuePerPoint": null,
+            "valueRange": [
+              0.5,
+              1.5
+            ],
+            "valueIsVariable": true,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "1:1 to Air India Maharaja Club — confirm award availability."
+          },
+          {
+            "channel": "Statement credit",
+            "valuePerPoint": 0.4,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "₹0.40 per point — avoid.",
+            "worst": true
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -1456,6 +2315,39 @@
       "movieStructured": {
         "type": "NONE",
         "annualValueComputed": 0
+      },
+      "redemption": {
+        "currency": "miles",
+        "currencyName": "EDGE Reward Points",
+        "plainSummary": "Use points for airline/hotel transfers and travel redemptions for the best value. Note: Magnus lost several transfer partners in 2024–26, so confirm current partners before relying on this.",
+        "methods": [
+          {
+            "channel": "Travel partner transfer",
+            "valuePerPoint": null,
+            "valueRange": [
+              0.5,
+              1.5
+            ],
+            "valueIsVariable": true,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "Value varies; partners reduced since 2024 — check what's live before transferring.",
+            "best": true
+          },
+          {
+            "channel": "Travel EDGE bookings",
+            "valuePerPoint": 1.0,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "~₹1 per point on travel."
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -1505,6 +2397,50 @@
         "usesPerPeriod": 1,
         "annualValue": null,
         "annualValueComputed": 6000
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Membership Rewards",
+        "plainSummary": "Save Membership Rewards for hotel transfers (Marriott Bonvoy ~₹0.50–₹1+) and premium air miles (~₹0.60–₹1+). Taj vouchers ~₹0.40. Statement credit is the weakest.",
+        "methods": [
+          {
+            "channel": "Air miles / Marriott transfer",
+            "valuePerPoint": null,
+            "valueRange": [
+              0.5,
+              1.0
+            ],
+            "valueIsVariable": true,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "Marriott Bonvoy 1:1; premium air miles. Value varies — confirm first.",
+            "best": true
+          },
+          {
+            "channel": "Taj hotel vouchers",
+            "valuePerPoint": 0.4,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "~₹0.40 per point."
+          },
+          {
+            "channel": "Statement credit",
+            "valuePerPoint": 0.3,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "Weakest — avoid.",
+            "worst": true
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -1548,6 +2484,37 @@
         "usesPerPeriod": 1,
         "annualValue": null,
         "annualValueComputed": 1200
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Reward Points",
+        "plainSummary": "Your points are worth up to ₹0.50 each on travel bookings, but only ₹0.25 elsewhere. Save them for travel to get the most.",
+        "methods": [
+          {
+            "channel": "Travel bookings",
+            "valuePerPoint": 0.5,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "Up to ₹0.50 per point — the best use.",
+            "best": true
+          },
+          {
+            "channel": "Other redemptions",
+            "valuePerPoint": 0.25,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "₹0.25 per point — save points for travel instead.",
+            "worst": true
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -1597,6 +2564,39 @@
         "usesPerPeriod": 2,
         "annualValue": null,
         "annualValueComputed": 18000
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Reward Points",
+        "plainSummary": "Your points are worth ₹1 each via Travel with Points, or transfer 1:1 to airline/hotel partners for premium travel — often even more on business-class seats.",
+        "methods": [
+          {
+            "channel": "Travel with Points",
+            "valuePerPoint": 1.0,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "₹1 per point.",
+            "best": true
+          },
+          {
+            "channel": "Airline / hotel transfer",
+            "valuePerPoint": null,
+            "valueRange": [
+              1.0,
+              2.5
+            ],
+            "valueIsVariable": true,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "1:1 to KrisFlyer, Flying Blue, Qatar, JAL, Accor, Marriott. Premium cabins can exceed ₹1/pt — confirm the award first."
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     },
     {
@@ -1630,6 +2630,37 @@
       "movieStructured": {
         "type": "NONE",
         "annualValueComputed": 0
+      },
+      "redemption": {
+        "currency": "cashback-points",
+        "currencyName": "CashPoints",
+        "plainSummary": "Redeem as statement cashback — it avoids the ₹99 + tax fee charged on catalogue redemptions. Accumulate before redeeming.",
+        "methods": [
+          {
+            "channel": "Statement cashback",
+            "valuePerPoint": 0.25,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "No fee. Best simple option.",
+            "best": true
+          },
+          {
+            "channel": "Catalogue redemption",
+            "valuePerPoint": 0.25,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 118,
+            "capPerCycle": null,
+            "note": "Same value but a ₹99+tax fee applies — avoid.",
+            "worst": true
+          }
+        ],
+        "caps": "Each rewards bucket capped at 500 CashPoints/month.",
+        "fees": null
       }
     },
     {
@@ -1669,6 +2700,26 @@
       "movieStructured": {
         "type": "NONE",
         "annualValueComputed": 0
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "Reward Points",
+        "plainSummary": "Best used as instant fuel redemption at BPCL outlets — your points directly cut your fuel bill. Worth about ₹0.25 each.",
+        "methods": [
+          {
+            "channel": "Instant fuel redemption at BPCL",
+            "valuePerPoint": 0.25,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "₹0.25 per point, straight off your fuel bill.",
+            "best": true
+          }
+        ],
+        "caps": "Accelerated categories capped at 7,500 Reward Points/month.",
+        "fees": null
       }
     },
     {
@@ -1712,6 +2763,26 @@
         "usesPerPeriod": 1,
         "annualValue": null,
         "annualValueComputed": 2400
+      },
+      "redemption": {
+        "currency": "points",
+        "currencyName": "EDGE Reward Points",
+        "plainSummary": "Your EDGE points are worth about ₹0.20 each in the EDGE rewards catalogue. The card's bigger value is partner app discounts, not point redemption.",
+        "methods": [
+          {
+            "channel": "EDGE rewards catalogue",
+            "valuePerPoint": 0.2,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "~₹0.20 per point.",
+            "best": true
+          }
+        ],
+        "caps": null,
+        "fees": null
       }
     }
   ],
