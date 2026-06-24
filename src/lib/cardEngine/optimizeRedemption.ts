@@ -2,9 +2,12 @@
  * optimizeRedemption.ts — PURE, DETERMINISTIC. No I/O, no Date, no AI.
  *
  * Given a card's Redemption object and the user's current point/mile balance,
- * ranks every redemption channel by rupee value and returns the best option
- * plus the full ranked list. Cap-aware: when a capPerCycle exists and the
- * balance exceeds it, marks the channel as staged (multiple cycles needed).
+ * ranks every redemption channel by their FLOOR (reliable) value and returns
+ * the best option plus the full ranked list. Variable methods (airline
+ * transfers) expose their high-end as upside but are ranked by their floor
+ * so the recommended method is always the one the user can count on.
+ * Cap-aware: when a capPerCycle exists and the balance exceeds it, marks the
+ * channel as staged (multiple cycles needed).
  */
 
 import type { Redemption, RedemptionMethod } from './loadCardDB';
@@ -12,9 +15,15 @@ import type { Redemption, RedemptionMethod } from './loadCardDB';
 export interface OptimizedMethod {
   channel: string;
   usablePoints: number;
-  /** High-end rupee value (for variable methods, this is the ceiling). */
+  /**
+   * Floor (reliable) rupee value — used for ranking.
+   * For fixed methods this equals valueRupees. For variable methods this is
+   * usable × valueRange[0] (the worst-case end the user can count on).
+   */
+  valueRupeesFloor: number;
+  /** High-end rupee value — for variable methods this is the upside ceiling. */
   valueRupees: number;
-  /** Low-end rupee value — only set when valueIsVariable is true. */
+  /** Low-end rupee value — set when valueIsVariable is true (same as valueRupeesFloor). */
   valueRupeesLow: number | undefined;
   valueIsVariable: boolean;
   /** True when balance exceeds capPerCycle; full redemption needs multiple cycles. */
@@ -33,11 +42,11 @@ export interface RedemptionResult {
   /** True for cashback/cashback-points cards — no action needed from user. */
   isCashback: boolean;
   /**
-   * Best ranked method. Null only when there are no methods (shouldn't happen
-   * with well-formed data) or when isCashback is true.
+   * Best ranked method (highest floor value). Null only when there are no
+   * methods or when isCashback is true.
    */
   best: OptimizedMethod | null;
-  /** All methods sorted descending by valueRupees (high-end for variable). */
+  /** All methods sorted descending by valueRupeesFloor. */
   all: OptimizedMethod[];
 }
 
@@ -49,16 +58,20 @@ function evalMethod(method: RedemptionMethod, balance: number): OptimizedMethod 
 
   let valueRupees: number;
   let valueRupeesLow: number | undefined;
+  let valueRupeesFloor: number;
 
   if (method.valueIsVariable && method.valueRange != null) {
     const [low, high] = method.valueRange;
-    valueRupees = usablePoints * high;
-    valueRupeesLow = usablePoints * low;
+    valueRupeesFloor = usablePoints * low;   // floor — what the user can count on
+    valueRupees = usablePoints * high;        // upside ceiling
+    valueRupeesLow = valueRupeesFloor;
   } else if (method.valuePerPoint != null) {
-    valueRupees = usablePoints * method.valuePerPoint;
+    valueRupeesFloor = usablePoints * method.valuePerPoint;
+    valueRupees = valueRupeesFloor;           // fixed — floor = ceiling
     valueRupeesLow = undefined;
   } else {
     // Automatic cashback-style method — value is implicit (1:1 with ₹)
+    valueRupeesFloor = usablePoints;
     valueRupees = usablePoints;
     valueRupeesLow = undefined;
   }
@@ -66,6 +79,7 @@ function evalMethod(method: RedemptionMethod, balance: number): OptimizedMethod 
   return {
     channel: method.channel,
     usablePoints,
+    valueRupeesFloor,
     valueRupees,
     valueRupeesLow,
     valueIsVariable: method.valueIsVariable,
@@ -79,6 +93,10 @@ function evalMethod(method: RedemptionMethod, balance: number): OptimizedMethod 
 
 /**
  * Rank every redemption channel for this card at the given balance.
+ * Methods are sorted by floor value (descending) so `best` is always the
+ * channel with the highest guaranteed return. Variable methods appear lower
+ * in the list despite potentially higher upside — the UI can surface their
+ * valueRupees as an "up to X" figure.
  *
  * @param redemption  The card's `redemption` object from cardDB.
  * @param balance     The user's current point/mile balance (integer ≥ 0).
@@ -104,7 +122,7 @@ export function optimizeRedemption(
 
   const all = redemption.methods
     .map((m) => evalMethod(m, balance))
-    .sort((a, b) => b.valueRupees - a.valueRupees);
+    .sort((a, b) => b.valueRupeesFloor - a.valueRupeesFloor);
 
   return {
     currency: redemption.currency,
