@@ -27,7 +27,7 @@ interface RawCard {
 
 export interface RedemptionMethod {
   channel: string;
-  valuePerPoint: number;
+  valuePerPoint: number | null;
   valueRange: [number, number] | null;
   valueIsVariable: boolean;
   minPoints: number | null;
