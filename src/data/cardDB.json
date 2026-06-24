@@ -11999,7 +11999,7 @@
       "affectedHackIds": null,
       "changeDate": "April 2024",
       "whatChanged": "Axis stopped letting you move points to Accor hotels. This affects the Magnus, Atlas, Horizon and Olympus cards.",
-      "whatUserShouldKnow": "There used to be a popular trick: move your Axis points to Accor hotels for big travel value. That no longer works — Axis removed Accor. Any old YouTube video or blog still suggesting it is out of date.",
+      "whatUserShouldKnow": "Axis no longer lets you transfer points to Accor hotels — a previously high-value travel redemption route. Older guides still suggesting it are out of date.",
       "replacement": "On Magnus, you can move points to Marriott or Singapore Airlines instead (note: Marriott was also removed in April 2026). If travel rewards matter most, look at HSBC Premier or HDFC Infinia.",
       "severity": "critical",
       "triggerWhen": "user_owns_card,user_mentions_hack"
@@ -12099,30 +12099,6 @@
       "replacement": "For lounge access without conditions: HDFC Infinia (unlimited domestic), Amex Platinum Travel (8 free visits a year, no condition), or HSBC Premier (unlimited through the banking relationship).",
       "severity": "important",
       "triggerWhen": "user_owns_card,user_considers_card"
-    },
-    {
-      "warningId": "W010",
-      "changeType": "hack_dead",
-      "affectedCardIds": "CC05",
-      "affectedHackIds": "H005",
-      "changeDate": "Throughout 2024-2025",
-      "whatChanged": "A trick on the Axis Flipkart card — booking refundable flights to hit a spending target, then cancelling but keeping the cashback — has been shut down.",
-      "whatUserShouldKnow": "Axis now automatically tracks cancellations and takes back the cashback on your next bill. Doing this repeatedly can get your card suspended. Don't try it.",
-      "replacement": "Only use refundable bookings honestly. Do not try to game spending targets by cancelling bookings on any Axis card.",
-      "severity": "critical",
-      "triggerWhen": "user_mentions_hack,user_owns_card"
-    },
-    {
-      "warningId": "W011",
-      "changeType": "hack_dead",
-      "affectedCardIds": "CC19",
-      "affectedHackIds": "H019",
-      "changeDate": "Active tightening phase 2024-2026",
-      "whatChanged": "A trick on the SBI Cashback card — buying Amazon Pay gift cards to earn 5%, then using that balance for utility bills (which normally don't earn) — has become unreliable.",
-      "whatUserShouldKnow": "Since 2024, SBI checks transactions for words like 'Gift Card' or 'Voucher'. As of May 2026 this trick is hit-or-miss — some people still get the cashback, many get it denied.",
-      "replacement": "Switch to ICICI Amazon Pay, where paying bills through the Amazon Pay wallet works as intended (not as a workaround). On SBI Cashback, pay bills through shops that earn 5% online directly.",
-      "severity": "important",
-      "triggerWhen": "user_mentions_hack,user_owns_card"
     },
     {
       "warningId": "W012",
@@ -12253,7 +12229,7 @@
       "difficulty": "Beginner",
       "lastVerified": "May 2026",
       "sources": "TechnoFino, r/CreditCardsIndia, Card Maven",
-      "relatedWarnings": "W010"
+      "relatedWarnings": null
     },
     {
       "hackId": "H006",
@@ -12547,7 +12523,7 @@
       "difficulty": "Intermediate",
       "lastVerified": "Jun 2024 source; May 2026 worth re-verifying",
       "sources": "Financialy substack",
-      "relatedWarnings": "W004,W011"
+      "relatedWarnings": "W004"
     },
     {
       "hackId": "H020",

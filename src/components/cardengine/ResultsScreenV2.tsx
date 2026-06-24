@@ -976,7 +976,9 @@ export const ResultsScreenV2: React.FC<Props> = ({
 
                             return (
                               <div className="r2-pts-panel">
-                                <div className="r2-pts-summary">{redemption.plainSummary}</div>
+                                {!optResult.isCashback && (
+                                  <div className="r2-pts-summary">{redemption.plainSummary}</div>
+                                )}
 
                                 {optResult.isCashback ? (
                                   <div className="r2-pts-cashback">
