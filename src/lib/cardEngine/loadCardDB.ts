@@ -172,6 +172,7 @@ export function loadCardDB(raw: RawDB): LoadedCardDB {
       cons: c.cons ?? null,
       loungeStructured: c.loungeStructured ?? null,
       movieStructured: c.movieStructured ?? null,
+      redemption: c.redemption,
       // rewardType derived below, once earn rows are indexed.
     };
   });
