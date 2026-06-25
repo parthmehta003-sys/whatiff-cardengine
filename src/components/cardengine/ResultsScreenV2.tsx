@@ -600,7 +600,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                     { key: 'hack',     label: 'Pro Tips',         Icon: Zap,        accent: '#8b5cf6' },
                     ...(hasTransfer ? [{ key: 'transfer' as P1IconKey, label: 'Flights & hotels', Icon: Plane, accent: '#f59e0b' }] : []),
                     { key: 'know',     label: 'Things to know',   Icon: Info,       accent: '#f59e0b' },
-                    ...(hasRedemption ? [{ key: 'points' as P1IconKey, label: 'Your points', Icon: Coins, accent: '#10b981' }] : []),
+                    ...(hasRedemption ? [{ key: 'points' as P1IconKey, label: 'Redeem points', Icon: Coins, accent: '#10b981' }] : []),
                   ];
 
                   const p1IconCfg = P1_ICONS.find(i => i.key === p1ActiveIcon);
