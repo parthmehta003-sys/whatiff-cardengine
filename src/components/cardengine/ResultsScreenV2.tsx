@@ -305,6 +305,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
   // Reward-rate % toggle inside owned-card "Why" panel.
   const [showRates, setShowRates] = useState(false);
   const [showWhyTable, setShowWhyTable] = useState(false);
+  const [showVerdictDetails, setShowVerdictDetails] = useState(false);
 
   // Alt-card expansion (single-card view only).
   const [altExpanded, setAltExpanded] = useState(false);
@@ -455,23 +456,34 @@ export const ResultsScreenV2: React.FC<Props> = ({
                 const val = inr(Math.abs(activeV.netPerYear));
 
                 if (activeV.verdict === 'wrong_fit') {
+                  const metKeys: PriorityKey[] = [];
+                  const missedKeys: PriorityKey[] = [];
                   if (pKeys.length > 0 && activeCard) {
-                    const metKeys = pKeys.filter(k => {
+                    for (const k of pKeys) {
                       const ev = evalPriorityForCard(k, activeCard, monthlySpend);
-                      return ev.status === 'met' || ev.status === 'partial';
-                    });
-                    if (metKeys.length > 0) {
-                      const uniqueKeys = metKeys.filter(k => {
-                        const others = (result.ownedRanked ?? []).filter(c => c.cardId !== activeV.cardId);
-                        return !others.some(c => {
-                          const ev2 = evalPriorityForCard(k, c, monthlySpend);
-                          return ev2.status === 'met' || ev2.status === 'partial';
-                        });
-                      });
-                      if (uniqueKeys.length > 0)
-                        return `You can drop this money-wise — but it's the only card covering your ${uniqueKeys.map(k => LABEL[k]).join(', ')}, so think before you do.`;
+                      (ev.status === 'met' || ev.status === 'partial' ? metKeys : missedKeys).push(k);
                     }
                   }
+                  const ll = (keys: PriorityKey[]) => keys.map(k => LABEL[k]).join(', ');
+                  // Unique-coverage check
+                  if (metKeys.length > 0) {
+                    const uniqueKeys = metKeys.filter(k => {
+                      const others = (result.ownedRanked ?? []).filter(c => c.cardId !== activeV.cardId);
+                      return !others.some(c => {
+                        const ev2 = evalPriorityForCard(k, c, monthlySpend);
+                        return ev2.status === 'met' || ev2.status === 'partial';
+                      });
+                    });
+                    if (uniqueKeys.length > 0)
+                      return `You can drop this money-wise — but it's the only card covering your ${ll(uniqueKeys)}, so think before you do.`;
+                    // Covers some but not unique — name both sides
+                    if (missedKeys.length > 0)
+                      return `You can drop this — your other cards earn more, and while it covers your ${ll(metKeys)}, it misses your ${ll(missedKeys)}.`;
+                    return `You can drop this — your other cards earn more, and it covers your ${ll(metKeys)}, but not uniquely.`;
+                  }
+                  // Covers nothing
+                  if (pKeys.length > 0 && missedKeys.length > 0)
+                    return `You can drop this — your other cards earn more on everything you'd use it for, and it covers none of your priorities.`;
                   return "You can drop this — your other cards earn more on everything you'd use it for.";
                 }
 
@@ -502,9 +514,6 @@ export const ResultsScreenV2: React.FC<Props> = ({
                           verdictBadge={activeV.verdict.replace('_', ' ')}
                           className="r2-pcard-solo" />
                       </div>
-                      <div className={'r2-gaptag r2-owned-vbox ' + (activeV.verdict === 'wrong_fit' ? 'r2-owned-vbox--drop' : 'r2-owned-vbox--keep')}>
-                        <span className="r2-gaptag-text">{ownedVerdictLine}</span>
-                      </div>
                     </>
                   ) : (
                     <>
@@ -523,9 +532,6 @@ export const ResultsScreenV2: React.FC<Props> = ({
                           </div>
                         </div>
                         <button className="r2-carousel-arrow" onClick={next} aria-label="Next card">›</button>
-                      </div>
-                      <div className={'r2-gaptag r2-owned-vbox ' + (activeV.verdict === 'wrong_fit' ? 'r2-owned-vbox--drop' : 'r2-owned-vbox--keep')}>
-                        <span className="r2-gaptag-text">{ownedVerdictLine}</span>
                       </div>
                     </>
                   )}
@@ -640,16 +646,15 @@ export const ResultsScreenV2: React.FC<Props> = ({
                   const hasTransfer = !!(p1Transfer?.displayTravelHack);
 
                   const p1Intel = intelligence?.[activeCardId] ?? [];
-                  const whyLabel =
-                    activeV.verdict === 'keep'       ? 'Why keep this'   :
-                    activeV.verdict === 'wrong_fit'  ? 'Why drop this'   :
-                    activeV.verdict === 'underused'  ? 'Why use it more' :
-                                                       'Why we say this';
+                  const verdictAccent =
+                    activeV.verdict === 'keep'       ? '#10b981' :   // emerald
+                    activeV.verdict === 'underused'  ? '#f59e0b' :   // amber
+                                                       '#ef4444';    // red
                   const activeOwnedCard = result.ownedRanked?.find(c => c.cardId === activeCardId);
                   const hasRedemption = !!activeOwnedCard?.meta.redemption;
 
                   const P1_ICONS: { key: P1IconKey; label: string; Icon: typeof Scale; accent: string }[] = [
-                    { key: 'why',      label: whyLabel,           Icon: Scale,      accent: '#10b981' },
+                    { key: 'why',      label: 'Verdict',          Icon: Scale,      accent: verdictAccent },
                     { key: 'hack',     label: 'Pro Tips',         Icon: Zap,        accent: '#8b5cf6' },
                     ...(hasTransfer ? [{ key: 'transfer' as P1IconKey, label: 'Flights & hotels', Icon: Plane, accent: '#f59e0b' }] : []),
                     { key: 'know',     label: 'Things to know',   Icon: Info,       accent: '#f59e0b' },
@@ -861,8 +866,63 @@ export const ResultsScreenV2: React.FC<Props> = ({
                               </div>
                             ) : null;
 
+                            const verdictClass =
+                              activeV.verdict === 'keep'      ? 'keep' :
+                              activeV.verdict === 'underused' ? 'underused' : 'wrong-fit';
+
+                            // Recompute verdict line in this scope (mirrors hero IIFE computation)
+                            const verdictLine = (() => {
+                              const pKeys: PriorityKey[] = [
+                                ...(priorities?.top        ? [priorities.top]        : []),
+                                ...(priorities?.secondary  ? [priorities.secondary]  : []),
+                                ...(priorities?.niceToHave ? [priorities.niceToHave] : []),
+                              ];
+                              const activeCard = result.ownedRanked?.find(c => c.cardId === activeCardId);
+                              const val = inr(Math.abs(activeV.netPerYear));
+                              const ll = (keys: PriorityKey[]) => keys.map(k => LABEL[k]).join(', ');
+
+                              if (activeV.verdict === 'wrong_fit') {
+                                const metKs: PriorityKey[] = [], missedKs: PriorityKey[] = [];
+                                if (pKeys.length > 0 && activeCard) {
+                                  for (const k of pKeys) {
+                                    const ev = evalPriorityForCard(k, activeCard, monthlySpend);
+                                    (ev.status === 'met' || ev.status === 'partial' ? metKs : missedKs).push(k);
+                                  }
+                                }
+                                if (metKs.length > 0) {
+                                  const uniqueKs = metKs.filter(k => {
+                                    const others = (result.ownedRanked ?? []).filter(c => c.cardId !== activeCardId);
+                                    return !others.some(c => { const ev2 = evalPriorityForCard(k, c, monthlySpend); return ev2.status === 'met' || ev2.status === 'partial'; });
+                                  });
+                                  if (uniqueKs.length > 0) return `You can drop this money-wise — but it's the only card covering your ${ll(uniqueKs)}, so think before you do.`;
+                                  if (missedKs.length > 0) return `You can drop this — your other cards earn more, and while it covers your ${ll(metKs)}, it misses your ${ll(missedKs)}.`;
+                                  return `You can drop this — your other cards earn more, and it covers your ${ll(metKs)}, but not uniquely.`;
+                                }
+                                if (pKeys.length > 0 && missedKs.length > 0) return `You can drop this — your other cards earn more on everything you'd use it for, and it covers none of your priorities.`;
+                                return "You can drop this — your other cards earn more on everything you'd use it for.";
+                              }
+                              if (pKeys.length === 0 || !activeCard) return `Keep this card — earns you ${val} a year.`;
+                              const metKs: PriorityKey[] = [], missedKs: PriorityKey[] = [];
+                              for (const k of pKeys) { const ev = evalPriorityForCard(k, activeCard, monthlySpend); (ev.status === 'met' || ev.status === 'partial' ? metKs : missedKs).push(k); }
+                              if (metKs.length > 0 && missedKs.length === 0) return `Keep this card — earns you ${val} a year, and it covers your ${ll(metKs)}.`;
+                              if (metKs.length === 0) return `Keep this card — earns you ${val} a year. Doesn't cover your ${ll(missedKs)}.`;
+                              return `Keep this card — earns you ${val} a year — covers your ${ll(metKs)}, but not your ${ll(missedKs)}.`;
+                            })();
+
                             return (
                               <div className="r2-why-levels">
+                                {/* Verdict box — always visible, focal element */}
+                                <div className={`r2-vcard r2-vcard--${verdictClass}`}>
+                                  {verdictLine}
+                                </div>
+
+                                {/* See details expander */}
+                                <button className="r2-why-rate-toggle r2-details-toggle"
+                                  onClick={() => setShowVerdictDetails(v => !v)}>
+                                  {showVerdictDetails ? '▾ Hide details' : '▸ See details'}
+                                </button>
+
+                                {showVerdictDetails && (<>
                                 {/* Level ① — prominent earn headline */}
                                 <div className="r2-why-level">
                                   <div className="r2-why-earn-headline">
@@ -905,6 +965,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                     {level3}
                                   </div>
                                 )}
+                                </>)}
                               </div>
                             );
                           })()}
@@ -2492,12 +2553,6 @@ const css = `
 /* ── Owned-card carousel (Journey A) ── */
 .r2-owned-carousel{display:flex;align-items:center;gap:8px;margin-bottom:4px}
 .r2-owned-earn-line{font-size:12px;color:#fafafa;text-align:center;margin:6px 0 10px;line-height:1.4}
-/* Verdict box — keep (green) and drop (amber) */
-.r2-owned-vbox{margin:8px 0 10px}
-.r2-owned-vbox--keep{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.30)}
-.r2-owned-vbox--keep .r2-gaptag-text{color:#6ee7b7}
-.r2-owned-vbox--drop{background:rgba(245,158,11,.06);border-color:rgba(245,158,11,.25)}
-.r2-owned-vbox--drop .r2-gaptag-text{color:#fcd34d}
 .r2-carousel-arrow{
   flex-shrink:0;width:32px;height:32px;border-radius:50%;
   background:#18181b;border:1px solid #3f3f46;color:#fafafa;
@@ -2658,6 +2713,25 @@ const css = `
 .r2-underused-unlock-head{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#f59e0b;margin-bottom:6px}
 .r2-underused-unlock{font-size:12.5px;color:#d4d4d8;line-height:1.55}
 .r2-underused-unlock-caveat{margin-top:6px;font-size:11px;color:#fafafa}
+/* ── Verdict card (prominent box in Verdict tab) ── */
+.r2-vcard{
+  font-size:14px;font-weight:600;line-height:1.55;
+  border-radius:12px;padding:14px 16px;margin-bottom:12px;
+  border-width:1px;border-style:solid}
+.r2-vcard--keep{
+  background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.45);
+  color:#6ee7b7;
+  box-shadow:0 0 12px rgba(16,185,129,.18)}
+.r2-vcard--underused{
+  background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.40);
+  color:#fcd34d;
+  box-shadow:0 0 12px rgba(245,158,11,.15)}
+.r2-vcard--wrong-fit{
+  background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.40);
+  color:#fca5a5;
+  box-shadow:0 0 12px rgba(239,68,68,.15)}
+.r2-details-toggle{display:block;margin-bottom:10px}
+
 /* ── Why-panel 3-level structure ── */
 .r2-why-levels{display:flex;flex-direction:column;gap:16px}
 .r2-why-level{background:#0c0c0e;border:1px solid #27272a;border-radius:12px;padding:14px 16px}
