@@ -2461,7 +2461,8 @@ const css = `
 .r2-portbox{
   margin-top:22px;
   border-radius:14px;
-  background:linear-gradient(rgba(6,182,212,.07),rgba(6,182,212,.07)) padding-box,
+  background:#09090b;
+  background:linear-gradient(#09090b,#09090b) padding-box,
              linear-gradient(135deg,#06b6d4 0%,#8b5cf6 100%) border-box;
   border:1px solid transparent;
   box-shadow:0 0 0 1px rgba(6,182,212,.10),
@@ -2472,9 +2473,9 @@ const css = `
   display:flex;align-items:center;justify-content:space-between;width:100%;
   font-family:'DM Sans',system-ui,sans-serif;
   font-size:13px;font-weight:700;color:#e4e4e7;
-  background:none;border:none;cursor:pointer;
+  background:rgba(6,182,212,.10);border:none;cursor:pointer;
   padding:13px 16px;text-align:left;gap:8px}
-.r2-portbox-head:hover{color:#fafafa}
+.r2-portbox-head:hover{background:rgba(6,182,212,.14);color:#fafafa}
 .r2-portbox-chev{
   font-size:14px;color:#71717a;transition:transform .2s;display:inline-block;flex-shrink:0;
   transform:rotate(90deg)}
