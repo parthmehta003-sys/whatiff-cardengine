@@ -306,6 +306,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
   const [showRates, setShowRates] = useState(false);
   const [showWhyTable, setShowWhyTable] = useState(false);
   const [showVerdictDetails, setShowVerdictDetails] = useState(false);
+  const [portfolioOpen, setPortfolioOpen] = useState(false);
 
   // Alt-card expansion (single-card view only).
   const [altExpanded, setAltExpanded] = useState(false);
@@ -535,6 +536,58 @@ export const ResultsScreenV2: React.FC<Props> = ({
                       </div>
                     </>
                   )}
+                  {/* Portfolio summary — best card per category, below carousel */}
+                  {result.bestCardPerCategory && (() => {
+                    const bpc = result.bestCardPerCategory!;
+                    const spentCats = (Object.keys(monthlySpend) as (keyof typeof monthlySpend)[])
+                      .filter(c => (monthlySpend[c] ?? 0) > 0);
+                    const rows = spentCats
+                      .map(c => ({ cat: c as string, route: bpc[c as string] }))
+                      .filter(r => r.route)
+                      .sort((a, b) => (b.route?.guaranteed ?? 0) - (a.route?.guaranteed ?? 0));
+                    const totalAnnual = rows.reduce((s, r) => s + (r.route?.guaranteed ?? 0) * 12, 0);
+                    if (rows.length === 0) return null;
+                    return (
+                      <div className="r2-portbox">
+                        <button className="r2-portbox-head" onClick={() => setPortfolioOpen(v => !v)}>
+                          <span>Best cards in your portfolio for each spend</span>
+                          <span className={'r2-portbox-chev' + (portfolioOpen ? ' open' : '')}>›</span>
+                        </button>
+                        {portfolioOpen && (
+                          <div className="r2-portbox-body">
+                            <div className="r2-routemap-sub" style={{ marginBottom: 8 }}>among cards you own today</div>
+                            {rows.map(({ cat, route }) => {
+                              const isLeak = !route?.cardId;
+                              return (
+                                <div key={cat} className={'r2-routemap-row' + (isLeak ? ' leak' : '')}>
+                                  <span className="r2-routemap-cat">{cat === 'Other(base)' ? 'Everything else' : cat}</span>
+                                  {isLeak ? (
+                                    <span className="r2-routemap-leak-note">{route?.noData ? 'no rate data' : 'none earn here'}</span>
+                                  ) : (
+                                    <>
+                                      <span className="r2-routemap-card">{route?.cardName}</span>
+                                      <span className="r2-routemap-val">₹{Math.round((route?.guaranteed ?? 0) * 12).toLocaleString('en-IN')}/yr</span>
+                                    </>
+                                  )}
+                                </div>
+                              );
+                            })}
+                            {totalAnnual > 0 && (
+                              <>
+                                <div className="r2-routemap-total">
+                                  <span className="r2-routemap-total-lbl">Total with current setup</span>
+                                  <span className="r2-routemap-total-val">₹{Math.round(totalAnnual).toLocaleString('en-IN')}/yr</span>
+                                </div>
+                                <div className="r2-portcard-explainer">
+                                  No single card does everything well. Each one is best for a few things. Use all of them the right way and you earn <b>₹{Math.round(totalAnnual).toLocaleString('en-IN')}</b> a year — more than any card alone.
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </>
               );
             })()
@@ -2442,6 +2495,30 @@ const css = `
   font-size:13px;font-weight:600;cursor:pointer;padding:4px 0;display:block}
 .r2-alt-toggle:hover{color:#a78bfa}
 .r2-alt-detail{margin-top:14px;border-top:1px solid #1f1f23;padding-top:14px}
+
+/* ── Portfolio summary box (Journey A — best card per spend, below carousel) ── */
+.r2-portbox{
+  margin-top:14px;
+  border-radius:14px;
+  background:linear-gradient(#09090b,#09090b) padding-box,
+             linear-gradient(135deg,#06b6d4 0%,#8b5cf6 100%) border-box;
+  border:1px solid transparent;
+  box-shadow:0 0 0 1px rgba(6,182,212,.10),
+             0 6px 24px rgba(6,182,212,.07),
+             0 6px 24px rgba(139,92,246,.05);
+  overflow:hidden}
+.r2-portbox-head{
+  display:flex;align-items:center;justify-content:space-between;width:100%;
+  font-family:'DM Sans',system-ui,sans-serif;
+  font-size:13px;font-weight:700;color:#e4e4e7;
+  background:none;border:none;cursor:pointer;
+  padding:13px 16px;text-align:left;gap:8px}
+.r2-portbox-head:hover{color:#fafafa}
+.r2-portbox-chev{
+  font-size:14px;color:#71717a;transition:transform .2s;display:inline-block;flex-shrink:0;
+  transform:rotate(90deg)}
+.r2-portbox-chev.open{transform:rotate(270deg)}
+.r2-portbox-body{padding:0 14px 14px;border-top:1px solid rgba(6,182,212,.12)}
 
 /* ── Stage 7: Transfer callout box ── */
 .r2-xfr-box{
