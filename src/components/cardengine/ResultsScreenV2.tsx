@@ -1236,59 +1236,6 @@ export const ResultsScreenV2: React.FC<Props> = ({
                         </div>
                       )}
 
-                      {/* Best cards per category — shared collapsible, not per-card (Fix 2: above balance) */}
-                      {result.bestCardPerCategory && (() => {
-                        const routes = Object.entries(result.bestCardPerCategory) as [string, OwnedCategoryRoute][];
-                        const sorted = routes.slice().sort((a, b) => {
-                          const aLeak = !a[1].cardId; const bLeak = !b[1].cardId;
-                          if (aLeak !== bLeak) return aLeak ? 1 : -1;
-                          return b[1].guaranteed - a[1].guaranteed;
-                        });
-                        const totalAnnual = routes.reduce((s, [, r]) => s + (r.guaranteed ?? 0) * 12, 0);
-                        const distinctWinnersOld = new Set(routes.map(([, r]) => r.cardId).filter(Boolean));
-                        const soloWinnerOld = distinctWinnersOld.size === 1
-                          ? routes.find(([, r]) => r.cardId)?.[1].cardName ?? null
-                          : null;
-                        return (
-                          <details className="r2-fold">
-                            <summary>Best cards in your portfolio for each spend</summary>
-                            <div className="r2-fold-body">
-                              <span className="r2-routemap-sub">among cards you own today</span>
-                              {sorted.map(([cat, route]) => {
-                                const isLeak = !route.cardId;
-                                return (
-                                  <div key={cat} className={'r2-routemap-row' + (isLeak ? ' leak' : '')}>
-                                    <span className="r2-routemap-cat">{cat}</span>
-                                    {isLeak ? (
-                                      <span className="r2-routemap-leak-note">{route.noData ? 'no rate data' : 'none earn here'}</span>
-                                    ) : (
-                                      <>
-                                        <span className="r2-routemap-card">{route.cardName}</span>
-                                        <span className="r2-routemap-val">₹{Math.round(route.guaranteed * 12).toLocaleString('en-IN')}/yr</span>
-                                      </>
-                                    )}
-                                  </div>
-                                );
-                              })}
-                              {totalAnnual > 0 && (
-                                <>
-                                  <div className="r2-routemap-total">
-                                    <span className="r2-routemap-total-lbl">Total with current setup</span>
-                                    <span className="r2-routemap-total-val">₹{Math.round(totalAnnual).toLocaleString('en-IN')}/yr</span>
-                                  </div>
-                                  <div className="r2-portcard-explainer">
-                                    {soloWinnerOld
-                                      ? <>One card — <b>{soloWinnerOld}</b> — covers all your spending best. Put everything on it and you earn <b>₹{Math.round(totalAnnual).toLocaleString('en-IN')}</b> a year.</>
-                                      : <>No single card does everything well. Each one is best for a few things. Use all of them the right way and you earn <b>₹{Math.round(totalAnnual).toLocaleString('en-IN')}</b> a year — more than any card alone.</>
-                                    }
-                                  </div>
-                                </>
-                              )}
-                            </div>
-                          </details>
-                        );
-                      })()}
-
                       {/* Balance calculator */}
                       {(() => {
                         const ownedVerdicts = result.ownedVerdicts!;
@@ -2512,9 +2459,9 @@ const css = `
 
 /* ── Portfolio summary box (Journey A — best card per spend, below carousel) ── */
 .r2-portbox{
-  margin-top:14px;
+  margin-top:22px;
   border-radius:14px;
-  background:linear-gradient(#09090b,#09090b) padding-box,
+  background:linear-gradient(rgba(6,182,212,.07),rgba(6,182,212,.07)) padding-box,
              linear-gradient(135deg,#06b6d4 0%,#8b5cf6 100%) border-box;
   border:1px solid transparent;
   box-shadow:0 0 0 1px rgba(6,182,212,.10),
