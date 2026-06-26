@@ -443,6 +443,55 @@ export const ResultsScreenV2: React.FC<Props> = ({
               const toStub = (v: typeof activeV) => ({ meta: { name: v.cardName, bank: v.bank } });
               const prev = () => { setOwnedFrontIdx(i => (i - 1 + N) % N); setP1ActiveIcon('why'); setP1HackStepsOpen(false); };
               const next = () => { setOwnedFrontIdx(i => (i + 1) % N); setP1ActiveIcon('why'); setP1HackStepsOpen(false); };
+
+              // ── Consolidated under-card verdict (money + priorities) ──────────
+              const ownedVerdictLine = (() => {
+                const pKeys: PriorityKey[] = [
+                  ...(priorities?.top        ? [priorities.top]        : []),
+                  ...(priorities?.secondary  ? [priorities.secondary]  : []),
+                  ...(priorities?.niceToHave ? [priorities.niceToHave] : []),
+                ];
+                const activeCard = result.ownedRanked?.find(c => c.cardId === activeV.cardId);
+                const val = inr(Math.abs(activeV.netPerYear));
+
+                if (activeV.verdict === 'wrong_fit') {
+                  if (pKeys.length > 0 && activeCard) {
+                    const metKeys = pKeys.filter(k => {
+                      const ev = evalPriorityForCard(k, activeCard, monthlySpend);
+                      return ev.status === 'met' || ev.status === 'partial';
+                    });
+                    if (metKeys.length > 0) {
+                      const uniqueKeys = metKeys.filter(k => {
+                        const others = (result.ownedRanked ?? []).filter(c => c.cardId !== activeV.cardId);
+                        return !others.some(c => {
+                          const ev2 = evalPriorityForCard(k, c, monthlySpend);
+                          return ev2.status === 'met' || ev2.status === 'partial';
+                        });
+                      });
+                      if (uniqueKeys.length > 0)
+                        return `You can drop this money-wise — but it's the only card covering your ${uniqueKeys.map(k => LABEL[k]).join(', ')}, so think before you do.`;
+                    }
+                  }
+                  return "You can drop this — your other cards earn more on everything you'd use it for.";
+                }
+
+                // KEEP or UNDERUSED
+                if (pKeys.length === 0 || !activeCard)
+                  return `Keep this card — earns you ${val} a year.`;
+                const metKeys: PriorityKey[] = [];
+                const missedKeys: PriorityKey[] = [];
+                for (const k of pKeys) {
+                  const ev = evalPriorityForCard(k, activeCard, monthlySpend);
+                  (ev.status === 'met' || ev.status === 'partial' ? metKeys : missedKeys).push(k);
+                }
+                const ll = (keys: PriorityKey[]) => keys.map(k => LABEL[k]).join(', ');
+                if (metKeys.length > 0 && missedKeys.length === 0)
+                  return `Keep this card — earns you ${val} a year, and it covers your ${ll(metKeys)}.`;
+                if (metKeys.length === 0)
+                  return `Keep this card — earns you ${val} a year. Doesn't cover your ${ll(missedKeys)}.`;
+                return `Keep this card — earns you ${val} a year — covers your ${ll(metKeys)}, but not your ${ll(missedKeys)}.`;
+              })();
+
               return (
                 <>
                   <div className="r2-eyebrow">Your cards</div>
@@ -453,7 +502,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                           verdictBadge={activeV.verdict.replace('_', ' ')}
                           className="r2-pcard-solo" />
                       </div>
-                      {activeV.reason && <div className="r2-owned-earn-line">{activeV.reason}</div>}
+                      <div className="r2-owned-verdict-line">{ownedVerdictLine}</div>
                     </>
                   ) : (
                     <>
@@ -473,7 +522,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                         </div>
                         <button className="r2-carousel-arrow" onClick={next} aria-label="Next card">›</button>
                       </div>
-                      {activeV.reason && <div className="r2-owned-earn-line">{activeV.reason}</div>}
+                      <div className="r2-owned-verdict-line">{ownedVerdictLine}</div>
                     </>
                   )}
                 </>
@@ -605,48 +654,8 @@ export const ResultsScreenV2: React.FC<Props> = ({
 
                   const p1IconCfg = P1_ICONS.find(i => i.key === p1ActiveIcon);
 
-                  // ── One-line summary: money verdict + priority coverage ──────────
-                  const summaryLine = (() => {
-                    const moneyGood = activeV.verdict !== 'wrong_fit';
-                    const moneyHalf = moneyGood ? "this one's worth keeping" : "you can drop this";
-                    const priorityKeys: PriorityKey[] = [
-                      ...(priorities?.top        ? [priorities.top]        : []),
-                      ...(priorities?.secondary  ? [priorities.secondary]  : []),
-                      ...(priorities?.niceToHave ? [priorities.niceToHave] : []),
-                    ];
-                    if (priorityKeys.length === 0) return `Money-wise, ${moneyHalf}.`;
-                    if (!activeOwnedCard) return `Money-wise, ${moneyHalf}.`;
-                    const metKeys: PriorityKey[] = [];
-                    const missedKeys: PriorityKey[] = [];
-                    for (const key of priorityKeys) {
-                      const ev = evalPriorityForCard(key, activeOwnedCard, monthlySpend);
-                      (ev.status === 'met' || ev.status === 'partial' ? metKeys : missedKeys).push(key);
-                    }
-                    const labelList = (keys: PriorityKey[]) => keys.map(k => LABEL[k]).join(', ');
-                    // Special case: can drop money-wise but uniquely covers a priority
-                    if (!moneyGood && metKeys.length > 0) {
-                      const uniqueKeys = metKeys.filter(key => {
-                        const others = (result.ownedRanked ?? []).filter(c => c.cardId !== activeCardId);
-                        return !others.some(c => {
-                          const ev2 = evalPriorityForCard(key, c, monthlySpend);
-                          return ev2.status === 'met' || ev2.status === 'partial';
-                        });
-                      });
-                      if (uniqueKeys.length > 0)
-                        return `Money-wise, you can drop this — but it's the only card covering your ${labelList(uniqueKeys)}, so think before you do.`;
-                    }
-                    if (metKeys.length > 0 && missedKeys.length === 0)
-                      return `Money-wise, ${moneyHalf} — and it covers your ${labelList(metKeys)}.`;
-                    if (metKeys.length === 0)
-                      return `Money-wise, ${moneyHalf} — and it doesn't cover your ${labelList(missedKeys)}.`;
-                    return `Money-wise, ${moneyHalf} — it covers your ${labelList(metKeys)}, but not your ${labelList(missedKeys)}.`;
-                  })();
-
                   return (
                     <>
-                      {/* One-line money + priority summary */}
-                      <div className="r2-summary-line">{summaryLine}</div>
-
                       {/* Phase 1 icon row */}
                       <div className="r2-iconrow">
                         {P1_ICONS.map(({ key, label, Icon, accent }) => (
@@ -850,28 +859,14 @@ export const ResultsScreenV2: React.FC<Props> = ({
 
                             return (
                               <div className="r2-why-levels">
-                                {/* Verdict one-liner — always visible */}
-                                <div className="r2-verdict-oneliner">
-                                  {activeV.verdict === 'keep' && (
-                                    wonLabelShared
-                                      ? <>Keep this card — you earn the best rate on <b>{wonLabelShared}</b>. It gives you back <b>{inr(standaloneTotalShared)}</b> a year.</>
-                                      : <>Keep this card — it earns well across your spending. It gives you back <b>{inr(standaloneTotalShared)}</b> a year.</>
-                                  )}
-                                  {activeV.verdict === 'wrong_fit' && (
-                                    <>You can drop this — on everything you spend on, your other cards earn you more, at a better rate. So it adds nothing new to your wallet.</>
-                                  )}
-                                  {activeV.verdict === 'underused' && (
-                                    wonLabelShared
-                                      ? <>Right now this is only your best card for <b>{wonLabelShared}</b>. It can earn a lot more — see Pro Tips to unlock it.</>
-                                      : <>Right now it isn&rsquo;t your best card for anything. It can earn more — see Pro Tips.</>
-                                  )}
-                                </div>
-
-                                {/* Level ① */}
+                                {/* Level ① — prominent earn headline */}
                                 <div className="r2-why-level">
-                                  <div className="r2-why-level-head">
-                                    <span>What you get back in a year</span>
-                                    <span className="r2-why-total">{inr(standaloneTotalShared)} back</span>
+                                  <div className="r2-why-earn-headline">
+                                    <div className="r2-why-earn-label">What you get back in a year</div>
+                                    <div className="r2-why-earn-amount">{inr(standaloneTotalShared)}</div>
+                                    {wonLabelShared && (
+                                      <div className="r2-why-earn-bestfor">Best used for: {wonLabelShared}</div>
+                                    )}
                                   </div>
                                   <button className="r2-why-rate-toggle" onClick={() => setShowWhyTable(v => !v)}>
                                     {showWhyTable ? '▾ Hide the numbers' : '▸ See the numbers'}
@@ -2493,8 +2488,7 @@ const css = `
 /* ── Owned-card carousel (Journey A) ── */
 .r2-owned-carousel{display:flex;align-items:center;gap:8px;margin-bottom:4px}
 .r2-owned-earn-line{font-size:12px;color:#fafafa;text-align:center;margin:6px 0 10px;line-height:1.4}
-.r2-summary-line{font-size:13px;color:#d4d4d8;line-height:1.55;margin:0 0 14px;padding:10px 14px;
-  background:#111113;border:1px solid #27272a;border-radius:10px}
+.r2-owned-verdict-line{font-size:13px;color:#d4d4d8;line-height:1.55;text-align:center;margin:6px 0 10px}
 .r2-carousel-arrow{
   flex-shrink:0;width:32px;height:32px;border-radius:50%;
   background:#18181b;border:1px solid #3f3f46;color:#fafafa;
@@ -2655,9 +2649,6 @@ const css = `
 .r2-underused-unlock-head{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#f59e0b;margin-bottom:6px}
 .r2-underused-unlock{font-size:12.5px;color:#d4d4d8;line-height:1.55}
 .r2-underused-unlock-caveat{margin-top:6px;font-size:11px;color:#fafafa}
-.r2-verdict-oneliner{font-size:13px;color:#fafafa;line-height:1.6;margin-bottom:12px}
-.r2-verdict-oneliner b{color:#e4e4e7}
-
 /* ── Why-panel 3-level structure ── */
 .r2-why-levels{display:flex;flex-direction:column;gap:16px}
 .r2-why-level{background:#0c0c0e;border:1px solid #27272a;border-radius:12px;padding:14px 16px}
@@ -2665,6 +2656,10 @@ const css = `
   font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
   color:#71717a;margin-bottom:10px}
 .r2-why-total{font-size:12px;font-weight:800;color:#10b981;letter-spacing:0}
+.r2-why-earn-headline{margin-bottom:12px}
+.r2-why-earn-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#71717a;margin-bottom:4px}
+.r2-why-earn-amount{font-size:32px;font-weight:900;color:#10b981;letter-spacing:-.02em;line-height:1}
+.r2-why-earn-bestfor{font-size:11px;color:#71717a;margin-top:5px;font-weight:500}
 .r2-why-rate-toggle{margin-top:10px;background:none;border:none;color:#71717a;
   font-size:11px;font-weight:600;cursor:pointer;padding:0;text-decoration:underline}
 .r2-why-rate-toggle:hover{color:#fafafa}
