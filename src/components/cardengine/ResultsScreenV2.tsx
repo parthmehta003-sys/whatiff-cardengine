@@ -605,8 +605,48 @@ export const ResultsScreenV2: React.FC<Props> = ({
 
                   const p1IconCfg = P1_ICONS.find(i => i.key === p1ActiveIcon);
 
+                  // ── One-line summary: money verdict + priority coverage ──────────
+                  const summaryLine = (() => {
+                    const moneyGood = activeV.verdict !== 'wrong_fit';
+                    const moneyHalf = moneyGood ? "this one's worth keeping" : "you can drop this";
+                    const priorityKeys: PriorityKey[] = [
+                      ...(priorities?.top        ? [priorities.top]        : []),
+                      ...(priorities?.secondary  ? [priorities.secondary]  : []),
+                      ...(priorities?.niceToHave ? [priorities.niceToHave] : []),
+                    ];
+                    if (priorityKeys.length === 0) return `Money-wise, ${moneyHalf}.`;
+                    if (!activeOwnedCard) return `Money-wise, ${moneyHalf}.`;
+                    const metKeys: PriorityKey[] = [];
+                    const missedKeys: PriorityKey[] = [];
+                    for (const key of priorityKeys) {
+                      const ev = evalPriorityForCard(key, activeOwnedCard, monthlySpend);
+                      (ev.status === 'met' || ev.status === 'partial' ? metKeys : missedKeys).push(key);
+                    }
+                    const labelList = (keys: PriorityKey[]) => keys.map(k => LABEL[k]).join(', ');
+                    // Special case: can drop money-wise but uniquely covers a priority
+                    if (!moneyGood && metKeys.length > 0) {
+                      const uniqueKeys = metKeys.filter(key => {
+                        const others = (result.ownedRanked ?? []).filter(c => c.cardId !== activeCardId);
+                        return !others.some(c => {
+                          const ev2 = evalPriorityForCard(key, c, monthlySpend);
+                          return ev2.status === 'met' || ev2.status === 'partial';
+                        });
+                      });
+                      if (uniqueKeys.length > 0)
+                        return `Money-wise, you can drop this — but it's the only card covering your ${labelList(uniqueKeys)}, so think before you do.`;
+                    }
+                    if (metKeys.length > 0 && missedKeys.length === 0)
+                      return `Money-wise, ${moneyHalf} — and it covers your ${labelList(metKeys)}.`;
+                    if (metKeys.length === 0)
+                      return `Money-wise, ${moneyHalf} — and it doesn't cover your ${labelList(missedKeys)}.`;
+                    return `Money-wise, ${moneyHalf} — it covers your ${labelList(metKeys)}, but not your ${labelList(missedKeys)}.`;
+                  })();
+
                   return (
                     <>
+                      {/* One-line money + priority summary */}
+                      <div className="r2-summary-line">{summaryLine}</div>
+
                       {/* Phase 1 icon row */}
                       <div className="r2-iconrow">
                         {P1_ICONS.map(({ key, label, Icon, accent }) => (
@@ -2453,6 +2493,8 @@ const css = `
 /* ── Owned-card carousel (Journey A) ── */
 .r2-owned-carousel{display:flex;align-items:center;gap:8px;margin-bottom:4px}
 .r2-owned-earn-line{font-size:12px;color:#fafafa;text-align:center;margin:6px 0 10px;line-height:1.4}
+.r2-summary-line{font-size:13px;color:#d4d4d8;line-height:1.55;margin:0 0 14px;padding:10px 14px;
+  background:#111113;border:1px solid #27272a;border-radius:10px}
 .r2-carousel-arrow{
   flex-shrink:0;width:32px;height:32px;border-radius:50%;
   background:#18181b;border:1px solid #3f3f46;color:#fafafa;
