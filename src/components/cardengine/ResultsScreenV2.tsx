@@ -502,7 +502,9 @@ export const ResultsScreenV2: React.FC<Props> = ({
                           verdictBadge={activeV.verdict.replace('_', ' ')}
                           className="r2-pcard-solo" />
                       </div>
-                      <div className="r2-owned-verdict-line">{ownedVerdictLine}</div>
+                      <div className={'r2-gaptag r2-owned-vbox ' + (activeV.verdict === 'wrong_fit' ? 'r2-owned-vbox--drop' : 'r2-owned-vbox--keep')}>
+                        <span className="r2-gaptag-text">{ownedVerdictLine}</span>
+                      </div>
                     </>
                   ) : (
                     <>
@@ -522,7 +524,9 @@ export const ResultsScreenV2: React.FC<Props> = ({
                         </div>
                         <button className="r2-carousel-arrow" onClick={next} aria-label="Next card">›</button>
                       </div>
-                      <div className="r2-owned-verdict-line">{ownedVerdictLine}</div>
+                      <div className={'r2-gaptag r2-owned-vbox ' + (activeV.verdict === 'wrong_fit' ? 'r2-owned-vbox--drop' : 'r2-owned-vbox--keep')}>
+                        <span className="r2-gaptag-text">{ownedVerdictLine}</span>
+                      </div>
                     </>
                   )}
                 </>
@@ -2488,7 +2492,12 @@ const css = `
 /* ── Owned-card carousel (Journey A) ── */
 .r2-owned-carousel{display:flex;align-items:center;gap:8px;margin-bottom:4px}
 .r2-owned-earn-line{font-size:12px;color:#fafafa;text-align:center;margin:6px 0 10px;line-height:1.4}
-.r2-owned-verdict-line{font-size:13px;color:#d4d4d8;line-height:1.55;text-align:center;margin:6px 0 10px}
+/* Verdict box — keep (green) and drop (amber) */
+.r2-owned-vbox{margin:8px 0 10px}
+.r2-owned-vbox--keep{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.30)}
+.r2-owned-vbox--keep .r2-gaptag-text{color:#6ee7b7}
+.r2-owned-vbox--drop{background:rgba(245,158,11,.06);border-color:rgba(245,158,11,.25)}
+.r2-owned-vbox--drop .r2-gaptag-text{color:#fcd34d}
 .r2-carousel-arrow{
   flex-shrink:0;width:32px;height:32px;border-radius:50%;
   background:#18181b;border:1px solid #3f3f46;color:#fafafa;
