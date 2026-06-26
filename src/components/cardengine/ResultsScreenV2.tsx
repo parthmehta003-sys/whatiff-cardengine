@@ -546,6 +546,10 @@ export const ResultsScreenV2: React.FC<Props> = ({
                       .filter(r => r.route)
                       .sort((a, b) => (b.route?.guaranteed ?? 0) - (a.route?.guaranteed ?? 0));
                     const totalAnnual = rows.reduce((s, r) => s + (r.route?.guaranteed ?? 0) * 12, 0);
+                    const distinctWinners = new Set(rows.map(r => r.route?.cardId).filter(Boolean));
+                    const soloWinner = distinctWinners.size === 1
+                      ? rows.find(r => r.route?.cardId)?.route?.cardName ?? null
+                      : null;
                     if (rows.length === 0) return null;
                     return (
                       <div className="r2-portbox">
@@ -579,7 +583,10 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                   <span className="r2-routemap-total-val">₹{Math.round(totalAnnual).toLocaleString('en-IN')}/yr</span>
                                 </div>
                                 <div className="r2-portcard-explainer">
-                                  No single card does everything well. Each one is best for a few things. Use all of them the right way and you earn <b>₹{Math.round(totalAnnual).toLocaleString('en-IN')}</b> a year — more than any card alone.
+                                  {soloWinner
+                                    ? <>One card — <b>{soloWinner}</b> — covers all your spending best. Put everything on it and you earn <b>₹{Math.round(totalAnnual).toLocaleString('en-IN')}</b> a year.</>
+                                    : <>No single card does everything well. Each one is best for a few things. Use all of them the right way and you earn <b>₹{Math.round(totalAnnual).toLocaleString('en-IN')}</b> a year — more than any card alone.</>
+                                  }
                                 </div>
                               </>
                             )}
@@ -1238,6 +1245,10 @@ export const ResultsScreenV2: React.FC<Props> = ({
                           return b[1].guaranteed - a[1].guaranteed;
                         });
                         const totalAnnual = routes.reduce((s, [, r]) => s + (r.guaranteed ?? 0) * 12, 0);
+                        const distinctWinnersOld = new Set(routes.map(([, r]) => r.cardId).filter(Boolean));
+                        const soloWinnerOld = distinctWinnersOld.size === 1
+                          ? routes.find(([, r]) => r.cardId)?.[1].cardName ?? null
+                          : null;
                         return (
                           <details className="r2-fold">
                             <summary>Best cards in your portfolio for each spend</summary>
@@ -1266,7 +1277,10 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                     <span className="r2-routemap-total-val">₹{Math.round(totalAnnual).toLocaleString('en-IN')}/yr</span>
                                   </div>
                                   <div className="r2-portcard-explainer">
-                                    No single card does everything well. Each one is best for a few things. Use all of them the right way and you earn <b>₹{Math.round(totalAnnual).toLocaleString('en-IN')}</b> a year — more than any card alone.
+                                    {soloWinnerOld
+                                      ? <>One card — <b>{soloWinnerOld}</b> — covers all your spending best. Put everything on it and you earn <b>₹{Math.round(totalAnnual).toLocaleString('en-IN')}</b> a year.</>
+                                      : <>No single card does everything well. Each one is best for a few things. Use all of them the right way and you earn <b>₹{Math.round(totalAnnual).toLocaleString('en-IN')}</b> a year — more than any card alone.</>
+                                    }
                                   </div>
                                 </>
                               )}
