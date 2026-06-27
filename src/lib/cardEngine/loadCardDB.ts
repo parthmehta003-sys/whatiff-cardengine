@@ -15,7 +15,8 @@ import type {
 interface RawCard {
   cardId: string; name: string; bank: string | null; feeTier: string | null;
   network: string | null; cibilScore: number | null; minSalary: number; minItr: number;
-  joiningFee: number; annualFee: number; feeWaiverSpend: number; forexPct: number;
+  joiningFee: number; annualFee: number; feeWaiverSpend: number;
+  renewalCreditFloor?: number; forexPct: number;
   loungeAccess: string | null; loungeDetail: string | null; inviteOnly: boolean;
   aprAnnualPct: number | null; interestFreeDaysRetail: number | null;
   emiConversionAprPct: number | null; cashAdvanceFee: string | null;
@@ -164,6 +165,7 @@ export function loadCardDB(raw: RawDB): LoadedCardDB {
       joiningFee: c.joiningFee ?? 0,
       annualFee: c.annualFee ?? 0,
       feeWaiverSpend: c.feeWaiverSpend ?? 0,
+      renewalCreditFloor: c.renewalCreditFloor ?? 0,
       forexPct: c.forexPct ?? 0,
       minSalary: c.minSalary ?? 0,
       minItr: c.minItr ?? 0,
