@@ -64,6 +64,13 @@ export interface CardMeta {
   joiningFee: number;
   annualFee: number;
   feeWaiverSpend: number;   // 0 = none / LTF
+  /**
+   * Near-guaranteed renewal/fee-payment credit, valued at the HONEST FLOOR (PR #119 standard).
+   * Points × the card's lowest reliable redeemValue, or a fixed cash-equivalent voucher.
+   * Credited only when the annual fee is actually PAID (effFee > 0) — when the fee is waived
+   * the user doesn't pay it, so per the cards' own terms no renewal points are issued. 0 = none.
+   */
+  renewalCreditFloor?: number;
   forexPct: number;
   minSalary: number;        // ₹L/yr salaried; 0 = no published bar
   minItr: number;           // ₹L/yr self-employed
@@ -275,6 +282,22 @@ export function effectiveAnnualFee(meta: CardMeta, annualSpend: number): number 
   return meta.annualFee;
 }
 
+/**
+ * Near-guaranteed renewal credit, netted against the fee at its honest floor value.
+ * Issued only when the annual fee is actually PAID — so it's gated on the same effFee > 0
+ * condition everywhere, which means it's never credited alongside a waived fee (no double-count).
+ * Returns 0 when the fee is waived or the card has no such credit.
+ */
+export function renewalCredit(meta: CardMeta, annualSpend: number): number {
+  const effFee = effectiveAnnualFee(meta, annualSpend);
+  return effFee > 0 ? (meta.renewalCreditFloor ?? 0) : 0;
+}
+
+/** Effective fee net of the honest renewal credit — the single "true fee number" used everywhere. */
+export function netEffectiveFee(meta: CardMeta, annualSpend: number): number {
+  return effectiveAnnualFee(meta, annualSpend) - renewalCredit(meta, annualSpend);
+}
+
 function annualSpendOf(spend: MonthlySpend): number {
   return Object.values(spend).reduce((s, v) => s + (v ?? 0), 0) * 12;
 }
@@ -346,7 +369,8 @@ function scoreCard(
   });
   const annualSpend = annualSpendOf(user.monthlySpend);
   const effFee = effectiveAnnualFee(meta, annualSpend);
-  const net = Math.round((earn.guaranteedPerYear - effFee) * 100) / 100;
+  const credit = renewalCredit(meta, annualSpend);
+  const net = Math.round((earn.guaranteedPerYear - effFee + credit) * 100) / 100;
   const notes: string[] = [];
   if (meta.inviteOnly) notes.push('Invite-only — ranked on fit, but not directly applicable.');
   if (meta.feeWaiverSpend > 0 && effFee === 0) {
@@ -410,8 +434,8 @@ function bestComboSecond(
       assignments[c > p ? cand.cardId : primary.cardId].push(cat);
     }
     // Fee waivers use routed spend (same basis as comboLabel) so the gate and display agree.
-    const primaryFee = effectiveAnnualFee(primary.meta, monthlyFor(assignments[primary.cardId]) * 12);
-    const candFee    = effectiveAnnualFee(cand.meta,    monthlyFor(assignments[cand.cardId])    * 12);
+    const primaryFee = netEffectiveFee(primary.meta, monthlyFor(assignments[primary.cardId]) * 12);
+    const candFee    = netEffectiveFee(cand.meta,    monthlyFor(assignments[cand.cardId])    * 12);
     const comboNet = comboValue - primaryFee - candFee;
     const gain = comboNet - primary.netGuaranteedPerYear;
     if (!best || gain > best.gain) best = { card: cand, assignments, gain };
@@ -441,8 +465,9 @@ function comboLabel(
         return s + Math.max(p, q) * 12;
       }, 0);
   // Each card's fee waiver uses spend ROUTED to it (its assigned categories), not household total.
-  const primaryFee = effectiveAnnualFee(primary.meta, monthlyFor(assignments[primary.cardId] ?? []) * 12);
-  const secondFee = effectiveAnnualFee(second.meta, monthlyFor(assignments[second.cardId] ?? []) * 12);
+  // Net of near-guaranteed renewal credit, so combo net matches scoreCard's honest fee number.
+  const primaryFee = netEffectiveFee(primary.meta, monthlyFor(assignments[primary.cardId] ?? []) * 12);
+  const secondFee = netEffectiveFee(second.meta, monthlyFor(assignments[second.cardId] ?? []) * 12);
   const combinedFees = primaryFee + secondFee;
   const net = Math.round((combinedAnnualValue - combinedFees) * 100) / 100;
   return {
@@ -617,7 +642,7 @@ export function ownedSetupValue(
   // A card the user barely uses won't clear its waiver, so its fee stands. (Review: combined-spend waiver.)
   const effFees = owned.reduce((s, m) => {
     const routedAnnual = (spendRoutedToCard.get(m.cardId) ?? 0) * 12;
-    return s + effectiveAnnualFee(m, routedAnnual);
+    return s + netEffectiveFee(m, routedAnnual);
   }, 0);
   const netByCard = new Map<string, number>();
   for (const m of owned) netByCard.set(m.cardId, contribByCard.get(m.cardId) ?? 0);
