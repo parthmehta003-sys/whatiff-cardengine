@@ -2213,6 +2213,7 @@
       "joiningFee": 12499,
       "annualFee": 12499,
       "feeWaiverSpend": 1000000,
+      "renewalCreditFloor": 5000,
       "forexPct": 2,
       "loungeAccess": "Unlimited (Dom + Int)",
       "loungeDetail": "Unlimited dom + intl (direct)",
