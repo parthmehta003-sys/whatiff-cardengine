@@ -20,6 +20,7 @@ interface RawCard {
   loungeAccess: string | null; loungeDetail: string | null; inviteOnly: boolean;
   aprAnnualPct: number | null; interestFreeDaysRetail: number | null;
   emiConversionAprPct: number | null; cashAdvanceFee: string | null;
+  emiText?: string | null;
   pros: string | null; cons: string | null; tips: string | null;
   loungeStructured?: LoungeStructured | null;
   movieStructured?: MovieStructured | null;
@@ -170,6 +171,7 @@ export function loadCardDB(raw: RawDB): LoadedCardDB {
       minSalary: c.minSalary ?? 0,
       minItr: c.minItr ?? 0,
       inviteOnly: !!c.inviteOnly,
+      emiText: c.emiText ?? null,
       pros: c.pros ?? null,
       cons: c.cons ?? null,
       loungeStructured: c.loungeStructured ?? null,

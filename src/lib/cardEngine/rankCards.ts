@@ -75,6 +75,8 @@ export interface CardMeta {
   minSalary: number;        // ₹L/yr salaried; 0 = no published bar
   minItr: number;           // ₹L/yr self-employed
   inviteOnly: boolean;
+  /** Verbatim EMI processing-fee + conversion terms (display layer; never feeds ranking math). */
+  emiText?: string | null;
   pros?: string | null;
   cons?: string | null;
   imageUrl?: string;
