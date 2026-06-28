@@ -645,9 +645,9 @@
       "loungeDetail": "—",
       "inviteOnly": false,
       "aprAnnualPct": 45,
-      "interestFreeDaysRetail": null,
-      "emiConversionAprPct": null,
-      "cashAdvanceFee": "2.5% or min ₹500 whichever is higher.",
+      "interestFreeDaysRetail": 50,
+      "emiConversionAprPct": 20,
+      "cashAdvanceFee": "2.5% or min ₹500 whichever is higher. ",
       "pros": "Welcome/Joining benefits:\nJoining fee partially offsets itself: On payment of the joining fee, users receive 500 CashPoints. Since 1 CashPoint = up to ₹0.25, this equals approximately ₹125 value.\nBase Rewards\nEarn 2 CashPoints per ₹200 spent on all other eligible spends.\nEffective from 15th May 2026, the reward accrual structure is revised from ₹150 to ₹200 spends for earning reward points.\nAccelerated Rewards\nEarn 10X CashPoints (20 CashPoints per ₹200 spent) on: Amazon, BigBasket, Flipkart, Reliance Smart SuperStore, Swiggy. \nReward Value\n1 CashPoint = up to ₹0.25 for Product Catalogue redemption, SmartBuy flight & hotel bookings, General reward catalogue redemption.\n1 CashPoint = ₹0.20 when redeemed as cashback against statement balance.\n1 CashPoint = 0.25 airmiles for airmiles conversion/redemption.\nMilestone benefit improves overall returns: Receive a ₹500 gift voucher every calendar quarter on spends of ₹50,000+. Annual value can reach ₹2,000 if consistently achieved.\nJoining fee partially offsets itself: On payment of the joining fee, users receive 500 CashPoints. Since 1 CashPoint = up to ₹0.25, this equals approximately ₹125 value.\nFlexible redemption across categories: CashPoints can be redeemed through SmartBuy flights/hotels, cashback, vouchers and product catalogue options, creating more flexibility than simple statement cashback.\nUseful dining and fuel benefits: Includes 10% additional discount on Swiggy Dineout and 1% fuel surcharge waiver on transactions between ₹400–₹5,000, capped at ₹250 per statement cycle.\nLong interest-free period: Offers up to 50 days interest-free credit, useful for monthly cash-flow management.",
       "cons": "1. Reward value looks larger than actual return rates: Base rewards are weak: 2 CashPoints per ₹200 spent. Since 1 CashPoint = ₹0.25, effective value works out to approximately 0.25% return on regular spending.\n2. Accelerated reward categories have merchant restrictions: The 10X structure applies only to select merchants such as Amazon, Flipkart, Swiggy, BigBasket and Reliance Smart. Spending outside these categories falls sharply to base rates.\n3. Redemption limitations reduce flexibility: Minimum ₹500 equivalent CashPoints required for statement redemption\nCashback redemption capped at 3,000 CashPoints/month; Flight/hotel redemption capped at 50,000 CashPoints/month\nSmartBuy allows only 50% booking payment via CashPoints\n4. CashPoints expire after 2 years: Unused CashPoints lapse after 24 months, making delayed redemption costly.\n5. Exclusions: No reward points are earned on: Fuel spends, EMI transactions, Rent payments, Government transactions, Wallet loads, Gift card / prepaid card loads, Voucher purchases, Cash advances, Payment of outstanding balances, Card fees and charges, Smart EMI / Dial-an-EMI transactions.\n6. Reward Caps\n10X CashPoints category is capped at 2,500 CashPoints per calendar month.\nTotal reward points earning is capped at 15,000 reward points per statement cycle.\nGrocery transactions are capped at 1,000 reward points per month.\nRuPay UPI spends earn 2 reward points per ₹200 and are capped at 500 reward points per calendar month.\n7. No lounge access or premium travel benefits: Despite annual fees, the card does not provide airport lounge access, international privileges or major travel perks.",
       "tips": "1. Make Amazon, Flipkart and grocery spending default to this card: Shift spends on Amazon, Flipkart, Swiggy, BigBasket and Reliance Smart here first to unlock 10X CashPoints (up to 2.5% value-back) instead of earning weak base rewards elsewhere.\n2. Create a quarterly spending target, not a monthly one: Aim for ₹50,000 every calendar quarter to unlock the ₹500 voucher milestone benefit. That translates to around ₹16,700/month and can generate ₹2,000 annual value.\n3. Redeem through SmartBuy rather than statement cashback: Use CashPoints on SmartBuy flights/hotels or higher-value redemption routes because 1 CashPoint = up to ₹0.25, compared with ₹0.20 on cashback redemption.\n4. Set a reward redemption reminder every 6–12 months: CashPoints expire after 24 months. Avoid building large balances and losing rewards through inactivity.\n5. Use fuel transactions strategically: Keep fuel payments between ₹400–₹5,000 to activate the 1% fuel surcharge waiver, capped at ₹250 per statement cycle.\n6. Avoid making this your primary card for all spending: Base rewards are only 2 CashPoints per ₹200 (~0.25% return). For travel, premium spending or airport benefits, use a stronger companion card.",
@@ -690,7 +690,8 @@
         ],
         "caps": "CashPoints expire 24 months after earning.",
         "fees": null
-      }
+      },
+      "emiText": "Auto EMI: Auto EMI transactions of Rs 10,000 or more are converted at:\n20% per annum interest rate (APR)\nTenure: 9 months\nProcessing fee: ₹99 + GST.\nSmart EMI: up to ₹849 + GST\nEasyEMI: up to ₹299 processing fee."
     },
     {
       "cardId": "CC12",
@@ -709,9 +710,9 @@
       "loungeDetail": "—",
       "inviteOnly": false,
       "aprAnnualPct": 45,
-      "interestFreeDaysRetail": null,
-      "emiConversionAprPct": null,
-      "cashAdvanceFee": "2.5% or min ₹500 whichever is higher.",
+      "interestFreeDaysRetail": 50,
+      "emiConversionAprPct": 20,
+      "cashAdvanceFee": "2.5% or min ₹500 whichever is higher. ",
       "pros": "Welcome Benefits:\nComplimentary Swiggy One Membership for 3 months on card activation.\nExisting Swiggy One members receive a 3-month extension.\nLimited period offer: Additional 9-month Swiggy One membership extension for eligible customers applying through the Swiggy app.Total complimentary membership: 12 months.\nRewards:\nBase Rewards\nEarn 10% cashback on: Swiggy Food Delivery, Instamart, Dineout, Genie\nEarn 5% cashback on eligible online spends including: Apparel, Electronics, Department Stores, Home Décor, Personal Care, Local Cabs, Entertainment, Pharmacies, Discount, Stores, Pet Stores & Supplies\nEarn 1% cashback on all other eligible spends.\nAccelerated Rewards\n20% instant discount on hotel bookings via Cleartrip.\n6.35% instant discount on flight bookings via Cleartrip.\nAdditional 10% discount on Swiggy Dineout up to ₹500 on a minimum order value of ₹3,000 during birthday week.\nApplicable from 3 days before to 3 days after birthday\nReward Value:\nCashback earned on the Swiggy HDFC Bank Credit Card is credited directly against the outstanding balance in the credit card statement.\nEffectively:₹1 cashback = ₹1 statement credit value.\nStrong cashback for frequent Swiggy users: Get 10% cashback on Swiggy Food, Instamart, Dineout and Genie, making it one of the highest-return food and quick-commerce cards. Cashback capped at ₹1,500 per billing cycle.\nSolid online shopping rewards beyond Swiggy: Earn 5% cashback on eligible online categories including Amazon, Flipkart, electronics, apparel, cabs, pharmacies, home décor and more, also capped at ₹1,500/month.\nDecent baseline rewards on other spends: Earn 1% cashback on general spending categories for transactions above ₹100.\nUseful welcome benefit: Includes 3-month complimentary Swiggy One membership on activation, with Swiggy-app applicants sometimes eligible for an extended offer.\nGood annual value for high online spenders: A user heavily spending on Swiggy + online purchases can realistically generate ₹20k+ annual value through cashback and benefits.",
       "cons": "Reward Caps\n10% cashback on Swiggy spends capped at ₹1,500 per billing cycle.\n5% cashback on online spends capped at ₹1,500 per billing cycle.\n1% cashback on other spends capped at ₹500 per billing cycle.\nFuel surcharge waiver capped at ₹250 per billing cycle.\nRent transaction fee capped at ₹3,000 per transaction.\nFuel transaction fee capped at ₹3,000 per transaction for spends above ₹15,000.\nUtility transaction fee capped at ₹3,000 per transaction for spends above ₹50,000.\nEducation transaction fee capped at ₹3,000 per transaction on eligible third-party apps.\nExclusions: Fuel, Rent, Jewellery, Government transactions, Gift cards, EMI transactions, Wallet loads, SmartBuytransactions, SmartPay, Cash advances, Purchase of foreign currency, Fees & charges, Prepaid/Gift cards\n5% cashback works only on selected merchant categories: The \"5% online\" promise is narrower than it looks. Rewards depend on merchant category mappings and eligible merchants.\nEMI conversion reverses previously earned cashback: If a purchase is later converted to EMI, cashback gets clawed back. Example: a ₹20,000 Flipkart purchase earning ₹1,000 cashback can later see the entire ₹1,000 reversed after EMI conversion.\nTransactions below thresholds don't qualify:\n• Swiggy 10% cashback requires ₹249+ transaction value\n• 5% and 1% categories require ₹100+ transaction value",
       "tips": "1. Make Swiggy your default food and grocery ecosystem: Route Food delivery, Instamart, Genie and Dineout entirely through this card to maximize the 10% category.\n2. Target the cashback ceiling intentionally: Try to hit around ₹15,000 monthly Swiggy spend, which fully utilizes the ₹1,500 monthly cap.\n3. Move eligible online shopping here first: Shift Amazon, Flipkart, electronics, apparel, cabs and pharmacy spends here before using another card.\n4. Avoid EMI conversion completely: If you spend ₹20k–30k online, converting later to EMI can erase a large portion of accumulated cashback.\n5. Break spending by category and watch caps: Once ₹1,500 cap is reached in a category, switch future spending to another card instead of earning zero incremental value.\n6. Avoid gift cards and wallet-loading hacks: Many users route spending through wallets or gift cards; this card excludes many such routes and can result in zero cashback",
@@ -743,7 +744,8 @@
         ],
         "caps": null,
         "fees": null
-      }
+      },
+      "emiText": "Auto EMI conversion: 20% per annum interest rate\n9-month tenure of Rs 10,000 or more (Excluding Fuel, Gold, and Jewellery)\n₹99 + GST processing fee.\nSmart EMI processing fee: Up to ₹849 + GST.\nEasyEMI processing fee:Up to ₹299 + GST."
     },
     {
       "cardId": "CC13",
@@ -762,8 +764,8 @@
       "loungeDetail": "—",
       "inviteOnly": false,
       "aprAnnualPct": 45,
-      "interestFreeDaysRetail": null,
-      "emiConversionAprPct": null,
+      "interestFreeDaysRetail": 50,
+      "emiConversionAprPct": 20,
       "cashAdvanceFee": "2.5% of withdrawal amount or ₹500, whichever is higher.",
       "pros": "Rewards:\nBase Rewards: Earn 10X CashPoints i.e. 10 CashPoints per ₹200 spent on:BigBasket, BookMyShow, OYO, Swiggy, Uber.\nEarn 1 CashPoint per ₹200 spent on all other eligible spends.\nFor RuPay cardholders:Earn 1 reward point per ₹200 spent on UPI transactions.\nAccelerated Rewards\n10X CashPoints are applicable only on non-EMI spends at:BigBasket, BookMyShow, OYO, Swiggy, Uber.\nRewards Value: Reward Value 1 CashPoint = up to ₹0.15 for:Product Catalogue redemption, SmartBuy flight & hotel bookings, Cashback redemption.\n1 CashPoint = 0.15 airmiles for airmiles redemption/conversion.\nLow annual fee with easy waiver condition: Annual fee gets waived on ₹50,000 annual spend, which is a relatively easy milestone for most users.\nExtra dining savings: Get an additional 10% discount on Swiggy Dineout using HDFC card offers.\nUseful fuel surcharge waiver: 1% fuel surcharge waiver across India on transactions between ₹400–₹5,000, capped at ₹250 per statement cycle.\nExtra rewards through PayZapp ecosystem: Link the card to PayZapp to earn additional CashPoints on utility bill payments, mobile recharges and partner purchases, plus access to ₹1,000 CashPoints on shopping across 200+ brands through PayZapp offers. This adds incremental value beyond the card’s standard reward structure.\nIntroductory APR (cards sourced before 1 Feb 2024 only): 0.99%/month (11.88% p.a.) for first 90 days from issuance. Not available on cards issued after 1 Feb 2024; standard APR applies otherwise.",
       "cons": "Reward Caps:\n10X CashPoints category capped at 2,500 CashPoints per calendar month.\nMaximum reward points earning capped at 15,000 reward points per statement cycle.\nUtility transaction rewards capped at 2,000 reward points per calendar month.\nTelecom & Cable transaction rewards capped at 2,000 reward points per calendar month.\nGrocery transaction rewards capped at 1,000 reward points per month.\nRuPay UPI spends capped at 500 reward points per calendar month.\nFuel surcharge waiver capped at ₹250 per billing cycle.\nRent transaction fee capped at ₹3,000 per transaction.\nFuel transaction fee capped at ₹3,000 per transaction for spends above ₹15,000.\nUtility transaction fee capped at ₹3,000 per transaction for spends above ₹50,000.\nEducation transaction fee capped at ₹3,000 per transaction on eligible third-party apps.\nExclusions: Fuel spends, EMI transactions, Rent payments, Government-related transactions, Wallet loads, Gift card / prepaid card loads, Voucher purchases, Cash advances, Payment of outstanding balances, Card fees and charges, Smart EMI / Dial-an-EMI transactions.\n\nAdditional exclusions:\nEducation payments through third-party apps do not earn reward points.\nWallet loading and Easy EMI transactions do not earn reward points.\nTransactions under MCC 6540 (wallet/prepaid/gift card loads) are excluded.\n\nReward value is weak despite the \"10X\" headline: The 10X sounds attractive but reward value is modest because 1 Reward Point = ₹0.15 for cashback or travel redemption. The actual return rate is lower than many newer cashback cards.\nBase reward rate is poor: General spending earns only 2 Reward Points per ₹200 spent, which translates to a weak everyday reward rate.\nRewards are concentrated in very few merchants: Big rewards are restricted to a small list - BigBasket, Uber, Swiggy, OYO and BookMyShow. Heavy spending elsewhere gets weak returns.\nNo lounge access benefits: Competing entry-level cards increasingly offer lounge access; Freedom does not.\nNo meaningful travel proposition: Outside occasional OYO and Dineout usage, the card lacks airport, travel, forex or premium travel features.\nOlder rewards structure feels dated: Many newer cards now offer direct cashback with simpler structures and higher effective returns.",
@@ -806,7 +808,8 @@
         ],
         "caps": "CashPoints expire 24 months after earning.",
         "fees": null
-      }
+      },
+      "emiText": "Auto EMI: Applicable on transactions above ₹10,000 (excluding fuel, gold, and jewellery):\nInterest rate: 20% per annum\nTenure: 9 months\nProcessing fee: ₹99 + GST.\nSmart EMI processing fee: Up to ₹849 + GST.\nEasyEMI processing fee: Up to ₹299 + GST.\nPre-closure charges:: 3% of balance principal outstanding."
     },
     {
       "cardId": "CC14",
@@ -1075,9 +1078,9 @@
       "loungeAccess": "Domestic",
       "loungeDetail": "1 per quarter  (₹1 lakh/ qtr spend req. in a calander quarter).",
       "inviteOnly": false,
-      "aprAnnualPct": 0.45,
-      "interestFreeDaysRetail": null,
-      "emiConversionAprPct": null,
+      "aprAnnualPct": 45,
+      "interestFreeDaysRetail": 50,
+      "emiConversionAprPct": 20,
       "cashAdvanceFee": "2.5% of withdrawal amount or ₹500, whichever is higher.",
       "pros": "Welcome Benefits\nWelcome benefit of 1,000 CashPoints on payment of joining fee.\nRewards:\nBase Rewards\nEarn 5% CashBack on:Amazon, BookMyShow, Cult.fit, Flipkart, Myntra, Sony LIV, Swiggy, Tata CLiQ, Uber,Zomato.\nEarn 1% CashBack on all other eligible spends: shopping, dining, entertainment,travel,online purchases,utility payments directly through merchants and most standard retail transactions.\nAccelerated Rewards\n5% CashBack is applicable only on non-EMI spends made on the 10 partner merchants: Amazon, BookMyShow, Cult.fit, Flipkart, Myntra, Sony LIV, Swiggy, Tata CLiQ, Uber, Zomato. The 5% CashBack is applicable only on non-EMI transactions made on these merchants.\nUber spends qualify for 5% CashBack only for travel/commute-related spends under MCC 4121.\nReward Value\n1 Reward Point / CashPoint = ₹1 as statement cashback redemption.\n1 Reward Point / CashPoint = ₹0.30 on SmartBuy flight & hotel bookings.\n1 Reward Point / CashPoint = 0.30 airmiles.\n1 Reward Point / CashPoint = up to ₹0.30 on rewards catalogue redemption.\nA minimum of 500 reward points is required for cashback redemption against statement balance\n1. One of the strongest direct cashback structures among entry-level cards: Earn 5% cashback on Amazon, Flipkart, Myntra, Swiggy, Zomato, Uber, BookMyShow, Tata CLiQ, Cult.fit and Sony LIV, with cashback credited as CashPoints at 1 CashPoint = ₹1 statement credit value. \n2. Strong base reward rate for non-bonus spends: Earn 1% cashback on all other spends excluding fuel, EMI, rent, government transactions and wallets. Additional cashback also has a separate 1,000 CashPoints monthly cap, allowing users to earn another ₹1,000/month.\n3. Quarterly milestone benefits: Spend ₹1 lakh per calendar quarter and receive ₹1,000 voucher every quarter for BigBasket, BookMyShow, Pizza Hut,PVR, Uber.\n4. Joining fee can effectively become value-neutral: Users paying joining fees receive 1,000 CashPoints (~₹1,000) as welcome benefit, effectively offsetting a substantial part of the joining cost.\n5. Additional cashback stacking via SmartBuy / PayZapp ecosystem: Get up to 10% additional cashback across 200+ brands via HDFC SmartBuy and PayZapp offers, allowing users to stack platform offers over normal rewards.",
       "cons": "Eclusions: Fuel spends, EMI transactions, Wallet loading, Rent payments, Government-related transactions, Cash advances, Payment of outstanding balances, Card fees and other charges, Smart EMI / Dial-an-EMI transactions, Education payments through third-party apps, Wallet / prepaid / gift card loads under MCC 6540.\nReward Caps:\n5% CashBack category capped at 1,000 CashPoints per calendar month.\n1% CashBack category capped at 1,000 CashPoints per calendar month.\nCashback redemption against statement balance capped at 3,000 reward points per calendar month.\nFlight & hotel bookings via SmartBuy capped at 50,000 reward points redemption per calendar month.\nFlight & hotel bookings can only be redeemed up to 50% using reward points; remaining amount must be paid using card.\nProduct/Voucher redemption capped at 70% of product/voucher value using reward points.\nFuel surcharge waiver capped at ₹250 per statement cycle.\nRent transaction fee capped at ₹3,000 per transaction.\nFuel transaction fee capped at ₹3,000 per transaction for spends above ₹15,000.\nUtility transaction fee capped at ₹3,000 per transaction for spends above ₹50,000.\nEducation transaction fee capped at ₹3,000 per transaction through third-party apps.\n1. Lounge access is no longer direct and became meaningfully weaker: Complimentary domestic lounge access through card swipe has been discontinued. To access airport lounges now, users must spend ₹1 lakh/quarter and choose between ₹1,000 voucher OR lounge access voucher — not both.\n2. Cashback categories have hard earning caps: The 5% category is capped at 1,000 CashPoints/month, meaning spends above ₹20,000/month on partner merchants stop generating incremental 5% rewards.\n3. Multiple spend categories now earn nothing: No cashback on Rent, Government spends, Fuel, Wallet loads, EMI transactions. Many education payments through third-party apps. Large payment categories therefore generate little reward value.\n4. Cashback redemption now carries friction and fees: Cashback is not automatically credited. Users must accumulate at least 500 CashPoints, manually redeem, and HDFC now charges ₹50 redemption fee for statement credit redemption.\n5. Reward points expire after 2 years: Unredeemed CashPoints lapse after 24 months, making delayed users lose accumulated value entirely.",
@@ -1126,7 +1129,8 @@
         ],
         "caps": "Statement-cashback redemption capped at 3,000 CashPoints per month.",
         "fees": null
-      }
+      },
+      "emiText": "Auto EMI: Applicable on transactions above ₹10,000 Excluding Fuel, Gold, and Jewellery)\nInterest rate: 20% per annum\nTenure: 9 months\nProcessing fee: ₹99 + GST.\nSmart EMI processing fee: Up to ₹849 + GST.\nEasyEMI processing fee: Up to ₹299 + GST.\nPre-closure charges: 3% of balance principal outstanding"
     },
     {
       "cardId": "CC19",
@@ -1197,13 +1201,13 @@
       "loungeAccess": "Dom + International",
       "loungeDetail": "3 dom/qtr (₹60k qtr spend req.) + 6 Priority Pass intl/year",
       "inviteOnly": false,
-      "aprAnnualPct": 0.45,
-      "interestFreeDaysRetail": null,
-      "emiConversionAprPct": null,
+      "aprAnnualPct": 45,
+      "interestFreeDaysRetail": 50,
+      "emiConversionAprPct": 20,
       "cashAdvanceFee": "2.5% of withdrawal amount or ₹500, whichever is higher.",
-      "pros": "Joining/Welcome Benefits\nComplimentary MMT BLACK Elite and Swiggy One Membership on spends of Rs. 1 lakh in first 90 days\nRewards\nBase Rewards\nEarn 5 Reward Points per ₹150 spent on all eligible retail spends.\nAccelerated Rewards\nEarn 5X Reward Points on spends at: Myntra, Nykaa, Reliance Digital, Marks & Spencer.\n5X Reward Points are applicable on both e-commerce and POS transactions.\nReward Value\n1 Reward Point = ₹0.65 on Exclusive Gold Catalogue redemption via SmartBuy.\n1 Reward Point = ₹0.50 on SmartBuy flight & hotel bookings.\n1 Reward Point = up to 0.5 airmiles on airline miles conversion.\n1 Reward Point = up to ₹0.35 on products & voucher redemption.\n1 Reward Point = up to ₹0.20 as statement balance redemption/cashback.\nTravel:\n1. Strong airport lounge access structure: Get 3 domestic lounge visits every quarter (on ₹60,000 spend in previous quarter) plus 6 international lounge visits annually via Priority Pass, making this one of the stronger travel access packages in its segment.\n2. Boarding Edge creates additional travel value: Receive 2 travel benefits every calendar quarter by uploading your boarding pass on SmartBuy. Options include:\nAirport transfers, Spa access, Hotel dining experiences, Hotel room upgrades, Frequent travelers can extract several thousand rupees of value annually.\n3. SmartBuy travel accelerators can significantly improve rewards: Up to 10X rewards on flights, Up to 10X rewards on hotel bookings. Accelerated rewards on travel partners. This materially improves the card economics if you book through SmartBuy instead of directly.\n4. Travel protection benefits included: ₹1 crore accidental air death cover, Overseas emergency hospitalization up to ₹15 lakh, Credit liability cover up to ₹9 lakh. Useful protection that many users otherwise purchase separately.\nLifestyle:\n5. Quarterly lifestyle milestone vouchers: Spend ₹1.5 lakh in a quarter and receive ₹1,500 Myntra/Nykaa vouchers, creating recurring value for regular spenders.\n₹5,000 flight voucher at ₹5 lakh spend. Additional ₹5,000 flight voucher at ₹7.5 lakh spend.\n6. Dining privileges through ecosystem partners: Access Good Food Trail benefits and receive up to 10% discount through Swiggy Dineout partner restaurants, helping reduce dining costs.",
+      "pros": "Joining/Welcome Benefits\nComplimentary MMT BLACK Elite and Swiggy One Membership on spends of Rs. 1 lakh in first 90 days\nRewards\nBase Rewards\nEarn 5 Reward Points per ₹150 spent on all eligible retail spends.\nAccelerated Rewards\nEarn 5X Reward Points on spends at: Myntra, Nykaa, Reliance Digital, Marks & Spencer.\n5X Reward Points are applicable on both e-commerce and POS transactions.\nReward Value\n1 Reward Point = ₹0.65 on Exclusive Gold Catalogue redemption via SmartBuy.\n1 Reward Point = ₹0.50 on SmartBuy flight & hotel bookings.\n1 Reward Point = up to 0.5 airmiles on airline miles conversion.\n1 Reward Point = up to ₹0.35 on products & voucher redemption.\n1 Reward Point = up to ₹0.20 as statement balance redemption/cashback.\nTravel:\n1. Strong airport lounge access structure: Get 3 domestic lounge visits every quarter (on ₹60,000 spend in previous quarter) plus 6 international lounge visits annually via Priority Pass, making this one of the stronger travel access packages in its segment.\n2. Boarding Edge creates additional travel value: Receive 2 travel benefits every calendar quarter by uploading your boarding pass on SmartBuy. Options include:\nAirport transfers, Spa access, Hotel dining experiences, Hotel room upgrades, Frequent travelers can extract several thousand rupees of value annually.\n3. SmartBuy travel accelerators can significantly improve rewards: Up to 10X rewards on flights, Up to 10X rewards on hotel bookings. Accelerated rewards on travel partners. This materially improves the card economics if you book through SmartBuy instead of directly.\n4. Travel protection benefits included: ₹1 crore accidental air death cover, Overseas emergency hospitalization up to ₹15 lakh, Credit liability cover up to ₹9 lakh. Useful protection that many users otherwise purchase separately.\nLifestyle:\n5. Quarterly lifestyle milestone vouchers: Spend ₹1.5 lakh in a quarter and receive ₹1,500 Myntra/Nykaa vouchers, creating recurring value for regular spenders.\n₹5,000 flight voucher at ₹5 lakh spend. Additional ₹5,000 flight voucher at ₹7.5 lakh spend.\n6. Dining privileges through ecosystem partners: Access Good Food Trail benefits and receive up to 10% discount through Swiggy Dineout partner restaurants, helping reduce dining costs.\n",
       "cons": "Reward Caps:\nMaximum reward points earning capped at 50,000 Reward Points per statement cycle.\n5X Reward Points on partner merchants capped at 5,000 Reward Points per month across all brands combined.\nGrocery transaction rewards capped at 2,000 Reward Points per calendar month.\nInsurance transaction rewards capped at 2,000 Reward Points per day.\nSmartBuy flight & hotel redemption capped at 50,000 Reward Points per calendar month.\nCashback / statement balance redemption capped at 50,000 Reward Points per calendar month.\nMiles transfer redemption on SmartBuy capped at 50,000 Reward Points per month.\nProduct & voucher redemption capped at 70% of total product/voucher value using Reward Points.\nTravel bookings redemption capped at 70% of booking value using Reward Points; remaining amount payable via card.\nFuel surcharge waiver capped at ₹500 per billing cycle.\nRent transaction fee capped at ₹3,000 per transaction.\nFuel transaction fee capped at ₹3,000 per transaction for spends above ₹15,000.\nUtility transaction fee capped at ₹3,000 per transaction for spends above ₹50,000.\nEducation transaction fee capped at ₹3,000 per transaction through third-party apps.\nExclusions: Fuel transactions, EasyEMI transactions, E-wallet loading transactions, Rental payments, Property management transactions (rent, maintenance, packers & movers, etc.), Government transactions, Wallet payments even if wallet is loaded using the card, SmartEMI converted transactions, Cash advances, Payment of outstanding balances, Card fees and charges.\nAdditional conditions:\nReward points are reversed if retail transactions are converted into SmartEMI.\nMinimum transaction value eligible for reward points is ₹150.\nReward points expire after 2 years from accumulation date.\nReward points become nullified if the card is inactive for more than 365 days.\nRewards:\n1. Base rewards are heavily dependent on accelerated ecosystems: Only 5 Reward Points per ₹200 (2.5 RP per ₹100) on regular retail spends. The card becomes significantly more rewarding only through SmartBuy, milestone spends, or partner accelerators. Users spending normally may underutilize the card.\n2. Redemption value varies sharply depending on where points are used. Reward values differ materially:\nGold Catalogue → ₹0.65 per point, Flights/Hotels → ₹0.50 per point, Statement credit → ₹0.20 per point, Products/Vouchers → up to ₹0.35 per point. A poor redemption choice can reduce realized value by 60–70%.\nMilestones:\n3. Milestone rewards require high spend commitments: Key benefits activate only after ₹1.5 lakh quarterly → ₹1,500 voucher, ₹5 lakh annual → ₹5,000 flight voucher, ₹7.5 lakh annual → additional ₹5,000 voucher. \n4. Milestone rewards expire after only 60 days: Benefits unlocked through spending remain valid for only 60 days, requiring active tracking and timely redemption.\nReward Structure:\n6. Reward earning is capped at 50,000 points per statement cycle: Very high spenders may hit the 50,000 reward point ceiling, reducing incremental value on large transactions. This feels more accurate because every point now reflects an actual economic downside rather than a generic feature limitation.",
-      "tips": "1. Treat SmartBuy as the default booking route, not an extra feature: Before booking any flight, hotel, or buying vouchers, check SmartBuy first. Regalia Gold’s economics improve substantially through SmartBuy where you can unlock up to 10X rewards on travel bookings, accelerated rewards on vouchers, and additional partner offers. Booking directly on airline or hotel websites often leaves a large portion of value on the table. A practical habit: open SmartBuy first, compare pricing, and only then transact.\n2. Build your spending around milestone checkpoints rather than monthly spending: Regalia Gold derives meaningful value from milestone unlocks. Track ₹1.5 lakh quarterly (₹1,500 Myntra/Nykaa voucher), ₹5 lakh annually (₹5,000 flight voucher), and ₹7.5 lakh annually (additional ₹5,000 voucher). If you are approaching these thresholds, shift planned spends such as insurance, travel bookings, electronics, or annual subscriptions onto the card. Missing ₹5 lakh by ₹10–20k can mean losing ₹5,000+ of benefits.\n3. Redeem points selectively and avoid low-value redemptions: Regalia Gold has a large value gap between redemption options. Avoid redeeming against statement balance (₹0.20/point) and prioritize Flights & Hotels (₹0.50/point) or Gold Catalogue (₹0.65/point). Also set a monthly reminder to review milestone unlocks and expiring rewards since milestone benefits expire in 60 days.",
+      "tips": "1. Treat SmartBuy as the default booking route, not an extra feature: Before booking any flight, hotel, or buying vouchers, check SmartBuy first. Regalia Gold’s economics improve substantially through SmartBuy where you can unlock up to 10X rewards on travel bookings, accelerated rewards on vouchers, and additional partner offers. Booking directly on airline or hotel websites often leaves a large portion of value on the table. A practical habit: open SmartBuy first, compare pricing, and only then transact.\n2. Build your spending around milestone checkpoints rather than monthly spending: Regalia Gold derives meaningful value from milestone unlocks. Track ₹1.5 lakh quarterly (₹1,500 Myntra/Nykaa voucher), ₹5 lakh annually (₹5,000 flight voucher), and ₹7.5 lakh annually (additional ₹5,000 voucher). If you are approaching these thresholds, shift planned spends such as insurance, travel bookings, electronics, or annual subscriptions onto the card. Missing ₹5 lakh by ₹10–20k can mean losing ₹5,000+ of benefits.\n3. Redeem points selectively and avoid low-value redemptions: Regalia Gold has a large value gap between redemption options. Avoid redeeming against statement balance (₹0.20/point) and prioritize Flights & Hotels (₹0.50/point) or Gold Catalogue (₹0.65/point). Also set a monthly reminder to review milestone unlocks and expiring rewards since milestone benefits expire in 60 days. ",
       "loungeStructured": {
         "domestic": {
           "visits": 3,
@@ -1264,7 +1268,8 @@
         ],
         "caps": "Each path capped at 50,000 points per statement cycle.",
         "fees": null
-      }
+      },
+      "emiText": "Auto EMI: Applicable on transactions above ₹10,000 (excluding gold, fuel and jewellery)\nInterest rate: 20% per annum\nTenure: 9 months\nProcessing fee: ₹99 + GST.\nSmart EMI processing fee: Up to ₹849 + GST.\nEasyEMI processing fee: Up to ₹299 + GST.\nPre-closure charges: 3% of balance principal outstanding"
     },
     {
       "cardId": "CC21",
@@ -1283,10 +1288,10 @@
       "loungeDetail": "2 dom/qtr + 1unl/qtr (₹60k qtr spend req. in the previous quarter)",
       "inviteOnly": false,
       "aprAnnualPct": 45,
-      "interestFreeDaysRetail": null,
-      "emiConversionAprPct": null,
+      "interestFreeDaysRetail": 50,
+      "emiConversionAprPct": 20,
       "cashAdvanceFee": "2.5% of withdrawal amount or ₹500, whichever is higher.",
-      "pros": "Joining/Welcome Benefits:\nComplimentary Swiggy One & Times Prime Membership on achieving ₹75,000 net retail spends within 90 days of card issuance.\nRewards:\nBase rewards:\nEarn 4 Reward Points for every ₹200 spent on eligible categories. (Effective 15th May 2026).\nEarlier structure: Earn 4 Reward Points per ₹150 spent on regular spends.\nAccelerated Rewards:\nEarn 5X Reward Points on Swiggy and Zomato, i.e. 20 Reward Points per ₹150 spent.\nIncremental 4X reward points are capped at 2,500 Reward Points per calendar month across both merchants combined.\nBase 1X rewards on Swiggy/Zomato continue without capping.\nReward Value / Redemption Value\n1 Reward Point = ₹0.50 on SmartBuy flight and hotel bookings for up to 70% of the booking amount.\n1 Reward Point = up to ₹0.35 on Exclusive Catalogue redemption.\n1 Reward Point = ₹0.50 at select restaurants.\n1 Reward Point = up to ₹0.20 as cashback against statement balance.\nReward Points can be redeemed via SmartBuy or NetBanking.\nMilestone Benefits\nSpend ₹1.5 lakh in a calendar quarter and choose one ₹1,500 voucher from: Marriott, Decathlon, Barbeque Nation, O2 Spa, Lakme Salon\nTravel Benefits:\n1. Strong airport lounge proposition with global coverage: Get 2 complimentary airport lounge visits every calendar quarter worldwide (primary + add-on combined), translating to up to 8 annual lounge visits.. Recent updates also introduce 2 domestic + 1 international lounge structure tied to spend criteria of Rs 60,000 in the previous quarter. \n2. Travel-focused insurance and protection suite: Receive travel protections including air accident cover ($125,000), overseas hospitalization cover ($31,250), baggage delay cover, and ₹9 lakh credit liability cover, creating additional value for frequent travelers.\n3. SmartBuy accelerates travel redemptions meaningfully: Earn up to 10X reward points on SmartBuy, and redeem points for flights/hotels at 1 RP = ₹0.50, substantially improving effective reward rates over normal redemption.\nLifestyle Benefits:\n4. High-value entertainment benefit for movie users: Get Buy 1 Get 1 free on BookMyShow on weekends with up to 2 free tickets per month and ₹250 discount cap per ticket, potentially saving ₹6,000 annually.\n5. Accelerated food rewards on Swiggy and Zomato: Earn 5X reward points on food delivery spends, making the card useful for high-frequency dining users.\n6. Dining ecosystem benefits add recurring savings: Receive 10% additional discount on partner restaurants via Swiggy Dineout, improving value on dining spends.\nWelcome / Milestone Benefits:\n7. Useful welcome package with recurring memberships: Spend ₹75,000 within first 90 days and unlock Swiggy One + Times Prime memberships, offsetting a meaningful portion of first-year fees.\n8. Milestone spending rewards improve annual return: Spend ₹1.5 lakh per quarter and unlock ₹1,500 vouchers across brands like Marriott, Decathlon and others.",
+      "pros": "Joining/Welcome Benefits:\nComplimentary Swiggy One & Times Prime Membership on achieving ₹75,000 net retail spends within 90 days of card issuance.\nRewards:\nBase rewards:\nEarn 4 Reward Points for every ₹200 spent on eligible categories. (Effective 15th May 2026).\nAccelerated Rewards:\nEarn 5X Reward Points on Swiggy and Zomato, i.e. 20 Reward Points per ₹150 spent.\nIncremental 4X reward points are capped at 2,500 Reward Points per calendar month across both merchants combined.\nBase 1X rewards on Swiggy/Zomato continue without capping.\nReward Value / Redemption Value\n1 Reward Point = ₹0.50 on SmartBuy flight and hotel bookings for up to 70% of the booking amount.\n1 Reward Point = up to ₹0.35 on Exclusive Catalogue redemption.\n1 Reward Point = ₹0.50 at select restaurants.\n1 Reward Point = up to ₹0.20 as cashback against statement balance.\nReward Points can be redeemed via SmartBuy or NetBanking.\nMilestone Benefits\nSpend ₹1.5 lakh in a calendar quarter and choose one ₹1,500 voucher from: Marriott, Decathlon, Barbeque Nation, O2 Spa, Lakme Salon\nTravel Benefits:\n1. Strong airport lounge proposition with global coverage: Get 2 complimentary airport lounge visits every calendar quarter worldwide (primary + add-on combined), translating to up to 8 annual lounge visits.. Recent updates also introduce 2 domestic + 1 international lounge structure tied to spend criteria of Rs 60,000 in the previous quarter. \n2. Travel-focused insurance and protection suite: Receive travel protections including air accident cover ($125,000), overseas hospitalization cover ($31,250), baggage delay cover, and ₹9 lakh credit liability cover, creating additional value for frequent travelers.\n3. SmartBuy accelerates travel redemptions meaningfully: Earn up to 10X reward points on SmartBuy, and redeem points for flights/hotels at 1 RP = ₹0.50, substantially improving effective reward rates over normal redemption.\nLifestyle Benefits:\n4. High-value entertainment benefit for movie users: Get Buy 1 Get 1 free on BookMyShow on weekends with up to 2 free tickets per month and ₹250 discount cap per ticket, potentially saving ₹6,000 annually.\n5. Accelerated food rewards on Swiggy and Zomato: Earn 5X reward points on food delivery spends, making the card useful for high-frequency dining users.\n6. Dining ecosystem benefits add recurring savings: Receive 10% additional discount on partner restaurants via Swiggy Dineout, improving value on dining spends.\nWelcome / Milestone Benefits:\n7. Useful welcome package with recurring memberships: Spend ₹75,000 within first 90 days and unlock Swiggy One + Times Prime memberships, offsetting a meaningful portion of first-year fees.\n8. Milestone spending rewards improve annual return: Spend ₹1.5 lakh per quarter and unlock ₹1,500 vouchers across brands like Marriott, Decathlon and others.",
       "cons": "Reward Caps\nIncremental 4X rewards on Swiggy & Zomato capped at 2,500 Reward Points per calendar month.\nLounge access requires spends of ₹60,000 or more in the preceding calendar quarter from Jul 2026 onwards.\nExclusions: Fuel spends, EMI transactions, Cash withdrawals, Fees & charges, Wallet loads, Gift/prepaid card loads, Voucher purchases, Rent payments, Government transactions, Payment of outstanding balances.\n1. Lounge access is now spend-linked rather than automatic: You now need ₹60,000 spend in the previous quarter to unlock lounge benefits in the next quarter. Missing spend targets can effectively eliminate one of the card’s strongest features.\n2. Reward point value drops sharply outside travel use cases: Redemption value varies significantly: ₹0.50 on SmartBuy travel, but only ₹0.20 for cashback and up to ₹0.35 for catalog redemption, making poor redemption choices expensive.\n3. Swiggy/Zomato acceleration has reward caps: The additional accelerated rewards are capped at 2,500 reward points monthly, limiting upside for heavy food spenders.\n4. Base reward structure is average for everyday spending: Outside bonus categories you earn 4 RP per ₹200, which is not especially competitive against dedicated cashback cards.\n5. Forex markup remains high for international usage: At 3.5% forex markup, the card becomes expensive for overseas spending despite travel positioning.\n6. Diners acceptance is still inconsistent in some places: While acceptance has improved through network partnerships, Diners Club can still face merchant acceptance issues versus Visa/Mastercard.",
       "tips": "1. Route all travel bookings and voucher purchases through SmartBuy, not direct merchant apps\nThe biggest mistake with Diners Privilege is treating it like a normal rewards card. Flights and hotel bookings should go through SmartBuy whenever pricing is similar because you can unlock up to 10X rewards and redeem at ₹0.50 per point, versus much lower value elsewhere. Similarly, check SmartBuy voucher inventory before shopping at brands you already use.\n2. Never redeem points as cashback unless there is no alternative\nCashback gives only ₹0.20 per point, which destroys value. Build points for travel redemption instead. Even if you travel only a few times a year, saving points for SmartBuy flights/hotels can materially increase effective returns.",
       "loungeStructured": {
@@ -1344,7 +1349,8 @@
         ],
         "caps": null,
         "fees": null
-      }
+      },
+      "emiText": "Auto EMI: Applicable on transactions above ₹10,000 (excluding gold, fuel and jewellery)\nInterest rate: 20% per annum\nTenure: 9 months\nProcessing fee: ₹99 + GST.\nSmart EMI processing fee: Up to ₹849 + GST.\nEasyEMI processing fee: Up to ₹299 + GST.\nPre-closure charges: 3% of balance principal outstanding"
     },
     {
       "cardId": "CC22",
@@ -2012,12 +2018,12 @@
       "loungeAccess": "Unlimited (Dom + Int)",
       "loungeDetail": "Unlimited dom + intl (direct)",
       "inviteOnly": true,
-      "aprAnnualPct": 45,
+      "aprAnnualPct": 23.88,
       "interestFreeDaysRetail": 50,
-      "emiConversionAprPct": null,
-      "cashAdvanceFee": "2.5% of withdrawal amount or ₹500, whichever is higher.",
+      "emiConversionAprPct": 20,
+      "cashAdvanceFee": "Not applicable on Infinia",
       "pros": "Joining Fee & Fee Benefits\nDespite a high ₹12,500 + GST (~₹14,750) joining fee, users receive 12,500 Reward Points worth ₹12,500 on joining and renewal, effectively recovering most of the fee immediately.\nRenewal fee is fully waived at ₹10 lakh annual spend, creating a meaningful upside for high spenders.\nComplimentary Club Marriott membership (Year 1) unlocks: Up to 25% dining/stay discounts; 50% off food on Tuesdays; Buy-one-get-one drink benefits on Mondays.\n500 CashPoints on payment of joining fee.\nRewards:\nBase Rewards\nEarn 10X CashPoints, i.e. 20 CashPoints per ₹200 spent on: Amazon, BigBasket, Flipkart, Reliance Smart SuperStore, Swiggy.\nEarn 2 CashPoints per ₹200 spent on all other eligible spends.\nAccelerated Rewards\n10X CashPoints (20 CashPoints per ₹200) on non-EMI spends at: Amazon, BigBasket, Flipkart, Reliance Smart SuperStore, Swiggy.\nFor RuPay variants:\nEarn 2 Reward Points per ₹200 spent on UPI spends (excluding fuel, wallet/prepaid card loads, and voucher purchases), capped at 500 Reward Points per calendar month.\nReward Value / Redemption Value\n1 CashPoint = ₹1 on Apple products and Tanishq vouchers purchased via SmartBuy.\n1 CashPoint = ₹1 on flight and hotel bookings via SmartBuy.\n1 CashPoint = up to 1 AirMile on airline miles conversion.\n1 CashPoint = up to ₹0.50 on products and vouchers.\n1 CashPoint = up to ₹0.30 as cashback against statement balance.\nAdditional MoneyBack+ redemption values:\n1 CashPoint = up to ₹0.25 against statement balance redemption.\n1 CashPoint = up to ₹0.25 on SmartBuy flights & hotel bookings.\nTravel\nOne of the strongest lounge programs in India:Unlimited domestic airport lounge access; Unlimited international lounge access; Access extends to primary + add-on cardholders; Access to 1,000+ Priority Pass lounges globally.\nITC hotel benefit of Stay 3 nights, Pay for 2, creating savings of 33% on luxury hotel stays.\nLow 2% forex markup, below industry norms of 3.5–4%.\nConcierge includes itinerary planning, VIP airport assistance and international gift delivery.\nMilestone Benefits\nSpend ₹50,000 net spends within a calendar quarter to receive a ₹500 voucher of Swiggy, Myntra, Pizza Hut, Apollo Pharmacy, Bata.\nBase earning: 5 Reward Points per ₹150 (~3.3% reward rate) even on categories many cards exclude insurance, utilities, education spends.\nSmartBuy acceleration can reach: 5X on flights; 10X on hotels. Effective reward rates can reach 33%+.\nReward points redeem at ₹1 per point for flights, hotels, Apple purchases, Tanishq vouchers.\nStrong airline ecosystem:\n1 Reward Point = up to 1 Air Mile, enabling premium travel redemptions.\nLifestyle\nUnlimited golf games + golf lessons globally, among the strongest golf privileges in India.\nITC buffet benefit: 1+1 complimentary buffet.\nGlobal concierge offers:private dining assistance; event planning; airport meet-and-greet; travel bookings.\nInsurance & Protection\n₹3 crore accidental air death cover.\n₹50 lakh emergency overseas hospitalization cover.\nCredit Shield up to ₹9 lakh.\nUp to 50 days interest-free period.",
-      "cons": "Joining/Welcome benefits:\n500 CashPoints on payment of joining fee.\n500 CashPoints on payment of renewal fee\nReward Caps:\nMaximum accelerated reward earning capped at 2,500 CashPoints per calendar month on 10X merchants.\nMaximum reward earning capped at 15,000 reward points per statement cycle.\nGrocery transaction rewards capped at 1,000 reward points per month.\nMaximum of 2 lakh reward points can be redeemed in a statement cycle.\nReward point redemption capped at 1.5 lakh reward points per month for flights, hotel bookings, and airmiles.\nReward points can be redeemed for up to 70% of the total bill value on Apple products and Tanishq vouchers; remaining amount payable via card.\nFlight and hotel bookings via SmartBuy can be redeemed up to 50% of booking value using CashPoints.\nCashback redemption capped at 50,000 reward points per calendar month.\nFlight & hotel redemption capped at 50,000 reward points per calendar month.\nProduct/voucher redemption capped at 70% of product value using reward points.\nFuel surcharge waiver capped at ₹250 per statement cycle.\nRent payment fee capped at ₹3,000 per transaction.\nFuel transaction fee capped at ₹3,000 per transaction for spends above ₹15,000.\nUtility transaction fee capped at ₹3,000 per transaction for spends above ₹50,000.\nEducation transaction fee capped at ₹3,000 per transaction through third-party apps.\nMaximum fuel surcharge waiver capped at ₹250 per statement cycle.\nUnredeemed CashPoints expire after 2 years.\nExclusions: Fuel spends, EMI transactions, Rent payments, Government-related transactions, Wallet loads, Gift/prepaid card loads, Voucher purchases, Cash advances, Payment of outstanding balances, Card fees and charges, Smart EMI / Dial-an-EMI transactions.\nAdditional exclusions:\nEducation payments via third-party apps do not earn reward points.\nWallet loading and EasyEMI transactions do not earn reward points.\nTransactions below ₹200 are not eligible for CashPoints earning\nRewards Limitations\nSmartBuy rewards come with monthly caps: maximum 15,000 bonus Reward Points/month; heavy users can hit ceilings faster than expected.\nFlights and hotels can only use Reward Points for up to 70% of booking value, forcing 30% cash payment every time.\nCashback redemption is poor: 1 Reward Point = ₹0.30 only; 70% lower value versus travel redemptions.\nProduct/voucher redemptions can drop to ₹0.50 per Reward Point, cutting value by 50%.\nTravel Restrictions\nForex markup remains 2% + GST (~2.36%), meaning users focused purely on international spending can still find stronger zero-forex alternatives.\nUnlimited lounge benefit creates little value for infrequent travelers despite being a headline feature.\nPriority Pass value is meaningful only for frequent international users.\nUsage Restrictions\nFuel surcharge waived between ₹400–₹1 lakh, but fuel transactions earn 0 reward points.\nSmartBuy optimization requires users to transact through HDFC ecosystem rather than directly with merchants.\nCommunity users have flagged silent reward devaluations over time.\nFee & Spend Hurdles\nEffective fee approaches ₹14,750 annually including GST.\nFee waiver requires ₹10 lakh annual spend, a significant hurdle.\nInvite-only structure makes access difficult even for users with income eligibility.\nCharges Reward redemption fee: ₹99 + taxes per redemption request.\nCashback redemption fee: ₹50 per cashback redemption request.",
+      "cons": "Joining/Welcome benefits:\n500 CashPoints on payment of joining fee.\n500 CashPoints on payment of renewal fee\nReward Caps:\nMaximum accelerated reward earning capped at 2,500 CashPoints per calendar month on 10X merchants.\nMaximum reward earning capped at 15,000 reward points per statement cycle.\nGrocery transaction rewards capped at 1,000 reward points per month.\nMaximum of 2 lakh reward points can be redeemed in a statement cycle.\nReward point redemption capped at 1.5 lakh reward points per month for flights, hotel bookings, and airmiles.\nReward points can be redeemed for up to 70% of the total bill value on Apple products and Tanishq vouchers; remaining amount payable via card.\nFlight and hotel bookings via SmartBuy can be redeemed up to 50% of booking value using CashPoints.\nCashback redemption capped at 50,000 reward points per calendar month.\nFlight & hotel redemption capped at 50,000 reward points per calendar month.\nProduct/voucher redemption capped at 70% of product value using reward points.\nFuel surcharge waiver capped at ₹250 per statement cycle.\nRent payment fee capped at ₹3,000 per transaction.\nFuel transaction fee capped at ₹3,000 per transaction for spends above ₹15,000.\nUtility transaction fee capped at ₹3,000 per transaction for spends above ₹50,000.\nEducation transaction fee capped at ₹3,000 per transaction through third-party apps.\nMaximum fuel surcharge waiver capped at ₹250 per statement cycle.\nUnredeemed CashPoints expire after 2 years.\nExclusions: Fuel spends, EMI transactions, Rent payments, Government-related transactions, Wallet loads, Gift/prepaid card loads, Voucher purchases, Cash advances, Payment of outstanding balances, Card fees and charges, Smart EMI / Dial-an-EMI transactions.\nAdditional exclusions:\nEducation payments via third-party apps do not earn reward points.\nWallet loading and EasyEMI transactions do not earn reward points.\nTransactions below ₹200 are not eligible for CashPoints earning\nRewards Limitations\nSmartBuy rewards come with monthly caps: maximum 15,000 bonus Reward Points/month; heavy users can hit ceilings faster than expected.\nFlights and hotels can only use Reward Points for up to 70% of booking value, forcing 30% cash payment every time.\nCashback redemption is poor: 1 Reward Point = ₹0.30 only; 70% lower value versus travel redemptions.\nProduct/voucher redemptions can drop to ₹0.50 per Reward Point, cutting value by 50%.\nTravel Restrictions\nForex markup remains 2% + GST (~2.36%), meaning users focused purely on international spending can still find stronger zero-forex alternatives.\nUnlimited lounge benefit creates little value for infrequent travelers despite being a headline feature.\nPriority Pass value is meaningful only for frequent international users.\nUsage Restrictions\nFuel surcharge waived between ₹400–₹1 lakh, but fuel transactions earn 0 reward points.\nSmartBuy optimization requires users to transact through HDFC ecosystem rather than directly with merchants.\nCommunity users have flagged silent reward devaluations over time.\nFee & Spend Hurdles\nEffective fee approaches ₹14,750 annually including GST.\nFee waiver requires ₹10 lakh annual spend, a significant hurdle.\nInvite-only structure makes access difficult even for users with income eligibility.\nCharges Reward redemption fee: ₹99 + taxes per redemption request.\nCashback redemption fee: ₹50 per cashback redemption request.\n",
       "tips": "Travel\nRoute all travel bookings through SmartBuy: Flights → 5X rewards; Hotels → 10X rewards. Effective reward rates can exceed 33%.\nUse unlimited lounge benefits across both primary and add-on cards instead of splitting travel across cards.\nUse ITC Stay 3 Pay 2 only on longer stays—short stays dilute value.\nLifestyle\nActivate and fully utilize Club Marriott Year-1 membership: up to 25% discounts; Tuesday 50% food discounts  & member drink offers.\nUse ITC 1+1 buffet offers strategically for higher-ticket dining occasions.\nRewards & Spend Strategy\nPrioritize redemptions where 1 Reward Point = ₹1:Flights, Hotels, Apple & Tanishq.\nAvoid cashback redemption at ₹0.30/RP and generic vouchers at ₹0.50/RP.\nBuy vouchers through SmartBuy + Gyftr where possible; many power users stack accelerated earnings to push returns significantly higher. Community strategies and user experiences consistently highlight SmartBuy + voucher stacking as a major Infinia advantage.\nTrack SmartBuy bonus accruals monthly to avoid crossing the 15,000 bonus RP cap",
       "loungeStructured": {
         "domestic": {
@@ -2103,11 +2109,12 @@
         ],
         "caps": "Up to 2 lakh points per cycle; 1.5 lakh/month for flights, hotels, airmiles.",
         "fees": null
-      }
+      },
+      "emiText": "Auto EMI (applicable on transactions above ₹10,000 Excluding Fuel, Gold, and Jewellery)\nInterest rate: 20% per annum.\nProcessing fee: ₹99 + GST.\nEasyEMI processing fee: Up to ₹299 + GST.\nSmart EMI processing fee: Up to ₹849 + GST.\nPre-closure charges: 3% of principal outstanding"
     },
     {
       "cardId": "CC32",
-      "name": "HDFC Diners Club Black",
+      "name": "HDFC Diners Club Black Metal",
       "bank": "HDFC",
       "feeTier": "₹5,000+",
       "network": "Diners Club",
@@ -2122,26 +2129,26 @@
       "loungeDetail": "2 dom/qtr + 1 intl/ qtr (₹60k qtr spend req. in the preceding calendar quarter)",
       "inviteOnly": false,
       "aprAnnualPct": 23.88,
-      "interestFreeDaysRetail": null,
-      "emiConversionAprPct": null,
+      "interestFreeDaysRetail": 50,
+      "emiConversionAprPct": 20,
       "cashAdvanceFee": "2.5% of withdrawal amount or ₹500, whichever is higher.",
-      "pros": "Welcome Benefits\nComplimentary Club Marriott, Amazon Prime Membership, Swiggy One Membership on achieving net retail spends of ₹1.5 lakh within 90 days of card issuance.\nComplimentary Club Marriott membership benefits include:\nUp to 25% dining discount at participating Marriott hotels in India.\nUp to 20% discount at participating Marriott hotels in Asia Pacific.\nUp to 20% discount on Marriott room bookings.\nSpa discounts at select Marriott properties.\nRewards:\nBase rewards:\nEarn 5 Reward Points per ₹150 spent on eligible retail spends.\nEarn 10 Reward Points per ₹150 spent on standalone restaurant spends during weekends (Saturday & Sunday).\nAccelerated Rewards\nEarn 2X Reward Points on weekend dining at standalone restaurants.\nAccelerated earning rate (Applicable only on merchants with MCCs: 5812, 5813, 5814)\n10 Reward Points per ₹150 spent at eligible standalone restaurants during weekends.\nMinimum transaction amount to qualify: ₹150.\nEMI and wallet transactions are excluded.\nReward Value / Redemption Value\n1 Reward Point = ₹1 on SmartBuy flight and hotel bookings.\n1 Reward Point = up to 1 AirMile on airline miles conversion.\n1 Reward Point = up to ₹0.50 on products and vouchers.\n1 Reward Point = up to ₹0.30 as cashback against statement balance.\nReward Points can be redeemed via SmartBuy or NetBanking.\nMilestone Benefits: Spend ₹4 lakh or more in a calendar quarter to earn 10,000 Reward Points.\nTravel\n8 domestic + 4 international lounge visits annually at just ₹2.4 lakh yearly spend: Spend ₹60,000 in a quarter and unlock 2 domestic + 1 international lounge access for the next quarter — a relatively achievable threshold versus premium cards requiring ₹5–10 lakh annual spends.\nSolid travel protection for a mid-premium card: Get $125,000 air accident insurance, $31,250 emergency overseas hospitalization cover, and ₹9 lakh credit liability protection.\nUp to 50 days interest-free credit period: Useful for large purchases and travel bookings.\nLifestyle\n₹6,000 annual movie value through BookMyShow: Buy 1 Get 1 on weekend tickets with ₹250 discount per ticket, 2 free tickets every month. Heavy movie users can recover ₹6,000/year.\n₹75,000 spend in first 90 days unlocks two premium subscriptions: Receive complimentary Swiggy One + Times Prime memberships, creating immediate first-year value.\nQuarterly spend gets real lifestyle rewards: Spend ₹1.5 lakh every quarter and earn a ₹1,500 Marriott / Decathlon / BBQ Nation / Lakme / O2 Spa voucher. Annual potential: ₹6,000.\nRewards\n5X rewards on food delivery can be meaningful for frequent users: Earn 20 Reward Points per ₹200 on Swiggy and Zomato.\nUse SmartBuy multiplier for optmised returns: Get up to 10X Reward Points on travel and SmartBuy purchases & Regular spending earns 4 RP per ₹200, but category acceleration substantially improves returns.",
-      "cons": "Reward Caps\nReward Points redemption capped at 1.5 lakh Reward Points per month for: Flights, Hotel bookings, Airmiles.\nMaximum of 2 lakh Reward Points can be redeemed in a statement cycle.\nReward Points can be redeemed for up to 70% of the total bill value on Apple products and Tanishq vouchers; remaining amount payable via credit card.\nCashback redemption value capped at up to ₹0.30 per Reward Point against statement balance. \nExclusions: EMI transactions, Wallet payments, Fuel spends, Cash advances, Rent payments, Government transactions, Outstanding balance payments, Fees and charges\nRewards Limitations\nThe reward structure becomes powerful only when spending behavior is optimized. While the card earns 4 Reward Points per ₹200 on regular spends and offers accelerated categories, the strongest returns depend heavily on SmartBuy and bonus categories rather than everyday spending.\nThe 5X Swiggy and Zomato benefit works best for moderate users rather than heavy food spenders. Although spending earns 20 Reward Points per ₹200, accelerated rewards are capped at 2,500 additional Reward Points per month, after which spending continues but at regular rates.\nReward value depends materially on redemption choice. Travel redemptions can fetch ₹0.50 per Reward Point, while catalogue redemption falls to ₹0.35 and cashback to ₹0.20, meaning users who redeem casually can realize materially lower value.\nTravel Restrictions\nThe lounge program rewards consistency rather than one-time high spending. While ₹60,000 quarterly spend (~₹2.4 lakh annually) is relatively achievable, missing the threshold even in one quarter impacts access in the following quarter and lowers overall annual benefit realization.\nThe international lounge structure is designed more for occasional travelers than frequent flyers. With 1 international visit available every quarter (4 annually), users taking multiple overseas trips may exhaust benefits faster.\nLounge access focuses on cardholder usage rather than family usage. Benefits primarily cover the primary and add-on cardholder structure and may feel less flexible for users who frequently travel with guests.\nSpend & Milestone Structure\nQuarterly milestone rewards work best for users with stable spending patterns. Spending ₹1.5 lakh in a quarter unlocks a ₹1,500 brand voucher, but users with uneven spending across the year may naturally miss certain quarters despite high annual spend.\nWelcome benefits require front-loaded spending behavior. Complimentary Swiggy One and Times Prime memberships require ₹75,000 spend within the first 90 days, which may be easier for users planning large purchases early in the card lifecycle.\nNetwork & Acceptance\nDiners Club acceptance has improved significantly but still depends on merchant infrastructure. Users can occasionally face acceptance issues across smaller merchants, international websites or select payment gateways compared with Visa and Mastercard networks.\nInternational Spend\nThe card prioritizes rewards and lifestyle over international spend optimization. With 3.5% forex markup (~4.13% including GST), users with frequent overseas spending may find lower-forex alternatives more efficient.",
-      "tips": "Travel\nUse SmartBuy as the default route for all major travel spending rather than booking directly. Diners Privilege offers up to 10X Reward Points on SmartBuy, which creates a significant difference versus regular spending (4 RP / ₹200). Flights, hotels and travel bookings routed through SmartBuy can materially improve annual reward accumulation.\nPreserve lounge access through spend planning rather than reactive spending. Since ₹60,000 quarterly spend (~₹2.4 lakh annually) keeps lounge benefits active, monitor spending once you approach ₹45–50k in a quarter and route planned purchases like insurance, electronics or family expenses through the card. Missing the threshold can reduce annual travel value.\nLifestyle\nUse the quarterly milestone as a spend optimization trigger rather than a spend target. If quarterly spending naturally reaches ₹1.2–1.3 lakh, route upcoming purchases, annual subscriptions or planned expenses through the card and unlock the ₹1,500 quarterly voucher rather than narrowly missing the benefit.\nConcentrate recurring dining and entertainment spends here. BookMyShow benefits and dining partnerships create value only through repeated usage rather than occasional redemptions.\nRewards & Spend Strategy\nPrioritize Swiggy and Zomato before general everyday spending. Food delivery earns 20 Reward Points per ₹200 (5X rewards) versus 4 Reward Points per ₹200 on regular transactions. This creates one of the largest reward accelerators on the card.\nShift spends after crossing monthly reward ceilings. Accelerated rewards on food delivery are capped at 2,500 additional Reward Points monthly. Heavy users should redirect incremental spends after reaching the cap rather than continue spending at diluted returns.\nUse Diners Privilege as a category card, not a universal spend card. Route Food delivery, SmartBuy travel, Milestone-triggering spends. Avoid using it as the default card for every transaction.\nRedemption Strategy\nAccumulate Reward Points and redeem through travel rather than cash-like options. Travel redemption values can reach ₹0.50 per Reward Point, while cashback falls to ₹0.20.\nUsing cashback instead of travel can reduce value realization by almost 60%, making redemption strategy as important as earning strategy.The card creates its highest value through accelerated categories + SmartBuy + milestone stacking, not through regular everyday spending.",
+      "pros": "Welcome Benefits\nComplimentary Club Marriott, Amazon Prime Membership, Swiggy One Membership on achieving net retail spends of ₹1.5 lakh within 90 days of card issuance.\nComplimentary Club Marriott membership benefits include:\nUp to 25% dining discount at participating Marriott hotels in India.\nUp to 20% discount at participating Marriott hotels in Asia Pacific.\nUp to 20% discount on Marriott room bookings.\nSpa discounts at select Marriott properties.\nRewards:\nBase rewards:\nEarn 5 Reward Points per ₹150 spent on eligible retail spends.\nEarn 10 Reward Points per ₹150 spent on standalone restaurant spends during weekends (Saturday & Sunday).\nAccelerated Rewards\nEarn 2X Reward Points on weekend dining at standalone restaurants.\nAccelerated earning rate (Applicable only on merchants with MCCs: 5812, 5813, 5814)\n10 Reward Points per ₹150 spent at eligible standalone restaurants during weekends.\nMinimum transaction amount to qualify: ₹150.\nEMI and wallet transactions are excluded.\nReward Value / Redemption Value\n1 Reward Point = ₹1 on SmartBuy flight and hotel bookings.\n1 Reward Point = up to 1 AirMile on airline miles conversion.\n1 Reward Point = up to ₹0.50 on products and vouchers.\n1 Reward Point = up to ₹0.30 as cashback against statement balance.\nReward Points can be redeemed via SmartBuy or NetBanking.\nMilestone Benefits: Spend ₹4 lakh or more in a calendar quarter to earn 10,000 Reward Points.\nSpend ₹8 lakh in 12 months and get renewal fee waived for the next year. \nTravel\nUnlimited Airport lounge access to 1300+ Lounges in India and worldwide for primary and add-on card members. 2% on all your foreign currency spends\nUp to 10X Reward Points on spending via SmartBuy. Redeem up to 70% of booking value through Reward Points\nInsurance Benefits\nAir accident insurance worth ₹2 crore\nEmergency overseas hospitalization cover of ₹50 lakh\nTravel Insurance Cover of up to INR 55,000 on baggage delay beyond 8 hours for international flight (Capped to $10/hour).\nBanking Benefits\nCredit Liability Cover of up to ₹9 Lakh\nUp to 50 days of interest-free Credit from the date of purchase\nAbility to convert large transactions to a SmartEMI after purchase\nLifestyle\nEarn 2X Reward Points on Weekend Dining on participating restaurants\nTailor-made offers such as workspaces, business insurance and wellness discounts\n6 Complimentary Golf games every quarter across the finest courses in the world\n",
+      "cons": "Reward Caps\nReward Point redemption is capped at 1.5 lakh Reward Points per calendar month across flight bookings, hotel bookings, and AirMiles conversions.\nA maximum of 2 lakh Reward Points can be redeemed in a single statement cycle.\nApple products and Tanishq vouchers can be redeemed using Reward Points for up to 70% of the purchase value; the remaining amount must be paid using the credit card.\nCashback redemptions are valued at ₹0.30 per Reward Point, substantially lower than travel redemptions where 1 Reward Point = ₹1.\nExclusions\nEMI transactions, Wallet loads, Fuel transactions, Cash advances, Rent payments, Government transactions, Outstanding balance payments, Fees, charges and interest\nWeekend dining acceleration is also not applicable to: Wallet transactions, EMI transactions, Transactions below ₹150, Merchants outside eligible restaurant MCCs (5812, 5813, 5814)\nReward Limitations\nThe card delivers its highest value when Reward Points are redeemed for SmartBuy flights and hotels (₹1 per Reward Point) or converted into airline miles. Cashback and merchandise redemptions provide materially lower value.\nAlthough the card offers a strong base earning rate of 5 Reward Points per ₹150, the highest reward rates require spending through SmartBuy or eligible weekend dining merchants.\nAccelerated dining rewards apply only to standalone restaurants on weekends and do not extend to food delivery platforms such as Swiggy or Zomato.\nTravel Restrictions\nWhile the card offers unlimited domestic and international lounge access, access is restricted to lounges within the participating Diners Club, Priority Pass and partner lounge networks.\nThe 2% forex markup, although competitive for a premium lifestyle card, may still be higher than specialized low-forex credit cards designed for frequent international spending.\nSpend & Milestone Structure\nWelcome benefits require ₹1.5 lakh in net retail spends within the first 90 days of card issuance, making them more suited to users planning significant early spending.\nThe quarterly milestone of 10,000 Reward Points requires ₹4 lakh spend in a calendar quarter. Users with uneven spending patterns may miss the milestone despite having high annual spending.\nNetwork Acceptance \nDiners Club acceptance has improved significantly but may still be inconsistent at smaller merchants, certain international websites and select payment gateways compared with Visa and Mastercard.",
+      "tips": "Travel\nBook all flights and hotels through SmartBuy whenever possible. Reward Points are worth ₹1 per point on SmartBuy travel bookings, making it the highest-value redemption option.\nConsider airline mile transfers instead of direct redemption for premium cabin travel. Depending on the airline program, converting Reward Points to AirMiles can provide value exceeding ₹1 per Reward Point.\nUse the complimentary Club Marriott membership before booking hotels elsewhere. Dining discounts, room discounts, and spa benefits can generate meaningful savings throughout the year.\nUse airport lounge access consistently instead of paying for lounge entry. The unlimited lounge benefit is one of the card's strongest recurring value propositions.\nRewards & Spending\nMake Diners Black Metal your default card for general retail spending. The card earns 5 Reward Points per ₹150, one of the strongest base earning rates among premium Indian credit cards.\nPlan restaurant visits for weekends whenever possible. Eligible standalone restaurants earn 2X Reward Points (10 RP per ₹150) on Saturdays and Sundays.\nTrack quarterly spending if you're approaching ₹4 lakh. Consolidating planned purchases can unlock the 10,000 Reward Point milestone without unnecessary spending.\nAvoid redeeming Reward Points for cashback unless necessary. Cashback values Reward Points at ₹0.30, while SmartBuy travel offers ₹1 per Reward Point.\nAccumulate Reward Points instead of redeeming them frequently. Larger balances provide greater flexibility for high-value travel bookings or airline mile transfers.\nWelcome Benefits\nPlan major purchases within the first 90 days of card issuance. Spending ₹1.5 lakh unlocks Club Marriott, Amazon Prime and Swiggy One memberships.\nNetwork Usage\nKeep a Visa or Mastercard as a backup. Although Diners Club acceptance has improved significantly, certain international websites, smaller merchants, and payment gateways may not accept the network.",
       "loungeStructured": {
         "domestic": {
-          "visits": 2,
-          "visitPeriod": "quarter",
-          "spendThreshold": 60000,
-          "thresholdPeriod": "quarter",
-          "unlimited": false
+          "visits": null,
+          "visitPeriod": null,
+          "spendThreshold": null,
+          "thresholdPeriod": null,
+          "unlimited": true
         },
         "international": {
-          "visits": 1,
-          "visitPeriod": "quarter",
-          "spendThreshold": 60000,
-          "thresholdPeriod": "quarter",
-          "unlimited": false
+          "visits": null,
+          "visitPeriod": null,
+          "spendThreshold": null,
+          "thresholdPeriod": null,
+          "unlimited": true
         },
         "railway": null
       },
@@ -2199,7 +2206,8 @@
         ],
         "caps": null,
         "fees": null
-      }
+      },
+      "emiText": "Auto EMI 20% per annum.\nApplicable on transactions above ₹10,000 (Excluding Fuel, Gold, and Jewellery). \nProcessing fee: ₹99 + GST.\nEasyEMI processing fee: Up to ₹299 + GST.\nSmart EMI processing fee: Up to ₹849 + GST.\nPre-closure charges: 3% of principal outstanding."
     },
     {
       "cardId": "CC33",
@@ -2648,8 +2656,8 @@
       "loungeDetail": "—",
       "inviteOnly": false,
       "aprAnnualPct": 45,
-      "interestFreeDaysRetail": null,
-      "emiConversionAprPct": null,
+      "interestFreeDaysRetail": 50,
+      "emiConversionAprPct": 20,
       "cashAdvanceFee": "2.5% of withdrawal amount or ₹500, whichever is higher.",
       "pros": "Joining/Welcome benefits:\n500 CashPoints on payment of joining fee.\nRewards:\nBase Rewards\n2 CashPoints per ₹200 spent on all other eligible spends.\nAccelerated Rewards\nEarn 10X CashPoints (20 CashPoints per ₹200) on non-EMI spends at: Amazon, BigBasket, Flipkart, Reliance Smart SuperStore, Swiggy.\nReward Value / Redemption Value\n1 CashPoint = ₹0.25 as cashback against statement balance.\n1 CashPoint = ₹0.25 on SmartBuy redemption.\n1 CashPoint = ₹0.25 on Product Catalogue redemption.\n1 CashPoint = ₹0.25 on Airmiles conversion.\nMilestone Benefits:\nSpend ₹50,000 in a calendar quarter to receive a ₹500 voucher.\nUPI & Everyday Spending\nEarn up to 3% CashPoints on categories used daily. Grocery, supermarket, dining and all PayZapp transactions earn 3%, utility payments earn 2%, and all other eligible spends earn 1%, creating a straightforward rewards structure for everyday spending.\nEarn rewards on UPI spends — a capability still missing on many cards. Link the card to any UPI app and continue earning rewards on QR and merchant payments rather than restricting rewards to swipe-only transactions.\nRewards apply across both UPI and regular card usage. The 3% / 2% / 1% structure works for UPI as well as normal card transactions, allowing users to consolidate spending on one card.\nFees & Accessibility\nAnnual fee waiver requires only ₹25,000 yearly spends. Compared with premium cards needing ₹2–10 lakh annual spends for waivers, the threshold here is materially easier to achieve.\nGet up to 50 days interest-free credit along with fuel surcharge waiver benefits for routine spending needs.\nInstant virtual issuance removes onboarding friction. The card is issued as a virtual RuPay card, enabling immediate activation and UPI linking without waiting for physical delivery.\nOther Benefit:\n1% fuel surcharge waiver on fuel transactions on a Minimum transaction of ₹400 and Maximum transaction: ₹5,000\nRewards & Flexibility\nCashPoints can be redeemed across multiple routes rather than only cashback. Rewards support statement cashback, SmartBuy travel bookings, vouchers, catalogues and air miles, creating flexibility in redemption usage.",
       "cons": "Reward Caps\nMaximum accelerated reward earning: 2,500 CashPoints per calendar month under 10X category.\nMaximum overall reward earning: 15,000 reward points per statement cycle.\nFlights & hotel bookings:mMaximum 50% of booking value can be redeemed using CashPoints.\nFlight & hotel redemption cap: ₹50,000 worth of reward points per calendar month.\nProduct/voucher redemption: Up to 70% of value can be redeemed using reward points.\nMinimum statement balance required for cashback redemption:₹500.\nFuel surcharge waiver capped at ₹250 per statement cycle.\nUnredeemed CashPoints expire after 2 years.\nExclusions: Fuel spends, EMI transactions, Rent payments, Government transactions, Wallet loads, Gift card loads, Voucher purchases, Cash advances, Outstanding balance payments Card fees & charges.\nRewards Restrictions\nThe headline 3% reward rate is lower than it initially appears. Since 1 CashPoint = ₹0.25, the advertised 3% CashPoint earn rate effectively translates to only 0.75% cashback value, while 2% becomes 0.50% and 1% becomes 0.25%.\nReward earning is tightly capped every month. Each reward bucket (3%, 2%, 1%) is capped at 500 CashPoints/month, creating an effective ceiling of 1,500 CashPoints monthly across all categories.\nSpend Exclusions\nLarge spending categories earn absolutely nothing. Transactions involving fuel, rent, EMI spends, insurance, government payments, education transactions, wallet loads and voucher purchases earn 0 rewards, reducing reward potential for users with large bill payments.\nTransactions below ₹100 earn zero CashPoints. Frequent small-ticket UPI spends can create usage volume without generating rewards.\nRedemption Restrictions\nYou need ₹500 worth of rewards before redeeming your first rupee. Redemption starts only after accumulating 2,000 CashPoints, creating a relatively high threshold for low spenders.\nTravel redemptions can only fund half the booking value. Rewards can cover only 50% of flight or hotel booking value, with the remaining amount requiring card payment.\nVoucher and product redemptions are capped at 70% of value. Users still need to pay the remaining 30% through the card, limiting full reward utilization.\nFlight and hotel redemptions are capped at 50,000 points/month, creating limitations for heavy users.\nReward catalogue redemptions attract ₹99 + taxes handling fees, which can materially reduce value on smaller redemptions.\nUnredeemed rewards expire after 2 years, unlike premium cards that offer non-expiring reward structures",
@@ -2693,7 +2701,8 @@
         ],
         "caps": "Each rewards bucket capped at 500 CashPoints/month.",
         "fees": null
-      }
+      },
+      "emiText": "Auto EMI 20% per annum.\nApplicable on transactions above ₹10,000.\nProcessing fee: ₹99 + GST.\nEasyEMI processing fee: Up to ₹299 + GST.\nSmart EMI processing fee: Up to ₹849 + GST.\nPre-closure charges: 3% of principal outstanding."
     },
     {
       "cardId": "CC39",
@@ -13091,6 +13100,15 @@
         "W001",
         "W002"
       ]
+    },
+    {
+      "cardId": "CC32",
+      "flightHack": "Best airline value is 1:1 — transfer Reward Points to Singapore KrisFlyer, Finnair (Avios) or Flying Blue at 1:1. Most other airline partners (BA, Qatar, Etihad, Air India) transfer at 2:1.",
+      "hotelHack": "Best hotel route is All Accor (ALL) at 2:1. Wyndham, IHG and Radisson transfer at 1:1. Or redeem 1 Reward Point = ₹1 on SmartBuy flights and hotels.",
+      "transferAsOf": "2026-06",
+      "displayTravelHack": true,
+      "honestyStatus": "verified",
+      "attachedWarnings": []
     }
   ],
   "transferPartners": [
@@ -13219,6 +13237,167 @@
       "type": "airline",
       "ratio": "5:2",
       "notes": "Post Apr-2026"
+    },
+    {
+      "cardId": "CC32",
+      "partner": "Singapore KrisFlyer",
+      "type": "airline",
+      "ratio": "1:1",
+      "notes": "Best route — ₹1.20/pt; 0-3 days"
+    },
+    {
+      "cardId": "CC32",
+      "partner": "Finnair (Avios)",
+      "type": "airline",
+      "ratio": "1:1",
+      "notes": "₹1.13/pt; Qsuite via Finnair→Qatar; 0-3 days"
+    },
+    {
+      "cardId": "CC32",
+      "partner": "Flying Blue",
+      "type": "airline",
+      "ratio": "1:1",
+      "notes": "₹1.06/pt; Europe (Air France/KLM); 0-3 days"
+    },
+    {
+      "cardId": "CC32",
+      "partner": "Lotusmiles",
+      "type": "airline",
+      "ratio": "1:1",
+      "notes": "₹0.87/pt"
+    },
+    {
+      "cardId": "CC32",
+      "partner": "SpiceClub",
+      "type": "airline",
+      "ratio": "1:1",
+      "notes": "₹0.50/pt"
+    },
+    {
+      "cardId": "CC32",
+      "partner": "AirAsia",
+      "type": "airline",
+      "ratio": "1:1",
+      "notes": "₹0.22/pt"
+    },
+    {
+      "cardId": "CC32",
+      "partner": "Aeroplan",
+      "type": "airline",
+      "ratio": "2:1",
+      "notes": "₹0.65/pt"
+    },
+    {
+      "cardId": "CC32",
+      "partner": "LifeMiles",
+      "type": "airline",
+      "ratio": "2:1",
+      "notes": "₹0.63/pt"
+    },
+    {
+      "cardId": "CC32",
+      "partner": "United MileagePlus",
+      "type": "airline",
+      "ratio": "2:1",
+      "notes": "₹0.63/pt"
+    },
+    {
+      "cardId": "CC32",
+      "partner": "Asia Miles (Cathay)",
+      "type": "airline",
+      "ratio": "2:1",
+      "notes": "₹0.58/pt; bonus available"
+    },
+    {
+      "cardId": "CC32",
+      "partner": "Qatar (Avios)",
+      "type": "airline",
+      "ratio": "2:1",
+      "notes": "₹0.57/pt"
+    },
+    {
+      "cardId": "CC32",
+      "partner": "BA (Avios)",
+      "type": "airline",
+      "ratio": "2:1",
+      "notes": "₹0.55/pt"
+    },
+    {
+      "cardId": "CC32",
+      "partner": "Etihad Guest",
+      "type": "airline",
+      "ratio": "2:1",
+      "notes": "₹0.53/pt"
+    },
+    {
+      "cardId": "CC32",
+      "partner": "Miles & Smiles (Turkish)",
+      "type": "airline",
+      "ratio": "2:1",
+      "notes": "₹0.53/pt"
+    },
+    {
+      "cardId": "CC32",
+      "partner": "Royal Orchid (Thai)",
+      "type": "airline",
+      "ratio": "2:1",
+      "notes": "₹0.48/pt"
+    },
+    {
+      "cardId": "CC32",
+      "partner": "Air India Maharaja Club",
+      "type": "airline",
+      "ratio": "2:1",
+      "notes": "₹0.33/pt; bonus available"
+    },
+    {
+      "cardId": "CC32",
+      "partner": "All Accor (ALL)",
+      "type": "hotel",
+      "ratio": "2:1",
+      "notes": "Best hotel route — ₹1.08/pt"
+    },
+    {
+      "cardId": "CC32",
+      "partner": "Wyndham",
+      "type": "hotel",
+      "ratio": "1:1",
+      "notes": "₹0.85/pt"
+    },
+    {
+      "cardId": "CC32",
+      "partner": "ITC Club",
+      "type": "hotel",
+      "ratio": "2:1",
+      "notes": "₹0.50/pt"
+    },
+    {
+      "cardId": "CC32",
+      "partner": "IHG Rewards",
+      "type": "hotel",
+      "ratio": "1:1",
+      "notes": "₹0.45/pt"
+    },
+    {
+      "cardId": "CC32",
+      "partner": "Radisson",
+      "type": "hotel",
+      "ratio": "1:1",
+      "notes": "₹0.35/pt"
+    },
+    {
+      "cardId": "CC32",
+      "partner": "Marriott Bonvoy",
+      "type": "hotel",
+      "ratio": "2:1",
+      "notes": "₹0.28/pt"
+    },
+    {
+      "cardId": "CC32",
+      "partner": "SmartBuy Direct",
+      "type": "portal",
+      "ratio": "1 RP = ₹1",
+      "notes": "Flights & hotels via SmartBuy; no miles conversion"
     }
   ]
 }
