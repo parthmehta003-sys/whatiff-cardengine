@@ -13394,31 +13394,31 @@
     },
     {
       "cardId": "CC16",
-      "partner": "Club Vistara",
+      "partner": "Maharaja Club (Air India)",
       "type": "airline",
       "ratio": "10:1",
-      "notes": null
+      "notes": "min 2,000 pts to convert; formerly Club Vistara"
     },
     {
       "cardId": "CC16",
-      "partner": "InterMiles",
-      "type": "airline",
+      "partner": "Adani Reward Points",
+      "type": "lifestyle",
       "ratio": "10:1",
-      "notes": null
+      "notes": "redeemable flights/hotels/duty-free/cabs via Adani One"
     },
     {
       "cardId": "CC27",
-      "partner": "Club Vistara",
+      "partner": "Maharaja Club (Air India)",
       "type": "airline",
       "ratio": "10:1",
-      "notes": null
+      "notes": "min 2,000 pts to convert; formerly Club Vistara"
     },
     {
       "cardId": "CC27",
-      "partner": "InterMiles",
-      "type": "airline",
+      "partner": "Adani Reward Points",
+      "type": "lifestyle",
       "ratio": "10:1",
-      "notes": null
+      "notes": "redeemable flights/hotels/duty-free/cabs via Adani One"
     }
   ]
 }

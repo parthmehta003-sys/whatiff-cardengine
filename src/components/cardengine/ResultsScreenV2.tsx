@@ -2548,6 +2548,7 @@ const css = `
 .r2-xfr-partner.airline{background:rgba(6,182,212,.08);color:#67e8f9;border:1px solid rgba(6,182,212,.15)}
 .r2-xfr-partner.hotel{background:rgba(139,92,246,.08);color:#c4b5fd;border:1px solid rgba(139,92,246,.15)}
 .r2-xfr-partner.portal{background:rgba(16,185,129,.08);color:#6ee7b7;border:1px solid rgba(16,185,129,.15)}
+.r2-xfr-partner.lifestyle{background:rgba(245,158,11,.08);color:#fcd34d;border:1px solid rgba(245,158,11,.15)}
 .r2-xfr-ratio{
   font-size:10px;font-weight:700;opacity:.7;
   background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px}
