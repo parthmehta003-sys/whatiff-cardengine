@@ -583,7 +583,7 @@
       "inviteOnly": false,
       "aprAnnualPct": 45,
       "interestFreeDaysRetail": 48,
-      "emiConversionAprPct": null,
+      "emiConversionAprPct": 20,
       "cashAdvanceFee": "2.5% of amount withdrawn or Rs. 500/-\nwhichever is higher",
       "pros": "Joining fee/Welcome benefits: First-year membership fee of ₹999 + GST is waived on ₹50,000 retail spends within the first 3 months of card setup. Users spending around ₹16,700/month can effectively avoid the joining fee entirely.\nRewards:\nBase Rewards\nEarn 10% rewards on eligible spends on the Scapia Federal Visa Credit Card.\nRewards are credited on purchases of ₹20 and above.\nRewards earned are converted into Scapia Coins at a ratio of 1 Reward = 1 Scapia Coin.\nAccelerated Rewards\nEarn 20% rewards on travel bookings made through the Scapia App.\nReward Value\n5 Scapia Coins = ₹1\nTherefore: 1 Scapia Coin = ₹0.20; 10% rewards = effectively 2% value back; 20% travel rewards = effectively 4% value back\n1. Lifetime free card with ₹0 joining and annual fee: No joining fee and no renewal fee, making the holding cost effectively zero.\n2. 0% forex markup on international spends: Most cards charge ~2–3.5% forex markup. Scapia charges 0%, creating meaningful savings for frequent international users.\n3. High travel rewards potential: Earn: 10% rewards on eligible Visa spends, 5% rewards on eligible RuPay/UPI spends, 20% rewards on travel bookings via Scapia app\n4. Fuel surcharge waiver with a relatively high monthly cap: Get 1% surcharge waiver up to ₹500 per month, which is higher than many cards capped at ₹100–₹300 monthly.\n5. Up to 48-day interest-free period: Offers up to 48 days interest-free credit, which is useful for cash-flow management when dues are paid in full.\n6: No explicit cap on rewards for eligible spending categories: Scapia currently does not specify a reward earning cap on eligible transactions such as shopping, dining, groceries, travel and regular retail purchases, allowing heavy spenders to continue earning rewards without monthly or quarterly reward ceilings.",
       "cons": "No rewards caps\n1. Reward limitations, exclusions and thresholds reduce overall usability\nNo rewards are earned on: rent, insurance, fuel, education, utilities, wallet loads, forex, transaction, EMI spends\nRewards also begin only above: ₹20+ transaction value (Visa variant) & ₹500+ transaction value (RuPay variant)\nAdditionally, utility/telecom/cable spends have seen tightening of reward rules, with older terms limiting rewards beyond ₹20,000/statement cycle and updated terms excluding many such spends entirely.\n2. Airport benefits require spend-based eligibility conditions\nUnlimited domestic airport privileges unlock only after ₹20,000 spend in the previous month. Additionally, international airport benefits activate only on ₹50,000+ international flight bookings through the Scapia app, with rewards capped at ₹2,000.\n3. Fuel surcharge benefits have usage caps\nThe 1% fuel surcharge waiver applies only on transactions up to ₹5,000, with a maximum waiver of ₹500 per month.\n4. Additional charges apply on specific spend categories\nRent: 1% + GST\nWallet loads: 1% + GST\nUtility spends above ₹50,000/month: 1% + GST\nThese charges can materially reduce value for heavy spenders.\n5. High revolving credit cost\nInterest rate is 45% annually (3.75% monthly). A ₹50,000 unpaid balance can cost roughly ₹1,875/month in interest before GST.\nExclusions: Rent payments, Fuel spends, Fuel surcharg, Wallet loads / wallet top-ups, Utility payments, Telecom and cable payments, Insurance payments, Education & school  fees, Government transactions, Cash withdrawals, EMI transactions, Forex transactions, Credit card bill payments, Crypto / digital asset transactions, Money transfers, Gift cards\nUtility Transaction: Spends over Rs.50,000 in a month will attract a convenience fee of 1% + applicable GST (max Rs.3,000 per transaction)\nRent and Wallet load Spends on rent, wallet load will attract a convenience fee of 1% + applicable GST (max Rs.3,000 per transaction)\nWallet Load Fee 1% + GST; Maximum ₹3,000 per transaction.",
@@ -599,14 +599,7 @@
         "international": null,
         "railway": null
       },
-      "movieStructured": {
-        "type": "BOGO",
-        "valuePerUse": 150,
-        "frequency": "per_month",
-        "usesPerPeriod": 1,
-        "annualValue": null,
-        "annualValueComputed": 1800
-      },
+      "movieStructured": null,
       "redemption": {
         "currency": "points",
         "currencyName": "Scapia Coins",
@@ -5101,21 +5094,21 @@
       "ladderId": "SCAPIA",
       "category": "International",
       "rowType": "base",
-      "earnNum": 10,
-      "earnPer": 100,
+      "earnNum": 0,
+      "earnPer": null,
       "rewardUnit": "Scapia Coin",
-      "redemptionRoute": "travel",
-      "redeemValue": 0.2,
-      "trigger": "All eligible spend (min txn ₹20+)",
+      "redemptionRoute": "n/a",
+      "redeemValue": null,
+      "trigger": null,
       "thresholdAmount": null,
       "thresholdPeriod": null,
       "stacks": false,
-      "excluded": false,
+      "excluded": true,
       "capAmount": null,
       "capPeriod": null,
       "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "10% Scapia Coins = effective 2% (5 coins=₹1). Travel-only redemption reflected. No cap. Pros."
+      "sourceNote": "EXCLUDED (₹0): international spend is origin-based (transaction originates outside India), not MCC-based — absent from the Cardholder Agreement's ineligible-MCC table but confirmed zero-earn via BOBCARD product page + hands-on user reports. 0% forex markup still applies; only coin earning is excluded. Cons."
     },
     {
       "cardId": "CC10",
@@ -11671,9 +11664,9 @@
       "Dining": 4,
       "Fuel": 3,
       "Grocery": 3,
-      "International": 10,
+      "International": 2,
       "Overall": 8,
-      "bestFor": "Best LTF travel: unlimited dom lounge (₹20k milestone) + 0% forex + 10% via app"
+      "bestFor": "Best LTF travel: unlimited dom lounge (₹20k milestone) + 0% forex (no international coin earn) + 20% via app"
     },
     {
       "cardId": "CC11",
