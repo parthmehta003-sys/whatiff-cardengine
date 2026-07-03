@@ -929,17 +929,17 @@
       "joiningFee": 999,
       "annualFee": 999,
       "feeWaiverSpend": 250000,
-      "forexPct": 1.75,
+      "forexPct": 2.00,
       "loungeAccess": "Dom + International",
-      "loungeDetail": "2 dom/quarter (₹75k qtr spend req. in the previous quarter) & 4 intl/quarter",
+      "loungeDetail": "2 dom/quarter (₹75k qtr spend req. in the previous quarter) & 4 intl/calendar year",
       "inviteOnly": false,
       "aprAnnualPct": 47.88,
       "interestFreeDaysRetail": 50,
-      "emiConversionAprPct": null,
+      "emiConversionAprPct": 30,
       "cashAdvanceFee": "2.5% of withdrawal amount or ₹650, whichever is higher",
-      "pros": "Welcome Benefits\nWelcome gift voucher worth ₹500 on card activation and first transaction (subject to the offer active at issuance).\nRewards:\nBase Rewards:\nEarn 8 Reward Points for every ₹200 spent on all eligible retail transactions except select categories.\nAccelerated Rewards\nEarn 16 Reward Points for every ₹200 spent on Travel and Dining transactions.\nReduced Reward Categories: Earn 4 Reward Points for every ₹200 spent on Utility Payments, Insurance, Grocery, Education, Telecommunications, Railways. These categories earn lower rewards than the standard base rate. \nMilestone Benefits: Earn 1,000 Bonus Reward Points on annual spends of ₹1.5 lakh.\nUp to 12 complimentary airport lounge visits annually: Includes 8 domestic lounge visits/year (2 per quarter) and 4 international lounge visits/calendar year. Domestic lounge access unlocks after ₹75,000 spend in the previous quarter.\nStrong base rewards: up to 8 reward points per ₹200 spent: The card offers 8 reward points per ₹200 on general spend categories, creating stronger everyday rewards than many entry/mid-tier cards.\nOptional reward acceleration up to 3×–5×: YES Bank's optional Rewards Subscription Plans can boost earnings to 3× or even 5× reward points, especially across Travel, Dining, Fashion and Healthcare categories.\nGolf privileges included: Comes with green fee waiver benefits on golf rounds, a premium feature usually reserved for higher-tier cards.\nTravel utility + convenience features: Includes 1% fuel surcharge waiver on eligible spends and Instant EMI access across 80,000+ stores.\nOther benefits:\nMovie tickets at  25% discount when booked at www.bookmyshow.com or on BookMyShow mobile app\nFuel Surcharge Waiver: Enjoy fuel surcharge waiver at all fuel stations across India for transactions between `400 to `5,000\nInsurance:\nAccidental Death: 1 Crore Air Accidental Cover in case of death due to flight accidents (Applicable only when the flight ticket is booked with your card)\nEmergency Hospitalisation: Protection of up to `25 Lakhs against any medical emergency while travelling overseas (Applicable only when the flight ticket is booked with your card)\nCredit Shield: The outstanding amount on your card is covered upto 8 Lakhs in case of accidental death of Primary Cardmember",
-      "cons": "Reward Caps\n1,000 Bonus Reward Points on annual spends of ₹1.5 lakh. Domestic lounge access unlocked on ₹75,000 quarterly spends. ₹100 + GST reward redemption fee.\n\nHigh quarterly spend requirement for domestic lounge access: Need ₹75,000 spend in the previous quarter to unlock domestic lounge visits in the next quarter. Missing this threshold significantly reduces value.\n3×–5× reward acceleration is not free: The headline reward multiplier requires a separate annual subscription:\n– ₹3,500/year for Plan 1\n– ₹5,000/year for Plan 2\nVery high finance charges if balance is carried: Interest can reach 3.99% per month (~47.88% annually) on overdue balances.\nReward structure and redemption can be complex: Multiple reward layers, subscription plans and redemption options reduce simplicity and make optimization harder\nRent Transaction Fee: 1% (minimum ₹199 for rent transactions above ₹1,000)\nWallet Load Fee: 1%\nEducation Payment Fee via third-party platforms: 1%\nUtility Transaction Fee: 1% above prescribed thresholds\nFuel Transaction Fee: 1% above prescribed thresholds",
-      "tips": "3. Use the card for international travel over traditional 3.5% forex cards: Forex markup is 1.75%. On a ₹2 lakh overseas spend, a standard 3.5% card costs about ₹7,000, while YES First Preferred costs ₹3,500, saving around ₹3,500.\n\n4. Subscribe to the 3× or 5× Rewards Plan only if category spending justifies it\nConsider ₹3,500/year plan only if annual spend is high across everyday categories\nConsider ₹5,000/year plan only if Travel, Dining, Fashion and Healthcare spends are substantial\nExample: Paying ₹5,000 for a reward plan without meaningful category spending reduces net returns.",
+      "pros": "Welcome Benefits\nWelcome gift voucher worth ₹500 on card activation and first transaction (subject to the offer active at issuance).\nRewards:\nBase Rewards:\nEarn 8 Reward Points for every ₹200 spent on all eligible retail transactions except select categories.\nAccelerated Rewards\nEarn 16 Reward Points for every ₹200 spent on Travel and Dining transactions.\nReduced Reward Categories: Earn 4 Reward Points for every ₹200 spent on Utility Payments, Insurance, Grocery, Education, Telecommunications, Railways. These categories earn lower rewards than the standard base rate. \nUp to 12 complimentary airport lounge visits annually: Includes 8 domestic lounge visits/year (2 per quarter) and 4 international lounge visits/calendar year. Domestic lounge access unlocks after ₹75,000 spend in the previous quarter.\nStrong base rewards: up to 8 reward points per ₹200 spent: The card offers 8 reward points per ₹200 on general spend categories, creating stronger everyday rewards than many entry/mid-tier cards.\nOptional reward acceleration up to 3×–5×: YES Bank's optional Rewards Subscription Plans can boost earnings to 3× or even 5× reward points, especially across Travel, Dining, Fashion and Healthcare categories.\nTravel utility + convenience features: Includes 1% fuel surcharge waiver on eligible spends and Instant EMI access across 80,000+ stores.\nOther benefits:\nMovie tickets at  25% discount when booked at www.bookmyshow.com or on BookMyShow mobile app\nFuel Surcharge Waiver: Enjoy fuel surcharge waiver at all fuel stations across India for transactions between `400 to `5,000\nInsurance:\nAccidental Death: 1 Crore Air Accidental Cover in case of death due to flight accidents (Applicable only when the flight ticket is booked with your card)\nEmergency Hospitalisation: Protection of up to `25 Lakhs against any medical emergency while travelling overseas (Applicable only when the flight ticket is booked with your card)\nCredit Shield: The outstanding amount on your card is covered upto 8 Lakhs in case of accidental death of Primary Cardmember",
+      "cons": "Reward Caps\nDomestic lounge access unlocked on ₹75,000 quarterly spends. ₹100 + GST reward redemption fee.\n\nHigh quarterly spend requirement for domestic lounge access: Need ₹75,000 spend in the previous quarter to unlock domestic lounge visits in the next quarter. Missing this threshold significantly reduces value.\n3×–5× reward acceleration is not free: The headline reward multiplier requires a separate annual subscription:\n– ₹3,500/year for Plan 1\n– ₹5,000/year for Plan 2\nVery high finance charges if balance is carried: Interest can reach 3.99% per month (~47.88% annually) on overdue balances.\nReward structure and redemption can be complex: Multiple reward layers, subscription plans and redemption options reduce simplicity and make optimization harder\nRent Transaction Fee: 1% (minimum ₹199 for rent transactions above ₹1,000)\nWallet Load Fee: 1%\nEducation Payment Fee via third-party platforms: 1%\nUtility Transaction Fee: 1% above prescribed thresholds\nFuel Transaction Fee: 1% above prescribed thresholds",
+      "tips": "3. Use the card for international travel over traditional 3.5% forex cards: Forex markup is 2.00%. On a ₹2 lakh overseas spend, a standard 3.5% card costs about ₹7,000, while YES First Preferred costs ₹4,000, saving around ₹3,000.\n\n4. Subscribe to the 3× or 5× Rewards Plan only if category spending justifies it\nConsider ₹3,500/year plan only if annual spend is high across everyday categories\nConsider ₹5,000/year plan only if Travel, Dining, Fashion and Healthcare spends are substantial\nExample: Paying ₹5,000 for a reward plan without meaningful category spending reduces net returns.",
       "loungeStructured": {
         "domestic": {
           "visits": 2,
@@ -950,7 +950,7 @@
         },
         "international": {
           "visits": 4,
-          "visitPeriod": "quarter",
+          "visitPeriod": "year",
           "spendThreshold": null,
           "thresholdPeriod": null,
           "unlimited": false
@@ -968,7 +968,7 @@
       "redemption": {
         "currency": "points",
         "currencyName": "Reward Points",
-        "plainSummary": "Your points are worth roughly ₹0.25 each through the YES rewards catalogue. Redeem for vouchers or products.",
+        "plainSummary": "Your points are worth roughly ₹0.25 each through the YES rewards catalogue. There's a ₹100 + GST fee per redemption, so redeem in larger batches — frequent small redemptions waste value.",
         "methods": [
           {
             "channel": "Rewards catalogue / vouchers",
@@ -976,13 +976,13 @@
             "valueRange": null,
             "valueIsVariable": false,
             "minPoints": null,
-            "feePerRedemption": 0,
+            "feePerRedemption": 118,
             "capPerCycle": null,
-            "note": "~₹0.25 per point.",
+            "note": "~₹0.25 per point. Redeem in big batches — the ₹100+GST fee hurts small redemptions.",
             "best": true
           }
         ],
-        "caps": null,
+        "caps": "A ₹100 + GST fee applies per redemption.",
         "fees": null
       }
     },
@@ -1748,7 +1748,7 @@
       "redemption": {
         "currency": "points",
         "currencyName": "Reward Points",
-        "plainSummary": "Your points are worth up to ₹0.25 each, best on flight and hotel redemptions. The 40,000 bonus is worth about ₹10,000 toward travel.",
+        "plainSummary": "Your points are worth up to ₹0.25 each, best on flight and hotel redemptions. The 40,000 bonus is worth about ₹10,000 toward travel. There's a ₹100 + GST fee per redemption (waiver ended 15-Jun-2026), so redeem in larger batches.",
         "methods": [
           {
             "channel": "Flights / hotels",
@@ -1756,13 +1756,13 @@
             "valueRange": null,
             "valueIsVariable": false,
             "minPoints": null,
-            "feePerRedemption": 0,
+            "feePerRedemption": 118,
             "capPerCycle": null,
-            "note": "Up to ₹0.25 per point on travel.",
+            "note": "Up to ₹0.25 per point on travel. Redeem in big batches — the ₹100+GST fee hurts small redemptions.",
             "best": true
           }
         ],
-        "caps": null,
+        "caps": "A ₹100 + GST fee applies per redemption (waiver ended 15-Jun-2026).",
         "fees": null
       }
     },
@@ -6217,11 +6217,11 @@
       "thresholdPeriod": null,
       "stacks": false,
       "excluded": false,
-      "capAmount": null,
-      "capPeriod": null,
+      "capAmount": 75,
+      "capPeriod": "cycle",
       "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "4 RP/₹200 = 0.5% reduced category. Pros."
+      "sourceNote": "4 RP/₹200 = 0.5% reduced category, capped 300 RP/cycle = ₹75. MITC reward-points-capping table. Pros/Cons."
     },
     {
       "cardId": "CC16",
@@ -12462,8 +12462,8 @@
       "rateWithHack": 1.5,
       "rateWithoutHack": 0.8,
       "monthlyCap": null,
-      "status": "active",
-      "statusNote": "Subscription accelerators are paywalled (₹3,500-5,000/yr) — almost never worth it. Lounge gate: ₹75k spend in previous quarter for domestic lounges.",
+      "status": "discontinued",
+      "statusNote": "DISCONTINUED (July 2026): the underlying milestone benefit (\"1,000 Bonus RP on ₹1.5L annual spend\") is unsourced — absent from the issuer Excel and all official YES Bank docs (MITC v17, product page). Removed from card pros in the same pass. Subscription accelerators are paywalled (₹3,500-5,000/yr) — almost never worth it. Lounge gate: ₹75k spend in previous quarter for domestic lounges.",
       "commonFailure": null,
       "difficulty": "Beginner",
       "lastVerified": "May 2026",
@@ -13391,6 +13391,34 @@
       "type": "portal",
       "ratio": "1 RP = ₹1",
       "notes": "Flights & hotels via SmartBuy; no miles conversion"
+    },
+    {
+      "cardId": "CC16",
+      "partner": "Club Vistara",
+      "type": "airline",
+      "ratio": "10:1",
+      "notes": null
+    },
+    {
+      "cardId": "CC16",
+      "partner": "InterMiles",
+      "type": "airline",
+      "ratio": "10:1",
+      "notes": null
+    },
+    {
+      "cardId": "CC27",
+      "partner": "Club Vistara",
+      "type": "airline",
+      "ratio": "10:1",
+      "notes": null
+    },
+    {
+      "cardId": "CC27",
+      "partner": "InterMiles",
+      "type": "airline",
+      "ratio": "10:1",
+      "notes": null
     }
   ]
 }
