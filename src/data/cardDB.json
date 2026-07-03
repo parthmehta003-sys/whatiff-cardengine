@@ -13102,6 +13102,24 @@
       "displayTravelHack": true,
       "honestyStatus": "verified",
       "attachedWarnings": []
+    },
+    {
+      "cardId": "CC16",
+      "flightHack": "Transfer Reward Points to Air India's Maharaja Club at 10:1 (min 2,000 points to convert) — 10,000 RP = 1,000 Maharaja Club miles, redeemable on Air India and Star Alliance partner flights. Note: this program was formerly branded Club Vistara before the Vistara–Air India merger.",
+      "hotelHack": "Transfer Reward Points to Adani Reward Points at 10:1 via Adani One — redeemable not just for hotels but across flights, duty-free shopping and cabs booked through the Adani One app. Broader than a pure hotel route, so worth checking Adani One's live redemption rates against Maharaja Club before committing points either way.",
+      "transferAsOf": "2026-07",
+      "displayTravelHack": true,
+      "honestyStatus": "current",
+      "attachedWarnings": []
+    },
+    {
+      "cardId": "CC27",
+      "flightHack": "Transfer Reward Points to Air India's Maharaja Club at 10:1 (min 2,000 points to convert) — 10,000 RP = 1,000 Maharaja Club miles, redeemable on Air India and Star Alliance partner flights. Note: this program was formerly branded Club Vistara before the Vistara–Air India merger.",
+      "hotelHack": "Transfer Reward Points to Adani Reward Points at 10:1 via Adani One — redeemable not just for hotels but across flights, duty-free shopping and cabs booked through the Adani One app. Broader than a pure hotel route, so worth checking Adani One's live redemption rates against Maharaja Club before committing points either way.",
+      "transferAsOf": "2026-07",
+      "displayTravelHack": true,
+      "honestyStatus": "current",
+      "attachedWarnings": []
     }
   ],
   "transferPartners": [
