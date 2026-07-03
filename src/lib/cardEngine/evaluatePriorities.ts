@@ -91,6 +91,14 @@ function evalCategory(card: RankedCard, key: PriorityKey):
   if (perYear > 0) {
     return { status: 'met', line: `${LABEL[key]} — earns ${inr(perYear)}/yr` };
   }
+  if (key === 'Fuel' && card.meta.fuelWaiver) {
+    const fw = card.meta.fuelWaiver;
+    const cap = fw.capAmount != null ? ` (capped ${inr(fw.capAmount)}/${fw.capPeriod ?? 'cycle'})` : '';
+    return {
+      status: 'unmet',
+      line: `${LABEL[key]} — excluded, earns nothing, but waives ${fw.waiverPct}% surcharge on ${inr(fw.minTxn)}–${inr(fw.maxTxn)} txns${cap}`,
+    };
+  }
   return { status: 'unmet', line: `${LABEL[key]} — excluded, earns nothing` };
 }
 
