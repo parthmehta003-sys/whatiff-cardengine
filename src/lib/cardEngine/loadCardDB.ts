@@ -9,7 +9,7 @@
 import type { EarnRow, SpendCategory, CapPeriod, RowType } from './computeEarn';
 import type {
   CardMeta, CategoryStrength, LoungeStructured, MovieStructured,
-  WelcomeBenefit, MilestoneBenefit,
+  WelcomeBenefit, MilestoneBenefit, FuelWaiver,
 } from './rankCards';
 
 // ── Raw JSON shapes (as emitted by build_card_db.py) ─────────────────────────
@@ -27,6 +27,7 @@ interface RawCard {
   movieStructured?: MovieStructured | null;
   welcomeBenefit?: WelcomeBenefit | null;
   milestoneBenefit?: MilestoneBenefit | null;
+  fuelWaiver?: FuelWaiver | null;
   redemption?: Redemption;
 }
 
@@ -182,6 +183,7 @@ export function loadCardDB(raw: RawDB): LoadedCardDB {
       movieStructured: c.movieStructured ?? null,
       welcomeBenefit: c.welcomeBenefit ?? null,
       milestoneBenefit: c.milestoneBenefit ?? null,
+      fuelWaiver: c.fuelWaiver ?? null,
       redemption: c.redemption,
       // rewardType derived below, once earn rows are indexed.
     };

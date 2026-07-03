@@ -19,6 +19,7 @@ import {
   type SpendCategory,
   type CardEarnResult,
   type CategoryEarn,
+  type CapPeriod,
 } from './computeEarn';
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -86,6 +87,22 @@ export interface MilestoneBenefit {
   description: string;
 }
 
+/**
+ * Fuel surcharge waiver. DISPLAY-ONLY — never feeds the score (Fuel earn stays whatever the
+ * earnRow says; this is a separate cost-offset, not a reward). Surfaces the "why ₹0 isn't the
+ * whole story" context for cards that exclude Fuel from earning but still waive the surcharge.
+ * `capAmount`/`capPeriod` follow the same convention as earnRows' cap fields — capAmount is a
+ * ₹ value, not a raw waiver-fee count.
+ */
+export interface FuelWaiver {
+  waiverPct: number;
+  minTxn: number;
+  maxTxn: number;
+  capAmount: number | null;
+  capPeriod: CapPeriod | null;
+  description: string;
+}
+
 /** Whether the card's guaranteed earning redeems as direct cashback or as points/rewards. */
 export type RewardType = 'cashback' | 'points';
 
@@ -124,6 +141,8 @@ export interface CardMeta {
   welcomeBenefit?: WelcomeBenefit | null;
   /** Spend-milestone benefit — score-affecting via milestoneCreditPerYear() only when unlocked. */
   milestoneBenefit?: MilestoneBenefit | null;
+  /** Fuel surcharge waiver — DISPLAY-ONLY, never feeds the score. */
+  fuelWaiver?: FuelWaiver | null;
   /** Derived in the loader from earn-row redemption data. Read-only display signal. */
   rewardType?: RewardType;
   /** Redemption optimizer data — present for all 40 cards. Display-only; never feeds ranking math. */
