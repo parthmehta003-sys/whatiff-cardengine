@@ -51,6 +51,41 @@ export interface MovieStructured {
   annualValueComputed: number | null; // ₹/yr value the engine should surface
 }
 
+/**
+ * Welcome/joining benefit (one-time). DISPLAY-ONLY — never feeds the score.
+ * Used to show the joining-fee offset honestly ("Joining fee ₹X, offset by ~₹Y welcome benefit").
+ * `valueFloor` is the honest FLOOR ₹ value (points at real redemption / voucher usable value),
+ * never the sticker. `condition` keeps the display honest: null = unconditional (on fee payment);
+ * a string (e.g. "on ₹15,000 spend in 90 days") means it must NOT render as a guaranteed offset.
+ */
+export interface WelcomeBenefit {
+  valueFloor: number;
+  type: 'points' | 'voucher' | 'cashback' | 'mixed' | 'none';
+  condition: string | null;
+  description: string;
+}
+
+/** One spend-milestone tier. */
+export interface MilestoneTier {
+  spendThreshold: number;   // ₹ spend that unlocks this tier (per `period`)
+  valueFloor: number;       // honest FLOOR ₹ value granted at this tier
+  benefit: string;          // human description of what's granted
+}
+
+/**
+ * Spend-milestone benefit (recurring, spend-conditional). SCORE-AFFECTING via
+ * milestoneCreditPerYear(), but ONLY when entered spend actually unlocks a tier.
+ * `cumulative` is PER-CARD: true = crossing higher tiers ALSO grants lower ones; false = highest only.
+ * `period`: annual thresholds credit once; quarterly/monthly thresholds are PER PERIOD and the reward
+ * repeats each period the (evenly-spread) spend sustains.
+ */
+export interface MilestoneBenefit {
+  tiers: MilestoneTier[];   // sorted ascending by spendThreshold
+  period: 'annual' | 'quarterly' | 'monthly';
+  cumulative: boolean;
+  description: string;
+}
+
 /** Whether the card's guaranteed earning redeems as direct cashback or as points/rewards. */
 export type RewardType = 'cashback' | 'points';
 
@@ -85,6 +120,10 @@ export interface CardMeta {
   /** Structured benefit data (display/priority layer only — never feeds ranking math). */
   loungeStructured?: LoungeStructured | null;
   movieStructured?: MovieStructured | null;
+  /** One-time welcome/joining benefit — DISPLAY-ONLY, never feeds the score. */
+  welcomeBenefit?: WelcomeBenefit | null;
+  /** Spend-milestone benefit — score-affecting via milestoneCreditPerYear() only when unlocked. */
+  milestoneBenefit?: MilestoneBenefit | null;
   /** Derived in the loader from earn-row redemption data. Read-only display signal. */
   rewardType?: RewardType;
   /** Redemption optimizer data — present for all 40 cards. Display-only; never feeds ranking math. */
