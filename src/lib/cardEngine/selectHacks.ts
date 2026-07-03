@@ -51,12 +51,12 @@ export function cardIntelligence(
   intelligence: { intelId?: string; cardId: string; type: string | null; title: string | null; description: string | null; severity: string | null }[] = [],
   cardName?: string
 ): CardIntelligenceItem[] {
-  // BACKLOG / KNOWN GAP: This function does NOT filter warnings by `triggerWhen`.
-  // Warnings are surfaced based on card/issuer name matching in the text only.
-  // As a result, any `triggerWhen` condition (e.g. "user_owns_card") is currently ignored —
-  // W006's correct suppression today is COINCIDENTAL, not principled, and may break when
-  // new warnings are added. TODO: filter by `triggerWhen` against the actual user context
-  // (ownership view) before relying on this for correctness. See BACKLOG.md.
+  // Warning→card matching is now STRUCTURAL: a warning attaches only to the cards named in
+  // its `affectedCardIds` (see the loop below). The old issuer-name text-fallback was removed.
+  // BACKLOG / KNOWN GAP (still open): this function does NOT yet filter by `triggerWhen`
+  // (context: user_owns_card / user_considers_card / user_mentions_hack). That requires the
+  // journey context plumbed in and a context→triggerWhen mapping — deferred to a follow-up.
+  // See BACKLOG.md.
 
   // Distinguishing words: name words after the first (issuer), ≥ 3 chars.
   // Used to classify a multi-card warning as card-specific when the text names this card.
@@ -67,21 +67,12 @@ export function cardIntelligence(
   const items: CardIntelligenceItem[] = [];
   // 1) devaluations / benefit changes from warnings
   for (const w of warnings) {
-    if (!w.affectedCardIds) {
-      // Issuer-general warning: surface as broader for cards whose issuer appears in text
-      if (!cardName) continue;
-      const issuer = cardName.split(/\s+/)[0];
-      if (!issuer || issuer.length < 3) continue;
-      const text = w.whatUserShouldKnow || w.whatChanged || '';
-      if (!text) continue;
-      if (!new RegExp(`\\b${issuer.toLowerCase()}\\b`).test(text.toLowerCase())) continue;
-      const type: CardIntelligenceItem['type'] =
-        w.changeType === 'devaluation' ? 'devaluation'
-          : w.changeType === 'benefit_change' ? 'benefit_change'
-          : 'note';
-      items.push({ type, text, severity: w.severity, isGroup: true });
-      continue;
-    }
+    // Structured matching ONLY: a warning attaches to a card via affectedCardIds.
+    // The old issuer-name text-fallback surfaced null-affectedCardIds warnings on any card
+    // whose issuer name appeared in the text (e.g. W012 "Axis Atlas discontinued" leaked onto
+    // all 7 Axis cards). That was name-match noise, not a feature — warnings without
+    // affectedCardIds are now intentionally dormant (W006, W012) until an affected card is added.
+    if (!w.affectedCardIds) continue;
     const ids = w.affectedCardIds.split(/[,\s]+/).filter(Boolean);
     if (!ids.includes(cardId)) continue;
     const type: CardIntelligenceItem['type'] =
