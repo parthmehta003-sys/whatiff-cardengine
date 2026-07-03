@@ -340,6 +340,29 @@ export function netEffectiveFee(meta: CardMeta, annualSpend: number): number {
   return effectiveAnnualFee(meta, annualSpend) - renewalCredit(meta, annualSpend);
 }
 
+/**
+ * Spend-milestone credit (honest floor, spend-conditional). SIBLING of renewalCredit — it gates on
+ * its own per-tier `spendThreshold`, NOT on `effFee > 0`. Returns 0 for null/absent milestoneBenefit.
+ *
+ * Uniform-spread (GUARANTEED-floor) model: with only an annual spend figure, the only value
+ * guaranteeable is what an EVENLY-spending user gets — we never assume favourable intra-year
+ * concentration (that would overstate a guaranteed metric). Quarterly/monthly thresholds are
+ * per-period; the reward repeats each period the even spend sustains. Annual falls out at periods=1.
+ */
+export function milestoneCreditPerYear(meta: CardMeta, annualSpend: number): number {
+  const mb = meta.milestoneBenefit;
+  if (!mb || !mb.tiers?.length) return 0;
+  const tiers = [...mb.tiers].sort((a, b) => a.spendThreshold - b.spendThreshold);
+  const periods = mb.period === 'annual' ? 1 : (mb.period === 'quarterly' ? 4 : 12);
+  const basisSpend = annualSpend / periods;                 // per-period spend under even spread
+  const met = tiers.filter((t) => basisSpend >= t.spendThreshold);
+  if (!met.length) return 0;
+  const perPeriodValue = mb.cumulative
+    ? met.reduce((s, t) => s + t.valueFloor, 0)              // cumulative: sum all met tiers
+    : met[met.length - 1].valueFloor;                       // else: highest met tier only
+  return perPeriodValue * periods;                          // repeats each period
+}
+
 function annualSpendOf(spend: MonthlySpend): number {
   return Object.values(spend).reduce((s, v) => s + (v ?? 0), 0) * 12;
 }
@@ -412,7 +435,13 @@ function scoreCard(
   const annualSpend = annualSpendOf(user.monthlySpend);
   const effFee = effectiveAnnualFee(meta, annualSpend);
   const credit = renewalCredit(meta, annualSpend);
-  const net = Math.round((earn.guaranteedPerYear - effFee + credit) * 100) / 100;
+  // DELIBERATE INTERIM DEFERRAL: milestone credit is applied in the single-card recommendation
+  // score ONLY. It is intentionally NOT applied in the combo (bestComboSecond/comboLabel) or
+  // owned-journey (ownedSetupValue) paths, because those split spend PER ROUTED CARD — crediting a
+  // milestone on total household spend there would over-credit. Routed-spend milestone crediting is
+  // a separate modeling decision, deferred. (No-op today: milestoneBenefit is null on all 40.)
+  const milestoneCredit = milestoneCreditPerYear(meta, annualSpend);
+  const net = Math.round((earn.guaranteedPerYear - effFee + credit + milestoneCredit) * 100) / 100;
   const notes: string[] = [];
   if (meta.inviteOnly) notes.push('Invite-only — ranked on fit, but not directly applicable.');
   if (meta.feeWaiverSpend > 0 && effFee === 0) {
