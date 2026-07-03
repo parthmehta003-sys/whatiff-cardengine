@@ -45,11 +45,29 @@ export interface CardIntelligenceItem {
   isGroup?: boolean; // true when the source warning affects multiple cards (group-level change)
 }
 
+/** Journey context at the point warnings are selected (see the two CardEngine.tsx call sites). */
+export type WarningContext = 'user_considers_card' | 'user_owns_card';
+
+/**
+ * Does a warning's triggerWhen permit it to fire in `context`?
+ * - No context passed, or triggerWhen absent/empty → SHOW (loose = don't hide; no silent drops).
+ * - `user_mentions_hack` is context-AGNOSTIC (a hack caveat is relevant whether the user is
+ *   considering or owning the card), so it satisfies either journey context.
+ * - Otherwise the warning fires only if triggerWhen lists the current context.
+ */
+function warningFiresInContext(triggerWhen: string | null, context?: WarningContext): boolean {
+  if (!context || !triggerWhen) return true;
+  const toks = triggerWhen.split(/[,\s]+/).filter(Boolean);
+  if (!toks.length) return true;
+  return toks.includes(context) || toks.includes('user_mentions_hack');
+}
+
 export function cardIntelligence(
   cardId: string,
   warnings: Warning[],
   intelligence: { intelId?: string; cardId: string; type: string | null; title: string | null; description: string | null; severity: string | null }[] = [],
-  cardName?: string
+  cardName?: string,
+  context?: WarningContext
 ): CardIntelligenceItem[] {
   // Warning→card matching is now STRUCTURAL: a warning attaches only to the cards named in
   // its `affectedCardIds` (see the loop below). The old issuer-name text-fallback was removed.
@@ -75,6 +93,9 @@ export function cardIntelligence(
     if (!w.affectedCardIds) continue;
     const ids = w.affectedCardIds.split(/[,\s]+/).filter(Boolean);
     if (!ids.includes(cardId)) continue;
+    // triggerWhen context gate: fire only in the journey context(s) the warning is meant for.
+    // Absent/loose triggerWhen shows (no silent drops); user_mentions_hack is context-agnostic.
+    if (!warningFiresInContext(w.triggerWhen, context)) continue;
     const type: CardIntelligenceItem['type'] =
       w.changeType === 'devaluation' ? 'devaluation'
         : w.changeType === 'benefit_change' ? 'benefit_change'
