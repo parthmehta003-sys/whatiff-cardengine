@@ -712,10 +712,13 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                                        '#ef4444';    // red
                   const activeOwnedCard = result.ownedRanked?.find(c => c.cardId === activeCardId);
                   const hasRedemption = !!activeOwnedCard?.meta.redemption;
+                  // Pro-Tips fallback hierarchy: active hack → tips → hide the icon entirely.
+                  const p1Tips = activeOwnedCard?.meta.tips?.trim() || null;
+                  const hasProTip = !!p1Hack || !!p1Tips;
 
                   const P1_ICONS: { key: P1IconKey; label: string; Icon: typeof Scale; accent: string }[] = [
                     { key: 'why',      label: 'Verdict',          Icon: Scale,      accent: verdictAccent },
-                    { key: 'hack',     label: 'Pro Tips',         Icon: Zap,        accent: '#8b5cf6' },
+                    ...(hasProTip ? [{ key: 'hack' as P1IconKey, label: 'Pro Tips', Icon: Zap, accent: '#8b5cf6' }] : []),
                     ...(hasTransfer ? [{ key: 'transfer' as P1IconKey, label: 'Flights & hotels', Icon: Plane, accent: '#f59e0b' }] : []),
                     { key: 'know',     label: 'Things to know',   Icon: Info,       accent: '#f59e0b' },
                     ...(hasRedemption ? [{ key: 'points' as P1IconKey, label: 'Redeem points', Icon: Coins, accent: '#10b981' }] : []),
@@ -1114,7 +1117,14 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                     <div className="r2-hack-meta">Effort: <b>{difficultyLabel(p1Hack.difficulty)}</b>{p1Hack.commonFailure && <> · Watch out for: {p1Hack.commonFailure}</>}</div>
                                   )}
                                 </>
-                              )) : <div className="r2-empty">No pro tip for this card yet.</div>}
+                              )) : p1Tips ? (
+                                /* Fallback: no active hack, but the card has editorial tips. */
+                                <div className="r2-hackbox">
+                                  {p1Tips.split(/\r?\n/).filter((l: string) => l.trim()).map((line: string, i: number) => (
+                                    <div key={i} className="r2-hd">{line}</div>
+                                  ))}
+                                </div>
+                              ) : null}
                             </div>
                           )}
 
@@ -1333,7 +1343,10 @@ export const ResultsScreenV2: React.FC<Props> = ({
                 const hack = hacks?.[cardId] ?? null;
                 const intel = intelligence?.[cardId] ?? [];
                 const narrative = narratives?.[cardId];
-                const activeIconCfg = ICONS.find(i => i.key === activeIcon);
+                // Pro-Tips icon shows only when an active hack OR editorial tips exist.
+                const recHasProTip = !!(hacks?.[cardId]) || !!(activeCard.meta?.tips?.trim());
+                const recIcons = ICONS.filter(i => i.key !== 'hack' || recHasProTip);
+                const activeIconCfg = recIcons.find(i => i.key === activeIcon);
                 const priorityKeys: PriorityKey[] = [
                   ...(priorities?.top ? [priorities.top] : []),
                   ...(priorities?.secondary ? [priorities.secondary] : []),
@@ -1349,7 +1362,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                 return (
                   <>
                     <div className="r2-iconrow">
-                      {ICONS.map(({ key, label, Icon, accent }) => (
+                      {recIcons.map(({ key, label, Icon, accent }) => (
                         <button key={key} className={'r2-iconcircle' + (activeIcon === key ? ' on' : '')}
                           style={{ '--r2-accent': accent } as React.CSSProperties}
                           onClick={() => toggleIcon(key)} aria-label={label} aria-pressed={activeIcon === key}>
@@ -1382,7 +1395,9 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 {hack.executionSteps && (<><button className="r2-hack-seehow" onClick={() => setHackStepsOpen(v => !v)}>{hackStepsOpen ? 'Hide steps ↑' : 'See how →'}</button>{hackStepsOpen && <HackSteps steps={hack.executionSteps} />}</>)}
                                 {hack.difficulty && <div className="r2-hack-meta">Effort: <b>{difficultyLabel(hack.difficulty)}</b>{hack.commonFailure && <> · Watch out for: {hack.commonFailure}</>}</div>}
                               </>
-                            )) : <div className="r2-empty">No pro tip for this card yet.</div>}
+                            )) : activeCard.meta?.tips?.trim() ? (
+                              <div className="r2-hackbox">{activeCard.meta.tips.split(/\r?\n/).filter((l: string) => l.trim()).map((line: string, i: number) => <div key={i} className="r2-hd">{line}</div>)}</div>
+                            ) : null}
                           </div>
                         )}
                         {activeIcon === 'math' && (
@@ -1564,7 +1579,10 @@ export const ResultsScreenV2: React.FC<Props> = ({
           const hack = hacks?.[cardId] ?? null;
           const intel = intelligence?.[cardId] ?? [];
           const narrative = narratives?.[cardId];
-          const activeIconCfg = ICONS.find(i => i.key === activeIcon);
+          // Pro-Tips icon shows only when an active hack OR editorial tips exist.
+          const recHasProTip = !!hack || !!(activeCard.meta?.tips?.trim());
+          const recIcons = ICONS.filter(i => i.key !== 'hack' || recHasProTip);
+          const activeIconCfg = recIcons.find(i => i.key === activeIcon);
           const priorityKeys: PriorityKey[] = [
             ...(priorities?.top ? [priorities.top] : []),
             ...(priorities?.secondary ? [priorities.secondary] : []),
@@ -1781,7 +1799,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
 
                   {/* Icon row */}
                   <div className="r2-iconrow">
-                    {ICONS.map(({ key, label, Icon, accent }) => (
+                    {recIcons.map(({ key, label, Icon, accent }) => (
                       <button
                         key={key}
                         className={'r2-iconcircle' + (activeIcon === key ? ' on' : '')}

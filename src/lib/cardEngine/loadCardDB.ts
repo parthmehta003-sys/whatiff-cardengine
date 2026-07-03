@@ -174,6 +174,7 @@ export function loadCardDB(raw: RawDB): LoadedCardDB {
       emiText: c.emiText ?? null,
       pros: c.pros ?? null,
       cons: c.cons ?? null,
+      tips: c.tips ?? null,
       loungeStructured: c.loungeStructured ?? null,
       movieStructured: c.movieStructured ?? null,
       redemption: c.redemption,

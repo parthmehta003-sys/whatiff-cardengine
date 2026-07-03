@@ -79,6 +79,7 @@ export interface CardMeta {
   emiText?: string | null;
   pros?: string | null;
   cons?: string | null;
+  tips?: string | null;
   imageUrl?: string;
   applyUrl?: string;
   /** Structured benefit data (display/priority layer only — never feeds ranking math). */
