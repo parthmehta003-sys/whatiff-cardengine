@@ -406,6 +406,11 @@ export const ResultsScreenV2: React.FC<Props> = ({
         const label = (CAT_LABEL as Record<string, string>)[cat] ?? cat;
         const perYear = (card.earn.perCategory[cat as keyof typeof card.earn.perCategory]?.guaranteed ?? 0) * 12;
         if (perYear > 0) return `${label}: gives you back ${inr(perYear)} a year.`;
+        if (key === 'Fuel' && meta.fuelWaiver) {
+          const fw = meta.fuelWaiver;
+          const cap = fw.capAmount != null ? ` (capped ${inr(fw.capAmount)}/${fw.capPeriod ?? 'cycle'})` : '';
+          return `${label}: gives you nothing back, but waives the ${fw.waiverPct}% surcharge on ${inr(fw.minTxn)}–${inr(fw.maxTxn)} transactions${cap}.`;
+        }
         return `${label}: gives you nothing back.`;
       }
     }

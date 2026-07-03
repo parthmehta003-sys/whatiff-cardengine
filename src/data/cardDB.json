@@ -965,6 +965,14 @@
         "annualValue": null,
         "annualValueComputed": 3000
       },
+      "fuelWaiver": {
+        "waiverPct": 1,
+        "minTxn": 500,
+        "maxTxn": 5000,
+        "capAmount": 250,
+        "capPeriod": "cycle",
+        "description": "1% fuel surcharge waiver, ₹500–₹5,000 transactions, capped ₹250/statement cycle"
+      },
       "redemption": {
         "currency": "points",
         "currencyName": "Reward Points",
@@ -1744,6 +1752,14 @@
         "usesPerPeriod": 1,
         "annualValue": null,
         "annualValueComputed": 28800
+      },
+      "fuelWaiver": {
+        "waiverPct": 1,
+        "minTxn": 500,
+        "maxTxn": 5000,
+        "capAmount": 1000,
+        "capPeriod": "cycle",
+        "description": "1% fuel surcharge waiver, ₹500–₹5,000 transactions, capped ₹1,000/statement cycle"
       },
       "redemption": {
         "currency": "points",
