@@ -125,7 +125,30 @@ Rule: **score-affecting groups always get the automated before/after net check s
    PR. Highest value, highest care.
 4. **Phase 3:** add MITC-PDF ingestion path for changes not on public pages.
 
-## 12. Open decisions
+## 12. Per-card verification checklist (before any card is declared closed)
+
+`tsc --noEmit` passing and `loadCardDB` validators passing confirm the data is *structurally*
+valid — they say nothing about whether a user ever sees the thing that changed. Before a card's
+data PR is treated as closed (not just merged), confirm all three:
+
+- **(a) Prose-vs-structured-data consistency.** For every new or corrected structured fact in the
+  PR, check whether `pros`/`cons`/`tips` already describes it, contradicts it, or omits it. A
+  structured field and its prose description drifting apart silently is exactly the kind of gap
+  this checklist exists to catch — it's cheap to check and easy to miss.
+- **(b) An actual live-render pass, not just green checks.** Load the change (dev server + browser,
+  not `tsc`/validators alone) and describe what was actually seen — which screen, which tab, what
+  the number/text said. If some part of the change can't be reached in the current UI for that
+  specific card (wrong journey, card isn't eligible to reach the surface that would show it, etc.),
+  say so explicitly and explain why. "Nothing to check" must never quietly become "didn't check."
+- **(c) Visual confirmation for every "no-op" claim.** If a field is claimed to be invisible/no-op
+  based on a code search (e.g. "no component reads this"), that claim still gets one line of live
+  visual confirmation — a code search proves the code doesn't reference the field; it doesn't prove
+  what a user actually sees.
+
+See `BACKLOG.md` for known scope limits this checklist has already surfaced (e.g. pros/cons/tips
+being unreachable-by-rendering for already-owned cards).
+
+## 13. Open decisions
 
 - Source of truth after Fix 1: single `cardDB.json` vs per-card files?
 - Cadence: weekly vs monthly?
