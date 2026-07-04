@@ -31,25 +31,23 @@
       reported as done**, not merely a risk description for future cards — worth a
       look if any of those four cards' prose is revisited.
 
-- [ ] **`redemption.plainSummary`/`redemption.caps` are unreachable for every
-      pure-`cashback`-currency card, in both journeys.** Found while verifying CC12
-      (`ResultsScreenV2.tsx` "Redeem points" panel, ~line 1145). The panel only
-      exists in the owned-card journey (`hasRedemption` is gated on
-      `activeOwnedCard`; the new-card/recommended journey has no equivalent
-      surface at all). Inside that panel, `optimizeRedemption()` sets
-      `isCashback: true` whenever `redemption.currency === 'cashback'`
-      (`optimizeRedemption.ts:108`), and the JSX branch taken for
-      `isCashback === true` (`ResultsScreenV2.tsx:1158-1161`) renders a **hardcoded
-      generic sentence** ("Nothing to redeem — cashback is automatic. It credits
-      straight to your bill…") instead of `redemption.plainSummary`, and never
-      renders `redemption.caps` at all (that block lives only in the non-cashback
-      `else` branch). Confirmed live for CC12: after correcting `plainSummary` to
-      describe the statement-credit/next-cycle-lag mechanics and populating
-      `caps` with the 1-cycle-lag note, neither string appears anywhere in the
-      rendered app — verified via Playwright in both the owned-card Redeem-points
-      tab and by checking the new-card journey has no redemption panel at all.
-      This affects every card whose `redemption.currency` is `"cashback"` (not
-      CC12-specific) — the structured data is still more correct/honest than
-      before, but is currently write-only. Fix means either passing
-      `redemption.plainSummary`/`redemption.caps` through in the `isCashback`
-      branch, or adding a new-card-journey surface for redemption text.
+- [x] **FIXED (follow-up to PR #150).** `redemption.plainSummary`/`redemption.caps`
+      were unreachable for every pure-`cashback`-currency card, in the owned-card
+      journey's "Redeem points" panel (`ResultsScreenV2.tsx` ~line 1145 — this
+      panel only exists in the owned-card journey by design; the new-card journey
+      has no equivalent surface, confirmed intentional, not a gap). Root cause:
+      `optimizeRedemption()` sets `isCashback: true` whenever
+      `redemption.currency === 'cashback'` (`optimizeRedemption.ts:108`), and the
+      JSX branch taken for `isCashback === true` rendered a **hardcoded generic
+      sentence** instead of `redemption.plainSummary`, and never rendered
+      `redemption.caps` at all. Fixed by rendering `redemption.plainSummary` and
+      `redemption.caps` (when present) inside the `isCashback` branch instead of
+      the hardcoded string. Affected 5 cards total: CC05, CC07, CC12, CC14, CC19
+      (every card with `redemption.currency === "cashback"`, single method, no
+      real redemption choice). CC11 was never affected — its `currency` is
+      `"cashback-points"` with 2 real methods (SmartBuy vs statement cashback),
+      so it never hit the `isCashback === true` branch; its original "confirmed
+      rendering correctly" verification stands. Verified live post-fix: CC12 now
+      shows its statement-credit/1-cycle-lag text, CC19 shows its own distinct
+      plainSummary, and CC11's SmartBuy/balance-input flow is unchanged
+      (regression-checked).

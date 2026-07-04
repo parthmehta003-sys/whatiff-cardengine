@@ -1156,9 +1156,12 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 )}
 
                                 {optResult.isCashback ? (
-                                  <div className="r2-pts-cashback">
-                                    Nothing to redeem — cashback is automatic. It credits straight to your bill, so there are no points to collect or convert.
-                                  </div>
+                                  <>
+                                    <div className="r2-pts-cashback">{redemption.plainSummary}</div>
+                                    {redemption.caps && (
+                                      <div className="r2-pts-caps">{redemption.caps}</div>
+                                    )}
+                                  </>
                                 ) : (
                                   <>
                                     <div className="r2-pts-input-row">
