@@ -678,7 +678,7 @@
       "redemption": {
         "currency": "cashback-points",
         "currencyName": "CashPoints",
-        "plainSummary": "Your CashPoints are worth more on SmartBuy (₹0.25 each) than as statement cashback (₹0.20). Redeem via SmartBuy and don't let them sit — they expire after 24 months.",
+        "plainSummary": "Your CashPoints are worth more on SmartBuy (₹0.25 each) than as statement cashback (₹0.20). SmartBuy redemptions carry a ₹99 fee, statement cashback a ₹50 fee — redeem in bigger batches and don't let them sit, they expire after 24 months.",
         "methods": [
           {
             "channel": "SmartBuy (flights/hotels/vouchers)",
@@ -688,7 +688,7 @@
             "minPoints": null,
             "feePerRedemption": 99,
             "capPerCycle": null,
-            "note": "₹0.25 per point — best value.",
+            "note": "₹0.25 per point — best value. ₹99 fee per redemption — redeem in bigger batches.",
             "best": true
           },
           {
@@ -699,11 +699,11 @@
             "minPoints": null,
             "feePerRedemption": 50,
             "capPerCycle": null,
-            "note": "₹0.20 per point — lower value.",
+            "note": "₹0.20 per point — lower value. ₹50 fee per redemption.",
             "worst": true
           }
         ],
-        "caps": "CashPoints expire 24 months after earning.",
+        "caps": "CashPoints expire 24 months after earning. SmartBuy redemptions carry a ₹99 fee; statement cashback carries a ₹50 fee.",
         "fees": null
       },
       "emiText": "Auto EMI: Auto EMI transactions of Rs 10,000 or more are converted at:\n20% per annum interest rate (APR)\nTenure: 9 months\nProcessing fee: ₹99 + GST.\nSmart EMI: up to ₹849 + GST\nEasyEMI: up to ₹299 processing fee."
