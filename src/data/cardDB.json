@@ -713,7 +713,7 @@
       "name": "HDFC Swiggy",
       "bank": "HDFC",
       "feeTier": "Under ₹500",
-      "network": "Visa",
+      "network": "Mastercard",
       "cibilScore": null,
       "minSalary": 1.8,
       "minItr": 6,
@@ -728,8 +728,8 @@
       "interestFreeDaysRetail": 50,
       "emiConversionAprPct": 20,
       "cashAdvanceFee": "2.5% or min ₹500 whichever is higher. ",
-      "pros": "Welcome Benefits:\nComplimentary Swiggy One Membership for 3 months on card activation.\nExisting Swiggy One members receive a 3-month extension.\nLimited period offer: Additional 9-month Swiggy One membership extension for eligible customers applying through the Swiggy app.Total complimentary membership: 12 months.\nRewards:\nBase Rewards\nEarn 10% cashback on: Swiggy Food Delivery, Instamart, Dineout, Genie\nEarn 5% cashback on eligible online spends including: Apparel, Electronics, Department Stores, Home Décor, Personal Care, Local Cabs, Entertainment, Pharmacies, Discount, Stores, Pet Stores & Supplies\nEarn 1% cashback on all other eligible spends.\nAccelerated Rewards\n20% instant discount on hotel bookings via Cleartrip.\n6.35% instant discount on flight bookings via Cleartrip.\nAdditional 10% discount on Swiggy Dineout up to ₹500 on a minimum order value of ₹3,000 during birthday week.\nApplicable from 3 days before to 3 days after birthday\nReward Value:\nCashback earned on the Swiggy HDFC Bank Credit Card is credited directly against the outstanding balance in the credit card statement.\nEffectively:₹1 cashback = ₹1 statement credit value.\nStrong cashback for frequent Swiggy users: Get 10% cashback on Swiggy Food, Instamart, Dineout and Genie, making it one of the highest-return food and quick-commerce cards. Cashback capped at ₹1,500 per billing cycle.\nSolid online shopping rewards beyond Swiggy: Earn 5% cashback on eligible online categories including Amazon, Flipkart, electronics, apparel, cabs, pharmacies, home décor and more, also capped at ₹1,500/month.\nDecent baseline rewards on other spends: Earn 1% cashback on general spending categories for transactions above ₹100.\nUseful welcome benefit: Includes 3-month complimentary Swiggy One membership on activation, with Swiggy-app applicants sometimes eligible for an extended offer.\nGood annual value for high online spenders: A user heavily spending on Swiggy + online purchases can realistically generate ₹20k+ annual value through cashback and benefits.",
-      "cons": "Reward Caps\n10% cashback on Swiggy spends capped at ₹1,500 per billing cycle.\n5% cashback on online spends capped at ₹1,500 per billing cycle.\n1% cashback on other spends capped at ₹500 per billing cycle.\nFuel surcharge waiver capped at ₹250 per billing cycle.\nRent transaction fee capped at ₹3,000 per transaction.\nFuel transaction fee capped at ₹3,000 per transaction for spends above ₹15,000.\nUtility transaction fee capped at ₹3,000 per transaction for spends above ₹50,000.\nEducation transaction fee capped at ₹3,000 per transaction on eligible third-party apps.\nExclusions: Fuel, Rent, Jewellery, Government transactions, Gift cards, EMI transactions, Wallet loads, SmartBuytransactions, SmartPay, Cash advances, Purchase of foreign currency, Fees & charges, Prepaid/Gift cards\n5% cashback works only on selected merchant categories: The \"5% online\" promise is narrower than it looks. Rewards depend on merchant category mappings and eligible merchants.\nEMI conversion reverses previously earned cashback: If a purchase is later converted to EMI, cashback gets clawed back. Example: a ₹20,000 Flipkart purchase earning ₹1,000 cashback can later see the entire ₹1,000 reversed after EMI conversion.\nTransactions below thresholds don't qualify:\n• Swiggy 10% cashback requires ₹249+ transaction value\n• 5% and 1% categories require ₹100+ transaction value",
+      "pros": "Welcome Benefits:\nComplimentary Swiggy One Membership for 3 months on card activation.\nExisting Swiggy One members receive a 3-month extension.\nLimited period offer: Additional 9-month Swiggy One membership extension for eligible customers applying through the Swiggy app.Total complimentary membership: 12 months.\nRewards:\nBase Rewards\nEarn 10% cashback on: Swiggy Food Delivery, Instamart, Dineout, Genie\nEarn 5% cashback on eligible online spends including: Apparel, Electronics, Department Stores, Home Décor, Personal Care, Local Cabs, Entertainment, Pharmacies, Discount, Stores, Pet Stores & Supplies\nEarn 1% cashback on all other eligible spends.\nAccelerated Rewards\n20% instant discount on hotel bookings via Cleartrip.\n6.35% instant discount on flight bookings via Cleartrip.\n5% cashback on Cleartrip flight/hotel bookings, on top of the existing 20%/6.35% instant discounts (discount requires coupon CTSWHDFC).\nAdditional 10% discount on Swiggy Dineout up to ₹500 on a minimum order value of ₹3,000 during birthday week.\nApplicable from 3 days before to 3 days after birthday\nReward Value:\nCashback earned on the Swiggy HDFC Bank Credit Card is credited directly against the outstanding balance in the credit card statement.\nEffectively:₹1 cashback = ₹1 statement credit value.\nStrong cashback for frequent Swiggy users: Get 10% cashback on Swiggy Food, Instamart, Dineout and Genie, making it one of the highest-return food and quick-commerce cards. Cashback capped at ₹1,500 per billing cycle.\nSolid online shopping rewards beyond Swiggy: Earn 5% cashback on eligible online categories including Amazon, Flipkart, electronics, apparel, cabs, pharmacies, home décor and more, also capped at ₹1,500/month.\nDecent baseline rewards on other spends: Earn 1% cashback on general spending categories for transactions above ₹100.\nUseful welcome benefit: Includes 3-month complimentary Swiggy One membership on activation, with Swiggy-app applicants sometimes eligible for an extended offer.\nGood annual value for high online spenders: A user heavily spending on Swiggy + online purchases can realistically generate ₹20k+ annual value through cashback and benefits.",
+      "cons": "Reward Caps\n10% cashback on Swiggy spends capped at ₹1,500 per billing cycle.\n5% cashback on online spends capped at ₹1,500 per billing cycle.\n1% cashback on other spends capped at ₹500 per billing cycle.\nRent transaction fee capped at ₹4,999 per transaction.\nFuel transaction fee capped at ₹4,999 per transaction for spends above ₹15,000.\nUtility transaction fee capped at ₹4,999 per calendar month for spends above ₹50,000.\nEducation transaction fee capped at ₹4,999 per transaction on eligible third-party apps.\nExclusions: Fuel, Rent, Jewellery, Government transactions, Gift cards, EMI transactions, Wallet loads, SmartBuytransactions, SmartPay, Cash advances, Purchase of foreign currency, Fees & charges, Prepaid/Gift cards\n5% cashback works only on selected merchant categories: The \"5% online\" promise is narrower than it looks. Rewards depend on merchant category mappings and eligible merchants.\nEMI conversion reverses previously earned cashback: If a purchase is later converted to EMI, cashback gets clawed back. Example: a ₹20,000 Flipkart purchase earning ₹1,000 cashback can later see the entire ₹1,000 reversed after EMI conversion.\nTransactions below thresholds don't qualify:\n• Swiggy 10% cashback requires ₹249+ transaction value\n• 5% and 1% categories require ₹100+ transaction value",
       "tips": "1. Make Swiggy your default food and grocery ecosystem: Route Food delivery, Instamart, Genie and Dineout entirely through this card to maximize the 10% category.\n2. Target the cashback ceiling intentionally: Try to hit around ₹15,000 monthly Swiggy spend, which fully utilizes the ₹1,500 monthly cap.\n3. Move eligible online shopping here first: Shift Amazon, Flipkart, electronics, apparel, cabs and pharmacy spends here before using another card.\n4. Avoid EMI conversion completely: If you spend ₹20k–30k online, converting later to EMI can erase a large portion of accumulated cashback.\n5. Break spending by category and watch caps: Once ₹1,500 cap is reached in a category, switch future spending to another card instead of earning zero incremental value.\n6. Avoid gift cards and wallet-loading hacks: Many users route spending through wallets or gift cards; this card excludes many such routes and can result in zero cashback",
       "loungeStructured": {
         "domestic": null,
@@ -740,24 +740,30 @@
         "type": "NONE",
         "annualValueComputed": 0
       },
+      "welcomeBenefit": {
+        "valueFloor": 447,
+        "type": "subscription",
+        "condition": "guaranteed on card activation, claim within 2–3 days via Swiggy app",
+        "description": "3-month complimentary Swiggy One membership."
+      },
       "redemption": {
         "currency": "cashback",
         "currencyName": "Cashback",
-        "plainSummary": "Nothing to redeem — Swiggy cashback applies automatically as Swiggy Money.",
+        "plainSummary": "Cashback posts automatically as a statement credit against your outstanding balance (adjusted against your following cycle's dues) — no redemption action needed. Individual transactions post day-to-day rather than in one lump sum (changed 18-Apr-2026).",
         "methods": [
           {
-            "channel": "Automatic (Swiggy Money)",
+            "channel": "Automatic (Statement Credit)",
             "valuePerPoint": null,
             "valueRange": null,
             "valueIsVariable": false,
             "minPoints": null,
             "feePerRedemption": 0,
             "capPerCycle": null,
-            "note": "Auto-applied. No action needed.",
+            "note": "Auto-applied as statement credit. No action needed.",
             "best": true
           }
         ],
-        "caps": null,
+        "caps": "Cashback earned in a cycle is applied against the FOLLOWING cycle's statement balance (1-cycle lag); individual transactions now post day-to-day rather than on one date (changed 18-Apr-2026).",
         "fees": null
       },
       "emiText": "Auto EMI conversion: 20% per annum interest rate\n9-month tenure of Rs 10,000 or more (Excluding Fuel, Gold, and Jewellery)\n₹99 + GST processing fee.\nSmart EMI processing fee: Up to ₹849 + GST.\nEasyEMI processing fee:Up to ₹299 + GST."
@@ -5396,9 +5402,9 @@
       "excluded": false,
       "capAmount": 1500,
       "capPeriod": "cycle",
-      "sharedCapId": "CC12_5PCT_1500_CYCLE",
+      "sharedCapId": "CC12_5PCT_ONLINE_1500_CYCLE",
       "multiplierNote": null,
-      "sourceNote": "5% on eligible online categories, capped ₹1,500/cycle. Pros."
+      "sourceNote": "5% on eligible online categories, capped ₹1,500/cycle. Pros. + Cleartrip (merchant-name basis, from 17-Apr-2026), same ₹1,500/cycle cap. T&C Table 1.2 footnote."
     },
     {
       "cardId": "CC12",
@@ -5440,7 +5446,7 @@
       "capPeriod": null,
       "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "Instant discount (not cashback): 20% hotels, 6.35% flights via Cleartrip. Upside. Pros."
+      "sourceNote": "Instant discount (not cashback): 20% hotels, 6.35% flights via Cleartrip. Upside. Pros. Requires coupon CTSWHDFC. Explicit limited-period offer per T&C w.e.f. 17-Apr-2026 — re-verify on next pass."
     },
     {
       "cardId": "CC12",
@@ -5459,9 +5465,9 @@
       "excluded": false,
       "capAmount": 1500,
       "capPeriod": "cycle",
-      "sharedCapId": "CC12_5PCT_1500_CYCLE",
+      "sharedCapId": "CC12_10PCT_SWIGGY_1500_CYCLE",
       "multiplierNote": null,
-      "sourceNote": "10% on Swiggy ecosystem, capped ₹1,500/cycle. Pros."
+      "sourceNote": "10% on Swiggy ecosystem, capped ₹1,500/cycle. Pros. NOTE: T&C also requires a ₹249 minimum per-transaction value to earn this 10% (w.e.f. 21-Apr-2026) — not modeled: thresholdAmount/thresholdPeriod on this row represent a monthly-aggregate spend band (rowType=spend_threshold only) and are never read on a rowType=base row, and the engine has no per-transaction-size input at all. Needs new engine support before this can be structured; already narrated correctly in cons prose."
     },
     {
       "cardId": "CC12",
