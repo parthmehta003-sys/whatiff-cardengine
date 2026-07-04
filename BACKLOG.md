@@ -30,9 +30,3 @@
       the new-card result. This is a gap in verification **already performed and
       reported as done**, not merely a risk description for future cards — worth a
       look if any of those four cards' prose is revisited.
-- [ ] **Redemption fees (`feePerRedemption`) aren't shown anywhere in the
-      Redeem-points panel.** Confirmed on CC11/CC16/CC27 alike — the panel shows
-      `valuePerPoint` per channel but never surfaces the per-redemption fee, even
-      though the fee is correctly stored and matches the established convention.
-      Pre-existing gap, not a regression from any single card's data PR;
-      cross-cutting UI enhancement whenever that panel is next revisited.
