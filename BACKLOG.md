@@ -51,3 +51,26 @@
       shows its statement-credit/1-cycle-lag text, CC19 shows its own distinct
       plainSummary, and CC11's SmartBuy/balance-input flow is unchanged
       (regression-checked).
+
+- [ ] **CC11 (HDFC MoneyBack+) cannot reach the new-card journey's hero/"Also
+      considered" slot under any spend profile tried.** Found while render-checking
+      the CC11 fee-schedule sweep (cons item 8). Tried 4 materially different
+      profiles: light targeted online+grocery spend, heavy grocery-only spend,
+      heavy multi-category spend at high income (₹2L/mo), and fuel-heavy spend with
+      Fuel set as the priority (CC11 earns ₹0 on fuel by design, so this one was
+      never going to work, but tested for completeness). In every case CC11 didn't
+      win the hero slot and didn't appear in the `runnersUp` list, which is
+      hard-capped to `RELEVANCE_RUNNERS` (4) entries in `rankCards.ts` — CC11's
+      weak base rate (~0.25%, 10X capped modestly) can't compete with the other
+      ~40 cards' guaranteed-earn numbers under realistic spend. Separately
+      confirmed via code: even if CC11 *did* land in "Also considered," that list
+      (`ResultsScreenV2.tsx` ~line 1560) has no per-card pros/cons access at all —
+      only the hero card (and the combo second card) get the "Pros & cons" tab /
+      "See full pros & cons" modal. So CC11's `cons`/`pros` prose is *not*
+      currently verifiable as rendering in the new-card journey under any profile
+      — combined with the pre-existing owned-journey pros/cons gap (above), this
+      means CC11's prose changes are correct-on-paper but not user-visible in
+      either journey today. Not a bug to fix here (CC11 genuinely doesn't deserve
+      to win against stronger cashback cards) — just a verification-reachability
+      fact worth knowing before assuming any future CC11 prose change "renders
+      somewhere."
