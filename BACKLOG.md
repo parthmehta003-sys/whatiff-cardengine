@@ -16,13 +16,20 @@
       pick, or a Journey A *suggested addition*. It never populates for a card
       already reviewed as owned in Journey A. Practically: the entire pros/cons/tips
       field category has been structurally unverifiable-by-rendering for every
-      already-owned card closed so far (not just CC11) — any prose fix to an owned
-      card's pros/cons is correct-on-paper but currently invisible to that card's
-      own owner in the app. Blocks calling this field category's verification fully
-      closed until either the UI is extended to show pros/cons for owned cards too,
-      or the verification standard is explicitly revised to acknowledge this scope
-      limit rather than silently assuming "light review" (per the schema-mapping
-      table in `docs/card-data-automation-scoping.md` §6) means "renders somewhere."
+      already-owned card closed so far — any prose fix to an owned card's pros/cons
+      is correct-on-paper but currently invisible to that card's own owner in the
+      app. Blocks calling this field category's verification fully closed until
+      either the UI is extended to show pros/cons for owned cards too, or the
+      verification standard is explicitly revised to acknowledge this scope limit
+      rather than silently assuming "light review" (per the schema-mapping table in
+      `docs/card-data-automation-scoping.md` §6) means "renders somewhere."
+      **Precise retroactive scope:** CC10, CC11, CC16, and CC27 all had prose changes
+      shipped and verified via the new-card journey only (hero slot or combo alt
+      card) — the owned-card journey's pros/cons rendering was never explicitly
+      checked one way or the other for any of them, only assumed to generalize from
+      the new-card result. This is a gap in verification **already performed and
+      reported as done**, not merely a risk description for future cards — worth a
+      look if any of those four cards' prose is revisited.
 - [ ] **Redemption fees (`feePerRedemption`) aren't shown anywhere in the
       Redeem-points panel.** Confirmed on CC11/CC16/CC27 alike — the panel shows
       `valuePerPoint` per channel but never surfaces the per-redemption fee, even
