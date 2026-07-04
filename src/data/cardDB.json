@@ -653,6 +653,28 @@
         "type": "NONE",
         "annualValueComputed": 0
       },
+      "welcomeBenefit": {
+        "valueFloor": 100,
+        "type": "CashPoints",
+        "condition": "on fee payment",
+        "description": "500 CashPoints on joining fee payment — worth ₹100 at guaranteed floor (statement cashback rate)."
+      },
+      "milestoneBenefit": {
+        "tiers": [
+          { "spendThreshold": 50000, "valueFloor": 500, "benefit": "gift voucher" }
+        ],
+        "period": "quarterly",
+        "cumulative": false,
+        "description": "₹500 gift voucher per calendar quarter on ₹50,000+ spend, max ₹2,000/year"
+      },
+      "fuelWaiver": {
+        "waiverPct": 1,
+        "minTxn": 400,
+        "maxTxn": 5000,
+        "capAmount": 250,
+        "capPeriod": "cycle",
+        "description": "1% fuel surcharge waiver, ₹400–₹5,000 transactions, capped ₹250/statement cycle"
+      },
       "redemption": {
         "currency": "cashback-points",
         "currencyName": "CashPoints",
@@ -664,7 +686,7 @@
             "valueRange": null,
             "valueIsVariable": false,
             "minPoints": null,
-            "feePerRedemption": 0,
+            "feePerRedemption": 99,
             "capPerCycle": null,
             "note": "₹0.25 per point — best value.",
             "best": true
@@ -675,7 +697,7 @@
             "valueRange": null,
             "valueIsVariable": false,
             "minPoints": null,
-            "feePerRedemption": 0,
+            "feePerRedemption": 50,
             "capPerCycle": null,
             "note": "₹0.20 per point — lower value.",
             "worst": true
@@ -5162,11 +5184,11 @@
       "thresholdPeriod": null,
       "stacks": false,
       "excluded": false,
-      "capAmount": null,
-      "capPeriod": null,
-      "sharedCapId": null,
+      "capAmount": 3750,
+      "capPeriod": "cycle",
+      "sharedCapId": "CC11_OVERALL_3750RP_CYCLE",
       "multiplierNote": null,
-      "sourceNote": "2 CP/₹200 = 0.25% base."
+      "sourceNote": "2 CP/₹200 = 0.25% base. Shares overall 15,000 RP/cycle cap (=₹3,750 at CP=₹0.25) with Travel/Dining/International/Other(base). MITC reward-caps table. Cons."
     },
     {
       "cardId": "CC11",
@@ -5183,11 +5205,11 @@
       "thresholdPeriod": null,
       "stacks": false,
       "excluded": false,
-      "capAmount": null,
-      "capPeriod": null,
+      "capAmount": 625,
+      "capPeriod": "month",
       "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "10X (20 CP/₹200) = 2.5% on 5 partner merchants. Pros."
+      "sourceNote": "10X (20 CP/₹200) = 2.5% on 5 partner merchants. MITC states this as a single combined 2,500 RP/month cap across Online+Grocery 10X; modeled here as independent per-category caps since the engine has no cross-category upside-pooling mechanism for channel_conditional rows (upside-only, does not affect guaranteed earn). Pros."
     },
     {
       "cardId": "CC11",
@@ -5204,11 +5226,11 @@
       "thresholdPeriod": null,
       "stacks": false,
       "excluded": false,
-      "capAmount": null,
-      "capPeriod": null,
-      "sharedCapId": null,
+      "capAmount": 3750,
+      "capPeriod": "cycle",
+      "sharedCapId": "CC11_OVERALL_3750RP_CYCLE",
       "multiplierNote": null,
-      "sourceNote": "2 CashPoints/₹200 = 0.25% (CP=₹0.25). Pros."
+      "sourceNote": "2 CashPoints/₹200 = 0.25% (CP=₹0.25). Shares overall 15,000 RP/cycle cap (=₹3,750) with Online/Dining/International/Other(base). MITC reward-caps table. Pros/Cons."
     },
     {
       "cardId": "CC11",
@@ -5225,11 +5247,11 @@
       "thresholdPeriod": null,
       "stacks": false,
       "excluded": false,
-      "capAmount": null,
-      "capPeriod": null,
-      "sharedCapId": null,
+      "capAmount": 3750,
+      "capPeriod": "cycle",
+      "sharedCapId": "CC11_OVERALL_3750RP_CYCLE",
       "multiplierNote": null,
-      "sourceNote": "2 CashPoints/₹200 = 0.25% (CP=₹0.25). Pros."
+      "sourceNote": "2 CashPoints/₹200 = 0.25% (CP=₹0.25). Shares overall 15,000 RP/cycle cap (=₹3,750) with Online/Travel/International/Other(base). MITC reward-caps table. Pros/Cons."
     },
     {
       "cardId": "CC11",
@@ -5267,11 +5289,11 @@
       "thresholdPeriod": null,
       "stacks": false,
       "excluded": false,
-      "capAmount": null,
-      "capPeriod": null,
+      "capAmount": 250,
+      "capPeriod": "month",
       "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "2 CP/₹200 base."
+      "sourceNote": "2 CP/₹200 base, capped 1,000 RP/month = ₹250 at CP=₹0.25. MITC reward-caps table. Independent cap — not pooled into the overall cycle bucket. Cons."
     },
     {
       "cardId": "CC11",
@@ -5288,11 +5310,11 @@
       "thresholdPeriod": null,
       "stacks": false,
       "excluded": false,
-      "capAmount": null,
-      "capPeriod": null,
+      "capAmount": 625,
+      "capPeriod": "month",
       "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "10X = 2.5% on BigBasket/Reliance Smart. Pros."
+      "sourceNote": "10X = 2.5% on BigBasket/Reliance Smart. MITC states this as a single combined 2,500 RP/month cap across Online+Grocery 10X; modeled here as independent per-category caps since the engine has no cross-category upside-pooling mechanism for channel_conditional rows (upside-only, does not affect guaranteed earn). Pros."
     },
     {
       "cardId": "CC11",
@@ -5309,11 +5331,11 @@
       "thresholdPeriod": null,
       "stacks": false,
       "excluded": false,
-      "capAmount": null,
-      "capPeriod": null,
+      "capAmount": 500,
+      "capPeriod": "month",
       "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "2 CashPoints/₹200 = 0.25% (CP=₹0.25). Pros."
+      "sourceNote": "2 CashPoints/₹200 = 0.25% (CP=₹0.25), capped 2,000 RP/month = ₹500. MITC reward-caps table. Independent cap — not pooled into the overall cycle bucket. Pros/Cons."
     },
     {
       "cardId": "CC11",
@@ -5330,11 +5352,11 @@
       "thresholdPeriod": null,
       "stacks": false,
       "excluded": false,
-      "capAmount": null,
-      "capPeriod": null,
-      "sharedCapId": null,
+      "capAmount": 3750,
+      "capPeriod": "cycle",
+      "sharedCapId": "CC11_OVERALL_3750RP_CYCLE",
       "multiplierNote": null,
-      "sourceNote": "2 CashPoints/₹200 = 0.25% (CP=₹0.25). Pros."
+      "sourceNote": "2 CashPoints/₹200 = 0.25% (CP=₹0.25). Shares overall 15,000 RP/cycle cap (=₹3,750) with Online/Travel/Dining/Other(base). MITC reward-caps table. Pros/Cons."
     },
     {
       "cardId": "CC11",
@@ -5351,11 +5373,11 @@
       "thresholdPeriod": null,
       "stacks": false,
       "excluded": false,
-      "capAmount": null,
-      "capPeriod": null,
-      "sharedCapId": null,
+      "capAmount": 3750,
+      "capPeriod": "cycle",
+      "sharedCapId": "CC11_OVERALL_3750RP_CYCLE",
       "multiplierNote": null,
-      "sourceNote": "2 CashPoints/₹200 = 0.25% (CP=₹0.25). Pros."
+      "sourceNote": "2 CashPoints/₹200 = 0.25% (CP=₹0.25). Shares overall 15,000 RP/cycle cap (=₹3,750) with Online/Travel/Dining/International. MITC reward-caps table. Pros/Cons."
     },
     {
       "cardId": "CC12",
@@ -12367,7 +12389,7 @@
       "executionSteps": "1. Track your card spending through each quarter (Jan-Mar, Apr-Jun, etc.).\n2. Mid-quarter, check if you're below ₹50,000.\n3. If short, buy a Gyftr voucher (Amazon, BigBasket, Reliance Smart) to close the gap.\n4. Crossing ₹50,000 unlocks a ₹500 bonus voucher.\n5. That's ₹500 × 4 = ₹2,000 a year on top of your base rewards.",
       "whyItMatters": "Spending ₹50,000 a quarter (about ₹16,700/month) unlocks a ₹500 bonus voucher — doable for most households. Without it, you earn just 0.25% (₹{base_only}) on ₹{annual_spend}. With the vouchers, you get ₹{with_milestone}.",
       "relevantCategories": "general,online,grocery",
-      "minMonthlySpend": 15000,
+      "minMonthlySpend": 16667,
       "platformRequired": "none",
       "priorityMatch": "reward_optimization,general_purpose",
       "rateWithHack": 1,
