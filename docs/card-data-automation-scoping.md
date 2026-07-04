@@ -125,28 +125,88 @@ Rule: **score-affecting groups always get the automated before/after net check s
    PR. Highest value, highest care.
 4. **Phase 3:** add MITC-PDF ingestion path for changes not on public pages.
 
-## 12. Per-card verification checklist (before any card is declared closed)
+## 12. Per-card verification checklist — mandatory, every card, every PR
 
 `tsc --noEmit` passing and `loadCardDB` validators passing confirm the data is *structurally*
-valid — they say nothing about whether a user ever sees the thing that changed. Before a card's
-data PR is treated as closed (not just merged), confirm all three:
+valid — they say nothing about whether a user ever sees the thing that changed. This is **not**
+an optional step reserved for when someone explicitly asks for it, and it is **not** a one-time
+exercise CC11 happened to get — it's the standing requirement for every card's data PR, from
+CC12 onward, no exceptions. Before any card's data PR is reported as ready to merge, do all four:
 
-- **(a) Prose-vs-structured-data consistency.** For every new or corrected structured fact in the
-  PR, check whether `pros`/`cons`/`tips` already describes it, contradicts it, or omits it. A
-  structured field and its prose description drifting apart silently is exactly the kind of gap
-  this checklist exists to catch — it's cheap to check and easy to miss.
-- **(b) An actual live-render pass, not just green checks.** Load the change (dev server + browser,
-  not `tsc`/validators alone) and describe what was actually seen — which screen, which tab, what
-  the number/text said. If some part of the change can't be reached in the current UI for that
-  specific card (wrong journey, card isn't eligible to reach the surface that would show it, etc.),
-  say so explicitly and explain why. "Nothing to check" must never quietly become "didn't check."
-- **(c) Visual confirmation for every "no-op" claim.** If a field is claimed to be invisible/no-op
-  based on a code search (e.g. "no component reads this"), that claim still gets one line of live
-  visual confirmation — a code search proves the code doesn't reference the field; it doesn't prove
-  what a user actually sees.
+### (a) Prose-vs-structured-data consistency
 
-See `BACKLOG.md` for known scope limits this checklist has already surfaced (e.g. pros/cons/tips
-being unreachable-by-rendering for already-owned cards).
+For every field touched in the PR, check whether `pros`/`cons`/`tips` already describes the fact,
+contradicts it, or omits it. Classify each as one of:
+
+- **present & consistent** — prose already says the same thing; no action.
+- **present but stale** — prose describes something that used to be true and now contradicts the
+  corrected structured data (e.g. naming a transfer partner program that was renamed or dropped).
+  Treat this with the **same urgency as any other factual error** — it's a correction, not a gap,
+  and should be called out as such in the PR description.
+- **absent** — the fact isn't in the prose at all. Flag as a gap to fill (own diff, standard
+  approval gate, same as any other prose addition).
+
+Two patterns deserve extra attention because they're easy to walk past:
+
+- **Sibling-list gaps.** If `cons` already lists several caps/fees/exclusions in one paragraph and
+  a new one belongs in that same list, its absence is a *stronger* signal than an isolated missing
+  fact elsewhere — the paragraph's own existing structure is telling you where the gap is.
+- **Stale program/partner names.** Whenever a transfer partner or named program changes in
+  structured data (the Club Vistara → Maharaja Club class of correction), check prose specifically
+  for that name — a renamed/dropped partner mentioned by name in prose is the highest-value place
+  to look for a "present but stale" hit.
+
+### (b) Live-render pass — both journeys, not just one
+
+Load the change in a fresh incognito window (or the equivalent automated-browser flow where no
+incognito path exists) and describe what was actually seen — which screen, which tab, what the
+number/text said. This app has (at least) two distinct journeys with different UI surfaces, and
+**both must be checked** whenever the field/panel is relevant to both:
+
+- **New-card journey** — the card appears as a recommendation: hero slot (`result.recommended`),
+  combo alt card, or the "Also considered" list. Driven by a spend/income/fee-tolerance profile.
+- **Owned-card journey** — the user already holds the card. Different panels/tabs (Verdict, Pro
+  Tips, Things-to-know, Redeem-points), gated differently from the new-card journey.
+
+Report per-journey findings **separately** — never collapse two checks into a single "rendered
+correctly" that in fact only exercised one path. If a field/panel is unreachable in one journey but
+not the other, say explicitly which journey was checked, which one wasn't reachable, and why — same
+honesty standard as the "can't be checked under any profile" rule below, just applied per journey.
+
+If some part of the change can't be reached in the current UI at all — under any realistic spend/
+income/fee-tolerance profile, in either journey — say so explicitly and explain why (e.g. the
+card's guaranteed rate can't structurally win the hero slot against its competitors). **"Nothing to
+check" must never quietly become "didn't check."**
+
+Whenever a score-affecting field changed, confirm `netGuaranteedPerYear` before/after with a
+concrete spend profile, not just as a structural diff claim.
+
+### (c) Visual confirmation for every "no-op" claim
+
+If a field is claimed to be invisible/no-op based on a code search (e.g. "no component reads
+this"), that claim still gets one line of live visual confirmation. A grep proving the code doesn't
+reference the field is necessary but not sufficient — it doesn't prove what a user actually sees;
+confirm by attempting to observe it live too.
+
+### Reporting format
+
+Every PR description for a card data change includes two explicit lines summarizing (a) and (b) —
+not left implicit in prose buried in the summary:
+
+```
+PROSE CHECK: <present & consistent / present but stale (corrected) / absent (added)>, per field touched
+RENDER CHECK: <new-card journey: what was seen or why unreachable> | <owned-card journey: what was seen or why unreachable>
+```
+
+### Known gaps this checklist has already surfaced
+
+See `BACKLOG.md` for the structural UI gaps found applying this checklist (pros/cons/tips
+unreachable in the owned-card journey; `feePerRedemption` not shown in the Redeem-points panel).
+**Retroactive note:** CC10, CC11, CC16, and CC27 all had their pros/cons prose verified only via the
+new-card journey (hero slot or combo alt card) — the owned-card journey's pros/cons rendering was
+never explicitly checked one way or the other for any of them, only assumed to generalize from the
+new-card result. This is a known gap in **already-shipped** verification, not just a forward-looking
+risk — worth a look if those cards' prose is revisited.
 
 ## 13. Open decisions
 
