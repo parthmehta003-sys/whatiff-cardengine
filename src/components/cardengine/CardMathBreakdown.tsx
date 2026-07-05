@@ -32,6 +32,14 @@ const CAT_ACCENT: Record<string, string> = {
 const inr = (n: number) =>
   '₹' + Math.round(n).toLocaleString('en-IN');
 
+// perCategory[cat].notes already duplicates three message types this component renders its own
+// bespoke lines for (excluded, cap-hit, threshold-banding) — filter those out so we only surface
+// the notes with no equivalent UI elsewhere (per-category channel/portal upside, catch-all
+// inheritance, and any future note type not yet seen).
+const DUPLICATE_NOTE_PATTERNS = [/^Excluded category/, /^Reward capped at/, /^Spend above/];
+const nonDuplicateNotes = (notes: string[]) =>
+  notes.filter((n) => !DUPLICATE_NOTE_PATTERNS.some((re) => re.test(n)));
+
 interface Props {
   earn: CardEarnResult;
   effectiveAnnualFee: number;
@@ -170,6 +178,10 @@ const CategoryRow: React.FC<{
           spend above {inr(ce.thresholdAmount)}/mo earns the boosted {ce.thresholdRatePer100.toFixed(2)}% rate
         </div>
       )}
+
+      {nonDuplicateNotes(ce.notes).map((note, i) => (
+        <div key={i} className="wf-row-note">{note}</div>
+      ))}
     </div>
   );
 };
@@ -196,6 +208,7 @@ const css = `
 .wf-caphit{font-size:11px;color:#f59e0b;margin:5px 0 0 16px;display:flex;flex-wrap:wrap;gap:8px}
 .wf-caphit-loss{color:#dc2626;font-weight:600}
 .wf-thresh{font-size:11px;color:#10b981;margin:4px 0 0 16px}
+.wf-row-note{font-size:11px;color:#71717a;margin:4px 0 0 16px;line-height:1.4}
 .wf-bd-feeline{display:flex;justify-content:space-between;align-items:baseline;
   margin-top:16px;padding-top:13px;border-top:1px solid #1f1f23;font-size:13px}
 .wf-bd-fee-label{color:#a1a1aa;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
