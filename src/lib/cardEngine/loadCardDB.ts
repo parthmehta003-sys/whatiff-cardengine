@@ -249,15 +249,28 @@ export function loadCardDB(raw: RawDB): LoadedCardDB {
     }
   }
 
-  // Derive rewardType strictly from existing earn-row redemption data (no guessing).
-  // A card is 'cashback' when most of its guaranteed (non-excluded) earning redeems as direct
-  // cash — rewardUnit 'cashback%' or redemptionRoute 'cashback'. Otherwise it's a points/rewards card.
+  // Derive rewardType. `redemption.currency` is the card's own authoritative statement of what
+  // it pays out in, so trust it first when it unambiguously says 'points'/'miles' (a rewards/points
+  // card) or 'cashback' (a pure cashback card). Only fall back to the earn-row heuristic — majority
+  // of non-excluded rows redeem as direct cash (rewardUnit 'cashback%' or redemptionRoute 'cashback')
+  // — for the ambiguous 'cashback-points' hybrid currency, where no single card-level label applies.
+  // (Bug found in verification: some cards' earnRows carry redemptionRoute: 'cashback' on a bundled
+  // ladder rung — e.g. "Flights/hotels/cashback" — that shares one rate across several non-cash
+  // redemption modes, not a literal "money straight back" mechanism; the old heuristic alone
+  // misclassified these as 'cashback' despite redemption.currency already saying 'points'.)
   for (const c of cards) {
-    const rows = (earnByCard.get(c.cardId) ?? []).filter((r) => !r.excluded);
-    const cashRows = rows.filter(
-      (r) => r.rewardUnit === 'cashback%' || r.redemptionRoute === 'cashback'
-    ).length;
-    c.rewardType = rows.length > 0 && cashRows * 2 >= rows.length ? 'cashback' : 'points';
+    const currency = c.redemption?.currency;
+    if (currency === 'points' || currency === 'miles') {
+      c.rewardType = 'points';
+    } else if (currency === 'cashback') {
+      c.rewardType = 'cashback';
+    } else {
+      const rows = (earnByCard.get(c.cardId) ?? []).filter((r) => !r.excluded);
+      const cashRows = rows.filter(
+        (r) => r.rewardUnit === 'cashback%' || r.redemptionRoute === 'cashback'
+      ).length;
+      c.rewardType = rows.length > 0 && cashRows * 2 >= rows.length ? 'cashback' : 'points';
+    }
   }
 
   // CategoryStrength

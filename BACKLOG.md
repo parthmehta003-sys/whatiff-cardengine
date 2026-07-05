@@ -117,3 +117,16 @@
       (accounting for a capped channel's value across however many cycles are
       needed to exhaust the balance) rather than single-cycle snapshot value —
       not fixed here, out of scope for a data-only pass.
+
+- [ ] **CC18's Lounge priority evaluator has no path to `milestoneBenefit` and can't
+      describe the "₹1,000 voucher OR lounge visit" either/or tradeoff.** Found during
+      the priorities-section verification sweep. `evalLounge()` in
+      `evaluatePriorities.ts` only reads `meta.loungeStructured` against the user's
+      spend — it has no reference to `milestoneBenefit` at all. Confirmed this is
+      **not a double-counting bug** (the two fields are already fully independent in
+      scoring and display), but it also means a user who picks "Lounge access" as a
+      priority sees only "1 domestic/quarter free visits, unlocked" with no mention
+      that CC18's real benefit is a choice between that lounge visit OR a ₹1,000
+      voucher (not both) at the same ₹1,00,000/quarter spend threshold. Not fixed —
+      flagging for future consideration if the priorities UI is ever extended to
+      describe milestone-linked alternatives.
