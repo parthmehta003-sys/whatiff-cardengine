@@ -703,7 +703,7 @@
             "worst": true
           }
         ],
-        "caps": "CashPoints expire 24 months after earning. SmartBuy redemptions carry a ₹99 fee; statement cashback carries a ₹50 fee.",
+        "caps": "CashPoints expire 24 months after earning. SmartBuy redemptions carry a ₹99 fee; statement cashback carries a ₹50 fee. 1 CashPoint = 0.25 airmiles (reference rate; actual value varies by airline redemption, not a guaranteed cash-equivalent — not ranked alongside the cash-equivalent routes above).",
         "fees": null
       },
       "emiText": "Auto EMI: Auto EMI transactions of Rs 10,000 or more are converted at:\n20% per annum interest rate (APR)\nTenure: 9 months\nProcessing fee: ₹99 + GST.\nSmart EMI: up to ₹849 + GST\nEasyEMI: up to ₹299 processing fee."
@@ -841,7 +841,7 @@
             "note": "Same ₹0.15/pt as cashback — no value gain from using the portal."
           }
         ],
-        "caps": "CashPoints expire 24 months after earning.",
+        "caps": "CashPoints expire 24 months after earning. 1 CashPoint = 0.15 airmiles (reference rate; actual value varies by airline redemption, not a guaranteed cash-equivalent — not ranked alongside the cash-equivalent routes above).",
         "fees": null
       },
       "emiText": "Auto EMI: Applicable on transactions above ₹10,000 (excluding fuel, gold, and jewellery):\nInterest rate: 20% per annum\nTenure: 9 months\nProcessing fee: ₹99 + GST.\nSmart EMI processing fee: Up to ₹849 + GST.\nEasyEMI processing fee: Up to ₹299 + GST.\nPre-closure charges:: 3% of balance principal outstanding."
@@ -1186,19 +1186,9 @@
             "feePerRedemption": 0,
             "capPerCycle": null,
             "note": "Up to ₹0.30/point. Points can cover at most 70% of the product/voucher value — the rest must be paid by card."
-          },
-          {
-            "channel": "Airmiles conversion",
-            "valuePerPoint": 0.30,
-            "valueRange": null,
-            "valueIsVariable": false,
-            "minPoints": null,
-            "feePerRedemption": 0,
-            "capPerCycle": null,
-            "note": "0.30 airmiles per CashPoint. NOTE: modeled here as ₹0.30/point for ranking purposes, but airmiles are not rupee-denominated — actual redemption value depends on the airline/route chosen and can vary from this figure."
           }
         ],
-        "caps": "Statement-cashback redemption capped at 3,000 CashPoints per month (min 500 points to redeem). SmartBuy flights/hotels: 50,000 points/month cap, max 50% of booking value via points. Voucher/catalogue: max 70% of value via points. CashPoints expire 24 months after earning.",
+        "caps": "Statement-cashback redemption capped at 3,000 CashPoints per month (min 500 points to redeem). SmartBuy flights/hotels: 50,000 points/month cap, max 50% of booking value via points. Voucher/catalogue: max 70% of value via points. CashPoints expire 24 months after earning. 1 CashPoint = 0.30 airmiles (reference rate; actual value varies by airline redemption, not a guaranteed cash-equivalent — not ranked alongside the cash-equivalent routes above).",
         "fees": null
       },
       "emiText": "Auto EMI: Applicable on transactions above ₹10,000 Excluding Fuel, Gold, and Jewellery)\nInterest rate: 20% per annum\nTenure: 9 months\nProcessing fee: ₹99 + GST.\nSmart EMI processing fee: Up to ₹849 + GST.\nEasyEMI processing fee: Up to ₹299 + GST.\nPre-closure charges: 3% of balance principal outstanding"
