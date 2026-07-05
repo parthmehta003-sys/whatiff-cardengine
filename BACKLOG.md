@@ -74,3 +74,21 @@
       to win against stronger cashback cards) — just a verification-reachability
       fact worth knowing before assuming any future CC11 prose change "renders
       somewhere."
+
+- [ ] **CC13 (HDFC Freedom) has the same new-card-journey unreachability as CC11.**
+      Found during CC13's Phase 2 verification. Tried 2 spend profiles (BigBasket
+      + Dining heavy at moderate income; a generic Grocery+Dining+Utility mix at
+      low income) — CC13 never won the hero slot and never appeared in the
+      4-entry "Also considered" runners-up list in either. Same root cause as
+      CC11: its effective rate (0.75% on 5 bonus merchants, capped low; 0.075%
+      elsewhere) can't compete with the ~40 other cards' guaranteed-earn numbers.
+      This means CC13's `pros`/`cons` prose corrections (Dineout discount line,
+      Rent/Fuel/Utility/Education fee figures) are correct-on-paper but not
+      user-visible in the new-card journey — combined with the pre-existing
+      owned-journey pros/cons gap (above), not user-visible in either journey
+      today. `welcomeBenefit` and `fuelWaiver` ARE independently confirmed
+      rendering correctly in the owned-card journey (Things-to-know no-op as
+      expected for welcomeBenefit; fuelWaiver shows correctly under Fuel
+      priority) — only the free-text prose is affected by this gap. Likely true
+      of every weak entry-level HDFC card (CC13, and presumably others still to
+      be verified) — worth keeping in mind rather than re-discovering per card.
