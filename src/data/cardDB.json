@@ -5247,7 +5247,7 @@
       "capPeriod": "month",
       "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "10X (20 CP/₹200) = 2.5% on 5 partner merchants. MITC states this as a single combined 2,500 RP/month cap across Online+Grocery 10X; modeled here as independent per-category caps since the engine has no cross-category upside-pooling mechanism for channel_conditional rows (upside-only, does not affect guaranteed earn). Pros."
+      "sourceNote": "10X (20 CP/₹200) = 2.5% on 5 partner merchants. MITC states this as a single combined 2,500 RP/month cap across Online+Grocery+Dining 10X; modeled here as independent per-category caps since the engine has no cross-category upside-pooling mechanism for channel_conditional rows (upside-only, does not affect guaranteed earn). Pros."
     },
     {
       "cardId": "CC11",
@@ -5290,6 +5290,27 @@
       "sharedCapId": "CC11_OVERALL_3750RP_CYCLE",
       "multiplierNote": null,
       "sourceNote": "2 CashPoints/₹200 = 0.25% (CP=₹0.25). Shares overall 15,000 RP/cycle cap (=₹3,750) with Online/Travel/International/Other(base). MITC reward-caps table. Pros/Cons."
+    },
+    {
+      "cardId": "CC11",
+      "ladderId": "HDFC_MONEYBACKPLUS",
+      "category": "Dining",
+      "rowType": "channel_conditional",
+      "earnNum": 20,
+      "earnPer": 200,
+      "rewardUnit": "CashPoint",
+      "redemptionRoute": "travel",
+      "redeemValue": 0.25,
+      "trigger": "Swiggy",
+      "thresholdAmount": null,
+      "thresholdPeriod": null,
+      "stacks": false,
+      "excluded": false,
+      "capAmount": 625,
+      "capPeriod": "month",
+      "sharedCapId": null,
+      "multiplierNote": null,
+      "sourceNote": "10X = 2.5% on Swiggy. Reopened: pros text names Swiggy as one of the 5 partner 10X merchants (Amazon, BigBasket, Flipkart, Reliance Smart, Swiggy) but this row was previously missing entirely -- Dining only had the 0.25% base rate modeled. Added to match the existing Online/Grocery 10X row pattern exactly: channel_conditional (upside-only, does not affect guaranteed earn), independent 625/month cap. MITC states this as a single combined 2,500 RP/month cap across Online+Grocery+Dining 10X; modeled here as independent per-category caps since the engine has no cross-category upside-pooling mechanism for channel_conditional rows. Pros."
     },
     {
       "cardId": "CC11",
@@ -5352,7 +5373,7 @@
       "capPeriod": "month",
       "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "10X = 2.5% on BigBasket/Reliance Smart. MITC states this as a single combined 2,500 RP/month cap across Online+Grocery 10X; modeled here as independent per-category caps since the engine has no cross-category upside-pooling mechanism for channel_conditional rows (upside-only, does not affect guaranteed earn). Pros."
+      "sourceNote": "10X = 2.5% on BigBasket/Reliance Smart. MITC states this as a single combined 2,500 RP/month cap across Online+Grocery+Dining 10X; modeled here as independent per-category caps since the engine has no cross-category upside-pooling mechanism for channel_conditional rows (upside-only, does not affect guaranteed earn). Pros."
     },
     {
       "cardId": "CC11",
