@@ -208,7 +208,43 @@ never explicitly checked one way or the other for any of them, only assumed to g
 new-card result. This is a known gap in **already-shipped** verification, not just a forward-looking
 risk — worth a look if those cards' prose is revisited.
 
-## 13. Open decisions
+## 13. Redemption-route policy: cash-equivalent vs transfer-currency
+
+Every `redemption.methods` entry MUST be one of two kinds, and the two must never be modeled the
+same way:
+
+1. **Cash-equivalent routes** — statement cashback, SmartBuy/portal bookings at a fixed rupee rate,
+   product/voucher catalogues. These carry a real `valuePerPoint` in ₹ and MAY participate in
+   `optimizeRedemption`'s ranking/"best way to use them" and (where applicable) floor-value
+   calculations. The ₹ figure is a guaranteed floor the user can count on regardless of how they
+   redeem.
+2. **Transfer-currency routes** — airmiles, hotel-loyalty-point conversions, or any route where the
+   realized value depends on which airline/hotel/route the user picks. These do NOT get a
+   `redemption.methods` entry with a `valuePerPoint` at all — that would misrepresent a variable,
+   redemption-dependent value as a guaranteed cash-equivalent floor, and would let it compete for
+   "best"/ranking against real cash-equivalent routes on equal footing when it isn't equal footing.
+   Instead, record the fact as **reference-only free text** — append a sentence to `redemption.caps`
+   (e.g. "1 CashPoint = 0.30 airmiles (reference rate; actual value varies by airline redemption, not
+   a guaranteed cash-equivalent)"). This mirrors the existing `transferPartners[].notes` pattern
+   already used for CC31/CC32/CC37's multi-partner airline/hotel transfer tables (`ratio` + free-text
+   `notes` like `"₹0.65/pt"` — never a numeric field the optimizer ranks or that feeds
+   `netGuaranteedPerYear`).
+
+Neither kind of `redemption.methods`/`transferPartners` entry feeds `netGuaranteedPerYear` — that
+field is display-only for the Redeem-points panel and transfer-hack callout, entirely separate from
+the `earnRows`-driven scoring path (`computeCardEarn` / `scoreCard`). Don't assume adding or removing
+a redemption method changes a card's headline number; verify via `earnRows`/`milestoneBenefit` if a
+change is meant to be score-affecting.
+
+**History:** CC18's airmiles conversion (0.30 airmiles/CashPoint) was briefly added as a ranked
+`methods` entry with `valuePerPoint: 0.30` in a prior pass, then reverted to a reference-only
+`redemption.caps` note once this policy was written up — it never fed `netGuaranteedPerYear` (that
+path doesn't read `redemption` at all), but it did wrongly compete for "best way to use them" against
+real cash-equivalent routes in the Redeem-points panel. CC11 and CC13's existing airmiles facts
+(0.25 and 0.15 airmiles/CashPoint respectively) were similarly confirmed reference-only in
+`redemption.caps`, never added as ranked methods.
+
+## 14. Open decisions
 
 - Source of truth after Fix 1: single `cardDB.json` vs per-card files?
 - Cadence: weekly vs monthly?
