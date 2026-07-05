@@ -92,3 +92,28 @@
       priority) — only the free-text prose is affected by this gap. Likely true
       of every weak entry-level HDFC card (CC13, and presumably others still to
       be verified) — worth keeping in mind rather than re-discovering per card.
+
+- [ ] **`optimizeRedemption`'s "Best way to use them" ranks by single-cycle usable
+      value, not lifetime per-point value — can recommend a lower-value channel.**
+      Found while verifying CC18's newly-added SmartBuy/Voucher/Airmiles methods.
+      `evalMethod()` computes `valueRupeesFloor = usablePoints × valuePerPoint`
+      where `usablePoints = min(balance, capPerCycle)` — so a heavily-capped
+      high-value channel (Statement cashback: ₹1/point, capped 3,000/month) can
+      rank BELOW an uncapped-or-loosely-capped lower-value channel (SmartBuy:
+      ₹0.30/point, capped 50,000/month) purely because more of a large balance
+      is usable THIS cycle via the looser cap. Confirmed live: at a 20,000-point
+      balance, "Best way to use them" recommended SmartBuy/Voucher/Airmiles
+      (₹6,000 this cycle) over Statement cashback (₹3,000 this cycle, the rest
+      deferred to future months) — even though Statement cashback is the better
+      long-run value at 3.3× the per-point rate. This isn't a bug in the data
+      (both channels are now accurately modeled) — it's a pre-existing
+      single-cycle-snapshot design choice in the optimizer that becomes more
+      visible/consequential once a card has multiple channels with real,
+      differentiated per-point values and caps (CC18 previously had SmartBuy
+      inertly modeled with `valuePerPoint: null`, which fell through to an
+      implicit ₹1/point via the "automatic cashback" fallback branch — an
+      accidental near-tie with Statement cashback that masked this behavior).
+      Worth deciding whether the optimizer should rank by lifetime value
+      (accounting for a capped channel's value across however many cycles are
+      needed to exhaust the balance) rather than single-cycle snapshot value —
+      not fixed here, out of scope for a data-only pass.
