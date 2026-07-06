@@ -130,3 +130,18 @@
       voucher (not both) at the same ₹1,00,000/quarter spend threshold. Not fixed —
       flagging for future consideration if the priorities UI is ever extended to
       describe milestone-linked alternatives.
+
+- [ ] **`perCategory[cat].notes` (PR #159) only renders in the new-card journey —
+      the owned-card journey's "See the numbers" panel is a separate component
+      that structurally can't show it without additional work.** Confirmed via
+      grep: `CardMathBreakdown` (the component PR #159 modified) has exactly 2
+      usage sites, both new-card-journey (`ResultsScreenV2.tsx`'s hero non-combo
+      "The math" tab, and `RecommendationCard.tsx`'s alt-card detail view, itself
+      only used in new-card-journey contexts). The owned-card journey's
+      "See the numbers" expandable panel is a distinct, bespoke inline renderer
+      inside `ResultsScreenV2.tsx` that never calls `CardMathBreakdown` and has no
+      equivalent notes-rendering logic. This is the SAME shape of gap as the
+      redemption-panel and pros/cons gaps already logged above (a fix landing in
+      one journey's surface with no equivalent in the other) — not fixed in
+      PR #159, intentionally scoped out. Building the owned-journey equivalent
+      is a real, separate piece of work if this parity is wanted.
