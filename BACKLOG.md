@@ -130,3 +130,58 @@
       voucher (not both) at the same ₹1,00,000/quarter spend threshold. Not fixed —
       flagging for future consideration if the priorities UI is ever extended to
       describe milestone-linked alternatives.
+
+- [ ] **Six cards (CC08, CC11, CC13, CC17, CC22, CC23) are structurally unreachable
+      in the new-card journey's hero/combo/"Also considered" slots under almost any
+      realistic spend profile — investigated and confirmed NOT a ranking-logic bug.**
+      `rankCards.ts`'s eligibility filter, `scoreCard()`, `rankSort()`, and the
+      `RELEVANCE_RUNNERS` (4) runners-up cap are applied uniformly and correctly to
+      all 40 cards; the mechanism itself has no special-case bias. The six cards are
+      excluded because their own `netGuaranteedPerYear` — computed correctly per the
+      existing rowType/redeemValue conventions — is genuinely near the bottom of the
+      40-card field. Root-caused to two independent, non-overlapping mechanisms, both
+      pre-existing modeling conventions rather than bugs:
+      (1) **CC11** (and to a lesser extent CC13): their entire distinctive appeal is
+      modeled as `channel_conditional` rows (merchant-restricted 10X), which by
+      long-standing design never feed `netGuaranteedPerYear` (upside-only). Stripped
+      of that, CC11's guaranteed rate is a flat 0.25% cash-equivalent everywhere
+      (2nd-lowest of all 40 cards) — confirmed via its own best-case profile
+      (spend precisely sized to max out all three 10X caps): `netGuaranteedPerYear`
+      = ₹396, `annualUpside` = ₹3,960 (10x higher, but upside never ranks). CC13 is
+      similar but less extreme: real `base`-row guaranteed rate on Dining/Grocery is
+      5% points × 0.15 redeemValue = 0.75% cash, capped at just ₹375/month — a much
+      lower rate AND a much lower cap than its direct competitor HDFC Swiggy (10%,
+      capped ₹1,500/month).
+      (2) **CC08/CC17/CC22/CC23** (all ICICI, 4/5 of the "Under ₹500 and below"
+      cluster tested): nominal "2 RP per ₹100" sounds competitive but ICICI's
+      redemption floor for these cards is `redeemValue: 0.25` (a floor shared by
+      many OTHER issuers' cards too — confirmed NOT ICICI-specific), so the real
+      guaranteed cash-equivalent is only ~0.5% (0.25% Utility; 1.0% International on
+      Sapphiro/Rubyx). Across all 40 cards ranked by average guaranteed cash rate,
+      these four sit in the bottom third (ranks 11th, 12th, 13th, 13th-lowest of 39).
+      **Confirmed NOT coincidental to "being one of the six flagged"**: two
+      never-previously-flagged cards with equally/more weak guaranteed rates —
+      CC06 Axis Neo (0.10% avg, the single worst card in the DB) and CC15 SBI
+      SimplyCLICK (0.214% avg) — show the identical unreachability pattern
+      (ranked outside the top 10 of ~30 in every profile tested), confirming this
+      is a direct, correct function of each card's own guaranteed economics, not a
+      quirk of these specific six.
+      **Mathematical dominance, not just bad luck, in at least one case**: CC08
+      (ICICI Platinum, ₹0 fee) can NEVER win against CC10 Scapia (also ₹0 fee),
+      because Scapia's guaranteed rate (10% flat) equals or exceeds CC08's
+      (0.25–0.5%) in every category CC08 covers — no spend profile, however
+      contrived, can flip this while both remain ₹0-fee and eligible. CC17 is
+      less absolute: dominated by same-tier CC14 Axis Ace (1.5% uncapped vs CC17's
+      0.5% uncapped) in every category except Utility, but CC17 DOES eventually
+      overtake CC14 into a runners-up slot at an extreme, unrealistic Utility spend
+      (~₹3,00,000/month tested) — so CC17's unreachability is a narrow-realistic-
+      window problem, not strict mathematical impossibility.
+      **Issuer clustering (4/6 = ICICI) is coincidental to this DB's authored rates,
+      not a mechanical bias against ICICI as a bank** — the 0.25 redeemValue floor
+      recurs across HDFC/IDFC/SBI/YES/ICICI cards alike; ICICI's four flagged cards
+      simply chose a conservative uniform ~2 RP/₹100 nominal rate rather than the
+      higher merchant-specific accelerators competitors used.
+      **Not fixed — explicitly out of scope for this pass** (any change to
+      `netGuaranteedPerYear`'s treatment of `channel_conditional` rows or to
+      redeemValue-floor conventions would affect all 40 cards' ranking, not just
+      these six; flagged here as a candidate finding for review, not a to-do).
