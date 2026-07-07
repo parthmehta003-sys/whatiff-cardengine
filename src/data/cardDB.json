@@ -1317,17 +1317,28 @@
             "note": "₹0.50 per point."
           },
           {
-            "channel": "Airline miles",
-            "valuePerPoint": 0.5,
+            "channel": "Product / Voucher catalogue",
+            "valuePerPoint": 0.35,
             "valueRange": null,
-            "valueIsVariable": true,
+            "valueIsVariable": false,
             "minPoints": null,
             "feePerRedemption": 0,
             "capPerCycle": 50000,
-            "note": "Up to 0.5 miles per point; real value varies by airline — usually weaker than the catalogue."
+            "note": "Up to ₹0.35 per point. Points can cover at most 70% of the product/voucher value — the rest must be paid by card."
+          },
+          {
+            "channel": "Statement cashback",
+            "valuePerPoint": 0.2,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": 50000,
+            "worst": true,
+            "note": "₹0.20 per point — worst value, avoid."
           }
         ],
-        "caps": "Each path capped at 50,000 points per statement cycle.",
+        "caps": "Each path capped at 50,000 points per statement cycle. Travel bookings redemption capped at 70% of booking value using Reward Points; remaining amount payable via card. 1 RP = up to 0.5 airmiles (reference rate; actual value varies by airline redemption, not a guaranteed cash-equivalent).",
         "fees": null
       },
       "emiText": "Auto EMI: Applicable on transactions above ₹10,000 (excluding gold, fuel and jewellery)\nInterest rate: 20% per annum\nTenure: 9 months\nProcessing fee: ₹99 + GST.\nSmart EMI processing fee: Up to ₹849 + GST.\nEasyEMI processing fee: Up to ₹299 + GST.\nPre-closure charges: 3% of balance principal outstanding"
@@ -6893,10 +6904,10 @@
       "category": "Online",
       "rowType": "base",
       "earnNum": 5,
-      "earnPer": 150,
+      "earnPer": 200,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.5,
+      "redeemValue": 0.35,
       "trigger": "General online",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -6906,7 +6917,7 @@
       "capPeriod": null,
       "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "5 RP/₹150 = 1.17% base."
+      "sourceNote": "5 RP/₹200 = 0.88% base (rate cut 5 RP/₹150→₹200, live 15 May 2026)."
     },
     {
       "cardId": "CC20",
@@ -6914,7 +6925,7 @@
       "category": "Online",
       "rowType": "channel_conditional",
       "earnNum": 25,
-      "earnPer": 150,
+      "earnPer": 200,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
       "redeemValue": 0.35,
@@ -6927,7 +6938,7 @@
       "capPeriod": "month",
       "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "5X = 5.83% on 4 partners; capped 5,000 RP/mo = ₹1,750. Pros/Cons."
+      "sourceNote": "5X = 4.38% on 4 partners (5 RP/₹150→₹200 base cut, live 15 May 2026); this row's independent cap is 5,000 RP/mo = ₹1,750. UNSTORED-BUT-VERIFIED: the true combined SmartBuy accelerator ceiling (HDFC SmartBuy T&C, Regalia/Diners Privilege/BizPower core-benefit group) is 4,000 RP/month and 2,000 RP/day applying JOINTLY across all SmartBuy-accelerated categories (shared with the Travel 10X row) — NOT enforced by these independent per-row caps today (no engine field for a cross-category upside pool or a daily cap; see BACKLOG). Forward-looking: as of 1 Jul 2026, 3,000 RP/month of that combined ceiling is further restricted to Brand Voucher (GyFTR/Woohoo) purchases specifically — no current CC20 row maps to Brand Vouchers, so no stored value changes today. Pros/Cons."
     },
     {
       "cardId": "CC20",
@@ -6935,7 +6946,7 @@
       "category": "Travel",
       "rowType": "base",
       "earnNum": 5,
-      "earnPer": 150,
+      "earnPer": 200,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
       "redeemValue": 0.5,
@@ -6948,7 +6959,7 @@
       "capPeriod": null,
       "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "5 RP/₹150 at SmartBuy ₹0.50/RP = ~1.67%."
+      "sourceNote": "5 RP/₹200 at SmartBuy ₹0.50/RP = ~1.25% (base cut 5 RP/₹150→₹200, live 15 May 2026)."
     },
     {
       "cardId": "CC20",
@@ -6956,7 +6967,7 @@
       "category": "Travel",
       "rowType": "channel_conditional",
       "earnNum": 50,
-      "earnPer": 150,
+      "earnPer": 200,
       "rewardUnit": "RP",
       "redemptionRoute": "travel",
       "redeemValue": 0.5,
@@ -6969,7 +6980,7 @@
       "capPeriod": "month",
       "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "Up to 10X on SmartBuy travel = high effective rate. Upside. Pros."
+      "sourceNote": "Up to 10X on SmartBuy travel = high effective rate (10X defined against base; base cut 5 RP/₹150→₹200, live 15 May 2026). Upside. This row's independent cap is 25,000 RP/mo. UNSTORED-BUT-VERIFIED: the true combined SmartBuy accelerator ceiling (HDFC SmartBuy T&C, Regalia/Diners Privilege/BizPower core-benefit group) is 4,000 RP/month and 2,000 RP/day applying JOINTLY across all SmartBuy-accelerated categories (shared with the Online 5X row) — NOT enforced by these independent per-row caps today (no engine field for a cross-category upside pool or a daily cap; see BACKLOG). Forward-looking: as of 1 Jul 2026, 3,000 RP/month of that combined ceiling is further restricted to Brand Voucher (GyFTR/Woohoo) purchases specifically — no current CC20 row maps to Brand Vouchers, so no stored value changes today. Pros."
     },
     {
       "cardId": "CC20",
@@ -6977,10 +6988,10 @@
       "category": "Dining",
       "rowType": "base",
       "earnNum": 5,
-      "earnPer": 150,
+      "earnPer": 200,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.5,
+      "redeemValue": 0.35,
       "trigger": "All eligible retail spend",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -6990,7 +7001,7 @@
       "capPeriod": "cycle",
       "sharedCapId": "CC20_OVERALL_50000RP_CYCLE",
       "multiplierNote": null,
-      "sourceNote": "5 RP/₹150 = 1.17% (RP≈₹0.35 voucher; ₹0.50 SmartBuy travel). Overall cap 50,000 RP/cycle. Pros."
+      "sourceNote": "5 RP/₹200 = 0.88% (RP≈₹0.35 voucher; ₹0.50 SmartBuy travel). Base cut 5 RP/₹150→₹200, live 15 May 2026; redeemValue corrected 0.50→0.35 to match this row's own voucher-rate %. Overall cap 50,000 RP/cycle. Pros."
     },
     {
       "cardId": "CC20",
@@ -7019,10 +7030,10 @@
       "category": "Grocery",
       "rowType": "base",
       "earnNum": 5,
-      "earnPer": 150,
+      "earnPer": 200,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.5,
+      "redeemValue": 0.35,
       "trigger": "Grocery (capped 2,000 RP/month)",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -7032,7 +7043,7 @@
       "capPeriod": "month",
       "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "5 RP/₹150 = 1.17%; grocery capped 2,000 RP/mo. Cons."
+      "sourceNote": "5 RP/₹200 = 0.88%; grocery capped 2,000 RP/mo. Base cut 5 RP/₹150→₹200, live 15 May 2026; redeemValue corrected 0.50→0.35 to match this row's own voucher-rate %. Cons."
     },
     {
       "cardId": "CC20",
@@ -7040,10 +7051,10 @@
       "category": "Utility",
       "rowType": "base",
       "earnNum": 5,
-      "earnPer": 150,
+      "earnPer": 200,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.5,
+      "redeemValue": 0.35,
       "trigger": "All eligible retail spend",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -7053,7 +7064,7 @@
       "capPeriod": "cycle",
       "sharedCapId": "CC20_OVERALL_50000RP_CYCLE",
       "multiplierNote": null,
-      "sourceNote": "5 RP/₹150 = 1.17% (RP≈₹0.35 voucher; ₹0.50 SmartBuy travel). Overall cap 50,000 RP/cycle. Pros."
+      "sourceNote": "5 RP/₹200 = 0.88% (RP≈₹0.35 voucher; ₹0.50 SmartBuy travel). Base cut 5 RP/₹150→₹200, live 15 May 2026; redeemValue corrected 0.50→0.35 to match this row's own voucher-rate %. Overall cap 50,000 RP/cycle. Pros."
     },
     {
       "cardId": "CC20",
@@ -7061,10 +7072,10 @@
       "category": "International",
       "rowType": "base",
       "earnNum": 5,
-      "earnPer": 150,
+      "earnPer": 200,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.5,
+      "redeemValue": 0.35,
       "trigger": "All eligible retail spend",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -7074,7 +7085,7 @@
       "capPeriod": "cycle",
       "sharedCapId": "CC20_OVERALL_50000RP_CYCLE",
       "multiplierNote": null,
-      "sourceNote": "5 RP/₹150 = 1.17% (RP≈₹0.35 voucher; ₹0.50 SmartBuy travel). Overall cap 50,000 RP/cycle. Pros."
+      "sourceNote": "5 RP/₹200 = 0.88% (RP≈₹0.35 voucher; ₹0.50 SmartBuy travel). Base cut 5 RP/₹150→₹200, live 15 May 2026; redeemValue corrected 0.50→0.35 to match this row's own voucher-rate %. Overall cap 50,000 RP/cycle. Pros."
     },
     {
       "cardId": "CC20",
@@ -7082,10 +7093,10 @@
       "category": "Other(base)",
       "rowType": "base",
       "earnNum": 5,
-      "earnPer": 150,
+      "earnPer": 200,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.5,
+      "redeemValue": 0.35,
       "trigger": "All eligible retail spend",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -7095,7 +7106,7 @@
       "capPeriod": "cycle",
       "sharedCapId": "CC20_OVERALL_50000RP_CYCLE",
       "multiplierNote": null,
-      "sourceNote": "5 RP/₹150 = 1.17% (RP≈₹0.35 voucher; ₹0.50 SmartBuy travel). Overall cap 50,000 RP/cycle. Pros."
+      "sourceNote": "5 RP/₹200 = 0.88% (RP≈₹0.35 voucher; ₹0.50 SmartBuy travel). Base cut 5 RP/₹150→₹200, live 15 May 2026; redeemValue corrected 0.50→0.35 to match this row's own voucher-rate %. Overall cap 50,000 RP/cycle. Pros."
     },
     {
       "cardId": "CC21",

@@ -2,6 +2,21 @@
 
 ## CardEngine
 
+- [ ] **Cross-category shared cap does not cover `channel_conditional` upside (surfaced by CC20
+      SmartBuy accelerators).** `sharedCapId` pooling only clamps base-row
+      `perCategory[cat].guaranteed`; `channel_conditional` rows compute `.upside`
+      independently per row via `applyPerCategoryCap`, with no cross-category upside-pooling
+      mechanism. A real fix needs to (1) extend pooling to cover `.upside` for
+      `channel_conditional` rows, gated so it doesn't also start clamping the currently-uncapped
+      base guaranteed earn on Online/Travel, and (2) handle two different `redeemValue`s (0.35 vs
+      0.5) sharing one RP-denominated ₹ cap. **Concrete case:** CC20 (HDFC Regalia Gold)'s Online
+      5X and Travel 10X rows share a real combined SmartBuy ceiling of 4,000 RP/month + 2,000
+      RP/day across all SmartBuy-accelerated categories (per HDFC SmartBuy T&C), but are stored
+      today as two independent per-row caps (Online ₹1,750/mo, Travel ₹25,000/mo) with no
+      `sharedCapId` between them — documented in each row's `sourceNote` as unstored-but-verified
+      (Part-1 PR, Fix A, Option 3: document-only). There is also no engine field for the daily cap.
+      This must appear in every future handover until resolved.
+
 - [ ] `cardIntelligence()` (selectHacks.ts) does not filter warnings by `triggerWhen`.
       Warnings are matched only by card/issuer name in the text. Any `triggerWhen`
       condition (e.g. `user_owns_card`) is ignored. W006's current suppression is
@@ -200,3 +215,31 @@
       `netGuaranteedPerYear`'s treatment of `channel_conditional` rows or to
       redeemValue-floor conventions would affect all 40 cards' ranking, not just
       these six; flagged here as a candidate finding for review, not a to-do).
+
+## CC20 (HDFC Regalia Gold) — Part 2 / second-pass notes
+
+Deferred from the Part-1 score-affecting PR (Fixes A/B/C/G/F/H). Not started.
+
+- [ ] **Fix D — `milestoneBenefit` schema extension (own PR).** CC20 has two concurrent
+      milestone programs the current single-`period` `MilestoneBenefit` shape can't hold at once:
+      quarterly voucher (₹1.5L spend → ₹1,500 Myntra/Nykaa/Reliance Digital/Marriott, choice) and
+      annual flight voucher (₹7.5L spend → ₹5,000, anniversary-year = 365 days from setup/last
+      up/downgrade, NOT calendar year). Needs a reviewed schema change (array of programs) with
+      loader/engine handled in lockstep. When it lands: (1) fix the now-stale comment at
+      `rankCards.ts:461` ("No-op today: milestoneBenefit is null on all 40" — CC11 and CC18
+      already carry live `milestoneBenefit` data and feed `milestoneCreditPerYear`); (2) add a
+      distinct anniversary-year-vs-calendar-year period label to the extended schema even though
+      there's no live calc bug today (`milestoneCreditPerYear` has no calendar-date logic — it
+      only divides annual spend by a period count — and no frontend renders `milestoneBenefit`
+      yet, confirmed via grep).
+
+- [ ] **pros text — quarterly milestone line under-lists brands.** CC20 `pros` currently reads
+      "₹1,500 Myntra/Nykaa vouchers" (2 brands); the Milestone Benefits T&C lists Myntra/Nykaa/
+      Reliance Digital/Marriott (4, cardholder choice). Folds into the Fix E prose reconciliation.
+
+- [ ] **Hack H020 redeemValue mismatch.** H020 ("Buy brand vouchers on SmartBuy...") stores
+      `rateWithHack: 6.67 / rateWithoutHack: 1.33`, which back-solve to an implied redeemValue of
+      ~0.40 — matching neither 0.35 (voucher) nor 0.5 (SmartBuy travel), and independent of the
+      Fix C earnRow bug. Pre-existing error in the hack itself; confirmed out of scope for the
+      Part-1 PR, logged here for the second-pass hacks review. Also note H020's headline rates
+      predate the 15 May 2026 base rate cut (5 RP/₹150→₹200) applied to earnRows in Part 1.
