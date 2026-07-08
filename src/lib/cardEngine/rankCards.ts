@@ -77,12 +77,20 @@ export interface MilestoneTier {
  * Spend-milestone benefit (recurring, spend-conditional). SCORE-AFFECTING via
  * milestoneCreditPerYear(), but ONLY when entered spend actually unlocks a tier.
  * `cumulative` is PER-CARD: true = crossing higher tiers ALSO grants lower ones; false = highest only.
- * `period`: annual thresholds credit once; quarterly/monthly thresholds are PER PERIOD and the reward
- * repeats each period the (evenly-spread) spend sustains.
+ * `period`: annual/anniversary thresholds credit once; quarterly/monthly thresholds are PER PERIOD and
+ * the reward repeats each period the (evenly-spread) spend sustains. `'anniversary'` is a 365-day
+ * window from card setup / last upgrade-downgrade date (NOT calendar year); it is score-identical to
+ * `'annual'` here (periods=1) — the distinct label is documentation only, since milestoneCreditPerYear
+ * has no calendar-date logic (see below).
+ *
+ * A card may hold ONE program (single object) or SEVERAL concurrent programs (array) — e.g. CC20 runs a
+ * quarterly voucher program AND an anniversary-year flight-voucher program simultaneously. The single-
+ * object form stays valid (CC11/CC18), so no data migration is needed. milestoneCreditPerYear normalizes
+ * either shape to an array and sums the per-program credit.
  */
 export interface MilestoneBenefit {
   tiers: MilestoneTier[];   // sorted ascending by spendThreshold
-  period: 'annual' | 'quarterly' | 'monthly';
+  period: 'annual' | 'anniversary' | 'quarterly' | 'monthly';
   cumulative: boolean;
   description: string;
 }
@@ -139,8 +147,11 @@ export interface CardMeta {
   movieStructured?: MovieStructured | null;
   /** One-time welcome/joining benefit — DISPLAY-ONLY, never feeds the score. */
   welcomeBenefit?: WelcomeBenefit | null;
-  /** Spend-milestone benefit — score-affecting via milestoneCreditPerYear() only when unlocked. */
-  milestoneBenefit?: MilestoneBenefit | null;
+  /**
+   * Spend-milestone benefit — score-affecting via milestoneCreditPerYear() only when unlocked.
+   * A single program (object) or several concurrent programs (array); milestoneCreditPerYear sums them.
+   */
+  milestoneBenefit?: MilestoneBenefit | MilestoneBenefit[] | null;
   /** Fuel surcharge waiver — DISPLAY-ONLY, never feeds the score. */
   fuelWaiver?: FuelWaiver | null;
   /** Derived in the loader from earn-row redemption data. Read-only display signal. */
@@ -360,19 +371,22 @@ export function netEffectiveFee(meta: CardMeta, annualSpend: number): number {
 }
 
 /**
- * Spend-milestone credit (honest floor, spend-conditional). SIBLING of renewalCredit — it gates on
- * its own per-tier `spendThreshold`, NOT on `effFee > 0`. Returns 0 for null/absent milestoneBenefit.
+ * Credit from ONE milestone program (honest floor, spend-conditional).
  *
  * Uniform-spread (GUARANTEED-floor) model: with only an annual spend figure, the only value
  * guaranteeable is what an EVENLY-spending user gets — we never assume favourable intra-year
  * concentration (that would overstate a guaranteed metric). Quarterly/monthly thresholds are
- * per-period; the reward repeats each period the even spend sustains. Annual falls out at periods=1.
+ * per-period; the reward repeats each period the even spend sustains. Annual/anniversary fall out at
+ * periods=1 — both are once-a-year windows and score identically (no calendar-date logic; anniversary
+ * is a 365-day window whose start we don't model, annual is the calendar year, and under even spread
+ * the credit is the same for either).
  */
-export function milestoneCreditPerYear(meta: CardMeta, annualSpend: number): number {
-  const mb = meta.milestoneBenefit;
+function programCreditPerYear(mb: MilestoneBenefit, annualSpend: number): number {
   if (!mb || !mb.tiers?.length) return 0;
   const tiers = [...mb.tiers].sort((a, b) => a.spendThreshold - b.spendThreshold);
-  const periods = mb.period === 'annual' ? 1 : (mb.period === 'quarterly' ? 4 : 12);
+  const periods = (mb.period === 'annual' || mb.period === 'anniversary')
+    ? 1
+    : (mb.period === 'quarterly' ? 4 : 12);
   const basisSpend = annualSpend / periods;                 // per-period spend under even spread
   const met = tiers.filter((t) => basisSpend >= t.spendThreshold);
   if (!met.length) return 0;
@@ -380,6 +394,22 @@ export function milestoneCreditPerYear(meta: CardMeta, annualSpend: number): num
     ? met.reduce((s, t) => s + t.valueFloor, 0)              // cumulative: sum all met tiers
     : met[met.length - 1].valueFloor;                       // else: highest met tier only
   return perPeriodValue * periods;                          // repeats each period
+}
+
+/**
+ * Spend-milestone credit (honest floor, spend-conditional). SIBLING of renewalCredit — it gates on
+ * its own per-tier `spendThreshold`, NOT on `effFee > 0`. Returns 0 for null/absent milestoneBenefit.
+ *
+ * A card may run ONE program (single object) or SEVERAL concurrent ones (array — e.g. CC20's quarterly
+ * voucher + anniversary flight voucher). We normalize to an array and SUM per-program credit. The loader
+ * does not validate this field (bare `?? null` passthrough), so guard defensively against non-array /
+ * malformed shapes here.
+ */
+export function milestoneCreditPerYear(meta: CardMeta, annualSpend: number): number {
+  const mb = meta.milestoneBenefit;
+  if (!mb) return 0;
+  const programs = Array.isArray(mb) ? mb : [mb];
+  return programs.reduce((sum, p) => sum + programCreditPerYear(p, annualSpend), 0);
 }
 
 function annualSpendOf(spend: MonthlySpend): number {
@@ -458,7 +488,9 @@ function scoreCard(
   // score ONLY. It is intentionally NOT applied in the combo (bestComboSecond/comboLabel) or
   // owned-journey (ownedSetupValue) paths, because those split spend PER ROUTED CARD — crediting a
   // milestone on total household spend there would over-credit. Routed-spend milestone crediting is
-  // a separate modeling decision, deferred. (No-op today: milestoneBenefit is null on all 40.)
+  // a separate modeling decision, deferred. NOTE: milestoneBenefit is now live on CC11, CC18 and CC20
+  // (CC20 carries two concurrent programs), so this deferral does have a real effect in the combo/owned
+  // paths for those cards — revisit routed-spend crediting when those journeys are next worked on.
   const milestoneCredit = milestoneCreditPerYear(meta, annualSpend);
   const net = Math.round((earn.guaranteedPerYear - effFee + credit + milestoneCredit) * 100) / 100;
   const notes: string[] = [];

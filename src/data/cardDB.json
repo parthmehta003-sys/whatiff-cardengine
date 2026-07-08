@@ -1290,6 +1290,37 @@
         "type": "NONE",
         "annualValueComputed": 0
       },
+      "milestoneBenefit": [
+        {
+          "tiers": [
+            {
+              "spendThreshold": 150000,
+              "valueFloor": 1500,
+              "benefit": "voucher — Myntra/Nykaa/Reliance Digital/Marriott, cardholder choice"
+            }
+          ],
+          "period": "quarterly",
+          "cumulative": false,
+          "description": "₹1,500 voucher (Myntra/Nykaa/Reliance Digital/Marriott, cardholder choice) per calendar quarter on ₹1.5 lakh quarterly spend."
+        },
+        {
+          "tiers": [
+            {
+              "spendThreshold": 500000,
+              "valueFloor": 5000,
+              "benefit": "flight voucher"
+            },
+            {
+              "spendThreshold": 750000,
+              "valueFloor": 5000,
+              "benefit": "additional flight voucher"
+            }
+          ],
+          "period": "anniversary",
+          "cumulative": true,
+          "description": "₹5,000 flight voucher at ₹5 lakh annual spend + an additional ₹5,000 flight voucher at ₹7.5 lakh (₹10,000 total). Anniversary-year window = 365 days from card setup / last upgrade-downgrade date, NOT the calendar year."
+        }
+      ],
       "redemption": {
         "currency": "points",
         "currencyName": "Reward Points",

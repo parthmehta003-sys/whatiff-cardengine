@@ -26,7 +26,7 @@ interface RawCard {
   loungeStructured?: LoungeStructured | null;
   movieStructured?: MovieStructured | null;
   welcomeBenefit?: WelcomeBenefit | null;
-  milestoneBenefit?: MilestoneBenefit | null;
+  milestoneBenefit?: MilestoneBenefit | MilestoneBenefit[] | null;
   fuelWaiver?: FuelWaiver | null;
   redemption?: Redemption;
 }
