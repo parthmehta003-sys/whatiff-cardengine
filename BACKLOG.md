@@ -146,7 +146,7 @@
       flagging for future consideration if the priorities UI is ever extended to
       describe milestone-linked alternatives.
 
-- [x] **FIXED (PR #167).** Priorities panel now renders every populated lounge block,
+- [x] **FIXED (PR #167, merged July 2026).** Priorities panel now renders every populated lounge block,
       stacked one per line, each with its own threshold/unlock state; unlimited blocks keep
       their type label; below-threshold blocks read "you can't access this lounge". Fixed in
       both `evalLounge()` and `priLine()`; status semantics unchanged (still best-across-blocks),
