@@ -176,7 +176,18 @@
       *incompleteness*, not a false claim — the shown block is accurate, just
       incomplete. Lower priority than the entry below.
 
-- [ ] **Priorities panel: "gives you nothing back" conflates ₹0 user spend with a
+- [x] **FIXED (PR #169, merged July 2026).** Added a 4th `PriorityStatus` `untested` (glyph –):
+      a category priority with a real nonzero rate but ₹0 entered spend now reads "No <Category>
+      spend entered — this card earns X% here" instead of the false "gives you nothing back", and
+      is grouped into NEITHER met nor missed (so the verdict sentence no longer claims a card
+      "doesn't cover" a category the user simply didn't enter spend for). An untested top priority
+      now prompts the user to enter spend rather than a card swap. Genuinely `excluded:true`/`noData`
+      categories keep the accurate "gives you nothing back". Fix lever: spend-independent
+      `categoryMeta` ({ratePer100, excluded, noData}) added to `CardEarnResult`, read by both
+      `evalCategory()` and `priLine()`. Verified across CC18/CC20/CC22/CC31/CC14; 3 original states
+      unchanged. Original finding preserved below for reference.
+
+      **Original finding — Priorities panel: "gives you nothing back" conflates ₹0 user spend with a
       card that excludes the category — an actively FALSE user-facing claim, live in
       production. FLAG TO PARTH FOR AN EXPLICIT PRIORITY CALL, not routine triage.**
       Found during CC20 (Regalia Gold) fresh-incognito verification, July 2026.
