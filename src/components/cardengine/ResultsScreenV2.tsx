@@ -354,30 +354,28 @@ export const ResultsScreenV2: React.FC<Props> = ({
           { label: 'railway', block: ls?.railway ?? null },
         ];
         const monthly = Object.values(spend).reduce((s, v) => s + (v ?? 0), 0);
-        let best: { rank: number; line: string } | null = null;
+        // Render EVERY populated lounge block (stacked, one line each) — not just the single
+        // best-ranked one, which previously dropped domestic/international/railway blocks silently.
+        // Each line reflects that block's OWN threshold/unlock state.
+        const lines: string[] = [];
         for (const { label, block } of blocks) {
           if (!block) continue;
           const threshold = block.spendThreshold ?? 0;
-          const tPeriod = block.thresholdPeriod;
-          const userPeriodSpend = monthly * periodMult(tPeriod);
+          const period = block.thresholdPeriod ?? 'month';
+          const userPeriodSpend = monthly * periodMult(block.thresholdPeriod);
+          // Label is always present, even for unlimited blocks (previously dropped for unlimited).
           const qty = block.unlimited
-            ? 'unlimited'
+            ? `unlimited ${label}`
             : `${block.visits ?? 0} ${label}${block.visitPeriod ? `/${block.visitPeriod}` : ''}`;
-          let rank: number; let line: string;
           if (threshold <= 0) {
-            rank = 2;
-            line = `Airport lounge: ${qty} free visits a year — no conditions.`;
+            lines.push(`${qty} — no conditions.`);
           } else if (userPeriodSpend >= threshold) {
-            rank = 1;
-            line = `Airport lounge: ${qty} free visits. You already spend enough to get these.`;
+            lines.push(`${qty} — unlocked (you spend ${inr(userPeriodSpend)}/${period} vs ${inr(threshold)} needed).`);
           } else {
-            rank = 0;
-            const periodLabel = tPeriod ?? 'month';
-            line = `Airport lounge: ${qty} free visits, but only if you spend ${inr(threshold)}/${periodLabel}. You spend ${inr(userPeriodSpend)} — so you won't get them.`;
+            lines.push(`${qty} — needs ${inr(threshold)}/${period} (you spend ${inr(userPeriodSpend)}, so you can't access this lounge).`);
           }
-          if (!best || rank > best.rank) best = { rank, line };
         }
-        return best?.line ?? 'No free airport lounge visits.';
+        return lines.length ? lines.join('\n') : 'No free airport lounge visits.';
       }
       case 'Movies': {
         const m = meta.movieStructured;
@@ -913,7 +911,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                     <span className="r2-pri-glyph">{ev.status === 'met' ? '✓' : ev.status === 'partial' ? '○' : '✗'}</span>
                                     <div>
                                       <div className="r2-pri-label">{LABEL[key]}</div>
-                                      {displayLine && <div className="r2-pri-line">{displayLine}</div>}
+                                      {displayLine && <div className="r2-pri-line">{displayLine.split('\n').map((ln, i) => <div key={i}>{ln}</div>)}</div>}
                                     </div>
                                   </div>
                                 );
@@ -1446,7 +1444,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                   <span className="r2-pri-glyph">{ev.status === 'met' ? '✓' : ev.status === 'partial' ? '⚠' : '✗'}</span>
                                   <div>
                                     <div className="r2-pri-label">{LABEL[key]}</div>
-                                    {displayLine && <div className="r2-pri-line">{displayLine}</div>}
+                                    {displayLine && <div className="r2-pri-line">{displayLine.split('\n').map((ln, i) => <div key={i}>{ln}</div>)}</div>}
                                   </div>
                                 </div>
                               );
@@ -1976,7 +1974,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 <span className="r2-pri-glyph">{ev.status === 'met' ? '✓' : ev.status === 'partial' ? '⚠' : '✗'}</span>
                                 <div>
                                   <div className="r2-pri-label">{LABEL[key]}</div>
-                                  {displayLine && <div className="r2-pri-line">{displayLine}</div>}
+                                  {displayLine && <div className="r2-pri-line">{displayLine.split('\n').map((ln, i) => <div key={i}>{ln}</div>)}</div>}
                                 </div>
                               </div>
                             );
