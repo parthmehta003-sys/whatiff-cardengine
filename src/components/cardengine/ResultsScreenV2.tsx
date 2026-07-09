@@ -511,8 +511,13 @@ export const ResultsScreenV2: React.FC<Props> = ({
                   if (ev.status === 'met' || ev.status === 'partial') metKeys.push(k); else if (ev.status === 'unmet') missedKeys.push(k); /* 'untested' → neither bucket */
                 }
                 const ll = (keys: PriorityKey[]) => keys.map(k => LABEL[k]).join(', ');
-                if (metKeys.length > 0 && missedKeys.length === 0)
-                  return `Keep this card — earns you ${val} a year, and it covers your ${ll(metKeys)}.`;
+                // Only 'met'/'partial' go to metKeys and only 'unmet' to missedKeys; 'untested' is in
+                // neither, so guard against an empty missedKeys (all priorities untested → no
+                // "doesn't cover" clause, which would otherwise render "Doesn't cover your .").
+                if (missedKeys.length === 0)
+                  return metKeys.length > 0
+                    ? `Keep this card — earns you ${val} a year, and it covers your ${ll(metKeys)}.`
+                    : `Keep this card — earns you ${val} a year.`;
                 if (metKeys.length === 0)
                   return `Keep this card — earns you ${val} a year. Doesn't cover your ${ll(missedKeys)}.`;
                 return `Keep this card — earns you ${val} a year — covers your ${ll(metKeys)}, but not your ${ll(missedKeys)}.`;
@@ -980,7 +985,8 @@ export const ResultsScreenV2: React.FC<Props> = ({
                               if (pKeys.length === 0 || !activeCard) return `Keep this card — earns you ${val} a year.`;
                               const metKs: PriorityKey[] = [], missedKs: PriorityKey[] = [];
                               for (const k of pKeys) { const ev = evalPriorityForCard(k, activeCard, monthlySpend); if (ev.status === 'met' || ev.status === 'partial') metKs.push(k); else if (ev.status === 'unmet') missedKs.push(k); /* 'untested' → neither bucket */ }
-                              if (metKs.length > 0 && missedKs.length === 0) return `Keep this card — earns you ${val} a year, and it covers your ${ll(metKs)}.`;
+                              // 'untested' is in neither bucket — guard empty missedKs (all untested → no false "doesn't cover" clause).
+                              if (missedKs.length === 0) return metKs.length > 0 ? `Keep this card — earns you ${val} a year, and it covers your ${ll(metKs)}.` : `Keep this card — earns you ${val} a year.`;
                               if (metKs.length === 0) return `Keep this card — earns you ${val} a year. Doesn't cover your ${ll(missedKs)}.`;
                               return `Keep this card — earns you ${val} a year — covers your ${ll(metKs)}, but not your ${ll(missedKs)}.`;
                             })();
