@@ -334,7 +334,7 @@ const TIER_META: Record<PriorityEval['tier'], { label: string; cls: string }> = 
   secondary: { label: 'Secondary', cls: 'wf-pri-secondary' },
   niceToHave: { label: 'Nice to have', cls: 'wf-pri-nice' },
 };
-const STATUS_GLYPH: Record<PriorityEval['status'], string> = { met: '✓', partial: '⚠', unmet: '✗' };
+const STATUS_GLYPH: Record<PriorityEval['status'], string> = { met: '✓', partial: '⚠', unmet: '✗', untested: '–' };
 
 const PrioritiesSection: React.FC<{ evals: PriorityEval[] }> = ({ evals }) => {
   const order: PriorityEval['tier'][] = ['top', 'secondary', 'niceToHave'];

@@ -13,7 +13,10 @@
 import type { MonthlySpend, SpendCategory } from './computeEarn';
 import type { CardMeta, LoungeBlock, Priorities, PriorityKey, RankedCard } from './rankCards';
 
-export type PriorityStatus = 'met' | 'partial' | 'unmet'; // ✓ / ⚠ / ✗
+export type PriorityStatus = 'met' | 'partial' | 'unmet' | 'untested'; // ✓ / ⚠ / ✗ / –
+// 'untested' = a category priority the card has a REAL nonzero rate for, but the user entered ₹0
+// spend in that category — so we can't claim a rupee figure, but it must NOT be mislabelled "unmet"
+// (that would falsely say the card gives nothing back). Distinct from a genuinely excluded category.
 export type PriorityTier = 'top' | 'secondary' | 'niceToHave';
 
 export interface PriorityEval {
@@ -87,19 +90,33 @@ function evalRewardType(meta: CardMeta, want: 'cashback' | 'points'):
 function evalCategory(card: RankedCard, key: PriorityKey):
   { status: PriorityStatus; line: string } {
   const cat = CATEGORY_PRIORITY[key]!;
+  // Spend-independent rate/exclusion for this category (from computeCardEarn's categoryMeta), so we
+  // can tell "card excludes this" from "user entered ₹0 spend here" even when perCategory[cat] is absent.
+  const cm = card.earn.categoryMeta?.[cat];
+  const excluded = cm?.excluded ?? false;
+  const noData = cm?.noData ?? false;
+  const ratePer100 = cm?.ratePer100 ?? 0;
   const perYear = (card.earn.perCategory[cat]?.guaranteed ?? 0) * 12;
+
+  // Genuinely earns nothing here — excluded, no rate at all (noData), or a zero rate. Accurate to
+  // say "gives nothing back" regardless of spend. (noData folds in per the confirmed design.)
+  if (excluded || noData || ratePer100 <= 0) {
+    if (key === 'Fuel' && card.meta.fuelWaiver) {
+      const fw = card.meta.fuelWaiver;
+      const cap = fw.capAmount != null ? ` (capped ${inr(fw.capAmount)}/${fw.capPeriod ?? 'cycle'})` : '';
+      return {
+        status: 'unmet',
+        line: `${LABEL[key]} — excluded, earns nothing, but waives ${fw.waiverPct}% surcharge on ${inr(fw.minTxn)}–${inr(fw.maxTxn)} txns${cap}`,
+      };
+    }
+    return { status: 'unmet', line: `${LABEL[key]} — excluded, earns nothing` };
+  }
+  // Real nonzero rate AND the user spends here → a genuine, quantifiable win.
   if (perYear > 0) {
     return { status: 'met', line: `${LABEL[key]} — earns ${inr(perYear)}/yr` };
   }
-  if (key === 'Fuel' && card.meta.fuelWaiver) {
-    const fw = card.meta.fuelWaiver;
-    const cap = fw.capAmount != null ? ` (capped ${inr(fw.capAmount)}/${fw.capPeriod ?? 'cycle'})` : '';
-    return {
-      status: 'unmet',
-      line: `${LABEL[key]} — excluded, earns nothing, but waives ${fw.waiverPct}% surcharge on ${inr(fw.minTxn)}–${inr(fw.maxTxn)} txns${cap}`,
-    };
-  }
-  return { status: 'unmet', line: `${LABEL[key]} — excluded, earns nothing` };
+  // Real nonzero rate but the user entered ₹0 spend here → untested, NOT "nothing back".
+  return { status: 'untested', line: `${LABEL[key]} — no spend entered; earns ${ratePer100}% here` };
 }
 
 /**
@@ -172,7 +189,7 @@ export function evalPriorityForCard(
   }
 }
 
-const STATUS_RANK = { met: 2, partial: 1, unmet: 0 } as const;
+const STATUS_RANK = { met: 3, partial: 2, untested: 1, unmet: 0 } as const;
 
 /**
  * Evaluate a priority against the recommended SETUP (1 card or a combo). A priority is met if EITHER
