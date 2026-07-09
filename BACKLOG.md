@@ -146,6 +146,69 @@
       flagging for future consideration if the priorities UI is ever extended to
       describe milestone-linked alternatives.
 
+- [ ] **Priorities panel: lounge display omits all but one block.** Found during
+      CC20 (Regalia Gold) fresh-incognito verification, July 2026. Both
+      `evalLounge()` (`evaluatePriorities.ts`) and `priLine()`'s Lounge branch
+      (`ResultsScreenV2.tsx:340-417`) iterate all three lounge blocks
+      (domestic/international/railway) but return only the single best-ranked
+      block, using rank = 2 (no spend condition) > 1 (condition met) > 0
+      (condition unmet). Confirmed on all 7 dual-lounge cards (CC16, CC20, CC22,
+      CC25, CC27, CC31, CC32) — every one drops a populated block: CC20/CC16 show
+      international (unconditional), omit domestic (conditional); CC22/CC25 show
+      domestic (tie, evaluated first), omit international; CC27/CC31/CC32 show
+      whichever unlimited block ranks first, omit the other. Data is NOT the
+      problem — e.g. CC20's domestic lounge (3/qtr, ₹60k spend gate) is correctly
+      populated and simply unreachable at any spend level, because an unconditional
+      international block always outranks a conditional domestic one. Sub-issue,
+      same function: for unlimited-visit blocks the quantity string drops the
+      domestic/international label entirely (CC27/CC31/CC32 render "unlimited free
+      visits a year — no conditions" with no indication of which lounge type). Fix
+      direction: render all populated lounge blocks, not the single best-ranked one
+      — requires changes in both `evalLounge()` and `priLine()` (see the
+      parallel-implementation note in the entry below). Severity: display
+      *incompleteness*, not a false claim — the shown block is accurate, just
+      incomplete. Lower priority than the entry below.
+
+- [ ] **Priorities panel: "gives you nothing back" conflates ₹0 user spend with a
+      card that excludes the category — an actively FALSE user-facing claim, live in
+      production. FLAG TO PARTH FOR AN EXPLICIT PRIORITY CALL, not routine triage.**
+      Found during CC20 (Regalia Gold) fresh-incognito verification, July 2026.
+      `card.earn.perCategory` only contains categories present in
+      `Object.keys(monthlySpend)` (`computeCardEarn`). `evalCategory()`/`priLine()`
+      key off `guaranteed` (= rate × user spend), not the card's actual rate. So a
+      priority category where the user entered ₹0 spend has `perCategory[cat]`
+      absent → `guaranteed ?? 0` → status "unmet" → renders "gives you nothing back"
+      — IDENTICAL output to a genuinely `excluded: true` category (e.g. Fuel on CC20,
+      which really does earn nothing). Verified directly on CC20: with ₹0
+      Dining/Travel spend entered, both show ✗ "gives you nothing back" despite CC20
+      earning 0.875%/1.25%+ on those categories; with nonzero spend entered, both
+      correctly flip to ✓ "gives you back ₹X/yr". Same pattern confirmed on CC22,
+      CC31, CC18 under zero-spend-in-priority-category profiles — not CC20-specific.
+      Downstream propagation, same root cause, wider blast radius: (1)
+      `evalPriorityForCard.status` drives met/missed grouping
+      (`ResultsScreenV2.tsx:499-510`) → a card with ₹0 entered spend in a priority
+      category lands in `missedKeys` → the verdict sentence states "Doesn't cover
+      your [Category]" — a FALSE claim about the card, not the user's spend entry.
+      (2) `findAlternativeForMissedTop` requires `status: 'met'` to suggest an
+      alternative — impossible when no card can earn on a category with ₹0 entered
+      spend — so the alt-finder silently no-ops for every zero-spend priority
+      category, on every card, with no error or fallback. SEVERITY — distinct from
+      the lounge entry above: this is not incomplete display, it is an ACTIVELY FALSE
+      claim ("doesn't cover your Travel" on a card that does), live now on every
+      card × every zero-spend priority combination, and it contradicts the product's
+      core "honest, no-agenda claims about what a card does for you" positioning. Fix
+      direction: distinguish `excluded: true` (card genuinely earns nothing here)
+      from `perCategory[cat]` absent due to ₹0 spend (rate simply untested by this
+      profile) before choosing status/copy — the two cases need different phrasing
+      and must not both collapse to met/missed the same way.
+      **Maintenance-smell note (applies to both priorities-panel entries above):**
+      `evalPriorityForCard` supplies only `.status` (glyph + met/missed grouping);
+      the actual on-screen text comes from a SEPARATE, parallel implementation,
+      `priLine()` in `ResultsScreenV2.tsx`, which ignores `evaluatePriorities.ts`'s
+      own `.line` field entirely. The two can and do disagree. Any real fix to either
+      entry above should touch both implementations or consolidate them into one
+      source of truth — don't patch one and leave the other stale.
+
 - [ ] **`perCategory[cat].notes` (PR #159) only renders in the new-card journey —
       the owned-card journey's "See the numbers" panel is a separate component
       that structurally can't show it without additional work.** Confirmed via
