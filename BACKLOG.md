@@ -146,7 +146,14 @@
       flagging for future consideration if the priorities UI is ever extended to
       describe milestone-linked alternatives.
 
-- [ ] **Priorities panel: lounge display omits all but one block.** Found during
+- [x] **FIXED (PR #167).** Priorities panel now renders every populated lounge block,
+      stacked one per line, each with its own threshold/unlock state; unlimited blocks keep
+      their type label; below-threshold blocks read "you can't access this lounge". Fixed in
+      both `evalLounge()` and `priLine()`; status semantics unchanged (still best-across-blocks),
+      so no scoring impact. Verified on all 7 dual-lounge cards + single-lounge regression.
+      Original finding preserved below for reference.
+
+      **Original finding — Priorities panel: lounge display omits all but one block.** Found during
       CC20 (Regalia Gold) fresh-incognito verification, July 2026. Both
       `evalLounge()` (`evaluatePriorities.ts`) and `priLine()`'s Lounge branch
       (`ResultsScreenV2.tsx:340-417`) iterate all three lounge blocks

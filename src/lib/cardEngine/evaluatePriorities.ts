@@ -116,41 +116,42 @@ function evalLounge(meta: CardMeta, spend: MonthlySpend):
     { label: 'railway', block: ls?.railway ?? null },
   ];
   const monthly = totalMonthlySpend(spend);
+  const rank = { met: 2, partial: 1, unmet: 0 } as const;
 
-  let best: { status: PriorityStatus; line: string } | null = null;
-  const better = (a: PriorityStatus, b: PriorityStatus | undefined) => {
-    const rank = { met: 2, partial: 1, unmet: 0 } as const;
-    return b === undefined || rank[a] > rank[b];
-  };
-
+  // Render EVERY populated block; overall status is the BEST block's status (any met block means
+  // the priority is met — unchanged behaviour). The line lists ALL populated blocks so no lounge
+  // type is silently dropped, and each clause reflects that block's own threshold/unlock state.
+  // (Display note: this .line is not currently rendered — all lounge display flows through
+  // ResultsScreenV2's priLine() — but kept in sync with it to avoid the two implementations drifting.)
+  let bestStatus: PriorityStatus | null = null;
+  const clauses: string[] = [];
   for (const { label, block } of blocks) {
     if (!block) continue;
     const threshold = block.spendThreshold ?? 0;
     const tPeriod = block.thresholdPeriod;
     const userPeriodSpend = monthly * periodMultiplier(tPeriod);
-    // describe the benefit quantity
+    // label always present, even for unlimited blocks
     const qty = block.unlimited
-      ? 'unlimited'
+      ? `unlimited ${label}`
       : `${block.visits ?? 0} ${label}${block.visitPeriod ? `/${block.visitPeriod}` : ''}`;
 
-    let res: { status: PriorityStatus; line: string };
+    let status: PriorityStatus; let clause: string;
     if (threshold <= 0) {
-      res = { status: 'met', line: `Lounge — ${qty} (no spend condition)` };
+      status = 'met';
+      clause = `${qty} (no spend condition)`;
     } else if (userPeriodSpend >= threshold) {
-      res = {
-        status: 'met',
-        line: `Lounge — ${qty}, unlocked — you spend ${inr(userPeriodSpend)}/${tPeriod ?? 'month'} vs ${inr(threshold)} needed`,
-      };
+      status = 'met';
+      clause = `${qty}, unlocked — you spend ${inr(userPeriodSpend)}/${tPeriod ?? 'month'} vs ${inr(threshold)} needed`;
     } else {
-      res = {
-        status: 'partial',
-        line: `Lounge — ${qty}, needs ${inr(threshold)}/${tPeriod ?? 'month'}, you spend ${inr(userPeriodSpend)} — you won't unlock it`,
-      };
+      status = 'partial';
+      clause = `${qty}, needs ${inr(threshold)}/${tPeriod ?? 'month'}, you spend ${inr(userPeriodSpend)} — you can't access this lounge`;
     }
-    if (better(res.status, best?.status)) best = res;
+    clauses.push(clause);
+    if (bestStatus === null || rank[status] > rank[bestStatus]) bestStatus = status;
   }
 
-  return best ?? { status: 'unmet', line: 'No lounge access' };
+  if (!clauses.length) return { status: 'unmet', line: 'No lounge access' };
+  return { status: bestStatus ?? 'unmet', line: `Lounge — ${clauses.join('; ')}` };
 }
 
 // ── Dispatch ────────────────────────────────────────────────────────────────
