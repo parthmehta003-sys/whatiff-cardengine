@@ -402,14 +402,24 @@ export const ResultsScreenV2: React.FC<Props> = ({
         const cat = catMap[key];
         if (!cat) return '';
         const label = (CAT_LABEL as Record<string, string>)[cat] ?? cat;
+        const cm = card.earn.categoryMeta?.[cat];
+        const excluded = cm?.excluded ?? false;
+        const noData = cm?.noData ?? false;
+        const ratePer100 = cm?.ratePer100 ?? 0;
         const perYear = (card.earn.perCategory[cat as keyof typeof card.earn.perCategory]?.guaranteed ?? 0) * 12;
-        if (perYear > 0) return `${label}: gives you back ${inr(perYear)} a year.`;
-        if (key === 'Fuel' && meta.fuelWaiver) {
-          const fw = meta.fuelWaiver;
-          const cap = fw.capAmount != null ? ` (capped ${inr(fw.capAmount)}/${fw.capPeriod ?? 'cycle'})` : '';
-          return `${label}: gives you nothing back, but waives the ${fw.waiverPct}% surcharge on ${inr(fw.minTxn)}–${inr(fw.maxTxn)} transactions${cap}.`;
+        // Genuinely earns nothing here (excluded / no rate) → accurate to say so, regardless of spend.
+        if (excluded || noData || ratePer100 <= 0) {
+          if (key === 'Fuel' && meta.fuelWaiver) {
+            const fw = meta.fuelWaiver;
+            const cap = fw.capAmount != null ? ` (capped ${inr(fw.capAmount)}/${fw.capPeriod ?? 'cycle'})` : '';
+            return `${label}: gives you nothing back, but waives the ${fw.waiverPct}% surcharge on ${inr(fw.minTxn)}–${inr(fw.maxTxn)} transactions${cap}.`;
+          }
+          return `${label}: gives you nothing back.`;
         }
-        return `${label}: gives you nothing back.`;
+        // Real rate + actual spend → quantifiable win.
+        if (perYear > 0) return `${label}: gives you back ${inr(perYear)} a year.`;
+        // Real rate but ₹0 spend entered → untested, NOT "nothing back".
+        return `No ${label} spend entered — this card earns ${ratePer100}% here.`;
       }
     }
   }
@@ -465,7 +475,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                   if (pKeys.length > 0 && activeCard) {
                     for (const k of pKeys) {
                       const ev = evalPriorityForCard(k, activeCard, monthlySpend);
-                      (ev.status === 'met' || ev.status === 'partial' ? metKeys : missedKeys).push(k);
+                      if (ev.status === 'met' || ev.status === 'partial') metKeys.push(k); else if (ev.status === 'unmet') missedKeys.push(k); /* 'untested' → neither bucket */
                     }
                   }
                   const ll = (keys: PriorityKey[]) => keys.map(k => LABEL[k]).join(', ');
@@ -498,7 +508,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                 const missedKeys: PriorityKey[] = [];
                 for (const k of pKeys) {
                   const ev = evalPriorityForCard(k, activeCard, monthlySpend);
-                  (ev.status === 'met' || ev.status === 'partial' ? metKeys : missedKeys).push(k);
+                  if (ev.status === 'met' || ev.status === 'partial') metKeys.push(k); else if (ev.status === 'unmet') missedKeys.push(k); /* 'untested' → neither bucket */
                 }
                 const ll = (keys: PriorityKey[]) => keys.map(k => LABEL[k]).join(', ');
                 if (metKeys.length > 0 && missedKeys.length === 0)
@@ -908,7 +918,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 const displayLine = priLine(key, ownedCardObj, monthlySpend);
                                 return (
                                   <div key={key} className={'r2-pri-row ' + ev.status}>
-                                    <span className="r2-pri-glyph">{ev.status === 'met' ? '✓' : ev.status === 'partial' ? '○' : '✗'}</span>
+                                    <span className="r2-pri-glyph">{ev.status === 'met' ? '✓' : ev.status === 'partial' ? '○' : ev.status === 'untested' ? '–' : '✗'}</span>
                                     <div>
                                       <div className="r2-pri-label">{LABEL[key]}</div>
                                       {displayLine && <div className="r2-pri-line">{displayLine.split('\n').map((ln, i) => <div key={i}>{ln}</div>)}</div>}
@@ -952,7 +962,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 if (pKeys.length > 0 && activeCard) {
                                   for (const k of pKeys) {
                                     const ev = evalPriorityForCard(k, activeCard, monthlySpend);
-                                    (ev.status === 'met' || ev.status === 'partial' ? metKs : missedKs).push(k);
+                                    if (ev.status === 'met' || ev.status === 'partial') metKs.push(k); else if (ev.status === 'unmet') missedKs.push(k); /* 'untested' → neither bucket */
                                   }
                                 }
                                 if (metKs.length > 0) {
@@ -969,7 +979,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                               }
                               if (pKeys.length === 0 || !activeCard) return `Keep this card — earns you ${val} a year.`;
                               const metKs: PriorityKey[] = [], missedKs: PriorityKey[] = [];
-                              for (const k of pKeys) { const ev = evalPriorityForCard(k, activeCard, monthlySpend); (ev.status === 'met' || ev.status === 'partial' ? metKs : missedKs).push(k); }
+                              for (const k of pKeys) { const ev = evalPriorityForCard(k, activeCard, monthlySpend); if (ev.status === 'met' || ev.status === 'partial') metKs.push(k); else if (ev.status === 'unmet') missedKs.push(k); /* 'untested' → neither bucket */ }
                               if (metKs.length > 0 && missedKs.length === 0) return `Keep this card — earns you ${val} a year, and it covers your ${ll(metKs)}.`;
                               if (metKs.length === 0) return `Keep this card — earns you ${val} a year. Doesn't cover your ${ll(missedKs)}.`;
                               return `Keep this card — earns you ${val} a year — covers your ${ll(metKs)}, but not your ${ll(missedKs)}.`;
@@ -1441,7 +1451,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                               const displayLine = priLine(key, activeCard, monthlySpend);
                               return (
                                 <div key={key} className={'r2-pri-row ' + ev.status}>
-                                  <span className="r2-pri-glyph">{ev.status === 'met' ? '✓' : ev.status === 'partial' ? '⚠' : '✗'}</span>
+                                  <span className="r2-pri-glyph">{ev.status === 'met' ? '✓' : ev.status === 'partial' ? '⚠' : ev.status === 'untested' ? '–' : '✗'}</span>
                                   <div>
                                     <div className="r2-pri-label">{LABEL[key]}</div>
                                     {displayLine && <div className="r2-pri-line">{displayLine.split('\n').map((ln, i) => <div key={i}>{ln}</div>)}</div>}
@@ -1466,7 +1476,12 @@ export const ResultsScreenV2: React.FC<Props> = ({
 
                               let msg: React.ReactNode;
 
-                              if (CATEGORY_KEYS.has(topKey)) {
+                              if (topEv.status === 'untested') {
+                                // Category priority with a real rate but ₹0 entered spend — the remedy is
+                                // to enter spend, not swap cards (no card can "cover" a zero-spend category),
+                                // so nudge for spend rather than falling through to a false "earns nothing".
+                                msg = <>You picked <b>{PRIORITY_LABEL[topKey]}</b> as your top priority but haven&rsquo;t entered any {PRIORITY_LABEL[topKey]} spend — add it above and we&rsquo;ll show what this card earns you there.</>;
+                              } else if (CATEGORY_KEYS.has(topKey)) {
                                 // Type 1 — Category priority: name the best card for that category
                                 const catKey = topKey === 'Online' ? 'Online' : topKey === 'Dining' ? 'Dining' : topKey === 'Fuel' ? 'Fuel' : 'Travel';
                                 const bestCard = rankedPool
@@ -1971,7 +1986,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                             const displayLine = priLine(key, activeCard, monthlySpend);
                             return (
                               <div key={key} className={'r2-pri-row ' + ev.status}>
-                                <span className="r2-pri-glyph">{ev.status === 'met' ? '✓' : ev.status === 'partial' ? '⚠' : '✗'}</span>
+                                <span className="r2-pri-glyph">{ev.status === 'met' ? '✓' : ev.status === 'partial' ? '⚠' : ev.status === 'untested' ? '–' : '✗'}</span>
                                 <div>
                                   <div className="r2-pri-label">{LABEL[key]}</div>
                                   {displayLine && <div className="r2-pri-line">{displayLine.split('\n').map((ln, i) => <div key={i}>{ln}</div>)}</div>}

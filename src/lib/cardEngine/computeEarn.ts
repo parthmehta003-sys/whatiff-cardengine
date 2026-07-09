@@ -80,6 +80,12 @@ export interface CardEarnResult {
   guaranteedPerYear: number;
   upsidePerYear: number;
   sharedCapAdjustments: string[]; // human notes when a card-level shared cap clamped totals
+  /**
+   * Spend-INDEPENDENT rate/exclusion for each category the priorities layer can key on
+   * (Travel/Dining/Fuel/Online). Lets evalCategory()/priLine() distinguish a genuinely excluded
+   * category from one the user simply entered ₹0 spend in (perCategory only holds spent categories).
+   */
+  categoryMeta: Record<string, { ratePer100: number; excluded: boolean; noData: boolean }>;
 }
 
 export type MonthlySpend = Partial<Record<SpendCategory, number>>;
@@ -375,6 +381,16 @@ export function computeCardEarn(
     categories.reduce((s, c) => s + (perCategory[c]?.upside ?? 0), 0)
   );
 
+  // Spend-independent rate/exclusion for the category-priority categories. computeCategory(cat, 0, …)
+  // reports baseRatePer100 + excluded + noData regardless of user spend; reuse an already-computed
+  // perCategory entry when the user did spend there. Consumed only by the priorities display layer.
+  const PRIORITY_CATS: SpendCategory[] = ['Travel', 'Dining', 'Fuel', 'Online'];
+  const categoryMeta: Record<string, { ratePer100: number; excluded: boolean; noData: boolean }> = {};
+  for (const cat of PRIORITY_CATS) {
+    const ce = perCategory[cat] ?? computeCategory(cat, 0, cardRows, opts);
+    categoryMeta[cat] = { ratePer100: ce.baseRatePer100, excluded: ce.excluded, noData: ce.noData };
+  }
+
   return {
     cardId,
     perCategory,
@@ -383,6 +399,7 @@ export function computeCardEarn(
     guaranteedPerYear: round2(guaranteedPerMonth * 12),
     upsidePerYear: round2(upsidePerMonth * 12),
     sharedCapAdjustments,
+    categoryMeta,
   };
 }
 
