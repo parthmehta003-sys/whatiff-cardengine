@@ -488,9 +488,9 @@ function scoreCard(
   // score ONLY. It is intentionally NOT applied in the combo (bestComboSecond/comboLabel) or
   // owned-journey (ownedSetupValue) paths, because those split spend PER ROUTED CARD — crediting a
   // milestone on total household spend there would over-credit. Routed-spend milestone crediting is
-  // a separate modeling decision, deferred. NOTE: milestoneBenefit is now live on CC11, CC18 and CC20
-  // (CC20 carries two concurrent programs), so this deferral does have a real effect in the combo/owned
-  // paths for those cards — revisit routed-spend crediting when those journeys are next worked on.
+  // a separate modeling decision, deferred. NOTE: milestoneBenefit is now live on CC11, CC18, CC20 and
+  // CC21 (CC20 carries two concurrent programs), so this deferral does have a real effect in the
+  // combo/owned paths for those cards — revisit routed-spend crediting when those journeys are next worked on.
   const milestoneCredit = milestoneCreditPerYear(meta, annualSpend);
   const net = Math.round((earn.guaranteedPerYear - effFee + credit + milestoneCredit) * 100) / 100;
   const notes: string[] = [];
