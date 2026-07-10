@@ -16,6 +16,48 @@
       `sharedCapId` between them — documented in each row's `sourceNote` as unstored-but-verified
       (Part-1 PR, Fix A, Option 3: document-only). There is also no engine field for the daily cap.
       This must appear in every future handover until resolved.
+      - **Candidate second instance (CC21, HDFC Diners Club Privilege).** CC21's Travel
+        `channel_conditional` "Flights/hotels via SmartBuy (up to 10X)" row is stored as genuinely
+        uncapped (matches every official doc provided). A third-party-only figure (~4,000 RP/month,
+        Card Maven) suggests a SmartBuy monthly ceiling that would be the same underlying
+        upside-pooling limitation showing up on a second card — but it is NOT primary-sourced. Do
+        not add any cap number until an official SmartBuy program T&C confirms it. Logged from the
+        CC21 verification PR (Fix F).
+
+- [ ] **Transfer partner caveat rendering (generalized from CC21 Fix G).**
+      PARKED — no build; nothing decided. Both approach options below are kept open.
+
+      **The general problem.** `transferPartners` rows can carry caveats in `notes` — eligibility
+      gates (card issued before a cutoff date), post-devaluation route removals, route-specific
+      value/timing notes — but the UI never surfaces them. `transferPartners` render *only* inside
+      `TransferCallout` (ResultsScreenV2.tsx), which (a) is gated on the card having a `transferHacks`
+      entry with `displayTravelHack: true`, and (b) renders `{partner} {ratio}` pills only, never the
+      partner's `notes`. So any card whose transfer value is conditional — eligibility-gated, or
+      valid only on some routes — is shown as if unconditional, or (when it has no travel-hack) not
+      shown at all. There is also no journey awareness: transfer partners render identically in the
+      new-card and owned-card journeys, with no way to mark a partner "owned-journey only" (relevant
+      when a benefit is closed to current-issuance cards but retained by legacy holders).
+
+      **Originating case (CC21, HDFC Diners Club Privilege) — supersedes the narrower Fix-G item.**
+      CC21 carries a legacy-gated KrisFlyer partner (miles transfer available only on cards issued
+      before 15 Jun 2023). Intended behavior: show it in the **owned** journey with the eligibility
+      caveat inline; hide it entirely in the **new-card** journey. The data row is already captured
+      in `transferPartners` (caveat + est. value in `notes`, "Owned-journey only" marker) but is
+      INERT today — CC21 has no `transferHack`, so it renders in neither journey. This is the first
+      card to need caveat + journey-gated transfer-partner display, but it is unlikely to be the last
+      (issuer-driven eligibility cutoffs and route devaluations recur).
+
+      **Two approaches, neither chosen:**
+      - *Option 1 — narrow, card-level flag.* Add a per-card boolean (e.g. `transferPartnersOwnedOnly`),
+        render partner `notes` inline in `TransferCallout`, and give transfer partners a display path
+        that does not require a full travel-hack (or add a CC21 `transferHack`). Smallest change; fits
+        the current one-card need; risks re-work if more caveat shapes appear.
+      - *Option 2 — general caveat/eligibility model.* Give `transferPartners` a first-class
+        eligibility/journey model (structured eligibility + per-partner journey visibility), rendered
+        wherever partners appear. More upfront work; absorbs future eligibility-gated / route-limited
+        partners without per-card flags.
+
+      Decide the approach before building. Logged from the CC21 verification PR (Fix G).
 
 - [ ] `cardIntelligence()` (selectHacks.ts) does not filter warnings by `triggerWhen`.
       Warnings are matched only by card/issuer name in the text. Any `triggerWhen`
