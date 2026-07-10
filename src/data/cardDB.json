@@ -1439,6 +1439,26 @@
             "best": true
           },
           {
+            "channel": "Select restaurants",
+            "valuePerPoint": 0.5,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "₹0.50 per point at select restaurants."
+          },
+          {
+            "channel": "Exclusive Catalogue",
+            "valuePerPoint": 0.35,
+            "valueRange": null,
+            "valueIsVariable": false,
+            "minPoints": null,
+            "feePerRedemption": 0,
+            "capPerCycle": null,
+            "note": "Up to ₹0.35 per point."
+          },
+          {
             "channel": "Statement cashback",
             "valuePerPoint": 0.2,
             "valueRange": null,
@@ -12722,13 +12742,13 @@
     {
       "hackId": "H021",
       "cardId": "CC21",
-      "hackName": "Track your SmartBuy limit so you don't lose the bonus",
-      "executionSteps": "1. Track your monthly SmartBuy bonus points.\n2. The 5x bonus stops after 2,500 points a month (about ₹62,500 of SmartBuy spending).\n3. Once you hit the limit, switch to another card or accept the base 1%.\n4. Plan big SmartBuy buys for early in the month before the limit fills.\n5. The limit resets on the 1st of each month, not your billing date.",
-      "whyItMatters": "If you don't track it, you keep spending past the limit and earn 1% instead of 5%. Routing ₹{monthly_smartbuy_potential}/month correctly captures ₹{annual_smartbuy_capture} a year.",
-      "relevantCategories": "online,smartbuy",
+      "hackName": "Track your Swiggy/Zomato 5X cap so you don't lose the bonus",
+      "executionSteps": "1. Track your combined Swiggy + Zomato spend through the month.\n2. The accelerated 4X bonus (16 RP/₹200) stops after 2,500 Reward Points a month, across both apps combined.\n3. That cap is reached at about ₹31,250 of combined Swiggy + Zomato spend per month.\n4. Beyond the cap, spends still earn the base 4 RP/₹200 rate uncapped — you keep earning, just not accelerated.\n5. The cap resets on the 1st of each calendar month, not your billing date.",
+      "whyItMatters": "5X Reward Points (20 RP/₹200) on Swiggy & Zomato combined. The accelerated 4X portion (16 RP/₹200) is capped at 2,500 RP/month across both merchants combined — reached at ~₹31,250/month combined Swiggy+Zomato spend. Beyond that, the base 4 RP/₹200 rate continues earning uncapped.",
+      "relevantCategories": "dining",
       "minMonthlySpend": 25000,
       "platformRequired": "none",
-      "priorityMatch": "online_shopping,reward_optimization",
+      "priorityMatch": "dining,reward_optimization",
       "rateWithHack": 5,
       "rateWithoutHack": 1,
       "monthlyCap": 2500,
@@ -12736,8 +12756,8 @@
       "statusNote": "Lounge gate: ₹60k previous quarter unlocks 2 dom + 1 intl. Diners acceptance still inconsistent at smaller merchants. Carry Regalia Gold (Visa/MC) as backup.",
       "commonFailure": null,
       "difficulty": "Intermediate",
-      "lastVerified": "May 2026",
-      "sources": "TechnoFino optimization threads",
+      "lastVerified": "June 2026",
+      "sources": "HDFC FAQ & T&C (June 2026), Section A.2",
       "relatedWarnings": null
     },
     {
@@ -13765,6 +13785,13 @@
       "type": "airline",
       "ratio": "2:1",
       "notes": "₹0.11/pt"
+    },
+    {
+      "cardId": "CC21",
+      "partner": "Singapore KrisFlyer",
+      "type": "airline",
+      "ratio": "2:1",
+      "notes": "Est. ₹0.63/pt. Eligibility: only Diners Club Privilege cards issued before 15 Jun 2023 can transfer miles; cards issued from that date onward are not eligible. Owned-journey only."
     }
   ]
 }

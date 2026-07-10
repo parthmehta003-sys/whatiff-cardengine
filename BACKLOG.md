@@ -16,6 +16,29 @@
       `sharedCapId` between them — documented in each row's `sourceNote` as unstored-but-verified
       (Part-1 PR, Fix A, Option 3: document-only). There is also no engine field for the daily cap.
       This must appear in every future handover until resolved.
+      - **Candidate second instance (CC21, HDFC Diners Club Privilege).** CC21's Travel
+        `channel_conditional` "Flights/hotels via SmartBuy (up to 10X)" row is stored as genuinely
+        uncapped (matches every official doc provided). A third-party-only figure (~4,000 RP/month,
+        Card Maven) suggests a SmartBuy monthly ceiling that would be the same underlying
+        upside-pooling limitation showing up on a second card — but it is NOT primary-sourced. Do
+        not add any cap number until an official SmartBuy program T&C confirms it. Logged from the
+        CC21 verification PR (Fix F).
+
+- [ ] **Transfer-partner journey split + eligibility-caveat rendering (surfaced by CC21).**
+      `transferPartners` rows only render inside `TransferCallout` (ResultsScreenV2.tsx), which is
+      gated on the card having a `transferHacks` entry with `displayTravelHack: true`; the callout
+      renders `{partner} {ratio}` pills only and never displays the partner's `notes`/caveat text.
+      There is also no new-card-vs-owned journey split for transfer partners — both journeys render
+      identically. CC21 (HDFC Diners Club Privilege) needs a legacy-gated KrisFlyer partner
+      (issued before 15 Jun 2023 only) shown in the **owned** journey with its eligibility caveat
+      inline, and hidden entirely in the **new-card** journey (current-issuance cards aren't
+      eligible). The data row is captured now in `transferPartners` (eligibility caveat in `notes`,
+      "Owned-journey only" marker) but is INERT — CC21 has no `transferHack`, so it renders nowhere.
+      To make it render as intended, three narrow changes are needed: (1) a card-level flag
+      (e.g. `transferPartnersOwnedOnly: true`) rather than a general framework — this is a one-card
+      case today; (2) render partner `notes` inline in `TransferCallout`; (3) a display path for
+      transfer partners that doesn't require a full travel-hack (or add a CC21 transferHack). Logged
+      from the CC21 verification PR (Fix G) — needs a design decision before building.
 
 - [ ] `cardIntelligence()` (selectHacks.ts) does not filter warnings by `triggerWhen`.
       Warnings are matched only by card/issuer name in the text. Any `triggerWhen`
