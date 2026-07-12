@@ -4216,7 +4216,7 @@
       "cardId": "CC05",
       "ladderId": "AXIS_FLIPKART",
       "category": "Dining",
-      "rowType": "base",
+      "rowType": "channel_conditional",
       "earnNum": 4,
       "earnPer": 100,
       "rewardUnit": "cashback%",
@@ -4232,6 +4232,27 @@
       "sharedCapId": null,
       "multiplierNote": null,
       "sourceNote": "4% on Swiggy (preferred merchant); else 1%. Pros."
+    },
+    {
+      "cardId": "CC05",
+      "ladderId": "AXIS_FLIPKART",
+      "category": "Dining",
+      "rowType": "base",
+      "earnNum": 1,
+      "earnPer": 100,
+      "rewardUnit": "cashback%",
+      "redemptionRoute": "cashback",
+      "redeemValue": 1,
+      "trigger": "Non-Swiggy dining",
+      "thresholdAmount": null,
+      "thresholdPeriod": null,
+      "stacks": false,
+      "excluded": false,
+      "capAmount": null,
+      "capPeriod": null,
+      "sharedCapId": null,
+      "multiplierNote": null,
+      "sourceNote": "1% on non-Swiggy dining (card's own sourceNote: 'else 1%'). Added as explicit base floor during rowType audit — Swiggy's 4% moved to channel_conditional upside. Pros."
     },
     {
       "cardId": "CC05",
@@ -4510,7 +4531,7 @@
       "cardId": "CC07",
       "ladderId": "ICICI_AMAZONPAY",
       "category": "Online",
-      "rowType": "base",
+      "rowType": "channel_conditional",
       "earnNum": 3,
       "earnPer": 100,
       "rewardUnit": "cashback%",
@@ -4525,7 +4546,7 @@
       "capPeriod": null,
       "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "3% Amazon (non-Prime floor); 5% for Amazon Prime members shown as conditional upside. 2% Amazon Pay partners; 1% else. Pros."
+      "sourceNote": "3% Amazon (non-Prime floor); 5% for Amazon Prime members shown as conditional upside. 2% Amazon Pay partners; 1% else. Pros. Floor rate unconfirmed pending official T&C — see rowType audit — NOT to be closed without verification."
     },
     {
       "cardId": "CC07",
@@ -4636,7 +4657,7 @@
       "cardId": "CC07",
       "ladderId": "ICICI_AMAZONPAY",
       "category": "Utility",
-      "rowType": "base",
+      "rowType": "channel_conditional",
       "earnNum": 1,
       "earnPer": 100,
       "rewardUnit": "cashback%",
@@ -5938,7 +5959,7 @@
       "cardId": "CC14",
       "ladderId": "AXIS_ACE",
       "category": "Dining",
-      "rowType": "base",
+      "rowType": "channel_conditional",
       "earnNum": 4,
       "earnPer": 100,
       "rewardUnit": "cashback%",
@@ -5953,7 +5974,7 @@
       "capPeriod": "cycle",
       "sharedCapId": "CC14_ACCEL_500_CYCLE",
       "multiplierNote": null,
-      "sourceNote": "4% on Swiggy/Zomato/Ola; shares ₹500/cycle accel cap. Pros."
+      "sourceNote": "4% on Swiggy/Zomato/Ola; shares ₹500/cycle accel cap. Pros. Floor rate unconfirmed pending official T&C — see rowType audit — NOT to be closed without verification."
     },
     {
       "cardId": "CC14",
@@ -6001,7 +6022,7 @@
       "cardId": "CC14",
       "ladderId": "AXIS_ACE",
       "category": "Utility",
-      "rowType": "base",
+      "rowType": "channel_conditional",
       "earnNum": 5,
       "earnPer": 100,
       "rewardUnit": "cashback%",
