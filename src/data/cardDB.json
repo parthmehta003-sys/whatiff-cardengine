@@ -4,6 +4,12 @@
   "cards": [
     {
       "cardId": "CC01",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "IDFC First Classic",
       "bank": "IDFC First",
       "feeTier": "LTF",
@@ -67,6 +73,12 @@
     },
     {
       "cardId": "CC02",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "IDFC First Select",
       "bank": "IDFC First",
       "feeTier": "LTF",
@@ -136,6 +148,12 @@
     },
     {
       "cardId": "CC03",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "IDFC First Wealth",
       "bank": "IDFC First",
       "feeTier": "LTF",
@@ -211,6 +229,12 @@
     },
     {
       "cardId": "CC04",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "IDFC First WOW",
       "bank": "IDFC First",
       "feeTier": "LTF",
@@ -268,6 +292,12 @@
     },
     {
       "cardId": "CC05",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "Axis Flipkart",
       "bank": "Axis",
       "feeTier": "Under ₹500",
@@ -325,6 +355,12 @@
     },
     {
       "cardId": "CC06",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "Axis Neo",
       "bank": "Axis",
       "feeTier": "LTF",
@@ -382,6 +418,12 @@
     },
     {
       "cardId": "CC07",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "ICICI Amazon Pay official T&C (2026-01-13)", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "ICICI Amazon Pay",
       "bank": "ICICI",
       "feeTier": "LTF",
@@ -435,6 +477,12 @@
     },
     {
       "cardId": "CC08",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "ICICI Platinum",
       "bank": "ICICI",
       "feeTier": "LTF",
@@ -498,6 +546,12 @@
     },
     {
       "cardId": "CC09",
+      "verification": {
+        "redeemValue": { "status": "flagged", "source": "Aggregators only — HSBC Rewards T&C declines to publish per-route values", "note": "Issuer declines to publish per-route redemption values (HSBC Rewards T&C). 0.30 sourced from aggregators only — NOT officially verified.", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "HSBC Visa Platinum",
       "bank": "HSBC",
       "feeTier": "LTF",
@@ -567,6 +621,12 @@
     },
     {
       "cardId": "CC10",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "Scapia",
       "bank": "Federal Bank",
       "feeTier": "LTF",
@@ -623,6 +683,12 @@
     },
     {
       "cardId": "CC11",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "HDFC MoneyBack+",
       "bank": "HDFC",
       "feeTier": "Under ₹500",
@@ -710,6 +776,12 @@
     },
     {
       "cardId": "CC12",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "HDFC Swiggy",
       "bank": "HDFC",
       "feeTier": "Under ₹500",
@@ -770,6 +842,12 @@
     },
     {
       "cardId": "CC13",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "HDFC Freedom",
       "bank": "HDFC",
       "feeTier": "Under ₹500",
@@ -848,6 +926,12 @@
     },
     {
       "cardId": "CC14",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "Axis Ace",
       "bank": "Axis",
       "feeTier": "Under ₹500",
@@ -907,6 +991,12 @@
     },
     {
       "cardId": "CC15",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "SBI SimplyCLICK",
       "bank": "SBI",
       "feeTier": "Under ₹500",
@@ -961,6 +1051,12 @@
     },
     {
       "cardId": "CC16",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "YES First Preferred",
       "bank": "YES Bank",
       "feeTier": "Under ₹500",
@@ -1038,6 +1134,12 @@
     },
     {
       "cardId": "CC17",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "ICICI Coral",
       "bank": "ICICI",
       "feeTier": "Under ₹500",
@@ -1107,6 +1209,12 @@
     },
     {
       "cardId": "CC18",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "HDFC Millennia",
       "bank": "HDFC",
       "feeTier": "₹500–₹1,000",
@@ -1195,6 +1303,12 @@
     },
     {
       "cardId": "CC19",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "SBI Cashback",
       "bank": "SBI",
       "feeTier": "₹500–₹1,000",
@@ -1248,6 +1362,12 @@
     },
     {
       "cardId": "CC20",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "HDFC official redemption chart", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "HDFC Regalia Gold",
       "bank": "HDFC",
       "feeTier": "₹1,000–₹5,000",
@@ -1376,6 +1496,12 @@
     },
     {
       "cardId": "CC21",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "HDFC official redemption chart", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "HDFC Diners Club Privilege",
       "bank": "HDFC",
       "feeTier": "₹1,000–₹5,000",
@@ -1491,6 +1617,12 @@
     },
     {
       "cardId": "CC22",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "ICICI Sapphiro",
       "bank": "ICICI",
       "feeTier": "₹1,000–₹5,000",
@@ -1570,6 +1702,12 @@
     },
     {
       "cardId": "CC23",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "ICICI Rubyx",
       "bank": "ICICI",
       "feeTier": "₹1,000–₹5,000",
@@ -1639,6 +1777,12 @@
     },
     {
       "cardId": "CC24",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "SBI PRIME",
       "bank": "SBI",
       "feeTier": "₹1,000–₹5,000",
@@ -1704,6 +1848,12 @@
     },
     {
       "cardId": "CC25",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "SBI Elite",
       "bank": "SBI",
       "feeTier": "₹1,000–₹5,000",
@@ -1773,6 +1923,12 @@
     },
     {
       "cardId": "CC26",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "Axis Select",
       "bank": "Axis",
       "feeTier": "₹1,000–₹5,000",
@@ -1842,6 +1998,12 @@
     },
     {
       "cardId": "CC27",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "YES Marquee",
       "bank": "YES Bank",
       "feeTier": "₹1,000–₹5,000",
@@ -1920,6 +2082,12 @@
     },
     {
       "cardId": "CC28",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "Amex Platinum Travel",
       "bank": "American Express",
       "feeTier": "₹1,000–₹5,000",
@@ -1990,6 +2158,12 @@
     },
     {
       "cardId": "CC29",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "IDFC First Gaj",
       "bank": "IDFC First",
       "feeTier": "₹1,000–₹5,000",
@@ -2060,6 +2234,12 @@
     },
     {
       "cardId": "CC30",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "Axis Horizon",
       "bank": "Axis",
       "feeTier": "₹1,000–₹5,000",
@@ -2148,6 +2328,12 @@
     },
     {
       "cardId": "CC31",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "HDFC Infinia Metal",
       "bank": "HDFC",
       "feeTier": "₹5,000+",
@@ -2259,6 +2445,12 @@
     },
     {
       "cardId": "CC32",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "HDFC Diners Club Black Metal",
       "bank": "HDFC",
       "feeTier": "₹5,000+",
@@ -2356,6 +2548,12 @@
     },
     {
       "cardId": "CC33",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "ICICI Private Emeralde Metal",
       "bank": "ICICI",
       "feeTier": "₹5,000+",
@@ -2450,6 +2648,12 @@
     },
     {
       "cardId": "CC34",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "Axis Magnus",
       "bank": "Axis",
       "feeTier": "₹5,000+",
@@ -2537,6 +2741,12 @@
     },
     {
       "cardId": "CC35",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "Amex Platinum Card (Charge Card)",
       "bank": "American Express",
       "feeTier": "₹5,000+",
@@ -2630,6 +2840,12 @@
     },
     {
       "cardId": "CC36",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "IDFC FIRST official product page", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "IDFC First WOW Black",
       "bank": "IDFC First",
       "feeTier": "₹1,000–₹5,000",
@@ -2704,6 +2920,12 @@
     },
     {
       "cardId": "CC37",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "HSBC Premier",
       "bank": "HSBC",
       "feeTier": "₹5,000+",
@@ -2786,6 +3008,12 @@
     },
     {
       "cardId": "CC38",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "HDFC UPI RuPay CC",
       "bank": "HDFC",
       "feeTier": "Under ₹500",
@@ -2851,6 +3079,12 @@
     },
     {
       "cardId": "CC39",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "SBI BPCL Octane RuPay",
       "bank": "SBI",
       "feeTier": "₹500–₹1,000",
@@ -2910,6 +3144,12 @@
     },
     {
       "cardId": "CC40",
+      "verification": {
+        "redeemValue": { "status": "verified", "source": "checkCardDB L3.6 — ladder/earnRow agreement confirmed, no drift", "date": "2026-07-14" },
+        "caps":        { "status": "unverified" },
+        "earnRates":   { "status": "unverified" },
+        "fees":        { "status": "unverified" }
+      },
       "name": "Axis MyZone RuPay",
       "bank": "Axis",
       "feeTier": "Under ₹500",
@@ -7035,8 +7275,8 @@
       "earnPer": 200,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.5,
-      "trigger": "Travel (SmartBuy redemption ₹0.50/RP)",
+      "redeemValue": 0.35,
+      "trigger": "Travel (voucher ₹0.35/RP)",
       "thresholdAmount": null,
       "thresholdPeriod": null,
       "stacks": false,
@@ -7045,7 +7285,7 @@
       "capPeriod": null,
       "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "5 RP/₹200 at SmartBuy ₹0.50/RP = ~1.25% (base cut 5 RP/₹150→₹200, live 15 May 2026)."
+      "sourceNote": "5 RP/₹200 at voucher ₹0.35/RP = ~0.88% (base cut 5 RP/₹150→₹200, live 15 May 2026)."
     },
     {
       "cardId": "CC20",
@@ -7224,8 +7464,8 @@
       "earnPer": 200,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.5,
-      "trigger": "Travel (SmartBuy ₹0.50/RP)",
+      "redeemValue": 0.35,
+      "trigger": "Travel (voucher ₹0.35/RP)",
       "thresholdAmount": null,
       "thresholdPeriod": null,
       "stacks": false,
@@ -7234,7 +7474,7 @@
       "capPeriod": null,
       "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "4 RP/₹200 at SmartBuy ₹0.50."
+      "sourceNote": "4 RP/₹200 at voucher ₹0.35/RP = 0.7% (base travel redeems via voucher, not SmartBuy; SmartBuy ₹0.50 is the separate channel_conditional row)."
     },
     {
       "cardId": "CC21",
@@ -10206,7 +10446,7 @@
       "earnPer": 150,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.5,
+      "redeemValue": 0.25,
       "trigger": "Online/offline/international spend",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -10227,7 +10467,7 @@
       "earnPer": 150,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.5,
+      "redeemValue": 0.25,
       "trigger": "General travel",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -10290,7 +10530,7 @@
       "earnPer": 150,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.5,
+      "redeemValue": 0.25,
       "trigger": "Online/offline/international spend",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -10332,7 +10572,7 @@
       "earnPer": 150,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.5,
+      "redeemValue": 0.25,
       "trigger": "Online/offline/international spend",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -10353,7 +10593,7 @@
       "earnPer": 150,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.5,
+      "redeemValue": 0.25,
       "trigger": "Insurance/utility/FASTag/railway",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -10374,7 +10614,7 @@
       "earnPer": 150,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.5,
+      "redeemValue": 0.25,
       "trigger": "International spend",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -10395,7 +10635,7 @@
       "earnPer": 150,
       "rewardUnit": "RP",
       "redemptionRoute": "voucher",
-      "redeemValue": 0.5,
+      "redeemValue": 0.25,
       "trigger": "Online/offline/international spend",
       "thresholdAmount": null,
       "thresholdPeriod": null,
@@ -11225,7 +11465,7 @@
       "rewardUnit": "cashback",
       "rungName": "Amazon Pay balance (₹1)",
       "valuePerPoint": 1,
-      "route": "voucher",
+      "route": "cashback",
       "isCommonUseDefault": true
     },
     {
@@ -11263,15 +11503,6 @@
       "valuePerPoint": 0.3,
       "route": "voucher",
       "isCommonUseDefault": true
-    },
-    {
-      "cardId": "CC09",
-      "ladderId": "HSBC_PLATINUM",
-      "rewardUnit": "RP",
-      "rungName": "Cashback (n/a)",
-      "valuePerPoint": 0,
-      "route": "voucher",
-      "isCommonUseDefault": false
     },
     {
       "cardId": "CC10",
