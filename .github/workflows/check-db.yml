@@ -1,0 +1,29 @@
+name: cardDB integrity
+
+# Runs the read-only cardDB integrity checker (scripts/checkCardDB.ts).
+#
+# WARN-ONLY for now: the checker exits 1 on any ERROR finding, but the
+# `continue-on-error: true` below keeps the job green so this can land while
+# the DB still has a known ERROR backlog (see WhatIff_Checker_and_Pass1 spec).
+#
+# TO FLIP TO BLOCKING once the backlog is cleared: delete the single
+# `continue-on-error: true` line below. Nothing else changes.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check-db:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      - name: cardDB integrity check
+        continue-on-error: true   # WARN-ONLY — delete this line to make the gate blocking
+        run: npm run check:db
