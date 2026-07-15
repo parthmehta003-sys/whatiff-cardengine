@@ -177,9 +177,31 @@ export function computeCategory(
     return blankCategory(category, false, 'Excluded category — earns ₹0.', true);
   }
 
-  const baseRows = rows.filter((r) => r.rowType === 'base' && !r.excluded);
+  let baseRows = rows.filter((r) => r.rowType === 'base' && !r.excluded);
   const thresholdRows = rows.filter((r) => r.rowType === 'spend_threshold' && !r.excluded);
   const channelRows = rows.filter((r) => r.rowType === 'channel_conditional' && !r.excluded);
+
+  // ── Catch-all FLOOR inheritance (base-row-missing categories) ──
+  // A category holding only channel_conditional/threshold rows and NO base row of ANY exclusion
+  // status has no guaranteed floor of its own — its real floor is the card's Other(base) catch-all.
+  // Source the base RATE only, leaving this category's own channel/threshold rows intact so the
+  // accelerator stays UPSIDE (never in the guaranteed metric).
+  //   IMPORTANT — the gate is `some(rowType === 'base')` with NO !excluded filter: a category that
+  //   carries an EXCLUDED base row is a deliberate ₹0 (e.g. utility only via a specific wallet), so
+  //   hasAnyBaseRow is true there and it is NOT inherited — it correctly stays ₹0.
+  const hasAnyBaseRow = rows.some((r) => r.rowType === 'base');
+  if (baseRows.length === 0 && !hasAnyBaseRow) {
+    const catchAllBase = cardRows.filter(
+      (r) => r.category === 'Other(base)' && r.rowType === 'base' && !r.excluded
+    );
+    if (catchAllBase.length > 0) {
+      baseRows = catchAllBase;
+      inherited = true;
+      notes.push(
+        'Guaranteed floor inherited from card base (issuer catch-all); accelerator shown as upside.'
+      );
+    }
+  }
 
   // ── Base rate: if multiple base rows (merchant accelerators), use the GENERAL (lowest) base
   //    for the guaranteed headline (Spec §5.4 — don't assume all spend is at the bonus merchant).
