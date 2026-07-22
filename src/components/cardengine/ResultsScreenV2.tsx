@@ -27,6 +27,25 @@ import { CATEGORY_LABELS } from './SpendInput';
 import { optimizeRedemption } from '../../lib/cardEngine/optimizeRedemption';
 
 const inr = (n: number) => '₹' + Math.round(n).toLocaleString('en-IN');
+
+// Shared earn-cell renderer for the owned-journey verdict panel. Single source of truth for the
+// three zero-states — excluded → "excluded", noData → "no data", genuinely-₹0 → "not earned" — so the
+// UNDERUSED and KEEP/WRONG_FIT branches can't drift. (Previously the UNDERUSED branch dropped
+// excluded/noData and collapsed every ₹0 category to a bare dash.) `ce.guaranteed` is ₹/month.
+function vproofEarnCell(ce: CategoryEarn | undefined, showRates: boolean): React.ReactNode {
+  const monthly = ce?.guaranteed ?? 0;
+  if (monthly > 0) {
+    return (
+      <>{inr(monthly * 12)}/yr{showRates && ce!.baseRatePer100 > 0 && (
+        <span className="r2-vproof-rate"> · {ce!.baseRatePer100.toFixed(2)}%</span>
+      )}</>
+    );
+  }
+  if (ce?.excluded) return <span className="r2-vproof-excl">excluded</span>;
+  if (ce?.noData) return <span className="r2-vproof-nodata">no data</span>;
+  return <span className="r2-vproof-zero">not earned</span>;
+}
+
 const difficultyLabel = (d: string) =>
   d === 'Beginner' ? 'Easy' : d === 'Intermediate' ? 'Medium' : d === 'Advanced' ? 'Hard' : d;
 
@@ -793,9 +812,9 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                 const ce = cardProof[cat as keyof typeof cardProof];
                                 return {
                                   cat,
+                                  ce,
                                   guaranteed: (ce?.guaranteed ?? 0) * 12,
                                   upside: (ce?.upside ?? 0) * 12,
-                                  rate: ce?.baseRatePer100 ?? 0,
                                 };
                               }).sort((a, b) => (b.guaranteed + b.upside) - (a.guaranteed + a.upside));
                               const totalUpside = rows.reduce((s, r) => s + r.upside, 0);
@@ -841,9 +860,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                       <div key={r.cat} className={'r2-vproof-row' + (r.guaranteed === 0 ? ' zero' : '')}>
                                         <span className="r2-vproof-cat">{catName(r.cat)}</span>
                                         <span className="r2-vproof-earn">
-                                          {r.guaranteed > 0
-                                            ? <>{inr(r.guaranteed)}/yr{showRates && r.rate > 0 && <span className="r2-vproof-rate"> · {r.rate.toFixed(2)}%</span>}</>
-                                            : <span className="r2-vproof-zero">—</span>}
+                                          {vproofEarnCell(r.ce, showRates)}
                                         </span>
                                       </div>
                                     ))}
@@ -864,9 +881,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                       <div key={r.cat} className={'r2-vproof-row' + (r.guaranteed === 0 ? ' zero' : '')}>
                                         <span className="r2-vproof-cat">{catName(r.cat)}</span>
                                         <span className="r2-vproof-earn">
-                                          {r.guaranteed > 0
-                                            ? <>{inr(r.guaranteed)}/yr{showRates && r.rate > 0 && <span className="r2-vproof-rate"> · {r.rate.toFixed(2)}%</span>}</>
-                                            : <span className="r2-vproof-zero">—</span>}
+                                          {vproofEarnCell(r.ce, showRates)}
                                         </span>
                                       </div>
                                     ))}
@@ -887,15 +902,7 @@ export const ResultsScreenV2: React.FC<Props> = ({
                                       <div key={cat} className={'r2-vproof-row' + (isBest && earn > 0 ? ' best' : '') + (earn === 0 ? ' zero' : '')}>
                                         <span className="r2-vproof-cat">{catName(cat)}</span>
                                         <span className="r2-vproof-earn">
-                                          {earn > 0 ? (
-                                            <>{inr(earn * 12)}/yr{showRates && ce!.baseRatePer100 > 0 && <span className="r2-vproof-rate"> · {ce!.baseRatePer100.toFixed(2)}%</span>}</>
-                                          ) : ce?.excluded ? (
-                                            <span className="r2-vproof-excl">excluded</span>
-                                          ) : ce?.noData ? (
-                                            <span className="r2-vproof-nodata">no data</span>
-                                          ) : (
-                                            <span className="r2-vproof-zero">not earned</span>
-                                          )}
+                                          {vproofEarnCell(ce, showRates)}
                                         </span>
                                         {isBest && earn > 0 && <span className="r2-vproof-best">best</span>}
                                       </div>
