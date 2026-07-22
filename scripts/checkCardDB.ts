@@ -92,9 +92,15 @@ for (const r of rows) {
   }
 }
 
-// L1.3 — GUARANTEED-ZERO HOLE. If a category has only conditional/threshold rows
-// and no base row, it resolves to a hard ₹0 floor. Sometimes correct — but it must
-// never happen by accident. This is the CC07/12/13/14/18 floor-rate class.
+// L1.3 — GUARANTEED-ZERO HOLE. A category with only conditional/threshold rows and no base
+// row resolves to a hard ₹0 floor ONLY IF the card has no Other(base) catch-all to inherit.
+// The engine (computeEarn.computeCategory) inherits the card's Other(base) base RATE for any
+// category that has no base row of any exclusion status — so on a card WITH that catch-all
+// there is no hole. A true guaranteed-zero hole is: no base row + no inheritable catch-all.
+// (Categories with an excluded base row are intentional ₹0 and skipped below, as before.)
+const cardsWithCatchAllBase = new Set(
+  rows.filter(r => r.category === 'Other(base)' && r.rowType === 'base' && !r.excluded).map(r => r.cardId)
+);
 const byCardCat = new Map<string, Map<string, EarnRow[]>>();
 for (const r of rows) {
   if (!byCardCat.has(r.cardId)) byCardCat.set(r.cardId, new Map());
@@ -103,12 +109,14 @@ for (const r of rows) {
 }
 for (const [cardId, cats] of byCardCat) {
   for (const [cat, rs] of cats) {
-    if (rs.some(r => r.excluded)) continue;              // explicit exclusion = intentional
+    if (cat === 'Other(base)') continue;                 // the catch-all itself is never a hole
+    if (rs.some(r => r.excluded)) continue;              // explicit exclusion = intentional ₹0
     const types = new Set(rs.map(r => r.rowType));
     if (types.size && !types.has('base')) {
+      if (cardsWithCatchAllBase.has(cardId)) continue;   // engine inherits Other(base) floor → not ₹0
       add('L1.3 guaranteed-zero hole', 'ERROR', cardId,
-        `${cat}: only [${[...types].join(',')}] — no base row, so floor = ₹0. ` +
-        `Confirm against MITC that ₹0 is genuinely correct, or add the base row.`);
+        `${cat}: only [${[...types].join(',')}] — no base row and no Other(base) catch-all to ` +
+        `inherit, so floor = ₹0. Confirm against MITC that ₹0 is genuinely correct, or add a base row.`);
     }
   }
 }
