@@ -5972,7 +5972,7 @@
       "earnNum": 1,
       "earnPer": 200,
       "rewardUnit": "CashPoint",
-      "redemptionRoute": "travel",
+      "redemptionRoute": "cashback",
       "redeemValue": 0.15,
       "trigger": "General online",
       "thresholdAmount": null,
@@ -5993,7 +5993,7 @@
       "earnNum": 10,
       "earnPer": 200,
       "rewardUnit": "CashPoint",
-      "redemptionRoute": "travel",
+      "redemptionRoute": "cashback",
       "redeemValue": 0.15,
       "trigger": "BigBasket, BookMyShow, OYO, Swiggy, Uber (non-EMI)",
       "thresholdAmount": null,
@@ -6004,7 +6004,7 @@
       "capPeriod": "month",
       "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "10X (10 CP/₹200) = 0.75% on 5 merchants; capped 2,500 CP/mo = ₹375. Pros/Cons."
+      "sourceNote": "10X (10 CP/₹200) = 0.75% on 5 merchants; capped 2,500 CP/mo = ₹375. Pros/Cons. Verified vs HDFC Freedom T&C dated 15 May 2026."
     },
     {
       "cardId": "CC13",
@@ -6014,7 +6014,7 @@
       "earnNum": 1,
       "earnPer": 200,
       "rewardUnit": "CashPoint",
-      "redemptionRoute": "travel",
+      "redemptionRoute": "cashback",
       "redeemValue": 0.15,
       "trigger": "All other eligible spend",
       "thresholdAmount": null,
@@ -6025,7 +6025,7 @@
       "capPeriod": "cycle",
       "sharedCapId": "CC13_OVERALL_15000RP_CYCLE",
       "multiplierNote": null,
-      "sourceNote": "1 CP/₹200 = 0.075% (CP=₹0.15). Overall cap 15,000 RP/cycle. Pros."
+      "sourceNote": "1 CP/₹200 = 0.075% (CP=₹0.15). Overall cap 15,000 RP/cycle. Pros. Verified vs HDFC Freedom T&C dated 15 May 2026."
     },
     {
       "cardId": "CC13",
@@ -6035,7 +6035,7 @@
       "earnNum": 10,
       "earnPer": 200,
       "rewardUnit": "CashPoint",
-      "redemptionRoute": "travel",
+      "redemptionRoute": "cashback",
       "redeemValue": 0.15,
       "trigger": "Swiggy (10X merchant)",
       "thresholdAmount": null,
@@ -6046,7 +6046,7 @@
       "capPeriod": "month",
       "sharedCapId": "CC13_10X_375_MONTH",
       "multiplierNote": null,
-      "sourceNote": "10X = 0.75% on Swiggy; pooled with BigBasket (Grocery row) via sharedCapId to the single 2,500 CP/mo (₹375) cap HDFC states for the whole 10X program. BookMyShow/OYO/Uber's 10X has no guaranteed base row on any category yet (only shows as Online channel_conditional upside) — flagged, not fixed this pass. Pros. Floor rate unconfirmed pending official T&C — see rowType audit — NOT to be closed without verification."
+      "sourceNote": "10X = 0.75% on Swiggy; pooled with BigBasket (Grocery row) via sharedCapId to the single 2,500 CP/mo (₹375) cap HDFC states for the whole 10X program. BookMyShow/OYO/Uber's 10X has no guaranteed base row on any category yet (only shows as Online channel_conditional upside) — flagged, not fixed this pass. Pros. Verified vs HDFC Freedom T&C dated 15 May 2026."
     },
     {
       "cardId": "CC13",
@@ -6067,7 +6067,7 @@
       "capPeriod": null,
       "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "EXCLUDED (₹0): fuel does not earn rewards (HDFC Freedom). Confirmed via issuer docs. Cons."
+      "sourceNote": "EXCLUDED (₹0): fuel does not earn rewards (HDFC Freedom). Confirmed via issuer docs. Cons. Verified vs HDFC Freedom T&C dated 15 May 2026."
     },
     {
       "cardId": "CC13",
@@ -6077,7 +6077,7 @@
       "earnNum": 10,
       "earnPer": 200,
       "rewardUnit": "CashPoint",
-      "redemptionRoute": "travel",
+      "redemptionRoute": "cashback",
       "redeemValue": 0.15,
       "trigger": "BigBasket (10X merchant)",
       "thresholdAmount": null,
@@ -6088,7 +6088,7 @@
       "capPeriod": "month",
       "sharedCapId": "CC13_10X_375_MONTH",
       "multiplierNote": null,
-      "sourceNote": "10X = 0.75% on BigBasket; shares 2,500 CP/mo cap with other 4 merchants (BookMyShow, OYO, Swiggy, Uber) — pooled with Swiggy (Dining row) via sharedCapId. Confirmed via official product page + Freedom T&C. Floor rate unconfirmed pending official T&C — see rowType audit — NOT to be closed without verification."
+      "sourceNote": "10X = 0.75% on BigBasket; shares 2,500 CP/mo cap with other 4 merchants (BookMyShow, OYO, Swiggy, Uber) — pooled with Swiggy (Dining row) via sharedCapId. Verified vs HDFC Freedom T&C dated 15 May 2026. PASS-2 CAPS: T&C also states a grocery-specific cap of 1,000 CP/mo (₹150), tighter than this ₹375 10X pool and category-specific (all grocery MCC, incl. non-BigBasket base spend) — cannot be expressed alongside the shared 10X cap on one row in the current model; logged for the caps pass, NOT modeled here."
     },
     {
       "cardId": "CC13",
@@ -6098,7 +6098,7 @@
       "earnNum": 1,
       "earnPer": 200,
       "rewardUnit": "CashPoint",
-      "redemptionRoute": "travel",
+      "redemptionRoute": "cashback",
       "redeemValue": 0.15,
       "trigger": "Utility",
       "thresholdAmount": null,
@@ -6109,7 +6109,7 @@
       "capPeriod": "month",
       "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "1 CP/₹200 = 0.075%; utility capped 2,000 RP/mo = ₹300. Cons."
+      "sourceNote": "1 CP/₹200 = 0.075%; utility capped 2,000 RP/mo = ₹300. Cons. Verified vs HDFC Freedom T&C dated 15 May 2026."
     },
     {
       "cardId": "CC13",
@@ -6119,7 +6119,7 @@
       "earnNum": 1,
       "earnPer": 200,
       "rewardUnit": "CashPoint",
-      "redemptionRoute": "travel",
+      "redemptionRoute": "cashback",
       "redeemValue": 0.15,
       "trigger": "All other eligible spend",
       "thresholdAmount": null,
@@ -6130,7 +6130,7 @@
       "capPeriod": "cycle",
       "sharedCapId": "CC13_OVERALL_15000RP_CYCLE",
       "multiplierNote": null,
-      "sourceNote": "1 CP/₹200 = 0.075% (CP=₹0.15). Overall cap 15,000 RP/cycle. Pros."
+      "sourceNote": "1 CP/₹200 = 0.075% (CP=₹0.15). Overall cap 15,000 RP/cycle. Pros. Verified vs HDFC Freedom T&C dated 15 May 2026."
     },
     {
       "cardId": "CC13",
@@ -6140,7 +6140,7 @@
       "earnNum": 1,
       "earnPer": 200,
       "rewardUnit": "CashPoint",
-      "redemptionRoute": "travel",
+      "redemptionRoute": "cashback",
       "redeemValue": 0.15,
       "trigger": "All other eligible spend",
       "thresholdAmount": null,
@@ -6151,7 +6151,7 @@
       "capPeriod": "cycle",
       "sharedCapId": "CC13_OVERALL_15000RP_CYCLE",
       "multiplierNote": null,
-      "sourceNote": "1 CP/₹200 = 0.075% (CP=₹0.15). Overall cap 15,000 RP/cycle. Pros."
+      "sourceNote": "1 CP/₹200 = 0.075% (CP=₹0.15). Overall cap 15,000 RP/cycle. Pros. Verified vs HDFC Freedom T&C dated 15 May 2026."
     },
     {
       "cardId": "CC14",
@@ -11544,9 +11544,9 @@
       "cardId": "CC13",
       "ladderId": "HDFC_FREEDOM",
       "rewardUnit": "CashPoint",
-      "rungName": "Catalogue/SmartBuy (₹0.15)",
+      "rungName": "Cashback/Catalogue/SmartBuy (₹0.15)",
       "valuePerPoint": 0.15,
-      "route": "travel",
+      "route": "cashback",
       "isCommonUseDefault": true
     },
     {
