@@ -24,6 +24,42 @@
         not add any cap number until an official SmartBuy program T&C confirms it. Logged from the
         CC21 verification PR (Fix F).
 
+- [ ] **Cross-category shared cap does not cover FLOOR-INHERITED categories (surfaced by CC32
+      Diners Black Metal).** Same *class* of bug as the `channel_conditional`-upside item above —
+      a category's reward lands somewhere the cap-bucket logic never looks — but a different
+      escape route. The shared-cap bucket builder in `computeEarn.ts:368-370` matches pool members
+      with `cardRows.filter(r => r.category === cat && r.capAmount != null && r.sharedCapId != null)`.
+      A category that exists ONLY via floor-inheritance (no stored `EarnRow` of its own — it borrows
+      the card's `Other(base)` catch-all through the inheritance rule at `computeEarn.ts:184-204`)
+      has NO row with `r.category === cat`, so it never joins the `sharedCapId` bucket. Its
+      `guaranteed` reward is added to the card total (`computeCardEarn`'s final sum) but is invisible
+      to the pool clamp — it escapes the shared cap entirely, even at binding magnitudes.
+      - **Exact repro (Case D, CC32, `CC32_OVERALL_75000RP_CYCLE` = ₹75,000/cycle reward cap):**
+        `computeCardEarn('CC32', rows, { 'Other(base)': 1_500_000, Subscriptions: 1_500_000 })`.
+        CC32 has no native Subscriptions row, so Subscriptions inherits Other(base) (5 RP/₹150).
+        Each category earns ₹50,000/mo reward → **₹100,000 combined, above the ₹75,000 cap, but
+        `sharedCapAdjustments` is empty and nothing is clamped** (`guaranteedPerMonth = 100000`).
+        Other(base) alone, or Other(base)+Travel+Dining (all native rows), clamps correctly — the
+        leak is specifically the inherited category's share.
+      - **Root cause:** the `r.category === cat` filter in the bucket builder excludes any category
+        whose rows were sourced by inheritance rather than stored under that category name. (The
+        per-category cap in `applyPerCategoryCap` is unaffected — it runs on the inherited rows
+        inside `computeCategory` — so only the CROSS-category pool clamp leaks.)
+      - **Not urgent:** because these are REWARD caps (not spend caps), the pool only binds at very
+        high spend. On CC32 the ₹75,000/cycle reward cap needs ~₹22.5L/month combined spend at the
+        3.33% base rate before it clamps at all (75,000 ÷ 0.03333), so the inherited-category leak
+        is only reachable above that. It changes no result at realistic spend.
+      - **Before deciding priority — run the same kind of quick cross-card audit** we did for the
+        `sharedCapId` channel_conditional gap (which swept all 40 cards): *which capped-pool cards
+        have a category that exists only via inheritance and would fall into this gap?* Preliminary
+        scan (capped card with a multi-member `sharedCapId` pool + an `Other(base)` catch-all + a
+        standard category with no native row) flags **12 cards — CC11, CC12, CC13, CC18, CC19,
+        CC20, CC25, CC27, CC31, CC32, CC38, CC39 — all with `Subscriptions` as the inherited-only
+        category** (no card ships a native Subscriptions row). The formal audit should confirm, per
+        card, that the `Other(base)` catch-all row is actually a member of the binding pool (so the
+        inherited category *should* be pooled) and whether the pool's cap is reachable, before
+        ranking severity. Same `r.category === cat` limitation flagged in the CC13 investigation.
+
 - [ ] **Transfer partner caveat rendering (generalized from CC21 Fix G).**
       PARKED — no build; nothing decided. Both approach options below are kept open.
 
