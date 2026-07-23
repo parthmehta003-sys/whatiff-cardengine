@@ -6044,9 +6044,9 @@
       "excluded": false,
       "capAmount": 375,
       "capPeriod": "month",
-      "sharedCapId": "CC13_10X_375_MONTH",
+      "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "10X = 0.75% on Swiggy; pooled with BigBasket (Grocery row) via sharedCapId to the single 2,500 CP/mo (₹375) cap HDFC states for the whole 10X program. BookMyShow/OYO/Uber's 10X has no guaranteed base row on any category yet (only shows as Online channel_conditional upside) — flagged, not fixed this pass. Pros. Verified vs HDFC Freedom T&C dated 15 May 2026."
+      "sourceNote": "10X = 0.75% on Swiggy. This row's independent cap is 2,500 CP/mo = ₹375. UNSTORED-BUT-VERIFIED: HDFC states a single 2,500 CP/mo (₹375) ceiling for the WHOLE 10X program applying JOINTLY across all 10X merchants (shared with the Grocery/BigBasket 10X row) — NOT enforced across rows today; the engine has no cross-category upside-pooling mechanism for channel_conditional rows (each computes .upside independently per row, clamped only by its own per-row cap; see BACKLOG). So the two rows can each reach ₹375 (up to ₹750 combined) versus the real ₹375 pooled ceiling. BookMyShow/OYO/Uber's 10X has no guaranteed base row on any category yet (only shows as Online channel_conditional upside) — flagged, not fixed this pass. Pros. Verified vs HDFC Freedom T&C dated 15 May 2026."
     },
     {
       "cardId": "CC13",
@@ -6086,9 +6086,9 @@
       "excluded": false,
       "capAmount": 375,
       "capPeriod": "month",
-      "sharedCapId": "CC13_10X_375_MONTH",
+      "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "10X = 0.75% on BigBasket; shares 2,500 CP/mo cap with other 4 merchants (BookMyShow, OYO, Swiggy, Uber) — pooled with Swiggy (Dining row) via sharedCapId. Verified vs HDFC Freedom T&C dated 15 May 2026. PASS-2 CAPS: T&C also states a grocery-specific cap of 1,000 CP/mo (₹150), tighter than this ₹375 10X pool and category-specific (all grocery MCC, incl. non-BigBasket base spend) — cannot be expressed alongside the shared 10X cap on one row in the current model; logged for the caps pass, NOT modeled here."
+      "sourceNote": "10X = 0.75% on BigBasket. This row's independent cap is 2,500 CP/mo = ₹375. UNSTORED-BUT-VERIFIED: HDFC states a single 2,500 CP/mo (₹375) ceiling for the WHOLE 10X program applying JOINTLY across all 5 merchants (BookMyShow, OYO, Swiggy, Uber, BigBasket; shared with the Dining/Swiggy 10X row) — NOT enforced across rows today; the engine has no cross-category upside-pooling mechanism for channel_conditional rows (each computes .upside independently per row, clamped only by its own per-row cap; see BACKLOG). So the two rows can each reach ₹375 (up to ₹750 combined) versus the real ₹375 pooled ceiling. Verified vs HDFC Freedom T&C dated 15 May 2026. PASS-2 CAPS: T&C also states a grocery-specific cap of 1,000 CP/mo (₹150), tighter than the 10X ceiling and category-specific (all grocery MCC, incl. non-BigBasket base spend) — cannot be expressed alongside this row's cap in the current model; logged for the caps pass, NOT modeled here."
     },
     {
       "cardId": "CC13",
@@ -6212,9 +6212,9 @@
       "excluded": false,
       "capAmount": 500,
       "capPeriod": "cycle",
-      "sharedCapId": "CC14_ACCEL_500_CYCLE",
+      "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "4% on Swiggy/Zomato/Ola; shares ₹500/cycle accel cap. Pros. Floor rate unconfirmed pending official T&C — see rowType audit — NOT to be closed without verification."
+      "sourceNote": "4% on Swiggy/Zomato/Ola. This row's independent cap is ₹500/cycle. UNSTORED-BUT-VERIFIED: Axis states a single ₹500/cycle accelerator ceiling applying JOINTLY across the accelerated categories (shared with the Utility/Google Pay 5% row) — NOT enforced across rows today; the engine has no cross-category upside-pooling mechanism for channel_conditional rows (each computes .upside independently per row, clamped only by its own per-row cap; see BACKLOG). So the two rows can each reach ₹500 (up to ₹1,000 combined) versus the real ₹500 pooled ceiling. Pros. Floor rate unconfirmed pending official T&C — see rowType audit — NOT to be closed without verification."
     },
     {
       "cardId": "CC14",
@@ -6275,9 +6275,9 @@
       "excluded": false,
       "capAmount": 500,
       "capPeriod": "cycle",
-      "sharedCapId": "CC14_ACCEL_500_CYCLE",
+      "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "5% ONLY via Google Pay bill payments (shares ₹500/cycle accel cap); all non-GPay utility = ₹0 (see paired exclusion row). Conditional. Pros/Cons."
+      "sourceNote": "5% ONLY via Google Pay bill payments; all non-GPay utility = ₹0 (see paired exclusion row). This row's independent cap is ₹500/cycle. UNSTORED-BUT-VERIFIED: Axis states a single ₹500/cycle accelerator ceiling applying JOINTLY across the accelerated categories (shared with the Dining/Swiggy-Zomato-Ola 4% row) — NOT enforced across rows today; the engine has no cross-category upside-pooling mechanism for channel_conditional rows (each computes .upside independently per row, clamped only by its own per-row cap; see BACKLOG). So the two rows can each reach ₹500 (up to ₹1,000 combined) versus the real ₹500 pooled ceiling. Conditional. Pros/Cons."
     },
     {
       "cardId": "CC14",
@@ -6905,9 +6905,9 @@
       "excluded": false,
       "capAmount": 1000,
       "capPeriod": "month",
-      "sharedCapId": "CC18_5PCT_1000CP_MONTH",
+      "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "5% on 10 partner merchants; independent 1,000 CP/mo (₹1,000) cap per official \"5% CashBack on 10 Online Merchants\" T&C — pooled with Dining (Swiggy/Zomato), NOT with the 1% bucket. FIXED: earnNum/earnPer were 0/1 (a 0% rate), contradicting this row's own sourceNote and the card's pros text — corrected to 5/100 to match the documented 5% rate. Pros/Cons. Floor rate unconfirmed pending official T&C — see rowType audit — NOT to be closed without verification. (Card's general 1% applies to non-partner online spend in reality, but only as the Other(base) catch-all, not a category-specific row; per engine behavior the leftover channel_conditional row suppresses catch-all inheritance, so guaranteed resolves to ₹0 here.)"
+      "sourceNote": "5% on 10 partner merchants. This row's independent cap is 1,000 CP/mo (₹1,000) per official \"5% CashBack on 10 Online Merchants\" T&C. UNSTORED-BUT-VERIFIED: that 1,000 CP/mo (₹1,000) ceiling is a single 5%-bucket limit applying JOINTLY across the 5% partner categories (shared with the Dining/Swiggy-Zomato 5% row), separate from the card's 1% bucket — NOT enforced across rows today; the engine has no cross-category upside-pooling mechanism for channel_conditional rows (each computes .upside independently per row, clamped only by its own per-row cap; see BACKLOG). So the two rows can each reach ₹1,000 (up to ₹2,000 combined) versus the real ₹1,000 pooled ceiling. FIXED: earnNum/earnPer were 0/1 (a 0% rate), contradicting this row's own sourceNote and the card's pros text — corrected to 5/100 to match the documented 5% rate. Pros/Cons. Floor rate unconfirmed pending official T&C — see rowType audit — NOT to be closed without verification. (Card's general 1% applies to non-partner online spend in reality, but only as the Other(base) catch-all, not a category-specific row; per engine behavior the leftover channel_conditional row suppresses catch-all inheritance, so guaranteed resolves to ₹0 here.)"
     },
     {
       "cardId": "CC18",
@@ -6947,9 +6947,9 @@
       "excluded": false,
       "capAmount": 1000,
       "capPeriod": "month",
-      "sharedCapId": "CC18_5PCT_1000CP_MONTH",
+      "sharedCapId": null,
       "multiplierNote": null,
-      "sourceNote": "5% on Swiggy/Zomato; pooled with Online (10 partner merchants) via the same independent 1,000 CP/mo (₹1,000) 5%-bucket cap, NOT with the 1% bucket. Pros. Floor rate unconfirmed pending official T&C — see rowType audit — NOT to be closed without verification. (Card's general 1% applies to non-partner dining in reality, but only as the Other(base) catch-all, not a category-specific row; per engine behavior the leftover channel_conditional row suppresses catch-all inheritance, so guaranteed resolves to ₹0 here.)"
+      "sourceNote": "5% on Swiggy/Zomato. This row's independent cap is 1,000 CP/mo (₹1,000). UNSTORED-BUT-VERIFIED: that 1,000 CP/mo (₹1,000) ceiling is a single 5%-bucket limit applying JOINTLY across the 5% partner categories (shared with the Online/10-partner-merchants 5% row), separate from the card's 1% bucket — NOT enforced across rows today; the engine has no cross-category upside-pooling mechanism for channel_conditional rows (each computes .upside independently per row, clamped only by its own per-row cap; see BACKLOG). So the two rows can each reach ₹1,000 (up to ₹2,000 combined) versus the real ₹1,000 pooled ceiling. Pros. Floor rate unconfirmed pending official T&C — see rowType audit — NOT to be closed without verification. (Card's general 1% applies to non-partner dining in reality, but only as the Other(base) catch-all, not a category-specific row; per engine behavior the leftover channel_conditional row suppresses catch-all inheritance, so guaranteed resolves to ₹0 here.)"
     },
     {
       "cardId": "CC18",
