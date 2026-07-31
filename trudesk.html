@@ -1,0 +1,1266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TruDesk — Deal Underwriting Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --accent:#FF6B35;
+    --accent-soft:#FFF1EB;
+    --ink:#2D2D2D;
+    --body:#5A5A5A;
+    --muted:#8A8A8A;
+    --panel:#F7F7F5;
+    --border:#E5E3DF;
+    --green:#2E9E5B;
+    --amber:#E8A33D;
+    --red:#D64545;
+    --green-soft:#E7F4EC;
+    --amber-soft:#FCF3E3;
+    --red-soft:#FBEAEA;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'Poppins','Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    color:var(--body);
+    background:#fff;
+    font-size:14px;
+    line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+  }
+  .num{ font-variant-numeric:tabular-nums lining-nums; font-feature-settings:"tnum" 1,"lnum" 1; }
+  h1,h2,h3,h4{color:var(--ink);margin:0;font-weight:600}
+  a{color:var(--accent)}
+  button{font-family:inherit}
+
+  /* ---------- Top nav ---------- */
+  .nav{
+    display:flex;align-items:center;gap:24px;
+    padding:0 28px;height:62px;
+    border-bottom:1px solid var(--border);
+    position:sticky;top:0;background:#fff;z-index:20;
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--ink);font-size:19px;letter-spacing:-0.01em}
+  .brand .dot{width:12px;height:12px;border-radius:3px;background:var(--accent)}
+  .brand small{font-weight:500;color:var(--muted);font-size:11px;letter-spacing:0.06em;text-transform:uppercase}
+  .tabs{display:flex;gap:6px;margin-left:8px}
+  .tab{
+    background:transparent;border:none;cursor:pointer;
+    padding:9px 16px;border-radius:8px;font-size:14px;font-weight:500;color:var(--body);
+    border-bottom:2px solid transparent;
+  }
+  .tab:hover{background:var(--panel)}
+  .tab.active{color:var(--accent);font-weight:600;background:var(--accent-soft)}
+  .nav-spacer{flex:1}
+  .nav-actions{display:flex;gap:8px}
+
+  .wrap{max-width:1280px;margin:0 auto;padding:28px}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    border:1px solid var(--border);background:#fff;color:var(--ink);
+    padding:9px 15px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;
+  }
+  .btn:hover{background:var(--panel)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.primary:hover{background:#f2571f}
+  .btn.ghost{background:transparent}
+  .btn.sm{padding:6px 11px;font-size:12px}
+  .btn.danger{color:var(--red);border-color:#eecccc}
+  .btn.danger:hover{background:var(--red-soft)}
+
+  /* ---------- Cards ---------- */
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:24px}
+  .card + .card{margin-top:16px}
+  .card h3{font-size:15px;margin-bottom:16px}
+  .card-title{font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:14px}
+
+  .lbl{display:block;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:5px}
+  .field{margin-bottom:14px}
+  .field:last-child{margin-bottom:0}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid2 .field{margin-bottom:0}
+  .inputwrap{position:relative;display:flex;align-items:center}
+  input[type=text],input[type=number],input[type=date],select{
+    width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;
+    background:#fff;color:var(--ink);font-size:14px;font-family:inherit;
+  }
+  input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .inputwrap .suffix{position:absolute;right:11px;color:var(--muted);font-size:12px;pointer-events:none;font-weight:500}
+  .inputwrap input{padding-right:44px}
+  input.invalid,select.invalid{border-color:var(--red);background:var(--red-soft)}
+  .errmsg{color:var(--red);font-size:11.5px;margin-top:4px;font-weight:500}
+  .readout{margin-top:12px;padding-top:12px;border-top:1px dashed var(--border);font-size:12.5px;color:var(--body)}
+  .readout b{color:var(--ink);font-weight:600}
+  input[type=range]{width:100%;accent-color:var(--accent);margin-top:8px}
+
+  /* ---------- Underwrite layout ---------- */
+  .uw{display:grid;grid-template-columns:minmax(360px,440px) 1fr;gap:24px;align-items:start}
+  @media(max-width:900px){ .uw{grid-template-columns:1fr} }
+
+  /* ---------- Verdict ---------- */
+  .verdict{
+    border-radius:12px;padding:22px 24px;color:#fff;
+    box-shadow:0 6px 20px rgba(0,0,0,0.10);
+    display:flex;flex-direction:column;gap:6px;margin-bottom:18px;
+  }
+  .verdict .badge{font-size:38px;font-weight:700;letter-spacing:0.02em;line-height:1}
+  .verdict .sub{font-size:13.5px;opacity:0.95;font-weight:400;max-width:640px}
+  .v-go{background:linear-gradient(135deg,#2E9E5B,#278a4f)}
+  .v-watch{background:linear-gradient(135deg,#E8A33D,#d9902a)}
+  .v-pass{background:linear-gradient(135deg,#D64545,#c33a3a)}
+
+  /* ---------- Stat tiles ---------- */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+  @media(max-width:640px){ .stats{grid-template-columns:1fr 1fr} }
+  .stat{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px 18px}
+  .stat .k{font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:8px;line-height:1.3;min-height:28px}
+  .stat .v{font-size:34px;font-weight:600;color:var(--ink);line-height:1}
+  .stat .v .u{font-size:14px;color:var(--muted);font-weight:500;margin-left:3px}
+  .stat.accent .v{color:var(--accent)}
+  .val-go{color:var(--green)!important}
+  .val-watch{color:var(--amber)!important}
+  .val-pass{color:var(--red)!important}
+
+  .panelbox{background:#fff;border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:18px}
+  .panelbox h4{font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+
+  /* ---------- Solver box ---------- */
+  .solver{border:2px solid var(--accent);border-radius:10px;padding:20px;background:var(--accent-soft);margin-bottom:18px}
+  .solver .lbl{color:var(--accent)}
+  .solver .big{font-size:26px;font-weight:600;color:var(--ink);margin-top:12px;line-height:1.15}
+  .solver .big .hl{color:var(--accent)}
+  .solver .delta{font-size:13px;margin-top:8px;font-weight:500}
+  .solver-in{max-width:180px}
+
+  /* ---------- Tables ---------- */
+  table{border-collapse:collapse;width:100%;font-size:13px}
+  th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)}
+  th:first-child,td:first-child{text-align:left}
+  th{font-size:10.5px;letter-spacing:0.05em;text-transform:uppercase;color:var(--muted);font-weight:600;cursor:default}
+  tbody tr:last-child td{border-bottom:none}
+  .cell-go{background:var(--green-soft);color:var(--green);font-weight:600;border-radius:5px}
+  .cell-watch{background:var(--amber-soft);color:#b9791f;font-weight:600;border-radius:5px}
+  .cell-pass{background:var(--red-soft);color:var(--red);font-weight:600;border-radius:5px}
+  .breach-row td{background:#fbeef0;font-weight:500}
+  .tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+  /* ---------- Waterfall ---------- */
+  .wf-bar{display:flex;height:34px;border-radius:6px;overflow:hidden;border:1px solid var(--border);margin-bottom:14px}
+  .wf-seg{height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10.5px;font-weight:600;min-width:2px;overflow:hidden;white-space:nowrap}
+  .wf-row{display:flex;justify-content:space-between;padding:5px 0;font-size:12.5px;border-bottom:1px dashed var(--border)}
+  .wf-row .dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:8px;vertical-align:middle}
+  .wf-row.total{font-weight:600;color:var(--ink);border-bottom:none;padding-top:8px}
+
+  /* ---------- Portfolio ---------- */
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px}
+  @media(max-width:1000px){ .kpis{grid-template-columns:1fr 1fr 1fr} }
+  @media(max-width:640px){ .kpis{grid-template-columns:1fr 1fr} }
+  .progress{height:8px;background:#e9e7e3;border-radius:5px;overflow:hidden;margin-top:10px}
+  .progress > div{height:100%;border-radius:5px;background:var(--green);transition:width .3s}
+  .ageing{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  @media(max-width:640px){ .ageing{grid-template-columns:1fr 1fr} }
+  .age-col{text-align:center}
+  .age-bar-track{height:120px;display:flex;align-items:flex-end;justify-content:center}
+  .age-bar{width:60%;border-radius:6px 6px 0 0;min-height:3px}
+  .age-meta{font-size:12px;margin-top:8px}
+  .age-meta .c{font-weight:600;color:var(--ink);font-size:16px}
+  .age-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px}
+
+  .alert{border-radius:8px;padding:14px 16px;margin-bottom:10px;border:1px solid}
+  .alert.amber{background:var(--amber-soft);border-color:#efd4a0}
+  .alert.red{background:var(--red-soft);border-color:#e9bcbc}
+  .alert .top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+  .alert .soc{font-weight:600;color:var(--ink);font-size:14px}
+  .alert .tag{font-size:10.5px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase}
+  .alert.amber .tag{color:#b9791f}
+  .alert.red .tag{color:var(--red)}
+  .alert .metrics{display:flex;gap:20px;margin-top:8px;font-size:12.5px;flex-wrap:wrap}
+  .alert .metrics b{color:var(--ink)}
+
+  .ptable th{cursor:pointer;user-select:none}
+  .ptable th:hover{color:var(--ink)}
+  .ptable th .arrow{color:var(--accent);font-size:9px;margin-left:3px}
+  .ptable td{vertical-align:middle}
+  .ptable tbody tr.main:hover{background:var(--panel)}
+  .expandbtn{border:none;background:transparent;cursor:pointer;color:var(--muted);font-size:13px;padding:2px 6px}
+  .statuspill{padding:5px 8px;border-radius:7px;border:1px solid var(--border);font-size:12px;background:#fff}
+  .badge-pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+  .pill-live{background:var(--green-soft);color:var(--green)}
+  .pill-sold{background:var(--accent-soft);color:var(--accent)}
+  .pill-lapsed{background:var(--red-soft);color:var(--red)}
+  .expandrow td{background:#fbfbfa;padding:0}
+  .expandinner{padding:16px 18px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px 24px}
+  @media(max-width:700px){ .expandinner{grid-template-columns:1fr 1fr} }
+  .snap .sk{font-size:10.5px;letter-spacing:0.05em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .snap .sv{font-size:14px;color:var(--ink);font-weight:500}
+
+  .disclaimer{background:#fbf6ee;border:1px solid #eaddc4;border-radius:8px;padding:18px 20px;font-size:13px;color:#8a6d3b;margin-top:20px}
+  .helper{font-size:12px;color:var(--muted);margin-top:5px}
+  .section-title{font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:26px 0 12px}
+  .empty{text-align:center;padding:60px 20px;color:var(--muted)}
+  .empty h3{color:var(--ink);margin-bottom:8px}
+  .row-flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .save-strip{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px 18px}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;z-index:50;box-shadow:0 6px 20px rgba(0,0,0,.2);opacity:0;transition:opacity .25s,transform .25s;pointer-events:none}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+  svg text{font-family:inherit}
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="brand"><span class="dot"></span>TruDesk<small>Underwriting Desk</small></div>
+    <div class="tabs" id="tabs">
+      <button class="tab" data-tab="underwrite">Underwrite</button>
+      <button class="tab" data-tab="portfolio">Portfolio</button>
+      <button class="tab" data-tab="assumptions">Assumptions</button>
+    </div>
+    <div class="nav-spacer"></div>
+    <div class="nav-actions">
+      <button class="btn ghost sm" id="loadSample">Load sample data</button>
+    </div>
+  </nav>
+  <div class="wrap" id="view"></div>
+  <div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   TruDesk — deal underwriting & portfolio exposure tool
+   Self-contained: no dependencies, no build step.
+   ============================================================ */
+const CR = 10000000;   // 1 Crore  = 10,000,000
+const LAKH = 100000;   // 1 Lakh   =    100,000
+const DAYS_PER_MONTH = 30.4;
+
+const MICRO_MARKETS = ["Powai","Chandivali","Bandra East","Andheri West","Goregaon East","Malad West","Lower Parel","Thane West","Other"];
+const CONFIGS = [["1","1 BHK"],["2","2 BHK"],["3","3 BHK"],["4","4 BHK+"]];
+
+const LS = { assumptions:"trudesk_assumptions", underwrite:"trudesk_underwrite", portfolio:"trudesk_portfolio" };
+
+const DEFAULT_ASSUMPTIONS = {
+  costOfCapital:14, goThreshold:5.0, watchThreshold:2.5,
+  breachCost:15, workingCapitalLimit:25,
+  rentByConfig:{ "1":45000, "2":85000, "3":120000, "4":160000 },
+  renoByConfig:{ "1":8, "2":12, "3":16, "4":22 },
+};
+
+/* ---------- persistence ---------- */
+function load(key, fallback){
+  try{ const v = localStorage.getItem(key); return v==null ? fallback : JSON.parse(v); }
+  catch(e){ return fallback; }
+}
+function save(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
+
+function loadAssumptions(){
+  const a = load(LS.assumptions, {});
+  return {
+    ...DEFAULT_ASSUMPTIONS, ...a,
+    rentByConfig:{ ...DEFAULT_ASSUMPTIONS.rentByConfig, ...(a.rentByConfig||{}) },
+    renoByConfig:{ ...DEFAULT_ASSUMPTIONS.renoByConfig, ...(a.renoByConfig||{}) },
+  };
+}
+
+/* ---------- default underwrite form ---------- */
+function defaultUw(){
+  const A = loadAssumptions();
+  const cfg = "2";
+  return {
+    society:"", microMarket:"Powai", config:cfg, carpet:"",
+    ask:"", guaranteed:"", clearing:"",
+    token:5, rent:A.rentByConfig[cfg], window:6, expectedDays:45,
+    reno:A.renoByConfig[cfg], legal:1.5, marketing:0.8, ops:1.2, channelFee:0.5,
+    targetMargin:6.0, dateSigned: todayStr(),
+  };
+}
+
+/* ---------- app state ---------- */
+let A = loadAssumptions();
+let state = {
+  tab:"underwrite",
+  uw: load(LS.underwrite, null) || defaultUw(),
+  portfolio: load(LS.portfolio, []),
+  sort:{ col:"dob", dir:"desc" },
+  expanded:{},
+};
+
+/* ============================================================
+   FORMAT HELPERS
+   ============================================================ */
+function nz(x){ return (Object.is(x,-0) || Math.abs(x) < 1e-9) ? 0 : x; }
+function fixed(v, dp){
+  v = Number(v);
+  if(!isFinite(v)) v = 0;
+  if(Math.abs(v) < Math.pow(10,-dp)/2) v = 0;   // never show -0
+  return v.toFixed(dp);
+}
+function cr(rupees){ return fixed(rupees/CR, 2); }          // "3.20"
+function crStr(rupees){ return cr(rupees) + " Cr"; }
+function lakh(rupees){ return fixed(rupees/LAKH, 1); }       // "16.3"
+function lakhStr(rupees){ return lakh(rupees) + " L"; }
+function pct(x){ return fixed(x, 1) + "%"; }
+function indian(num){
+  num = Math.round(num);
+  const neg = num < 0; num = Math.abs(num).toString();
+  let last3 = num.slice(-3); let rest = num.slice(0, -3);
+  if(rest) last3 = "," + last3;
+  rest = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ",");
+  return (neg ? "-" : "") + rest + last3;
+}
+function todayStr(){ const d = new Date(); return d.toISOString().slice(0,10); }
+function todayDate(){ const d = new Date(); d.setHours(0,0,0,0); return d; }
+function daysBetween(fromStr, toDate){
+  if(!fromStr) return 0;
+  const a = new Date(fromStr + "T00:00:00");
+  if(isNaN(a)) return 0;
+  const diff = Math.floor((toDate - a) / 86400000);
+  return Math.max(0, diff);
+}
+function n(v){ const x = parseFloat(v); return isFinite(x) ? x : 0; }
+
+/* ============================================================
+   CORE CALCULATION ENGINE
+   ============================================================ */
+function calc(inp, assumptions){
+  const G  = n(inp.guaranteed) * CR;
+  const M  = n(inp.clearing)   * CR;
+  const R  = (n(inp.reno) + n(inp.legal) + n(inp.marketing) + n(inp.ops)) * LAKH;
+  const Rreno = n(inp.reno) * LAKH;
+  const T  = n(inp.token) * LAKH;
+  const r  = n(inp.rent);
+  const cc = assumptions.costOfCapital;
+  const f  = n(inp.channelFee);
+
+  const rentPaid    = d => r * (d / DAYS_PER_MONTH);
+  const grossSpread = M - G;
+  const channelFee  = M * f / 100;
+  const capitalBase = d => T + Rreno + rentPaid(d) / 2;
+  const carry       = d => capitalBase(d) * (cc / 100) * (d / 365);
+  const peakCapital = d => T + Rreno + rentPaid(d);
+  const netMargin   = d => grossSpread - R - rentPaid(d) - carry(d) - channelFee;
+  const netMarginPct= d => M > 0 ? (netMargin(d) / M) * 100 : 0;
+
+  return { G,M,R,Rreno,T,r,cc,f, rentPaid, grossSpread, channelFee,
+           capitalBase, carry, peakCapital, netMargin, netMarginPct };
+}
+
+// net_margin(d) is monotonically decreasing in d -> bisection.
+function breakEven(c){
+  if(c.netMargin(0) <= 0) return { days:0, underwater:true, capped:false };
+  if(c.netMargin(3650) > 0) return { days:1000, underwater:false, capped:true };
+  let lo = 0, hi = 3650;
+  for(let i=0;i<80;i++){
+    const mid = (lo + hi) / 2;
+    if(c.netMargin(mid) > 0) lo = mid; else hi = mid;
+    if(hi - lo < 0.5) break;
+  }
+  return { days:(lo + hi) / 2, underwater:false, capped:false };
+}
+function beDisplay(be){
+  if(be.underwater) return "0";
+  if(be.capped || be.days > 999) return "999+";
+  return String(Math.round(be.days));
+}
+
+// Max guaranteed price for a target net-margin % p, holding d fixed. Closed form.
+function maxGuaranteed(c, d, p){
+  return c.M - (c.M * p / 100) - c.R - c.rentPaid(d) - c.carry(d) - c.channelFee; // rupees
+}
+// Price headroom: how far M can fall (G fixed) before net_margin = 0. Channel fee scales with M.
+function priceHeadroom(c, d){
+  const Mbe = (c.G + c.R + c.rentPaid(d) + c.carry(d)) / (1 - c.f/100);
+  return { Mbe, headroom: c.M - Mbe };
+}
+
+function verdict(c, inp, assumptions){
+  const d = n(inp.expectedDays);
+  const p = c.netMarginPct(d);
+  const be = breakEven(c);
+  const beDays = be.underwater ? 0 : be.days;
+  const cushion = beDays - d * 1.5;
+  const beyond = beDays - d;
+  let state, sentence;
+
+  const goMargin = p >= assumptions.goThreshold;
+  const goBE = beDays > d * 1.5;
+
+  if(be.underwater || p < 0){
+    state = "pass";
+    sentence = be.underwater
+      ? "You are underwater the day you sign — costs plus the guaranteed price already exceed the clearing price."
+      : "Net margin is negative ("+lakhStr(c.netMargin(d))+") at your expected sale date — this mandate loses money as underwritten.";
+  } else if(goMargin && goBE){
+    state = "go";
+    sentence = "Healthy "+pct(p)+" margin and break-even only arrives around day "+Math.round(beDays)+" — comfortably past your "+Math.round(d)+"-day sale target, so there is cushion if the market slows.";
+  } else if(p >= assumptions.watchThreshold){
+    state = "watch";
+    if(goMargin && !goBE){
+      sentence = "Spread is healthy at "+pct(p)+" but break-even lands at day "+Math.round(beDays)+" — only "+Math.round(beyond)+" days past your "+Math.round(d)+"-day target, leaving little room if the market softens.";
+    } else {
+      sentence = "Margin is a slim "+pct(p)+", below your GO bar of "+pct(assumptions.goThreshold)+" — workable, but small cost or timing overruns could erase it.";
+    }
+  } else {
+    state = "pass";
+    sentence = "Margin is just "+pct(p)+", under your WATCH floor of "+pct(assumptions.watchThreshold)+" — the spread does not justify the rent and cost of capital on this timeline.";
+  }
+  return { state, p, be, beDays, cushion, sentence };
+}
+
+function marginClass(p, assumptions){
+  if(p >= assumptions.goThreshold) return "go";
+  if(p >= assumptions.watchThreshold) return "watch";
+  return "pass";
+}
+
+/* ============================================================
+   RENDER — shell / tabs
+   ============================================================ */
+const view = document.getElementById("view");
+function setTab(t){
+  state.tab = t;
+  document.querySelectorAll(".tab").forEach(b => b.classList.toggle("active", b.dataset.tab === t));
+  if(t === "underwrite") renderUnderwrite();
+  else if(t === "portfolio") renderPortfolio();
+  else renderAssumptions();
+}
+document.getElementById("tabs").addEventListener("click", e => {
+  const b = e.target.closest(".tab"); if(b) setTab(b.dataset.tab);
+});
+
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+/* ============================================================
+   TAB 1 — UNDERWRITE
+   ============================================================ */
+function renderUnderwrite(){
+  const u = state.uw;
+  const mktOpts = MICRO_MARKETS.map(m => `<option ${m===u.microMarket?"selected":""}>${m}</option>`).join("");
+  const cfgOpts = CONFIGS.map(([v,l]) => `<option value="${v}" ${v===u.config?"selected":""}>${l}</option>`).join("");
+
+  view.innerHTML = `
+  <div class="uw">
+    <form id="uwForm" autocomplete="off">
+      <div class="card">
+        <div class="card-title">Property</div>
+        <div class="field"><label class="lbl">Society name</label>
+          <input type="text" id="f_society" value="${esc(u.society)}" placeholder="e.g. Lake Primrose"></div>
+        <div class="grid2">
+          <div class="field"><label class="lbl">Micro-market</label><select id="f_microMarket">${mktOpts}</select></div>
+          <div class="field"><label class="lbl">Configuration</label><select id="f_config">${cfgOpts}</select></div>
+        </div>
+        <div class="field" style="margin-top:14px"><label class="lbl">Carpet area</label>
+          <div class="inputwrap"><input type="number" id="f_carpet" value="${u.carpet}" min="0" step="1"><span class="suffix">sq ft</span></div>
+          <div class="errmsg" id="e_carpet" style="display:none"></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Pricing</div>
+        <div class="field"><label class="lbl">Seller's asking price</label>
+          <div class="inputwrap"><input type="number" id="f_ask" value="${u.ask}" min="0" step="0.01"><span class="suffix">Cr</span></div>
+          <div class="errmsg" id="e_ask" style="display:none"></div></div>
+        <div class="field"><label class="lbl">Guaranteed price offered to seller</label>
+          <div class="inputwrap"><input type="number" id="f_guaranteed" value="${u.guaranteed}" min="0" step="0.01"><span class="suffix">Cr</span></div>
+          <div class="errmsg" id="e_guaranteed" style="display:none"></div></div>
+        <div class="field"><label class="lbl">Expected clearing price post-renovation</label>
+          <div class="inputwrap"><input type="number" id="f_clearing" value="${u.clearing}" min="0" step="0.01"><span class="suffix">Cr</span></div>
+          <div class="errmsg" id="e_clearing" style="display:none"></div></div>
+        <div class="readout" id="pricingReadout"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Deal terms</div>
+        <div class="grid2">
+          <div class="field"><label class="lbl">Token paid to seller</label>
+            <div class="inputwrap"><input type="number" id="f_token" value="${u.token}" min="0" step="0.1"><span class="suffix">L</span></div></div>
+          <div class="field"><label class="lbl">Monthly rent paid to seller</label>
+            <div class="inputwrap"><input type="number" id="f_rent" value="${u.rent}" min="0" step="1000"><span class="suffix">INR</span></div></div>
+        </div>
+        <div class="grid2" style="margin-top:14px">
+          <div class="field"><label class="lbl">Guarantee window</label>
+            <div class="inputwrap"><input type="number" id="f_window" value="${u.window}" min="1" step="1"><span class="suffix">mo</span></div></div>
+          <div class="field"><label class="lbl">Expected days to sell</label>
+            <div class="inputwrap"><input type="number" id="f_expectedDays" value="${u.expectedDays}" min="10" max="240" step="1"><span class="suffix">days</span></div></div>
+        </div>
+        <input type="range" id="f_expectedDaysSlider" min="10" max="240" step="1" value="${u.expectedDays}">
+      </div>
+
+      <div class="card">
+        <div class="card-title">Costs</div>
+        <div class="grid2">
+          <div class="field"><label class="lbl">Renovation &amp; staging spend</label>
+            <div class="inputwrap"><input type="number" id="f_reno" value="${u.reno}" min="0" step="0.1"><span class="suffix">L</span></div></div>
+          <div class="field"><label class="lbl">Legal, title &amp; documentation</label>
+            <div class="inputwrap"><input type="number" id="f_legal" value="${u.legal}" min="0" step="0.1"><span class="suffix">L</span></div></div>
+        </div>
+        <div class="grid2" style="margin-top:14px">
+          <div class="field"><label class="lbl">Marketing &amp; listing production</label>
+            <div class="inputwrap"><input type="number" id="f_marketing" value="${u.marketing}" min="0" step="0.1"><span class="suffix">L</span></div></div>
+          <div class="field"><label class="lbl">Ops &amp; visit-hosting cost</label>
+            <div class="inputwrap"><input type="number" id="f_ops" value="${u.ops}" min="0" step="0.1"><span class="suffix">L</span></div></div>
+        </div>
+        <div class="field" style="margin-top:14px"><label class="lbl">Buy-side channel fee (% of clearing price)</label>
+          <div class="inputwrap"><input type="number" id="f_channelFee" value="${u.channelFee}" min="0" step="0.1"><span class="suffix">%</span></div></div>
+      </div>
+    </form>
+
+    <div id="uwResults"></div>
+  </div>`;
+
+  const form = document.getElementById("uwForm");
+  form.addEventListener("input", onUwInput);
+  form.addEventListener("change", onUwChange);
+  updateUnderwrite();
+}
+
+function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+function readUwForm(){
+  const g = id => { const el = document.getElementById(id); return el ? el.value : ""; };
+  const u = state.uw;
+  u.society = g("f_society");
+  u.microMarket = g("f_microMarket");
+  u.config = g("f_config");
+  ["carpet","ask","guaranteed","clearing","token","rent","window","expectedDays","reno","legal","marketing","ops","channelFee"]
+    .forEach(k => { u[k] = g("f_"+k); });
+  save(LS.underwrite, u);
+}
+
+function onUwInput(e){
+  if(e.target.id === "f_expectedDays"){
+    const s = document.getElementById("f_expectedDaysSlider"); if(s) s.value = e.target.value;
+  }
+  if(e.target.id === "f_expectedDaysSlider"){
+    const nfld = document.getElementById("f_expectedDays"); if(nfld) nfld.value = e.target.value;
+  }
+  readUwForm();
+  updateUnderwrite();
+}
+function onUwChange(e){
+  if(e.target.id === "f_config"){
+    const cfg = e.target.value;
+    const rent = document.getElementById("f_rent"), reno = document.getElementById("f_reno");
+    if(rent) rent.value = A.rentByConfig[cfg];
+    if(reno) reno.value = A.renoByConfig[cfg];
+  }
+  readUwForm();
+  updateUnderwrite();
+}
+
+function validateUw(u){
+  const errs = {};
+  const numFields = {
+    carpet:"Carpet area", ask:"Asking price", guaranteed:"Guaranteed price",
+    clearing:"Clearing price", token:"Token", rent:"Rent", window:"Window",
+    expectedDays:"Days to sell", reno:"Renovation", legal:"Legal", marketing:"Marketing",
+    ops:"Ops", channelFee:"Channel fee"
+  };
+  for(const k in numFields){
+    const raw = u[k];
+    if(raw === "" || raw == null){ errs[k] = "Required"; }
+    else if(parseFloat(raw) < 0){ errs[k] = "Must be ≥ 0"; }
+    else if(!isFinite(parseFloat(raw))){ errs[k] = "Enter a number"; }
+  }
+  if(u.guaranteed !== "" && u.clearing !== "" && n(u.guaranteed) > n(u.clearing)){
+    errs.guaranteed = "Guaranteed price exceeds expected clearing price";
+    errs.clearing = "Clearing price is below guaranteed price";
+  }
+  return errs;
+}
+
+function applyValidation(errs){
+  ["carpet","ask","guaranteed","clearing","token","rent","window","expectedDays","reno","legal","marketing","ops","channelFee"].forEach(k => {
+    const el = document.getElementById("f_"+k);
+    const em = document.getElementById("e_"+k);
+    if(el) el.classList.toggle("invalid", !!errs[k]);
+    if(em){ if(errs[k]){ em.textContent = errs[k]; em.style.display="block"; } else em.style.display="none"; }
+  });
+}
+
+function updateUnderwrite(){
+  const u = state.uw;
+  const errs = validateUw(u);
+  applyValidation(errs);
+
+  const c = calc(u, A);
+  const d = n(u.expectedDays);
+
+  // derived pricing readout
+  const spread = c.grossSpread;
+  const spreadPct = c.M > 0 ? spread / c.M * 100 : 0;
+  const rate = n(u.carpet) > 0 ? c.M / n(u.carpet) : 0;
+  const pr = document.getElementById("pricingReadout");
+  if(pr){
+    pr.innerHTML = `Implied gross spread: <b>${crStr(spread)}</b> (${pct(spreadPct)} of clearing price)<br>`
+      + `Implied clearing rate: <b>INR ${rate>0?indian(rate):"—"}</b>/sq ft`;
+  }
+
+  const v = verdict(c, u, A);
+  const results = document.getElementById("uwResults");
+  results.innerHTML = renderResults(c, u, v, d);
+
+  // wire solver + save (spans-only update to preserve focus)
+  const tm = document.getElementById("solverTarget");
+  if(tm){ tm.addEventListener("input", updateSolver); }
+  const ds = document.getElementById("saveDate");
+  if(ds){ ds.addEventListener("change", () => { state.uw.dateSigned = ds.value; save(LS.underwrite, state.uw); }); }
+  const sv = document.getElementById("saveBtn");
+  if(sv){ sv.addEventListener("click", saveToPortfolio); }
+}
+
+function updateSolver(){
+  const u = state.uw;
+  const c = calc(u, A);
+  const d = n(u.expectedDays);
+  const tmEl = document.getElementById("solverTarget");
+  const p = tmEl ? n(tmEl.value) : n(u.targetMargin);
+  u.targetMargin = tmEl ? tmEl.value : u.targetMargin;
+  save(LS.underwrite, u);
+  const gmax = maxGuaranteed(c, d, p);
+  const delta = gmax - n(u.ask) * CR;
+  const out = document.getElementById("solverOut");
+  const del = document.getElementById("solverDelta");
+  if(out) out.innerHTML = `Maximum price you can guarantee this seller: <span class="hl">INR ${crStr(gmax)}</span>`;
+  if(del){
+    if(n(u.ask) <= 0){ del.textContent = "Enter the seller's asking price to see the negotiation gap."; del.style.color="var(--muted)"; }
+    else if(delta >= 0){ del.textContent = "INR "+crStr(delta)+" above ask — you have room."; del.style.color="var(--green)"; }
+    else { del.textContent = "INR "+crStr(-delta)+" below ask — negotiation gap."; del.style.color="var(--red)"; }
+  }
+}
+
+function renderResults(c, u, v, d){
+  const p = v.p;
+  const be = v.be;
+  const peak = c.peakCapital(d);
+  const netM = c.netMargin(d);
+
+  // solver
+  const tgt = n(u.targetMargin || 6);
+  const gmax = maxGuaranteed(c, d, tgt);
+  const delta = gmax - n(u.ask) * CR;
+  let deltaTxt, deltaColor;
+  if(n(u.ask) <= 0){ deltaTxt = "Enter the seller's asking price to see the negotiation gap."; deltaColor="var(--muted)"; }
+  else if(delta >= 0){ deltaTxt = "INR "+crStr(delta)+" above ask — you have room."; deltaColor="var(--green)"; }
+  else { deltaTxt = "INR "+crStr(-delta)+" below ask — negotiation gap."; deltaColor="var(--red)"; }
+
+  // headroom
+  const hr = priceHeadroom(c, d);
+  const hrPct = c.M > 0 ? hr.headroom / c.M * 100 : 0;
+
+  const vClass = v.state==="go"?"v-go":v.state==="watch"?"v-watch":"v-pass";
+  const vLabel = v.state.toUpperCase();
+
+  return `
+    <div class="verdict ${vClass}">
+      <div class="badge">${vLabel}</div>
+      <div class="sub">${v.sentence}</div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="k">Net margin</div><div class="v num">${lakh(netM)}<span class="u">L</span></div></div>
+      <div class="stat"><div class="k">Net margin %<br>of clearing</div><div class="v num val-${marginClass(p,A)}">${fixed(p,1)}<span class="u">%</span></div></div>
+      <div class="stat"><div class="k">Break-even days to sell</div><div class="v num">${beDisplay(be)}</div></div>
+      <div class="stat"><div class="k">Peak capital deployed</div><div class="v num">${lakh(peak)}<span class="u">L</span></div></div>
+    </div>
+
+    <div class="solver">
+      <label class="lbl">Max guaranteed price solver</label>
+      <div class="field" style="margin-bottom:0">
+        <label class="lbl">Target net margin %</label>
+        <div class="inputwrap solver-in"><input type="number" id="solverTarget" value="${u.targetMargin||6}" min="0" step="0.1"><span class="suffix">%</span></div>
+      </div>
+      <div class="big num" id="solverOut">Maximum price you can guarantee this seller: <span class="hl">INR ${crStr(gmax)}</span></div>
+      <div class="delta" id="solverDelta" style="color:${deltaColor}">${deltaTxt}</div>
+    </div>
+
+    <div class="panelbox">
+      <h4>Rent-clock stress table</h4>
+      <div class="tbl-scroll">${renderStressTable(c, u)}</div>
+    </div>
+
+    <div class="panelbox">
+      <h4>Margin decay by days to sell</h4>
+      ${renderDecayChart(c, u)}
+    </div>
+
+    <div class="panelbox">
+      <h4>Price headroom</h4>
+      <div style="font-size:14px;color:var(--ink)">
+        You can discount the clearing price by up to <b style="color:var(--accent)">INR ${crStr(Math.max(0,hr.headroom))}</b>
+        (${pct(Math.max(0,hrPct))}) at your expected ${Math.round(d)}-day sale target and still break even.
+      </div>
+    </div>
+
+    <div class="panelbox">
+      <h4>Cost waterfall — how the gross spread is consumed</h4>
+      ${renderWaterfall(c, u, d, v)}
+    </div>
+
+    <div class="save-strip">
+      <div class="field" style="margin-bottom:0">
+        <label class="lbl">Date signed</label>
+        <input type="date" id="saveDate" value="${u.dateSigned||todayStr()}">
+      </div>
+      <button class="btn primary" id="saveBtn">Save to portfolio</button>
+    </div>
+  `;
+}
+
+function renderStressTable(c, u){
+  const windowDays = Math.round(n(u.window) * DAYS_PER_MONTH);
+  const rows = [19,30,45,60,90,120,180, windowDays];
+  const seen = new Set();
+  let body = "";
+  rows.forEach(d => {
+    if(seen.has(d)) return; seen.add(d);
+    const rp = c.rentPaid(d), cy = c.carry(d), nm = c.netMargin(d), mp = c.netMarginPct(d);
+    body += `<tr>
+      <td class="num">${d}${d===windowDays?" <span style='color:var(--muted);font-size:10px'>(window)</span>":""}</td>
+      <td class="num">${lakh(rp)}</td>
+      <td class="num">${lakh(cy)}</td>
+      <td class="num">${lakh(nm)}</td>
+      <td class="num"><span class="cell-${marginClass(mp,A)}" style="padding:2px 6px">${fixed(mp,1)}%</span></td>
+    </tr>`;
+  });
+  // guarantee breach row
+  const bd = windowDays;
+  const breachNm = c.netMargin(bd) - A.breachCost * LAKH;
+  const breachPct = c.M > 0 ? breachNm / c.M * 100 : 0;
+  body += `<tr class="breach-row">
+    <td>Guarantee breach</td>
+    <td class="num">${lakh(c.rentPaid(bd))}</td>
+    <td class="num">${lakh(c.carry(bd))}</td>
+    <td class="num">${lakh(breachNm)}</td>
+    <td class="num"><span class="cell-${marginClass(breachPct,A)}" style="padding:2px 6px">${fixed(breachPct,1)}%</span></td>
+  </tr>`;
+  return `<table><thead><tr>
+    <th>Days</th><th>Rent paid (L)</th><th>Carry cost (L)</th><th>Net margin (L)</th><th>Margin %</th>
+  </tr></thead><tbody>${body}</tbody></table>`;
+}
+
+function renderDecayChart(c, u){
+  const W = 600, H = 260, padL = 56, padR = 16, padT = 14, padB = 30;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const dMax = 240;
+  const pts = [];
+  for(let d=0; d<=dMax; d+=3) pts.push([d, c.netMargin(d)/LAKH]); // y in Lakh
+  let yMin = Math.min(0, ...pts.map(p=>p[1]));
+  let yMax = Math.max(0, ...pts.map(p=>p[1]));
+  if(yMax === yMin){ yMax += 1; yMin -= 1; }
+  const padY = (yMax - yMin) * 0.08;
+  yMin -= padY; yMax += padY;
+  const X = d => padL + (d/dMax)*plotW;
+  const Y = y => padT + (1 - (y - yMin)/(yMax - yMin))*plotH;
+
+  const path = pts.map((p,i)=> (i?"L":"M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)).join(" ");
+  const zeroY = Y(0);
+  const expD = Math.min(dMax, Math.max(0, n(u.expectedDays)));
+  const winD = Math.min(dMax, Math.max(0, n(u.window)*DAYS_PER_MONTH));
+
+  // y ticks
+  let ticks = "";
+  for(let i=0;i<=4;i++){
+    const yv = yMin + (yMax-yMin)*i/4;
+    const yy = Y(yv);
+    ticks += `<line x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}" stroke="#EFEEEA" stroke-width="1"/>`
+      + `<text x="${padL-8}" y="${yy+3}" text-anchor="end" font-size="10" fill="#8A8A8A">${fixed(yv,0)}</text>`;
+  }
+  // shade below zero
+  const shade = zeroY < H-padB
+    ? `<rect x="${padL}" y="${zeroY}" width="${plotW}" height="${(H-padB)-zeroY}" fill="#D64545" opacity="0.07"/>` : "";
+
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Margin decay chart">
+    ${shade}
+    ${ticks}
+    <line x1="${padL}" y1="${zeroY}" x2="${W-padR}" y2="${zeroY}" stroke="#2D2D2D" stroke-width="1"/>
+    <line x1="${X(expD)}" y1="${padT}" x2="${X(expD)}" y2="${H-padB}" stroke="#FF6B35" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <text x="${X(expD)}" y="${padT+10}" text-anchor="middle" font-size="10" fill="#FF6B35" font-weight="600">D-day ${Math.round(expD)}</text>
+    <line x1="${X(winD)}" y1="${padT}" x2="${X(winD)}" y2="${H-padB}" stroke="#8A8A8A" stroke-width="1" stroke-dasharray="2 3"/>
+    <text x="${X(winD)}" y="${H-padB+14}" text-anchor="middle" font-size="10" fill="#8A8A8A">window ${Math.round(winD)}d</text>
+    <path d="${path}" fill="none" stroke="#FF6B35" stroke-width="2.5"/>
+    <text x="${padL-46}" y="${padT+plotH/2}" transform="rotate(-90 ${padL-46} ${padT+plotH/2})" text-anchor="middle" font-size="10" fill="#8A8A8A">Net margin (L)</text>
+  </svg>`;
+}
+
+function renderWaterfall(c, u, d, v){
+  const gs = c.grossSpread;
+  const parts = [
+    ["Renovation & staging", n(u.reno)*LAKH, "#c98a6a"],
+    ["Rent to seller", c.rentPaid(d), "#d9a05b"],
+    ["Cost of capital (carry)", c.carry(d), "#b98f4a"],
+    ["Channel fee", c.channelFee, "#a97c55"],
+    ["Legal & docs", n(u.legal)*LAKH, "#8f8f8f"],
+    ["Marketing", n(u.marketing)*LAKH, "#a8a8a8"],
+    ["Ops & visits", n(u.ops)*LAKH, "#bdbdbd"],
+  ];
+  const netM = c.netMargin(d);
+  const netColor = v.state==="go"?"var(--green)":v.state==="watch"?"var(--amber)":"var(--red)";
+
+  // stacked bar (only meaningful when gross spread positive)
+  let bar = "";
+  if(gs > 0){
+    const total = gs;
+    const segs = parts.map(([name,val,col]) => {
+      const w = Math.max(0, val/total*100);
+      return `<div class="wf-seg" style="width:${w}%;background:${col}" title="${name}: ${lakhStr(val)}">${w>7?lakhStr(val):""}</div>`;
+    }).join("");
+    const netW = Math.max(0, netM/total*100);
+    const netSeg = netM > 0
+      ? `<div class="wf-seg" style="width:${netW}%;background:${netColor}" title="Net margin: ${lakhStr(netM)}">${netW>7?lakhStr(netM):""}</div>` : "";
+    bar = `<div class="wf-bar">${segs}${netSeg}</div>`;
+  }
+
+  const rows = `
+    <div class="wf-row total"><span><span class="dot" style="background:var(--accent)"></span>Gross spread</span><span class="num">${lakhStr(gs)}</span></div>
+    ${parts.map(([name,val,col]) => `<div class="wf-row"><span><span class="dot" style="background:${col}"></span>${name}</span><span class="num">− ${lakhStr(val)}</span></div>`).join("")}
+    <div class="wf-row total"><span><span class="dot" style="background:${netColor}"></span>Net margin</span><span class="num" style="color:${netColor}">${lakhStr(netM)}</span></div>
+  `;
+  return bar + rows;
+}
+
+function saveToPortfolio(){
+  const u = state.uw;
+  if(!u.society || String(u.society).trim()===""){ toast("Add a society name before saving."); return; }
+  if(u.clearing==="" || u.guaranteed===""){ toast("Enter guaranteed and clearing prices first."); return; }
+  const m = {
+    id: "m_" + Date.now() + "_" + Math.floor(Math.random()*1000),
+    society:u.society, microMarket:u.microMarket, config:u.config, carpet:n(u.carpet),
+    ask:n(u.ask), guaranteed:n(u.guaranteed), clearing:n(u.clearing),
+    token:n(u.token), rent:n(u.rent), window:n(u.window), expectedDays:n(u.expectedDays),
+    reno:n(u.reno), legal:n(u.legal), marketing:n(u.marketing), ops:n(u.ops), channelFee:n(u.channelFee),
+    dateSigned: u.dateSigned || todayStr(), status:"Live",
+  };
+  state.portfolio.push(m);
+  save(LS.portfolio, state.portfolio);
+  toast(`Saved “${m.society}” to portfolio (Live).`);
+}
+
+/* ============================================================
+   TAB 2 — PORTFOLIO
+   ============================================================ */
+function mandateMetrics(m){
+  const c = calc(m, A);
+  const be = breakEven(c);
+  const dob = daysBetween(m.dateSigned, todayDate());
+  const peak = c.peakCapital(dob);
+  const curPct = c.netMarginPct(dob);
+  const windowDays = n(m.window) * DAYS_PER_MONTH;
+  return { c, be, dob, peak, curPct, windowDays };
+}
+
+function renderPortfolio(){
+  const P = state.portfolio;
+  if(P.length === 0){
+    view.innerHTML = `<div class="empty">
+      <h3>No mandates yet</h3>
+      <p>Underwrite a deal and click “Save to portfolio”, or use <b>Load sample data</b> in the top bar to seed six example mandates.</p>
+    </div>`;
+    return;
+  }
+  const live = P.filter(m => m.status === "Live");
+  const metrics = P.map(m => ({ m, ...mandateMetrics(m) }));
+  const liveMetrics = metrics.filter(x => x.m.status === "Live");
+
+  const capitalToday = liveMetrics.reduce((s,x)=>s+x.peak, 0);
+  const rentBurn = live.reduce((s,m)=>s+n(m.rent), 0);
+  const wClearing = live.reduce((s,m)=>s+n(m.clearing)*CR, 0);
+  const wDob = live.reduce((s,m)=>{ const dob = daysBetween(m.dateSigned, todayDate()); return s + dob * n(m.clearing)*CR; }, 0);
+  const wAvgDob = wClearing > 0 ? wDob / wClearing : 0;
+  const wcLimit = A.workingCapitalLimit * CR;
+  const util = wcLimit > 0 ? capitalToday / wcLimit * 100 : 0;
+  const utilColor = util > 90 ? "var(--red)" : util > 75 ? "var(--amber)" : "var(--green)";
+
+  const kpis = `<div class="kpis">
+    <div class="stat"><div class="k">Live mandates</div><div class="v num">${live.length}</div></div>
+    <div class="stat accent"><div class="k">Capital deployed today</div><div class="v num">${cr(capitalToday)}<span class="u">Cr</span></div></div>
+    <div class="stat"><div class="k">Monthly rent burn run-rate</div><div class="v num">${lakh(rentBurn)}<span class="u">L</span></div></div>
+    <div class="stat"><div class="k">Wtd avg days on book</div><div class="v num">${Math.round(wAvgDob)}</div></div>
+    <div class="stat"><div class="k">Working-capital use</div>
+      <div class="v num" style="color:${utilColor}">${fixed(util,0)}<span class="u">%</span></div>
+      <div class="progress"><div style="width:${Math.min(100,util)}%;background:${utilColor}"></div></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px">${cr(capitalToday)} of ${fixed(A.workingCapitalLimit,0)} Cr limit</div>
+    </div>
+  </div>`;
+
+  // ageing buckets
+  const buckets = [
+    { label:"0–30", lo:0, hi:30, color:"#2E9E5B" },
+    { label:"31–60", lo:31, hi:60, color:"#7FB84A" },
+    { label:"61–90", lo:61, hi:90, color:"#E8A33D" },
+    { label:"91–180", lo:91, hi:180, color:"#E07B3A" },
+    { label:"180+", lo:181, hi:1e9, color:"#D64545" },
+  ];
+  buckets.forEach(b => { b.count=0; b.cap=0; });
+  liveMetrics.forEach(x => {
+    const b = buckets.find(b => x.dob >= b.lo && x.dob <= b.hi) || buckets[buckets.length-1];
+    b.count++; b.cap += x.peak;
+  });
+  const maxCap = Math.max(1, ...buckets.map(b=>b.cap));
+  const ageing = `<div class="ageing">${buckets.map(b => {
+    const h = b.cap>0 ? Math.max(4, b.cap/maxCap*118) : 3;
+    return `<div class="age-col">
+      <div class="age-bar-track"><div class="age-bar" style="height:${h}px;background:${b.color}"></div></div>
+      <div class="age-meta"><div class="c num">${b.count}</div><div class="num" style="color:var(--body)">${cr(b.cap)} Cr</div></div>
+      <div class="age-lbl">${b.label} days</div>
+    </div>`;
+  }).join("")}</div>`;
+
+  // risk list
+  const risks = liveMetrics.filter(x => {
+    const beRisk = !x.be.underwater && x.be.days > 0 && x.dob > 0.7 * x.be.days;
+    const winRisk = (x.windowDays - x.dob) <= 30;
+    return beRisk || winRisk;
+  });
+  let riskHtml;
+  if(risks.length === 0){
+    riskHtml = `<div style="color:var(--muted);font-size:13px;padding:8px 0">No live mandate is past 70% of its break-even day or within 30 days of window expiry. Clear runway.</div>`;
+  } else {
+    riskHtml = risks.map(x => {
+      const winLeft = Math.round(x.windowDays - x.dob);
+      const beLeft = x.be.underwater ? 0 : Math.max(0, Math.round(x.be.days - x.dob));
+      const sev = (x.curPct < A.watchThreshold || winLeft <= 0 || x.dob > 0.9 * (x.be.underwater?1:x.be.days)) ? "red" : "amber";
+      const why = [];
+      if(!x.be.underwater && x.be.days>0 && x.dob > 0.7*x.be.days) why.push("past 70% of break-even");
+      if(winLeft <= 30) why.push(winLeft<=0 ? "window expired" : winLeft+"d to window expiry");
+      return `<div class="alert ${sev}">
+        <div class="top"><span class="soc">${esc(x.m.society)}</span><span class="tag">${why.join(" · ")}</span></div>
+        <div class="metrics">
+          <span>Days on book <b class="num">${x.dob}</b></span>
+          <span>Days to break-even <b class="num">${x.be.underwater?"—":beLeft}</b></span>
+          <span>Current margin <b class="num">${fixed(x.curPct,1)}%</b></span>
+          <span>Window left <b class="num">${winLeft}d</b></span>
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  view.innerHTML = kpis
+    + `<div class="section-title">Ageing breakdown — capital by days on book (live mandates)</div>`
+    + `<div class="card">${ageing}</div>`
+    + `<div class="section-title">Risk list</div><div>${riskHtml}</div>`
+    + `<div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+         <span>All mandates</span>
+         <button class="btn sm" id="exportBtn">Export summary (CSV)</button>
+       </div>`
+    + `<div class="card" style="padding:8px"><div class="tbl-scroll">${renderPortfolioTable(metrics)}</div></div>`;
+
+  document.getElementById("exportBtn").addEventListener("click", exportCSV);
+  wirePortfolioTable();
+}
+
+function sortMetrics(metrics){
+  const { col, dir } = state.sort;
+  const val = x => {
+    switch(col){
+      case "society": return x.m.society.toLowerCase();
+      case "micro": return x.m.microMarket.toLowerCase();
+      case "config": return n(x.m.config);
+      case "guaranteed": return n(x.m.guaranteed);
+      case "clearing": return n(x.m.clearing);
+      case "dob": return x.dob;
+      case "be": return x.be.underwater ? -1 : x.be.days;
+      case "margin": return x.curPct;
+      case "status": return x.m.status;
+      default: return x.dob;
+    }
+  };
+  metrics = metrics.slice().sort((a,b)=>{
+    const va = val(a), vb = val(b);
+    if(va < vb) return dir==="asc" ? -1 : 1;
+    if(va > vb) return dir==="asc" ? 1 : -1;
+    return 0;
+  });
+  return metrics;
+}
+
+function renderPortfolioTable(metrics){
+  const sorted = sortMetrics(metrics);
+  const arrow = c => state.sort.col===c ? `<span class="arrow">${state.sort.dir==="asc"?"▲":"▼"}</span>` : "";
+  const head = `<tr>
+    <th data-sort="society">Society${arrow("society")}</th>
+    <th data-sort="micro">Micro-market${arrow("micro")}</th>
+    <th data-sort="config">Config${arrow("config")}</th>
+    <th data-sort="guaranteed">Guaranteed${arrow("guaranteed")}</th>
+    <th data-sort="clearing">Clearing${arrow("clearing")}</th>
+    <th data-sort="dob">Days on book${arrow("dob")}</th>
+    <th data-sort="be">Break-even day${arrow("be")}</th>
+    <th data-sort="margin">Current margin %${arrow("margin")}</th>
+    <th data-sort="status">Status${arrow("status")}</th>
+    <th></th>
+  </tr>`;
+  const cfgLabel = v => (CONFIGS.find(c=>c[0]===String(v))||["","—"])[1];
+
+  const body = sorted.map(x => {
+    const m = x.m;
+    const mc = marginClass(x.curPct, A);
+    const pill = m.status==="Live"?"pill-live":m.status==="Sold"?"pill-sold":"pill-lapsed";
+    const expanded = state.expanded[m.id];
+    let row = `<tr class="main" data-id="${m.id}">
+      <td><button class="expandbtn" data-exp="${m.id}">${expanded?"▾":"▸"}</button> ${esc(m.society)}</td>
+      <td>${esc(m.microMarket)}</td>
+      <td>${cfgLabel(m.config)}</td>
+      <td class="num">${fixed(n(m.guaranteed),2)} Cr</td>
+      <td class="num">${fixed(n(m.clearing),2)} Cr</td>
+      <td class="num">${x.dob}</td>
+      <td class="num">${beDisplay(x.be)}</td>
+      <td class="num"><span class="cell-${mc}" style="padding:2px 6px">${fixed(x.curPct,1)}%</span></td>
+      <td>
+        <select class="statuspill" data-status="${m.id}">
+          ${["Live","Sold","Lapsed"].map(s=>`<option ${s===m.status?"selected":""}>${s}</option>`).join("")}
+        </select>
+      </td>
+      <td><button class="btn sm danger" data-del="${m.id}">Delete</button></td>
+    </tr>`;
+    if(expanded){
+      row += `<tr class="expandrow"><td colspan="10">${renderSnapshot(m, x)}</td></tr>`;
+    }
+    return row;
+  }).join("");
+
+  return `<table class="ptable"><thead>${head}</thead><tbody>${body}</tbody></table>`;
+}
+
+function renderSnapshot(m, x){
+  const c = x.c;
+  const d = n(m.expectedDays);
+  const cfgLabel = (CONFIGS.find(cf=>cf[0]===String(m.config))||["","—"])[1];
+  const cell = (k,v) => `<div class="snap"><div class="sk">${k}</div><div class="sv num">${v}</div></div>`;
+  return `<div class="expandinner">
+    ${cell("Micro-market / config", esc(m.microMarket)+" · "+cfgLabel)}
+    ${cell("Carpet area", n(m.carpet)?indian(n(m.carpet))+" sq ft":"—")}
+    ${cell("Asking price", fixed(n(m.ask),2)+" Cr")}
+    ${cell("Guaranteed price", fixed(n(m.guaranteed),2)+" Cr")}
+    ${cell("Expected clearing", fixed(n(m.clearing),2)+" Cr")}
+    ${cell("Gross spread", lakhStr(c.grossSpread))}
+    ${cell("Token", lakhStr(n(m.token)*LAKH))}
+    ${cell("Monthly rent", "INR "+indian(n(m.rent)))}
+    ${cell("Guarantee window", n(m.window)+" mo")}
+    ${cell("Expected days to sell", d+" days")}
+    ${cell("Renovation / legal / mktg / ops", [m.reno,m.legal,m.marketing,m.ops].map(v=>fixed(n(v),1)).join(" / ")+" L")}
+    ${cell("Channel fee", fixed(n(m.channelFee),1)+"%")}
+    ${cell("Date signed", esc(m.dateSigned))}
+    ${cell("Net margin @ expected", lakhStr(c.netMargin(d))+" ("+fixed(c.netMarginPct(d),1)+"%)")}
+    ${cell("Break-even day", beDisplay(x.be))}
+    ${cell("Peak capital (today)", lakhStr(x.peak))}
+    <div style="grid-column:1/-1;margin-top:4px">
+      <button class="btn sm" data-open="${m.id}">Load into Underwrite →</button>
+    </div>
+  </div>`;
+}
+
+function wirePortfolioTable(){
+  view.querySelectorAll(".ptable th[data-sort]").forEach(th => {
+    th.addEventListener("click", () => {
+      const col = th.dataset.sort;
+      if(state.sort.col === col) state.sort.dir = state.sort.dir==="asc" ? "desc" : "asc";
+      else { state.sort.col = col; state.sort.dir = "asc"; }
+      renderPortfolio();
+    });
+  });
+  view.querySelectorAll("[data-exp]").forEach(b => b.addEventListener("click", e => {
+    e.stopPropagation();
+    const id = b.dataset.exp; state.expanded[id] = !state.expanded[id]; renderPortfolio();
+  }));
+  view.querySelectorAll("[data-status]").forEach(sel => sel.addEventListener("change", () => {
+    const id = sel.dataset.status;
+    const m = state.portfolio.find(m=>m.id===id); if(m){ m.status = sel.value; save(LS.portfolio, state.portfolio); renderPortfolio(); }
+  }));
+  view.querySelectorAll("[data-open]").forEach(b => b.addEventListener("click", () => {
+    const m = state.portfolio.find(m=>m.id===b.dataset.open); if(!m) return;
+    state.uw = {
+      society:m.society, microMarket:m.microMarket, config:String(m.config), carpet:m.carpet,
+      ask:m.ask, guaranteed:m.guaranteed, clearing:m.clearing,
+      token:m.token, rent:m.rent, window:m.window, expectedDays:m.expectedDays,
+      reno:m.reno, legal:m.legal, marketing:m.marketing, ops:m.ops, channelFee:m.channelFee,
+      targetMargin:6.0, dateSigned:m.dateSigned,
+    };
+    save(LS.underwrite, state.uw);
+    setTab("underwrite");
+    toast(`Loaded “${m.society}” into the underwriter.`);
+  }));
+  view.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => {
+    const id = b.dataset.del;
+    const m = state.portfolio.find(m=>m.id===id);
+    if(m && confirm(`Delete mandate “${m.society}”? This cannot be undone.`)){
+      state.portfolio = state.portfolio.filter(x=>x.id!==id);
+      delete state.expanded[id];
+      save(LS.portfolio, state.portfolio); renderPortfolio();
+    }
+  }));
+}
+
+function exportCSV(){
+  const P = state.portfolio;
+  const metrics = P.map(m => ({ m, ...mandateMetrics(m) }));
+  const live = metrics.filter(x=>x.m.status==="Live");
+  const capitalToday = live.reduce((s,x)=>s+x.peak,0);
+  const rentBurn = live.reduce((s,x)=>s+n(x.m.rent),0);
+  const wClearing = live.reduce((s,x)=>s+n(x.m.clearing)*CR,0);
+  const wAvgDob = wClearing>0 ? live.reduce((s,x)=>s+x.dob*n(x.m.clearing)*CR,0)/wClearing : 0;
+  const util = A.workingCapitalLimit>0 ? capitalToday/(A.workingCapitalLimit*CR)*100 : 0;
+
+  const q = s => `"${String(s==null?"":s).replace(/"/g,'""')}"`;
+  let lines = [];
+  lines.push(["TruDesk portfolio summary","Generated",todayStr()].map(q).join(","));
+  lines.push("");
+  lines.push(["KPI","Value"].map(q).join(","));
+  lines.push([q("Live mandates"), live.length].join(","));
+  lines.push([q("Capital deployed today (Cr)"), cr(capitalToday)].join(","));
+  lines.push([q("Monthly rent burn (L)"), lakh(rentBurn)].join(","));
+  lines.push([q("Weighted avg days on book"), Math.round(wAvgDob)].join(","));
+  lines.push([q("Working-capital utilisation (%)"), fixed(util,1)].join(","));
+  lines.push([q("Working-capital limit (Cr)"), fixed(A.workingCapitalLimit,1)].join(","));
+  lines.push("");
+  const header = ["Society","Micro-market","Config","Guaranteed (Cr)","Clearing (Cr)","Days on book","Break-even day","Current margin %","Peak capital (L)","Status","Date signed"];
+  lines.push(header.map(q).join(","));
+  metrics.forEach(x => {
+    const m = x.m;
+    const cfg = (CONFIGS.find(c=>c[0]===String(m.config))||["","—"])[1];
+    lines.push([
+      q(m.society), q(m.microMarket), q(cfg),
+      fixed(n(m.guaranteed),2), fixed(n(m.clearing),2),
+      x.dob, beDisplay(x.be), fixed(x.curPct,1), lakh(x.peak),
+      q(m.status), q(m.dateSigned)
+    ].join(","));
+  });
+  const blob = new Blob([lines.join("\r\n")], { type:"text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "trudesk-portfolio-"+todayStr()+".csv";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  toast("Portfolio summary exported.");
+}
+
+/* ============================================================
+   TAB 3 — ASSUMPTIONS
+   ============================================================ */
+function renderAssumptions(){
+  const numRow = (id,label,val,helper,step) => `
+    <div class="field">
+      <label class="lbl">${label}</label>
+      <div class="inputwrap" style="max-width:260px"><input type="number" id="${id}" value="${val}" step="${step||"0.1"}"><span class="suffix">${suffixFor(id)}</span></div>
+      ${helper?`<div class="helper">${helper}</div>`:""}
+    </div>`;
+
+  view.innerHTML = `
+    <div style="max-width:760px">
+    <div class="card">
+      <div class="card-title">Cost of capital &amp; verdict thresholds</div>
+      ${numRow("a_cc","Annual cost of capital", A.costOfCapital, "Blended cost of the venture debt and equity funding your working capital.")}
+      ${numRow("a_go","GO threshold — net margin %", A.goThreshold, "At or above this margin (with break-even cushion) a deal reads GO.")}
+      ${numRow("a_watch","WATCH threshold — net margin %", A.watchThreshold, "At or above this but below GO, a deal reads WATCH. Below it, PASS.")}
+    </div>
+
+    <div class="card">
+      <div class="card-title">Risk &amp; capital limits</div>
+      ${numRow("a_breach","Guarantee breach cost", A.breachCost, "Penalty, forced price cut or buyout cost if you miss the guaranteed window.")}
+      ${numRow("a_wc","Working-capital limit", A.workingCapitalLimit, "Total working capital your book can deploy at once. Drives the portfolio utilisation bar.", "0.5")}
+    </div>
+
+    <div class="card">
+      <div class="card-title">Default monthly rent by configuration</div>
+      <div class="helper" style="margin-top:-6px;margin-bottom:14px">Auto-populates the rent field on the Underwrite tab when a configuration is chosen.</div>
+      <div class="grid2">
+        ${["1","2","3","4"].map(c=>`<div class="field"><label class="lbl">${cfgName(c)}</label>
+          <div class="inputwrap"><input type="number" id="a_rent_${c}" value="${A.rentByConfig[c]}" step="1000"><span class="suffix">INR</span></div></div>`).join("")}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Default renovation spend by configuration</div>
+      <div class="helper" style="margin-top:-6px;margin-bottom:14px">Auto-populates the renovation field on the Underwrite tab when a configuration is chosen.</div>
+      <div class="grid2">
+        ${["1","2","3","4"].map(c=>`<div class="field"><label class="lbl">${cfgName(c)}</label>
+          <div class="inputwrap"><input type="number" id="a_reno_${c}" value="${A.renoByConfig[c]}" step="0.5"><span class="suffix">L</span></div></div>`).join("")}
+      </div>
+    </div>
+
+    <div class="row-flex" style="margin-top:16px">
+      <button class="btn" id="resetAssump">Reset to defaults</button>
+      <span class="helper">Changes save automatically and re-solve every output.</span>
+    </div>
+
+    <div class="disclaimer">
+      <b>Disclaimer.</b> All defaults are illustrative placeholders, not estimates of any company's actual costs.
+      Replace them with your own figures — every output re-solves.
+    </div>
+    </div>`;
+
+  view.querySelectorAll("input").forEach(inp => inp.addEventListener("input", onAssumptionChange));
+  document.getElementById("resetAssump").addEventListener("click", () => {
+    A = JSON.parse(JSON.stringify(DEFAULT_ASSUMPTIONS));
+    save(LS.assumptions, A);
+    renderAssumptions();
+    toast("Assumptions reset to defaults.");
+  });
+}
+function suffixFor(id){
+  if(id==="a_cc"||id==="a_go"||id==="a_watch") return "%";
+  if(id==="a_breach") return "L";
+  if(id==="a_wc") return "Cr";
+  return "";
+}
+function cfgName(c){ return (CONFIGS.find(x=>x[0]===c)||["","—"])[1]; }
+
+function onAssumptionChange(){
+  A.costOfCapital = n(gv("a_cc"));
+  A.goThreshold = n(gv("a_go"));
+  A.watchThreshold = n(gv("a_watch"));
+  A.breachCost = n(gv("a_breach"));
+  A.workingCapitalLimit = n(gv("a_wc"));
+  ["1","2","3","4"].forEach(c => { A.rentByConfig[c] = n(gv("a_rent_"+c)); A.renoByConfig[c] = n(gv("a_reno_"+c)); });
+  save(LS.assumptions, A);
+}
+function gv(id){ const el = document.getElementById(id); return el?el.value:""; }
+
+/* ============================================================
+   SAMPLE DATA
+   ============================================================ */
+function daysAgo(days){ const d = new Date(); d.setDate(d.getDate()-days); return d.toISOString().slice(0,10); }
+
+function loadSample(){
+  const samples = [
+    { society:"Lake Primrose", microMarket:"Powai", config:"2", carpet:1050,
+      ask:3.05, guaranteed:2.85, clearing:3.20, token:5, rent:85000, window:6, expectedDays:45,
+      reno:12, legal:1.5, marketing:0.8, ops:1.2, channelFee:0.5, dateSigned:daysAgo(41), status:"Live" },
+    { society:"Raheja Vistas", microMarket:"Chandivali", config:"2", carpet:980,
+      ask:2.95, guaranteed:2.72, clearing:3.00, token:5, rent:80000, window:6, expectedDays:50,
+      reno:11, legal:1.5, marketing:0.8, ops:1.0, channelFee:0.5, dateSigned:daysAgo(60), status:"Live" },
+    { society:"Oberoi Splendor", microMarket:"Andheri West", config:"3", carpet:1420,
+      ask:4.30, guaranteed:4.05, clearing:4.55, token:7, rent:120000, window:6, expectedDays:40,
+      reno:16, legal:2.0, marketing:1.2, ops:1.5, channelFee:0.5, dateSigned:daysAgo(26), status:"Live" },
+    { society:"Nahar Amrit Shakti", microMarket:"Chandivali", config:"1", carpet:610,
+      ask:1.55, guaranteed:1.42, clearing:1.66, token:3, rent:45000, window:6, expectedDays:55,
+      reno:8, legal:1.0, marketing:0.6, ops:0.8, channelFee:0.5, dateSigned:daysAgo(107), status:"Live" },
+    { society:"Hiranandani Meadows", microMarket:"Thane West", config:"3", carpet:1350,
+      ask:2.95, guaranteed:2.78, clearing:3.10, token:6, rent:70000, window:6, expectedDays:60,
+      reno:18, legal:2.0, marketing:1.0, ops:1.5, channelFee:0.5, dateSigned:daysAgo(170), status:"Live" },
+    { society:"Kalpataru Radiance", microMarket:"Goregaon East", config:"2", carpet:1120,
+      ask:3.40, guaranteed:3.18, clearing:3.62, token:6, rent:95000, window:6, expectedDays:42,
+      reno:13, legal:1.8, marketing:0.9, ops:1.3, channelFee:0.5, dateSigned:daysAgo(13), status:"Live" },
+  ];
+  if(state.portfolio.length > 0 && !confirm("Replace the current portfolio with 6 sample mandates?")) return;
+  state.portfolio = samples.map((s,i) => ({ id:"sample_"+i+"_"+Date.now(), ...s }));
+  save(LS.portfolio, state.portfolio);
+  state.expanded = {};
+  setTab("portfolio");
+  toast("Loaded 6 sample mandates.");
+}
+document.getElementById("loadSample").addEventListener("click", loadSample);
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+setTab("underwrite");
+</script>
+</body>
+</html>
