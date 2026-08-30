@@ -1,0 +1,18 @@
+# Netlify config for the rate registry.
+#
+# In the Netlify UI set the site's "Base directory" to `rate-registry` so this
+# file is picked up. The build command below writes config.js from the two
+# environment variables you set in Netlify (Site settings -> Environment
+# variables), so the anon key never has to be committed. If you'd rather commit
+# a static config.js instead, delete the [build] command and just publish ".".
+
+[build]
+  publish = "."
+  command = "printf \"window.WHATIFF_CONFIG={SUPABASE_URL:'%s',SUPABASE_ANON_KEY:'%s'};\" \"$SUPABASE_URL\" \"$SUPABASE_ANON_KEY\" > config.js"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

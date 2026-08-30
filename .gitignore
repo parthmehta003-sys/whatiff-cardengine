@@ -2,3 +2,7 @@ node_modules
 dist
 .DS_Store
 .claude/
+
+# Rate registry runtime config (Supabase URL + anon key). Never committed.
+rate-registry/config.js
+.env
