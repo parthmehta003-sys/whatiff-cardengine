@@ -5,4 +5,6 @@ dist
 
 # Rate registry runtime config (Supabase URL + anon key). Never committed.
 rate-registry/config.js
+# Build-time generated static aggregate pages.
+rate-registry/rates/
 .env

@@ -3,37 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="description" content="What other borrowers are actually paying on their home loans. Share your rate, see how yours compares." />
-  <title>WhatIff — What are you actually paying?</title>
+  <meta name="description" content="Banks advertise a rate almost nobody gets. See what borrowers actually got at your bank — what's achievable, not just what's advertised." />
+  <title>WhatIff — Are you overpaying on your home loan?</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./style.css" />
 
-  <!-- Analytics: privacy-friendly, free tier. Counts visitors automatically;
-       the app fires a "Submission" custom event so visitors -> submissions is
-       measurable from day one. Replace the data-domain with your Netlify site. -->
+  <!-- Analytics (free tier). Counts visitors automatically; the app fires
+       "Submission" and "DoorOpen" custom events. Replace the data-domain. -->
   <script defer data-domain="REPLACE_WITH_YOUR_DOMAIN"
           src="https://plausible.io/js/script.tagged-events.js"></script>
 </head>
 <body>
   <div class="wrap">
     <header class="masthead">
-      <div class="logo">WhatIff · Rate Registry</div>
+      <div class="logo">WhatIff · Home Loan Registry</div>
       <div class="tally" id="tally"></div>
     </header>
 
-    <!-- Everything below is rendered by app.js into #app. Two states -->
-    <!-- (landing + form, and result) swap in place here, no routing.   -->
+    <!-- Two states (landing+form, result) swap in place here. No routing. -->
     <main id="app" aria-live="polite"></main>
 
     <div class="foot" id="foot"></div>
   </div>
 
-  <!-- Supabase JS client (CDN, no build step). -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-  <!-- Your project URL + anon key. See config.example.js and the README. -->
   <script src="./config.js"></script>
   <script src="./app.js"></script>
 </body>

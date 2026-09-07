@@ -1,0 +1,15 @@
+{
+  "name": "whatiff-rate-registry",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "WhatIff home-loan rate registry — static site + Supabase, with a build-time static aggregate page generator.",
+  "scripts": {
+    "gen:config": "node scripts/write-config.mjs",
+    "gen:aggregates": "node scripts/build-aggregates.mjs",
+    "build": "npm run gen:config && npm run gen:aggregates"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4"
+  }
+}
