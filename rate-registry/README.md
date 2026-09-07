@@ -106,7 +106,42 @@ and prepayments aren't captured.
 
 ---
 
-## 5. Before launch
+## 5. Reference benchmarks (verification) — where the numbers come from
+
+Crowd submissions are one data stream; the **benchmark rates used to verify them
+and to show the "advertised floor" are a different stream and must be sourced,
+not guessed.** The `benchmarks` table holds them, and it ships **empty** — no
+figure ships baked in, because an unverified rate in a financial product is worse
+than none.
+
+Every row is auditable: `source_url` and `as_of` are **required** columns, so no
+unsourced number can enter. Populate it only from **primary sources**:
+
+- **Repo rate** → RBI (rbi.org.in, MPC / policy rates).
+- **RLLR** (a bank's floating floor) → that bank's own interest-rates / RLLR
+  disclosure page. Regulatorily published.
+- **Advertised floor** (the "from X%") → the bank's home-loan product page.
+- **MCLR** (optional, pre-2019 loans) → the bank's MCLR disclosure.
+
+See `supabase/seed_benchmarks.example.sql` — a template with placeholders only.
+
+What the benchmarks do once populated:
+
+1. **Verification.** Indian floating loans are `benchmark (repo) + spread`, so a
+   floating rate **cannot** legally sit below the bank's current RLLR. `submit_rate`
+   flags any floating submission below RLLR (with `exclude_reason = 'below_rllr'`)
+   — kept, dropped from aggregates. Fixed loans are exempt (they don't reset), and
+   the check is skipped entirely when no benchmark is on file, so the site works
+   before the table is filled.
+2. **The honest "advertised vs achievable" line.** When a verified row exists, the
+   result shows the bank's advertised floor next to the achievable rate, **with the
+   source link and the date it was true** — the hero claim becomes attributable,
+   never asserted by us.
+
+Because floating loans reset to the *current* benchmark, keep the latest row per
+bank accurate; refresh whenever the RBI repo rate moves.
+
+## 6. Before launch
 
 The site launches empty and stays honest when thin: under 10 rows it hides the
 bank list; no aggregate is shown from fewer than 4 reports; cohorts widen and

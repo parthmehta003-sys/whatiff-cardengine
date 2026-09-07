@@ -135,6 +135,10 @@ input, select, button, textarea { font-family: inherit; font-size: 16px; }
 .emi-box .sub { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
 .emi-diff { text-align: center; margin-top: 14px; font-size: 14px; color: var(--muted); }
 .emi-diff b { color: var(--ink); font-size: 26px; font-weight: 800; display:block; margin-top:2px; }
+.benchmark { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); text-align: center; line-height: 1.5; }
+.benchmark b { color: var(--ink); font-weight: 700; }
+.benchmark .src { display: block; font-size: 11px; margin-top: 4px; }
+.benchmark .src a { color: var(--muted); }
 
 /* ---- doors ---- */
 .doors-title { font-size: 16px; font-weight: 700; margin: 4px 0 12px; }

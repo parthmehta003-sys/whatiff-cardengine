@@ -308,20 +308,24 @@ async function submit(state) {
     outcomeId = null;
     if (window.plausible) window.plausible('Submission');
 
-    const [cs, br] = await Promise.all([
+    const [cs, br, bm] = await Promise.all([
       sb.rpc('cohort_stats', {
         p_loan_type: 'Home', p_bank: bank, p_year: loan_year,
         p_channel: channel, p_employment: employment,
       }),
       sb.rpc('bank_rates', { p_loan_type: 'Home' }),
+      sb.rpc('bank_benchmark', { p_bank: bank }),
     ]);
     if (cs.error) throw cs.error;
 
     const cohort = (cs.data && cs.data[0]) || { rates: [], median_rate: null, p25_rate: null, n: 0, tier: 4, tier_label: '' };
     const banks = br.error ? [] : (br.data || []);
     const bestBankP25 = banks.length ? Math.min(...banks.map(b => Number(b.p25_rate))) : null;
+    // Verified benchmark for this bank, or null when none is on file (then the
+    // advertised line is simply omitted — no unsourced number is ever shown).
+    const benchmark = (bm && !bm.error && bm.data && bm.data[0]) ? bm.data[0] : null;
 
-    lastResult = { input, cohort, bestBankP25 };
+    lastResult = { input, cohort, bestBankP25, benchmark };
     renderResult(lastResult);
   } catch (e) {
     submitting = false; btn.disabled = false; btn.textContent = 'See what\'s achievable at your bank';
@@ -369,7 +373,7 @@ function computeDoors(input, cohort, bestBankP25) {
 
 function renderResult(res) {
   window.scrollTo(0, 0);
-  const { input, cohort, bestBankP25 } = res;
+  const { input, cohort, bestBankP25, benchmark } = res;
   const rates = (cohort.rates || []).map(Number);
   const calc = computeDoors(input, cohort, bestBankP25);
 
@@ -440,6 +444,7 @@ function renderResult(res) {
         ${monthlyDiff > 0 ? `<b>${inr(monthlyDiff)}/mo</b> lower` : `<b>no monthly gap</b>`}
         ${monthlyDiff > 0 ? 'on your outstanding balance.' : 'nothing to chase here.'}
       </div>
+      ${benchmarkLine(input, benchmark)}
     </div>
 
     <div class="card">
@@ -608,6 +613,28 @@ function dotPlotSvg(rates, userRate, median) {
       <text x="${medX.toFixed(2)}" y="5" font-size="3.2" fill="var(--muted)" text-anchor="middle">median</text>
       ${circles}${ticks}
     </svg>`;
+}
+
+// The advertised line, shown ONLY when a verified benchmark row exists for this
+// bank. Every figure carries its source and as-of date, so the "advertised floor
+// almost nobody gets" claim is attributable, never asserted by us.
+function benchmarkLine(input, b) {
+  if (!b) return '';
+  const adv = b.advertised_floor != null ? Number(b.advertised_floor) : null;
+  const rllr = b.rllr != null ? Number(b.rllr) : null;
+  const shown = adv != null ? adv : rllr;
+  if (shown == null) return '';
+  const kind = adv != null ? 'advertises this loan from' : 'floating floor (RLLR) is';
+  let host = '';
+  try { host = b.source_url ? new URL(b.source_url).hostname.replace(/^www\./, '') : ''; } catch (e) {}
+  const src = b.source_url
+    ? `<a href="${esc(b.source_url)}" target="_blank" rel="noopener nofollow">${esc(host || 'source')}</a>`
+    : 'source on file';
+  return `
+    <div class="benchmark">
+      ${esc(input.bank)} ${kind} <b>${shown.toFixed(2)}%</b> — you're at ${input.rate.toFixed(2)}%.
+      <span class="src">Published rate, ${src}${b.as_of ? ' · as of ' + esc(String(b.as_of)) : ''}.</span>
+    </div>`;
 }
 
 function backButtonHtml() { return `<button class="btn btn-ghost" id="f-back">← Back to the registry</button>`; }

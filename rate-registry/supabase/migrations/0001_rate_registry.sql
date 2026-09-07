@@ -36,6 +36,7 @@ create table if not exists public.rates (
   city          text,
   session_id    uuid not null,
   excluded      boolean not null default false,
+  exclude_reason text,          -- why a row is excluded: 'outlier', 'below_rllr', 'superseded'
   constraint rate_range  check (rate >= 6 and rate <= 15),
   constraint year_range  check (loan_year >= 2015 and loan_year <= 2026),
   constraint amt_allowed check (amount_lakh in (20,35,50,75,100,150)),
@@ -75,6 +76,32 @@ create table if not exists public.outcomes (
 -- One outcomes row per rate submission (a second door updates it in place).
 create unique index if not exists outcomes_rate_id_uidx on public.outcomes (rate_id);
 
+-- Reference benchmarks — NOT crowd data. Published lender/regulator figures used
+-- (a) to verify submissions against a real floor, and (b) to show the advertised
+-- rate next to the achievable one. Every row is auditable: `source_url` and
+-- `as_of` are REQUIRED, so no unsourced number can enter. This table ships EMPTY
+-- — populate it only from primary sources (RBI for repo; each bank's own rate-
+-- card / RLLR disclosure). See supabase/seed_benchmarks.example.sql. All rate
+-- reasoning uses the CURRENT benchmark for floating loans (they reset to it) and
+-- the origination-period benchmark for fixed loans.
+create table if not exists public.benchmarks (
+  id              bigserial primary key,
+  bank            text not null,
+  effective_from  date not null,              -- date this figure took effect at the bank
+  repo_rate       numeric(4,2),               -- RBI repo at effective_from (national)
+  rllr            numeric(4,2),               -- bank Repo-Linked Lending Rate (floating floor)
+  mclr            numeric(4,2),               -- optional, for pre-2019 (MCLR-regime) loans
+  advertised_floor numeric(4,2),              -- the "from X%" the bank markets
+  source_url      text not null,              -- REQUIRED: where this number was read
+  as_of           date not null,              -- REQUIRED: the date it was verified/captured
+  note            text,
+  constraint bm_bank_allowed check (bank in (
+    'SBI','HDFC Bank','ICICI Bank','Axis Bank','Kotak Mahindra','LIC Housing',
+    'Bank of Baroda','PNB Housing','Bajaj Housing','IDFC First','Canara Bank',
+    'Union Bank','Tata Capital','Godrej Housing','Other'))
+);
+create unique index if not exists benchmarks_bank_from_uidx on public.benchmarks (bank, effective_from);
+
 -- ---------------------------------------------------------------------------
 -- 2. Row-level security
 --    Enable RLS and strip every default privilege from anon/authenticated.
@@ -82,13 +109,16 @@ create unique index if not exists outcomes_rate_id_uidx on public.outcomes (rate
 --    only access path.
 -- ---------------------------------------------------------------------------
 
-alter table public.rates    enable row level security;
-alter table public.outcomes enable row level security;
+alter table public.rates      enable row level security;
+alter table public.outcomes   enable row level security;
+alter table public.benchmarks enable row level security;
 
-revoke all on public.rates    from anon, authenticated;
-revoke all on public.outcomes from anon, authenticated;
-revoke all on sequence public.rates_id_seq    from anon, authenticated;
-revoke all on sequence public.outcomes_id_seq from anon, authenticated;
+revoke all on public.rates      from anon, authenticated;
+revoke all on public.outcomes   from anon, authenticated;
+revoke all on public.benchmarks from anon, authenticated;
+revoke all on sequence public.rates_id_seq      from anon, authenticated;
+revoke all on sequence public.outcomes_id_seq   from anon, authenticated;
+revoke all on sequence public.benchmarks_id_seq from anon, authenticated;
 
 -- No policies are defined, so with RLS enabled every direct anon operation is
 -- denied even if a grant were ever added by mistake. Defense in depth.
@@ -147,7 +177,7 @@ begin
 
   if v_cnt >= 5 and v_sd is not null and v_sd > 0 then
     update public.rates
-       set excluded = true
+       set excluded = true, exclude_reason = 'outlier'
      where loan_type = new.loan_type and bank = new.bank
        and excluded = false
        and abs(rate - v_mean) > 3 * v_sd;
@@ -223,9 +253,31 @@ begin
     p_channel, p_employment, p_cmr_band, p_turnover_cr, p_city)
   returning id into v_id;
 
+  -- Benchmark verification: a FLOATING loan cannot legally price below the
+  -- bank's current RLLR. If we have a verified RLLR for this bank, a sub-RLLR
+  -- floating submission is almost certainly a data-entry error — keep the row
+  -- but drop it from aggregates. Skipped entirely when no benchmark is on file,
+  -- so the check degrades gracefully to nothing until the table is populated.
+  if p_rate_type = 'Floating' then
+    declare v_rllr numeric;
+    begin
+      select rllr into v_rllr
+      from public.benchmarks
+      where bank = p_bank and rllr is not null and effective_from <= now()::date
+      order by effective_from desc
+      limit 1;
+
+      if v_rllr is not null and p_rate < v_rllr - 0.25 then
+        update public.rates
+           set excluded = true, exclude_reason = 'below_rllr'
+         where id = v_id;
+      end if;
+    end;
+  end if;
+
   -- Supersede earlier submissions from this session + loan type.
   update public.rates
-     set excluded = true
+     set excluded = true, exclude_reason = 'superseded'
    where session_id = p_session_id and loan_type = p_loan_type
      and id <> v_id and excluded = false;
 
@@ -464,6 +516,25 @@ as $$
   select count(*)::int from public.rates where excluded = false;
 $$;
 
+-- 5.6 Latest verified benchmark for a bank — the advertised floor / RLLR shown
+--     next to the achievable rate. Returns the source and as-of date so the
+--     figure is always attributable. Returns no row when the table is empty for
+--     that bank, and the UI simply omits the advertised line.
+create or replace function public.bank_benchmark(p_bank text)
+returns table (
+  repo_rate numeric, rllr numeric, advertised_floor numeric,
+  source_url text, as_of date, effective_from date)
+language sql
+security definer
+set search_path = public
+as $$
+  select repo_rate, rllr, advertised_floor, source_url, as_of, effective_from
+  from public.benchmarks
+  where bank = p_bank and effective_from <= now()::date
+  order by effective_from desc
+  limit 1;
+$$;
+
 -- ---------------------------------------------------------------------------
 -- 6. Grants — execute on the client-facing RPCs only. The trigger helpers and
 --    the internal functions are never called directly by the browser.
@@ -477,6 +548,7 @@ revoke all on function public.bank_year_rates(text,text)                       f
 revoke all on function public.cohort_stats(text,text,int,text,text)            from public;
 revoke all on function public.business_cohort_stats(int,int)                   from public;
 revoke all on function public.total_count()                                    from public;
+revoke all on function public.bank_benchmark(text)                             from public;
 revoke all on function public.enforce_rate_limit()                             from public;
 revoke all on function public.reclassify_bank_outliers()                       from public;
 
@@ -488,3 +560,4 @@ grant execute on function public.bank_year_rates(text,text)                    t
 grant execute on function public.cohort_stats(text,text,int,text,text)         to anon;
 grant execute on function public.business_cohort_stats(int,int)                to anon;
 grant execute on function public.total_count()                                 to anon;
+grant execute on function public.bank_benchmark(text)                          to anon;
