@@ -36,7 +36,7 @@ create table if not exists public.rates (
   city          text,
   session_id    uuid not null,
   excluded      boolean not null default false,
-  exclude_reason text,          -- why a row is excluded: 'outlier', 'below_rllr', 'superseded'
+  exclude_reason text,          -- why a row is excluded: 'outlier', 'below_floor', 'superseded'
   constraint rate_range  check (rate >= 6 and rate <= 15),
   constraint year_range  check (loan_year >= 2015 and loan_year <= 2026),
   constraint amt_allowed check (amount_lakh in (20,35,50,75,100,150)),
@@ -253,23 +253,28 @@ begin
     p_channel, p_employment, p_cmr_band, p_turnover_cr, p_city)
   returning id into v_id;
 
-  -- Benchmark verification: a FLOATING loan cannot legally price below the
-  -- bank's current RLLR. If we have a verified RLLR for this bank, a sub-RLLR
-  -- floating submission is almost certainly a data-entry error — keep the row
-  -- but drop it from aggregates. Skipped entirely when no benchmark is on file,
-  -- so the check degrades gracefully to nothing until the table is populated.
+  -- Benchmark verification for FLOATING loans. The practical floor is the
+  -- LOWEST rate the bank actually publishes: for home loans, banks routinely
+  -- advertise below their RLLR (concessions), so RLLR is NOT a hard floor —
+  -- take min(advertised_floor, rllr). A generous 0.50 margin means we only flag
+  -- clear data-entry errors (e.g. 6.0 at a bank whose floor is 8+), never valid
+  -- low rates. The row is kept, just dropped from aggregates. Skipped entirely
+  -- when no benchmark is on file, so this degrades gracefully.
   if p_rate_type = 'Floating' then
-    declare v_rllr numeric;
+    declare v_floor numeric;
     begin
-      select rllr into v_rllr
+      select least(coalesce(advertised_floor, rllr), coalesce(rllr, advertised_floor))
+        into v_floor
       from public.benchmarks
-      where bank = p_bank and rllr is not null and effective_from <= now()::date
+      where bank = p_bank
+        and (advertised_floor is not null or rllr is not null)
+        and effective_from <= now()::date
       order by effective_from desc
       limit 1;
 
-      if v_rllr is not null and p_rate < v_rllr - 0.25 then
+      if v_floor is not null and p_rate < v_floor - 0.50 then
         update public.rates
-           set excluded = true, exclude_reason = 'below_rllr'
+           set excluded = true, exclude_reason = 'below_floor'
          where id = v_id;
       end if;
     end;

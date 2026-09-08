@@ -123,16 +123,21 @@ unsourced number can enter. Populate it only from **primary sources**:
 - **Advertised floor** (the "from X%") → the bank's home-loan product page.
 - **MCLR** (optional, pre-2019 loans) → the bank's MCLR disclosure.
 
-See `supabase/seed_benchmarks.example.sql` — a template with placeholders only.
+A first pass (fetched 2026-09-07, each figure linked to the institution's own
+page) is in `supabase/seed_benchmarks.sql` — **spot-check each source_url, then
+run it after the migration**. `supabase/seed_benchmarks.example.sql` is the blank
+template for future refreshes. Two figures are flagged in the seed's header to
+re-verify (ICICI's RLLR; Tata's blank source is a blog, not a rate card).
 
 What the benchmarks do once populated:
 
-1. **Verification.** Indian floating loans are `benchmark (repo) + spread`, so a
-   floating rate **cannot** legally sit below the bank's current RLLR. `submit_rate`
-   flags any floating submission below RLLR (with `exclude_reason = 'below_rllr'`)
-   — kept, dropped from aggregates. Fixed loans are exempt (they don't reset), and
-   the check is skipped entirely when no benchmark is on file, so the site works
-   before the table is filled.
+1. **Verification.** For home loans, banks routinely advertise *below* their RLLR
+   (concessions), so RLLR is not a hard floor. `submit_rate` uses the lowest rate
+   the bank actually publishes — `min(advertised_floor, rllr)` — with a generous
+   0.50 margin, and flags any floating submission below that (`exclude_reason =
+   'below_floor'`) as a likely data-entry error. Kept, dropped from aggregates.
+   Fixed loans are exempt (they don't reset), and the check is skipped entirely
+   when no benchmark is on file, so the site works before the table is filled.
 2. **The honest "advertised vs achievable" line.** When a verified row exists, the
    result shows the bank's advertised floor next to the achievable rate, **with the
    source link and the date it was true** — the hero claim becomes attributable,
