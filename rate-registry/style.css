@@ -182,6 +182,11 @@ input, select, button, textarea { font-family: inherit; font-size: 16px; }
 }
 .bank-row.best .bar-fill { background: linear-gradient(90deg, var(--lav2), var(--ink)); }
 .bank-row .meta { font-size: 12px; color: var(--muted); margin-top: 8px; }
+.list-takeaway {
+  margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line);
+  font-size: 13.5px; color: var(--muted); line-height: 1.5;
+}
+.list-takeaway b { color: var(--ink); font-weight: 800; }
 
 /* ---- thin / empty ---- */
 .thin { text-align: center; font-size: 15px; color: var(--muted); line-height: 1.6; padding: 10px 4px; }

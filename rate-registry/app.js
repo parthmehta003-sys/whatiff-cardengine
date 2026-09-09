@@ -178,7 +178,7 @@ function listSection(total, banks) {
   if (total < 10 || banks.length === 0) {
     return `
       <div class="card">
-        <div class="section-title">What borrowers actually report paying</div>
+        <div class="section-title">What people are actually getting</div>
         <div class="thin" style="margin-top:14px">
           We're just getting started — <b>${total.toLocaleString('en-IN')}</b>
           borrower${total === 1 ? '' : 's'} have shared so far.
@@ -204,16 +204,22 @@ function listSection(total, banks) {
             <div class="emi">${inr(r.emi)}<span>/mo</span></div>
           </div>
           <div class="bar-track"><div class="bar-fill" style="width:${(frac * 100).toFixed(1)}%"></div></div>
-          <div class="meta">achievable ${r.p25.toFixed(2)}% · ${r.n} report${r.n === 1 ? '' : 's'}</div>
+          <div class="meta">around ${r.p25.toFixed(2)}% · from ${r.n} ${r.n === 1 ? 'person' : 'people'}</div>
         </div>
       </div>`;
   }).join('');
 
+  const gap = Math.round(maxE - minE);
+  const takeaway = gap >= 200
+    ? `<div class="list-takeaway">On the very same loan, that's about <b>${inr(gap)}/mo</b> between the cheapest and the priciest bank here.</div>`
+    : '';
+
   return `
     <div class="card">
-      <div class="section-title">What borrowers actually report paying</div>
-      <div class="section-sub">The lowest quarter of reported rates at each bank, shown as a monthly EMI on a ₹50 lakh loan over 20 years.</div>
+      <div class="section-title">What people are actually getting</div>
+      <div class="section-sub">Real rates people told us they got, bank by bank — shown as the monthly payment (EMI) on the same ₹50 lakh, 20-year loan, so you can compare fairly. Cheapest first.</div>
       ${body}
+      ${takeaway}
     </div>`;
 }
 
