@@ -12,7 +12,7 @@ borrower was treated unfairly.
   pre-renders the crawlable aggregate pages and writes `config.js`.
 - **Data:** Supabase (Postgres) via the CDN JS client.
 - **Hosting:** Netlify, from GitHub, at the root domain.
-- **Analytics:** Plausible — visitors → submissions, and of those shown a gap,
+- **Analytics:** Umami Cloud (free) — visitors → submissions, and of those shown a gap,
   how many open a door.
 
 ```
@@ -85,9 +85,12 @@ SUPABASE_URL=... SUPABASE_ANON_KEY=... npm run gen:aggregates
 
 ### Analytics
 
-Replace `REPLACE_WITH_YOUR_DOMAIN` in `index.html`, add the site in Plausible,
-and create two goals: **Submission** and **DoorOpen**. That gives you
-visitors → submissions and submissions → doors from day one.
+Wired to **Umami Cloud** (free tier). `index.html` loads the Umami script with
+the site's `data-website-id`; the app fires **Submission** and **DoorOpen** via
+`umami.track()`. Both appear automatically under the website's Events in the
+Umami dashboard — no goal setup needed — giving you visitors → submissions →
+doors from day one. To point at a different Umami site, swap the
+`data-website-id` in `index.html`.
 
 ---
 

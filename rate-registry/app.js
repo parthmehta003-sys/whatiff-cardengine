@@ -306,7 +306,7 @@ async function submit(state) {
     currentRateId = ins.data;
     lastPayload = payloadKey;
     outcomeId = null;
-    if (window.plausible) window.plausible('Submission');
+    if (window.umami) window.umami.track('Submission');
 
     const [cs, br, bm] = await Promise.all([
       sb.rpc('cohort_stats', {
@@ -574,7 +574,7 @@ function renderDoorCta(slot, door, done) {
       const r = await sb.rpc('record_outcome', { p_rate_id: currentRateId, p_door: door, p_email: email });
       if (r.error) throw r.error;
       outcomeId = r.data;
-      if (window.plausible) window.plausible('DoorOpen', { props: { door } });
+      if (window.umami) window.umami.track('DoorOpen', { door });
       renderDoorCta(slot, door, true);
     } catch (e) {
       btn.disabled = false; btn.textContent = label;
