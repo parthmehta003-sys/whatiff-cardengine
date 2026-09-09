@@ -25,7 +25,7 @@ delete from public.benchmarks where bank in (
 
 insert into public.benchmarks
   (bank, effective_from, repo_rate, rllr, mclr, advertised_floor, source_url, as_of, note) values
-  ('SBI', '2025-12-15', 5.25, 7.90, 8.70, NULL, 'https://sbi.bank.in/web/interest-rates/interest-rates', '2026-09-07', 'EBR is 7.90%. 1-year MCLR is 8.70%. Advertised floor not explicitly stated on official site.'),
+  ('SBI', '2025-12-15', 5.25, 7.50, 8.70, NULL, 'https://sbi.bank.in/web/interest-rates/interest-rates', '2026-09-08', 'RLLR = 7.50 + CRP (eff. 15-Dec-2025). EBLR = 7.90 + CRP + BSP. Both are BASES; actual rate = base + credit-risk premium. 1-yr MCLR 8.70%. Advertised home-loan floor not on this page — get it from the Home Loan product page.'),
   ('HDFC Bank', '2026-09-07', 5.25, 7.75, NULL, 7.75, 'https://homeloans.hdfc.bank.in/checklist/home-loan-interest-rates', '2026-09-07', 'RLLR is Policy Repo Rate + 2.50%. MCLR not found on official site as of 2026-09-07.'),
   ('ICICI Bank', '2025-12-05', 5.25, 8.95, 8.40, 7.50, 'https://www.icici.bank.in/interest-rates', '2026-09-07', 'I-EBLR is 8.95%. Advertised floor is 7.50%. 1-year MCLR is 8.40%. NOTE: I-EBLR looks high vs peers — re-verify.'),
   ('Axis Bank', '2026-09-07', 5.25, NULL, 8.90, NULL, 'https://www.axisbank.com/retail/loans/car-loan', '2026-09-07', '1-year MCLR is 8.90%. RLLR and advertised floor not found on official site as of 2026-09-07.'),
