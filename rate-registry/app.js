@@ -147,15 +147,25 @@ async function renderLanding() {
   footEl.innerHTML = 'Anonymous. No login. Aggregates only — individual rates and contact details are never shown.';
 
   app.innerHTML = `
-    <div class="hero">
-      ${coinsHtml()}
-      <h1>Are you paying more than you need to on your home loan?</h1>
-      <p>Banks advertise a rate almost nobody gets. Borrowers are telling each other what they actually got — so you can see what's achievable at your bank, not just what's advertised.</p>
-    </div>
-    <div class="microcopy"><b>Free.</b> No email needed to see your result.</div>
+    <section class="hero-card">
+      <div class="hero-copy">
+        <h1>Are you paying more than you need to on your home loan?</h1>
+        <p>Banks advertise a rate almost nobody gets. Borrowers are telling each other what they actually got — so you can see what's achievable at your bank, not just what's advertised.</p>
+        <button class="btn hero-cta" id="hero-cta" type="button">See what's achievable <span class="arr">→</span></button>
+        <div class="hero-note"><b>Free.</b> No email needed to see your result.</div>
+      </div>
+      <div class="hero-coins" aria-hidden="true">${coinsCluster()}</div>
+    </section>
     ${listSection(total, banks)}
     ${formHtml()}
   `;
+  const cta = document.getElementById('hero-cta');
+  if (cta) cta.addEventListener('click', () => {
+    const t = document.getElementById('addrate');
+    if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const bank = document.getElementById('f-bank');
+    if (bank) setTimeout(() => bank.focus({ preventScroll: true }), 400);
+  });
   wireForm();
 }
 
@@ -202,21 +212,39 @@ function listSection(total, banks) {
     </div>`;
 }
 
-// Decorative floating ₹ coins behind the hero (CSS-animated, on-brand, subtle).
-function coinsHtml() {
+// A single 3D-ish lavender ₹ coin (inline SVG, on-brand, no external asset).
+function coinSvg() {
+  return `<svg viewBox="0 0 100 108" xmlns="http://www.w3.org/2000/svg">
+    <defs><radialGradient id="cf" cx="38%" cy="30%" r="82%">
+      <stop offset="0" stop-color="#F5F0FC"/><stop offset="42%" stop-color="#C9C2DD"/><stop offset="100%" stop-color="#7C749C"/>
+    </radialGradient></defs>
+    <ellipse cx="50" cy="57" rx="45" ry="45" fill="#453f63"/>
+    <ellipse cx="50" cy="54" rx="45" ry="45" fill="#6b6490"/>
+    <circle cx="50" cy="50" r="45" fill="url(#cf)" stroke="#F1ECF9" stroke-width="2.5"/>
+    <circle cx="50" cy="50" r="37" fill="none" stroke="#8b83a8" stroke-width="1" stroke-dasharray="1 3.4" opacity=".7"/>
+    <g fill="none" stroke="#8b83a8" stroke-width="2" opacity=".5">
+      <ellipse cx="50" cy="50" rx="22" ry="9" transform="rotate(32 50 50)"/>
+      <ellipse cx="50" cy="50" rx="22" ry="9" transform="rotate(-32 50 50)"/>
+    </g>
+    <text x="50" y="51" text-anchor="middle" dominant-baseline="central"
+          font-family="DM Sans, sans-serif" font-weight="800" font-size="42" fill="#2B2644">₹</text>
+  </svg>`;
+}
+
+// A cluster of floating coins for the hero card's right side.
+function coinsCluster() {
   const coins = [
-    { l: '5%',  t: '10%', s: 40, d: '0s',   dur: '6.6s' },
-    { l: '87%', t: '6%',  s: 30, d: '.9s',  dur: '7.6s' },
-    { l: '15%', t: '70%', s: 32, d: '1.7s', dur: '6.9s' },
-    { l: '80%', t: '62%', s: 44, d: '.4s',  dur: '8.2s' },
-    { l: '45%', t: '2%',  s: 22, d: '2.3s', dur: '7.1s' },
-    { l: '93%', t: '38%', s: 26, d: '1.2s', dur: '6.3s' },
-    { l: '2%',  t: '46%', s: 28, d: '2.0s', dur: '7.9s' },
+    { l: '50%', t: '4%',  s: 62, d: '0s',   dur: '6.6s' },
+    { l: '14%', t: '26%', s: 54, d: '.7s',  dur: '7.5s' },
+    { l: '56%', t: '44%', s: 92, d: '.3s',  dur: '8.1s' },
+    { l: '82%', t: '26%', s: 42, d: '1.1s', dur: '6.9s' },
+    { l: '84%', t: '60%', s: 50, d: '.9s',  dur: '7.2s' },
+    { l: '26%', t: '66%', s: 70, d: '1.5s', dur: '7.9s' },
   ].map(c =>
     `<span class="coin" style="left:${c.l};top:${c.t};width:${c.s}px;height:${c.s}px;
-       font-size:${Math.round(c.s * 0.42)}px;animation-delay:${c.d};animation-duration:${c.dur}">₹</span>`
+       animation-delay:${c.d};animation-duration:${c.dur}">${coinSvg()}</span>`
   ).join('');
-  return `<div class="coins" aria-hidden="true">${coins}</div>`;
+  return `<span class="glow"></span>${coins}`;
 }
 
 function formHtml() {
@@ -228,7 +256,7 @@ function formHtml() {
   const empOpts = EMPLOYMENT.map(e => `<div class="opt" data-emp="${e}">${e}</div>`).join('');
 
   return `
-    <div class="card">
+    <div class="card" id="addrate">
       <div class="form-title">Add your rate</div>
       <div class="form-sub">Seven questions, under a minute. Anonymous — no phone, no email.</div>
 
