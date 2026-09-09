@@ -156,16 +156,21 @@ async function renderLanding() {
       </div>
       <div class="hero-coins" aria-hidden="true">${coinsCluster()}</div>
     </section>
-    ${listSection(total, banks)}
-    ${formHtml()}
+    <div class="landing-grid">
+      ${listSection(total, banks)}
+      ${formHtml()}
+    </div>
   `;
-  const cta = document.getElementById('hero-cta');
-  if (cta) cta.addEventListener('click', () => {
+  const scrollToForm = () => {
     const t = document.getElementById('addrate');
     if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
     const bank = document.getElementById('f-bank');
     if (bank) setTimeout(() => bank.focus({ preventScroll: true }), 400);
-  });
+  };
+  const cta = document.getElementById('hero-cta');
+  if (cta) cta.addEventListener('click', scrollToForm);
+  const navCta = document.getElementById('nav-cta');
+  if (navCta) navCta.addEventListener('click', scrollToForm);
   wireForm();
 }
 
@@ -466,6 +471,8 @@ function renderResult(res) {
     : `<div class="cohort-note">${cohortLine}</div>`;
 
   app.innerHTML = `
+    <div class="result-grid">
+    <div class="result-col">
     <div class="card">
       <div class="result-lead">
         <div class="frame"><b>${nLess}</b> out of 10 people who borrowed from ${esc(input.bank)} report a lower rate than yours.</div>
@@ -497,13 +504,6 @@ function renderResult(res) {
       ${benchmarkLine(input, benchmark)}
     </div>
 
-    <div class="card">
-      <div class="doors-title">What you can actually do about it</div>
-      ${doorHtml(1, rec, calc)}
-      ${doorHtml(2, rec, calc)}
-      ${doorHtml(3, rec, calc)}
-    </div>
-
     <div class="card" style="padding:0;overflow:hidden">
       <details class="dotwrap">
         <summary>See the full spread</summary>
@@ -512,6 +512,17 @@ function renderResult(res) {
           ${dotPlotSvg(rates, input.rate, Number(cohort.median_rate == null ? calc.cohortP25 : cohort.median_rate))}
         </div>
       </details>
+    </div>
+    </div>
+
+    <div class="result-col rc-doors">
+    <div class="card">
+      <div class="doors-title">What you can actually do about it</div>
+      ${doorHtml(1, rec, calc)}
+      ${doorHtml(2, rec, calc)}
+      ${doorHtml(3, rec, calc)}
+    </div>
+    </div>
     </div>
 
     ${backButtonHtml()}`;
