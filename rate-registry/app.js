@@ -442,10 +442,9 @@ function renderResult(res) {
     app.innerHTML = `
       <div class="card">
         <div class="result-lead">
-          <div class="frame">Your rate is in. There just aren't enough reports for
-            <b>${esc(input.bank)}</b> yet to say what's achievable.</div>
-          <div class="caveat">We never show a figure built from fewer than four reports.
-            Check back in a few days as more borrowers share.</div>
+          <div class="frame">Your rate is saved. We just don't have enough reports for
+            <b>${esc(input.bank)}</b> yet to show a fair comparison.</div>
+          <div class="caveat">We won't show a number until at least four people have shared — so it actually means something. Check back in a few days.</div>
         </div>
       </div>
       ${backButtonHtml()}`;
@@ -473,7 +472,7 @@ function renderResult(res) {
 
   const cohortLine = `Based on ${cohort.n} ${esc(input.employment.toLowerCase())} borrower${cohort.n === 1 ? '' : 's'} who took a ${esc(input.bank)} loan in ${input.loan_year} through ${esc(input.channel.toLowerCase())}.`;
   const widenLine = cohort.tier > 1
-    ? `<div class="cohort-note widen">Not enough reports for your exact group, so this compares against ${esc(cohort.tier_label)}.</div>`
+    ? `<div class="cohort-note widen">Not enough reports for your exact situation yet, so this compares you with ${esc(cohort.tier_label)}.</div>`
     : `<div class="cohort-note">${cohortLine}</div>`;
 
   app.innerHTML = `
@@ -483,7 +482,7 @@ function renderResult(res) {
       <div class="result-lead">
         <div class="frame"><b>${nLess}</b> out of 10 people who borrowed from ${esc(input.bank)} report a lower rate than yours.</div>
         ${pictographHtml(nLess)}
-        <div class="caveat">Rates vary with credit score, employer, salary and how you applied — so your situation may genuinely differ. What this tells you is what's achievable, not what you're owed.</div>
+        <div class="caveat">Rates depend on your credit score, employer, salary and how you applied — so yours may be different for good reasons. This shows what's possible at your bank, not that you were charged unfairly.</div>
       </div>
       ${widenLine}
       ${cohort.tier > 1 ? `<div class="cohort-note">${cohortLine}</div>` : ''}
@@ -492,29 +491,29 @@ function renderResult(res) {
     <div class="card">
       <div class="emi-pair">
         <div class="emi-box">
-          <div class="lbl">Your rate</div>
+          <div class="lbl">You pay</div>
           <div class="val">${input.rate.toFixed(2)}%</div>
-          <div class="sub">EMI ${inr(userEmi)}/mo</div>
+          <div class="sub">${inr(userEmi)} a month</div>
         </div>
         <div class="emi-box ach">
-          <div class="lbl">Achievable at ${esc(input.bank)}</div>
+          <div class="lbl">Others get at ${esc(input.bank)}</div>
           <div class="val">${calc.cohortP25.toFixed(2)}%</div>
-          <div class="sub">EMI ${inr(achEmi)}/mo</div>
+          <div class="sub">${inr(achEmi)} a month</div>
         </div>
       </div>
       <div class="emi-diff">
-        ${monthlyDiff > 0 ? 'That is about' : 'You are already at or below the achievable rate —'}
-        ${monthlyDiff > 0 ? `<b>${inr(monthlyDiff)}/mo</b> lower` : `<b>no monthly gap</b>`}
-        ${monthlyDiff > 0 ? 'on your outstanding balance.' : 'nothing to chase here.'}
+        ${monthlyDiff > 0
+          ? `That's about <b>${inr(monthlyDiff)} a month</b> more than others at your bank — on what you still owe.`
+          : `You're already getting a rate as good as others at your bank — <b>nothing to chase here.</b>`}
       </div>
       ${benchmarkLine(input, benchmark)}
     </div>
 
     <div class="card" style="padding:0;overflow:hidden">
       <details class="dotwrap">
-        <summary>See the full spread</summary>
+        <summary>See everyone's rates</summary>
         <div class="dotplot">
-          <div class="cap">Every rate in this cohort. Yours is highlighted.</div>
+          <div class="cap">Every rate people shared in this group. Yours is marked.</div>
           ${dotPlotSvg(rates, input.rate, Number(cohort.median_rate == null ? calc.cohortP25 : cohort.median_rate))}
         </div>
       </details>
@@ -546,7 +545,7 @@ function doorHtml(n, rec, calc) {
       <div class="door ${isRec ? 'rec' : ''}">
         ${tag}<div class="dnum">Door 1</div>
         <h3>Nothing to do right now</h3>
-        <div class="net none">The gap doesn't cover the cost of moving. We'll tell you if that changes.</div>
+        <div class="net none">The savings wouldn't cover the cost of switching right now. We'll tell you if that changes.</div>
       </div>`;
   }
 
@@ -558,7 +557,7 @@ function doorHtml(n, rec, calc) {
         <div class="door ${isRec ? 'rec' : ''}">
           ${tag}<div class="dnum">Door 2</div>
           <h3>Ask your bank to convert your spread</h3>
-          <div class="net none">No gap between your rate and the achievable rate at your bank right now.</div>
+          <div class="net none">Your rate already matches what others get at your bank.</div>
         </div>`;
     }
     const template =
@@ -576,8 +575,9 @@ Thank you.`;
       <div class="door ${isRec ? 'rec' : ''}" data-door="Conversion">
         ${tag}<div class="dnum">Door 2</div>
         <h3>Ask your bank to convert your spread</h3>
-        <div class="net">Net benefit: <b>${inr(d.net)}</b> after a conversion fee of about ${inr(d.cost)}.</div>
-        <div class="cost">Gross saving ${inr(d.gross)} over your remaining tenure, minus the fee. Fees are estimates — verify with your lender.</div>
+        <div class="dsub">In plain words: get your bank to put today's lower rate on your existing loan — no new loan, no longer tenure.</div>
+        <div class="net">You'd save about <b>${inr(d.net)}</b> — after a one-time fee of roughly ${inr(d.cost)}.</div>
+        <div class="cost">That's ${inr(d.gross)} saved over the years left on your loan, minus the fee. Fees are estimates — check with your bank.</div>
         <div class="dbody">
           <div class="template">${esc(template)}</div>
           <div class="warning">If you simply ask for <b>"a lower rate,"</b> many lenders respond with a top-up — your existing loan is closed and reopened with a fresh tenure, a processing fee, and sometimes insurance you were never shown. You end up paying more over the life of the loan. Ask specifically for a <b>conversion to the current spread on your existing loan, with no change to tenure and no top-up.</b></div>
@@ -594,15 +594,16 @@ Thank you.`;
       <div class="door ${isRec ? 'rec' : ''}">
         ${tag}<div class="dnum">Door 3</div>
         <h3>Move to another lender</h3>
-        <div class="net none">No lender in the registry is currently below your rate.</div>
+        <div class="net none">No other bank here is currently cheaper than your rate.</div>
       </div>`;
   }
   return `
     <div class="door ${isRec ? 'rec' : ''}" data-door="Transfer">
       ${tag}<div class="dnum">Door 3</div>
       <h3>Move to another lender</h3>
-      <div class="net">Net benefit: <b>${inr(d.net)}</b> after roughly ${inr(d.cost)} in processing, legal, valuation and registration costs.</div>
-      <div class="cost">Gross saving ${inr(d.gross)} over your remaining tenure, minus those costs. Fees are estimates — verify before moving.</div>
+      <div class="dsub">Switch your loan to a cheaper bank. There's paperwork and some upfront cost, but the savings can be big.</div>
+      <div class="net">You'd save about <b>${inr(d.net)}</b> — after roughly ${inr(d.cost)} in switching costs (processing, legal, valuation, registration).</div>
+      <div class="cost">That's ${inr(d.gross)} saved over the years left on your loan, minus those costs. Fees are estimates — check before you move.</div>
       <div class="dbody">
         <p style="font-size:13.5px;color:var(--muted);margin-bottom:4px">We can handle the paperwork. Leave your email and we'll come back.</p>
         <div class="door-cta" data-door-cta="Transfer"></div>
@@ -699,7 +700,7 @@ function benchmarkLine(input, b) {
     : 'source on file';
   return `
     <div class="benchmark">
-      ${esc(input.bank)} ${kind} <b>${shown.toFixed(2)}%</b> — you're at ${input.rate.toFixed(2)}%.
+      ${esc(input.bank)} ${kind} <b>${shown.toFixed(2)}%</b> — you're paying ${input.rate.toFixed(2)}%.
       <span class="src">Published rate, ${src}${b.as_of ? ' · as of ' + esc(String(b.as_of)) : ''}.</span>
     </div>`;
 }
