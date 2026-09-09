@@ -148,6 +148,7 @@ async function renderLanding() {
 
   app.innerHTML = `
     <div class="hero">
+      ${coinsHtml()}
       <h1>Are you paying more than you need to on your home loan?</h1>
       <p>Banks advertise a rate almost nobody gets. Borrowers are telling each other what they actually got — so you can see what's achievable at your bank, not just what's advertised.</p>
     </div>
@@ -199,6 +200,23 @@ function listSection(total, banks) {
       <div class="section-sub">The lowest quarter of reported rates at each bank, shown as a monthly EMI on a ₹50 lakh loan over 20 years.</div>
       ${body}
     </div>`;
+}
+
+// Decorative floating ₹ coins behind the hero (CSS-animated, on-brand, subtle).
+function coinsHtml() {
+  const coins = [
+    { l: '5%',  t: '10%', s: 40, d: '0s',   dur: '6.6s' },
+    { l: '87%', t: '6%',  s: 30, d: '.9s',  dur: '7.6s' },
+    { l: '15%', t: '70%', s: 32, d: '1.7s', dur: '6.9s' },
+    { l: '80%', t: '62%', s: 44, d: '.4s',  dur: '8.2s' },
+    { l: '45%', t: '2%',  s: 22, d: '2.3s', dur: '7.1s' },
+    { l: '93%', t: '38%', s: 26, d: '1.2s', dur: '6.3s' },
+    { l: '2%',  t: '46%', s: 28, d: '2.0s', dur: '7.9s' },
+  ].map(c =>
+    `<span class="coin" style="left:${c.l};top:${c.t};width:${c.s}px;height:${c.s}px;
+       font-size:${Math.round(c.s * 0.42)}px;animation-delay:${c.d};animation-duration:${c.dur}">₹</span>`
+  ).join('');
+  return `<div class="coins" aria-hidden="true">${coins}</div>`;
 }
 
 function formHtml() {
