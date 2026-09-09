@@ -177,16 +177,19 @@ function listSection(total, banks) {
   }));
   const maxE = Math.max(...rows.map(r => r.emi)), minE = Math.min(...rows.map(r => r.emi));
 
-  const body = rows.map(r => {
+  const body = rows.map((r, i) => {
     const frac = maxE === minE ? 1 : 0.25 + 0.75 * (r.emi - minE) / (maxE - minE);
     return `
-      <div class="bank-row">
-        <div class="top">
-          <div class="name">${esc(r.bank)}</div>
-          <div class="emi">${inr(r.emi)}<span>/mo</span></div>
+      <div class="bank-row${i === 0 ? ' best' : ''}">
+        <div class="rank">${i + 1}</div>
+        <div class="bank-main">
+          <div class="top">
+            <div class="name">${esc(r.bank)}${i === 0 ? '<span class="tagpill">cheapest</span>' : ''}</div>
+            <div class="emi">${inr(r.emi)}<span>/mo</span></div>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(frac * 100).toFixed(1)}%"></div></div>
+          <div class="meta">achievable ${r.p25.toFixed(2)}% · ${r.n} report${r.n === 1 ? '' : 's'}</div>
         </div>
-        <div class="bar-track"><div class="bar-fill" style="width:${(frac * 100).toFixed(1)}%"></div></div>
-        <div class="meta">achievable ${r.p25.toFixed(2)}% · ${r.n} report${r.n === 1 ? '' : 's'}</div>
       </div>`;
   }).join('');
 
@@ -420,6 +423,7 @@ function renderResult(res) {
     <div class="card">
       <div class="result-lead">
         <div class="frame"><b>${nLess}</b> out of 10 people who borrowed from ${esc(input.bank)} report a lower rate than yours.</div>
+        ${pictographHtml(nLess)}
         <div class="caveat">Rates vary with credit score, employer, salary and how you applied — so your situation may genuinely differ. What this tells you is what's achievable, not what you're owed.</div>
       </div>
       ${widenLine}
@@ -635,6 +639,14 @@ function benchmarkLine(input, b) {
       ${esc(input.bank)} ${kind} <b>${shown.toFixed(2)}%</b> — you're at ${input.rate.toFixed(2)}%.
       <span class="src">Published rate, ${src}${b.as_of ? ' · as of ' + esc(String(b.as_of)) : ''}.</span>
     </div>`;
+}
+
+// 10-person pictograph for the "{n} out of 10" stat. The first n are "pay less".
+function pictographHtml(nLess) {
+  const person = `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-5 0-9 2.5-9 6v2h18v-2c0-3.5-4-6-9-6z"/></svg>`;
+  let cells = '';
+  for (let i = 0; i < 10; i++) cells += `<span class="pc ${i < nLess ? 'less' : 'you'}">${person}</span>`;
+  return `<div class="picto" role="img" aria-label="${nLess} out of 10 pay less than you">${cells}</div>`;
 }
 
 function backButtonHtml() { return `<button class="btn btn-ghost" id="f-back">← Back to the registry</button>`; }
