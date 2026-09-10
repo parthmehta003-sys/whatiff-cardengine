@@ -70,13 +70,19 @@ borrower was treated unfairly.
    no real crowd data yet. **This is the main blocker to sharing the site.** No
    seed/demo rates in the repo by design — they must be real, from the user's network.
 2. **Unresolved data conflicts** (stored my best call, each flagged in the row's `note`):
-   - **HDFC conversion fee** — charges page 0.5% cap ₹50k vs `/conversion-fees` 0.25% cap ₹5k. Stored ~₹5k flat.
+   - **HDFC conversion fee** — ✅ RESOLVED from the official MITC (user-supplied PDF):
+     0.50% of principal outstanding, cap ₹50k, whichever lower → stored as
+     `conversion_fee_pct = 0.005` (not flat ₹5k). PF 0.5% confirmed.
    - **Bank of Baroda processing** — pages render "50%"/"25%" (stripped decimals for 0.50%/0.25%); left NULL rather than infer.
    - **Home First rate 8.00%** — single read, marked provisional; re-verify.
    - **Repco 8.75%** — low confidence (marketing/branches page); re-verify against official ROI PDF.
-3. **Refresh benchmarks when the RBI repo rate moves** (currently 5.25%, RBI last
-   changed 05-Dec-2025). Floating loans reset to the current benchmark, so keep the
-   latest row per bank accurate.
+3. **⚠️ REPO RATE DISCREPANCY (affects the WHOLE table).** All 28 rows use
+   `repo_rate = 5.25` (from the user's fresh RBI fetch: last changed 05-Dec-2025,
+   held Apr & Aug 2026). But HDFC's official (undated) home-loan T&C PDF computes
+   its illustrative rates on **Repo 6.25%** (special = repo + 2.45% = "8.70%").
+   Either the PDF is stale, or repo is actually 6.25%. If 6.25%, every `repo_rate`
+   value and the below-floor margins are off. **Confirm the current RBI repo rate
+   against rbi.org.in before trusting the table** — this is bigger than any one lender.
 4. **IDFC First** still has no verified data — add if a primary source turns up.
 
 ---
