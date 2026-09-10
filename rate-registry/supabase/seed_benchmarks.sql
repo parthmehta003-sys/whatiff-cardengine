@@ -91,7 +91,7 @@ insert into public.benchmarks
    'advertised_floor NULL: all rate blocks render "Loading". Conversion FLAT Rs 3000+GST (IHL conversion). PF FLAT slabs (Rs 3000-50000) so processing_fee_pct NULL.'),
   ('PNB Housing','2026-09-10',5.25,NULL,NULL,8.50, 0.005,NULL,0.01,
    'https://www.pnbhousing.com/home-loan','https://www.pnbhousing.com/documents/d/guest/know-schedule-of_charges','2026-09-10',
-   'Rate 8.50% APR from product heading; /interest-rates returns HTTP 406 so PNBHFR slab table unread (homepage says from 8.25 — unresolved). Conversion floating rate-reduction 0.5% POS+GST. PF 1% min 10000+GST.'),
+   'PNB Housing Finance (PNBHFL) — NOT Punjab National Bank (separate row). FEES CONFIRMED from the official MITC / Schedule of Charges v31.0.0 (eff 01-Jan-2026): PF 1% of loan +GST (min Rs 10000); CONVERSION = "ROI Change Floating-to-Floating (reduction in rate) 0.5% of POS +GST" — the Door-2 fee (distinct from the 3% fixed-switch). Floating benchmark is PNBRRR (no numeric published). Prepayment NIL for individual floating loans. Rate 8.50% from product heading (homepage says from 8.25; /interest-rates 406, slab table unread).'),
   ('Bajaj Housing','2026-09-10',5.25,NULL,NULL,7.25, NULL,NULL,NULL,
    'https://www.bajajhousingfinance.in/home-loan-interest-rates','https://www.bajajhousingfinance.in/documents/37350/3993180/MITC+-+Retail+(Secured+and+Unsecured)+-+English+(2).pdf','2026-09-10',
    'Rate 7.25%-10.25% salaried. FEES NULL BY DESIGN: MITC gives only ceilings — Switch up to 4.5% POS, PF up to 7% — not typical charges. Falls back to estimate.'),
