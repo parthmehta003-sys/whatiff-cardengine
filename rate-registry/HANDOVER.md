@@ -36,9 +36,9 @@ borrower was treated unfairly.
   the top-up warning + template verbatim — do not water those down).
 - **Lender universe expanded** to banks + home-loan NBFCs/HFCs (see dropdown below).
 - **Per-lender verified fees + rates loaded** — **29 lenders**, each figure from the
-  lender's own official page. **SBI, HDFC, BoB, IDFC First** hardened against
-  user-supplied official PDFs/screenshots (MITCs, rate & fee pages). This was the
-  last big task.
+  lender's own official page. **SBI, HDFC, ICICI, BoB, Union Bank, IDFC First**
+  hardened against user-supplied official PDFs/screenshots (MITCs, ROI schedules,
+  rate & fee pages). This was the last big task.
 
 ### The fees/rates work (most recent, commit `11279b7`)
 
@@ -88,7 +88,8 @@ borrower was treated unfairly.
    - **Home First rate 8.00%** — single read, marked provisional; re-verify.
    - **Repco 8.75%** — low confidence (marketing/branches page); re-verify against official ROI PDF.
 3. **Repo rate — ✅ RESOLVED at 5.25%.** Confirmed against RBI's 19-Aug-2026 MPC
-   minutes (held; next MPC 05-07 Oct 2026). HDFC's undated T&C PDF implies 6.25%
+   minutes (held; next MPC 05-07 Oct 2026), and independently by Union Bank's ROI
+   PDF (EBLR 8.00 = Repo 5.25 + Spread 2.75). HDFC's undated T&C PDF implies 6.25%
    but is stale. The `repo_rate = 5.25` on all rows stands. Refresh if the next MPC
    moves it.
 4. **IDFC First** — ✅ DONE. Row added (advertised_floor 7.75%, EBR-linked, reset
