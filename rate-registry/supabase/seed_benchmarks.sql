@@ -22,7 +22,8 @@
 --    three live figures) not 8.95. Both noted.
 --  * NULL advertised_floor (JS-rendered / not found): Axis, Yes, IndusInd, LIC —
 --    they show no advertised line and skip the floor check until filled.
--- IDFC First produced nothing verifiable and is intentionally absent.
+-- Repo 5.25% confirmed against RBI's 19-Aug-2026 MPC minutes (held; next MPC
+--    05-07 Oct 2026). HDFC's undated T&C PDF implies 6.25% but is stale.
 --
 -- Fees left NULL fall back to the app's ASSUMPTION estimate (labelled as such).
 
@@ -42,7 +43,7 @@ insert into public.benchmarks
    'Rate 7.25% onwards w.e.f. 01.04.2026. RLLR 7.50+CRP; EBLR 7.90+CRP+BSP. Conversion FLAT Rs 5000+GST. PF 0.35% (min 5000 max 15000)+GST.'),
   ('HDFC Bank','2026-09-10',5.25,NULL,NULL,7.75, 0.005,NULL,0.005,
    'https://homeloans.hdfc.bank.in/ps/home-loans-in-india/interest-rates','https://www.hdfc.com/content/dam/housing-development-finance-corporation/pdf/most-important-terms-and-conditions.pdf','2026-09-10',
-   'CONVERSION RESOLVED from official HDFC MITC Sr.13: switch-to-lower-rate on variable loans = 0.50% of principal outstanding, cap Rs 50,000, WHICHEVER LOWER (NOT the flat 5k previously stored; the 0.25%/5k figure is not in the MITC). Cap rarely binds under ~1cr outstanding, so stored as 0.5%. PF (MITC Sr.1 resident housing salaried/SEP): up to 0.50% or Rs 3000 whichever higher. RATE: official T&C confirms special housing = Repo + 2.45-3.30% (standard +3.15-3.70%); advertised_floor kept at freshly-observed 7.75%. FLAG: the T&C illustrative "8.70-9.55%" bakes in Repo 6.25% (undated PDF, likely stale vs the registry Repo 5.25%) — see repo-rate note.'),
+   'CONVERSION RESOLVED from official HDFC MITC Sr.13: switch-to-lower-rate on variable loans = 0.50% of principal outstanding, cap Rs 50,000, WHICHEVER LOWER (NOT the flat 5k previously stored; the 0.25%/5k figure is not in the MITC). Cap rarely binds under ~1cr outstanding, so stored as 0.5%. PF (MITC Sr.1 resident housing salaried/SEP): up to 0.50% or Rs 3000 whichever higher. RATE: official T&C confirms special housing = Repo + 2.45-3.30% (standard +3.15-3.70%); advertised_floor kept at freshly-observed 7.75%. The T&C illustrative "8.70-9.55%" bakes in Repo 6.25% but RBI 19-Aug-2026 MPC confirms Repo 5.25%, so that PDF text is stale.'),
   ('ICICI Bank','2026-09-10',5.25,NULL,8.35,7.55, NULL,3000,0.005,
    'https://www.icici.bank.in/personal-banking/loans/home-loan/home-loan-interest-rates','https://www.icici.bank.in/personal-banking/loans/home-loan/service-charges','2026-09-10',
    'advertised_floor 7.55 = pre-approved digital rate; standard rate-card floor 8.50 (till 30.09.2026). Benchmark I-EBLR 8.95 (EBLR, so rllr NULL). Conversion floating-to-floating FLAT Rs 3000+GST. PF 0.5% on rates page (fee schedule ceiling up to 2% NOT used).'),
@@ -82,6 +83,9 @@ insert into public.benchmarks
   ('Indian Bank','2026-08-14',5.25,NULL,8.85,7.15, NULL,NULL,NULL,
    'https://indianbank.bank.in/en/interest-rates-on-personal-segment-loan-products','https://indianbank.bank.in/en/processing-fee-on-personal-segment-loan-products','2026-09-10',
    'Rate 7.15% (IB Home Loan 7.15-8.55). No current RLLR/EBLR (only Base 9.55/BPLR 13.80). PF FLAT for core product (Rs 1500/2500/5000 by slab) so processing_fee_pct NULL. Conversion fee not in charges annexure.'),
+  ('IDFC First','2026-09-10',5.25,NULL,NULL,7.75, NULL,NULL,NULL,
+   'https://www.idfcfirstbank.com/personal-banking/loans/home-loan/home-loan-interest-rates','https://www.idfcfirstbank.com/personal-banking/loans/home-loan/fees-and-charges','2026-09-10',
+   'Rate "ROI starting from 7.75%" (official product rates page, user-supplied screenshots 2026-09-10). EBR-linked (External Benchmark Rate), reset every 3 months; no numeric EBR published so rllr NULL. FEES NULL BY DESIGN (both are "up to" ceilings, per house convention): Switch/repricing fee (Door 2) up to 2% of principal outstanding; Processing fee (Door 3) up to 3% of loan amount (IMD/admin Rs 6500 is part of PF). Foreclosure NIL on floating. Both door fees fall back to labelled estimate.'),
   ('LIC Housing','2026-09-10',5.25,NULL,NULL,NULL, NULL,3000,NULL,
    'https://www.lichousing.com/lhplr-for-retail-loans','https://cdn.lichousing.com/2026/01/fees_and_other_charges.pdf','2026-09-10',
    'advertised_floor NULL: all rate blocks render "Loading". Conversion FLAT Rs 3000+GST (IHL conversion). PF FLAT slabs (Rs 3000-50000) so processing_fee_pct NULL.'),

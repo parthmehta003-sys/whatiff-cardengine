@@ -35,8 +35,9 @@ borrower was treated unfairly.
 - **Plain-language copy pass done** on landing list and result screen/doors (kept
   the top-up warning + template verbatim — do not water those down).
 - **Lender universe expanded** to banks + home-loan NBFCs/HFCs (see dropdown below).
-- **Per-lender verified fees + rates loaded** (commit `11279b7`) — 28 lenders, each
-  figure from the lender's own official page. This was the last big task.
+- **Per-lender verified fees + rates loaded** — **29 lenders**, each figure from the
+  lender's own official page (HDFC & IDFC First hardened against user-supplied
+  official PDFs/screenshots). This was the last big task.
 
 ### The fees/rates work (most recent, commit `11279b7`)
 
@@ -76,14 +77,13 @@ borrower was treated unfairly.
    - **Bank of Baroda processing** — pages render "50%"/"25%" (stripped decimals for 0.50%/0.25%); left NULL rather than infer.
    - **Home First rate 8.00%** — single read, marked provisional; re-verify.
    - **Repco 8.75%** — low confidence (marketing/branches page); re-verify against official ROI PDF.
-3. **⚠️ REPO RATE DISCREPANCY (affects the WHOLE table).** All 28 rows use
-   `repo_rate = 5.25` (from the user's fresh RBI fetch: last changed 05-Dec-2025,
-   held Apr & Aug 2026). But HDFC's official (undated) home-loan T&C PDF computes
-   its illustrative rates on **Repo 6.25%** (special = repo + 2.45% = "8.70%").
-   Either the PDF is stale, or repo is actually 6.25%. If 6.25%, every `repo_rate`
-   value and the below-floor margins are off. **Confirm the current RBI repo rate
-   against rbi.org.in before trusting the table** — this is bigger than any one lender.
-4. **IDFC First** still has no verified data — add if a primary source turns up.
+3. **Repo rate — ✅ RESOLVED at 5.25%.** Confirmed against RBI's 19-Aug-2026 MPC
+   minutes (held; next MPC 05-07 Oct 2026). HDFC's undated T&C PDF implies 6.25%
+   but is stale. The `repo_rate = 5.25` on all rows stands. Refresh if the next MPC
+   moves it.
+4. **IDFC First** — ✅ DONE. Row added (advertised_floor 7.75%, EBR-linked, reset
+   3-monthly) from the user's official screenshots. Both door fees are "up to"
+   ceilings (2% switch, 3% PF) so left NULL → fall back to estimate.
 
 ---
 
@@ -110,7 +110,7 @@ template for future refreshes.
 | `supabase/migrations/0001_rate_registry.sql` | whole DB: schema, RLS, RPCs, triggers |
 | `supabase/migrations/0002_lenders_and_fees.sql` | widens allowed-lender check constraints to 30; adds `conversion_fee_pct`, `processing_fee_pct`, `fee_source_url` |
 | `supabase/migrations/0003_conversion_flat_fee.sql` | adds `conversion_fee_flat`; rebuilds `bank_benchmark` |
-| `supabase/seed_benchmarks.sql` | 28 verified lender rows (see corrections above) |
+| `supabase/seed_benchmarks.sql` | 29 verified lender rows (see corrections above) |
 | `README.md` | setup, deploy, security note, fees explanation |
 
 ---
@@ -168,4 +168,4 @@ d921d2a Plain-language landing list + clearer purpose
 - **Housing finance / NBFCs:** LIC Housing, PNB Housing, Bajaj Housing, Tata Capital, Godrej Housing, Aadhar Housing Finance, Aavas Financiers, Home First Finance, Repco Home Finance, Can Fin Homes, Sammaan Capital, Piramal Finance, Sundaram Home Finance
 - **Other**
 
-(IDFC First is in the dropdown but has no benchmark row yet — see TODO 4.)
+All 29 dropdown lenders now have a benchmark row.
