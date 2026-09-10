@@ -42,6 +42,9 @@ are deliberately not built yet.
 1. Create a free project at [supabase.com](https://supabase.com).
 2. **SQL Editor** → paste the entire `supabase/migrations/0001_rate_registry.sql`
    and run it. (Or `supabase db push` with the CLI.)
+3. Then run `supabase/migrations/0002_lenders_and_fees.sql` — it widens the
+   allowed-lender list to include home-loan NBFCs/HFCs and adds per-lender fee
+   fields (see "Fees" below). Safe to run once, after 0001.
 
 That creates both tables (`rates`, `outcomes`), enables RLS with **no direct
 table access for the browser at all**, and creates the write RPCs
@@ -148,6 +151,24 @@ What the benchmarks do once populated:
 
 Because floating loans reset to the *current* benchmark, keep the latest row per
 bank accurate; refresh whenever the RBI repo rate moves.
+
+### Fees (per lender)
+
+The three-door net-benefit maths needs two fees per lender, held on `benchmarks`
+(migration 0002):
+
+- **`conversion_fee_pct`** — what a lender charges to convert/reset the rate on an
+  *existing* loan. Drives **Door 2** (uses the user's own bank's figure).
+- **`processing_fee_pct`** — a lender's home-loan processing fee for a *new* /
+  balance-transfer loan. Drives **Door 3** (uses the cheapest target bank's figure).
+
+Both are fractions of the loan (e.g. `0.005` = 0.5%). When a lender's fee is
+**NULL**, the app falls back to the labelled `ASSUMPTION` constants in `app.js`
+and the door says the fee is an *estimate*; when a verified fee is present, the
+door says it's the lender's *published figure*. So the site works before you fill
+these in, and gets more accurate as you do. Gather them the same way as rates —
+from each lender's own fee schedule / MITC — via the fetch prompt; MOD (stamp)
+and legal/valuation stay as constants (state-based / roughly fixed).
 
 ## 6. Before launch
 

@@ -14,11 +14,14 @@
 'use strict';
 
 // ===========================================================================
-// ASSUMPTIONS — verify against lender schedules before relying on these.
-// A wrong net-benefit figure is worse than no figure.
+// ASSUMPTIONS — fallback fee estimates. These are used ONLY when a lender has
+// no verified fee in the benchmarks table. Once you populate conversion_fee_pct
+// / processing_fee_pct per lender (see migration 0002 + the fetch prompt), the
+// doors use the lender's real fee and say so. Verify anything here first —
+// a wrong net-benefit figure is worse than no figure.
 // ===========================================================================
-const CONVERSION_FEE_PCT = 0.005;  // one-time fee to move to current spread, % of outstanding
-const BT_PROCESSING_PCT  = 0.005;  // new lender processing fee, % of outstanding
+const CONVERSION_FEE_PCT = 0.005;  // fallback: convert/reset rate, % of outstanding (Door 2)
+const BT_PROCESSING_PCT  = 0.005;  // fallback: new lender processing fee, % of outstanding (Door 3)
 const BT_LEGAL_TECH      = 7500;   // legal + technical valuation, rupees
 const BT_MOD_PCT         = 0.0015; // MOD registration, % of loan — varies by state
 const MIN_NET_BENEFIT    = 25000;  // below this, recommend doing nothing
@@ -41,11 +44,22 @@ if (CFG.SUPABASE_URL && CFG.SUPABASE_ANON_KEY &&
 // ---------------------------------------------------------------------------
 // Constants (must match the DB check constraints)
 // ---------------------------------------------------------------------------
-const BANKS = [
-  'SBI', 'HDFC Bank', 'ICICI Bank', 'Axis Bank', 'Kotak Mahindra', 'LIC Housing',
-  'Bank of Baroda', 'PNB Housing', 'Bajaj Housing', 'IDFC First', 'Canara Bank',
-  'Union Bank', 'Tata Capital', 'Godrej Housing', 'Other'
+// Grouped for the dropdown; BANKS (flat) is the validation list and must match
+// the DB check constraint in migrations 0001 + 0002 exactly.
+const BANK_GROUPS = [
+  { label: 'Banks', items: [
+    'SBI', 'HDFC Bank', 'ICICI Bank', 'Axis Bank', 'Kotak Mahindra', 'Bank of Baroda',
+    'IDFC First', 'Canara Bank', 'Union Bank', 'Punjab National Bank', 'Bank of India',
+    'IDBI Bank', 'Yes Bank', 'IndusInd Bank', 'Federal Bank', 'Indian Bank',
+  ] },
+  { label: 'Housing finance / NBFCs', items: [
+    'LIC Housing', 'PNB Housing', 'Bajaj Housing', 'Tata Capital', 'Godrej Housing',
+    'Aadhar Housing Finance', 'Aavas Financiers', 'Home First Finance', 'Repco Home Finance',
+    'Can Fin Homes', 'Sammaan Capital', 'Piramal Finance', 'Sundaram Home Finance',
+  ] },
+  { label: 'Other', items: ['Other'] },
 ];
+const BANKS = BANK_GROUPS.flatMap(g => g.items);
 const AMOUNTS = [
   { v: 20, label: '₹20 lakh' }, { v: 35, label: '₹35 lakh' }, { v: 50, label: '₹50 lakh' },
   { v: 75, label: '₹75 lakh' }, { v: 100, label: '₹1 crore' }, { v: 150, label: '₹1.5 crore' },
@@ -259,7 +273,9 @@ function coinsCluster() {
 }
 
 function formHtml() {
-  const bankOpts = BANKS.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join('');
+  const bankOpts = BANK_GROUPS.map(g =>
+    `<optgroup label="${esc(g.label)}">${g.items.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join('')}</optgroup>`
+  ).join('');
   const yearOpts = YEARS.map(y => `<option value="${y}">${y}</option>`).join('');
   const amtOpts = AMOUNTS.map(a => `<option value="${a.v}">${esc(a.label)}</option>`).join('');
   const chanOpts = CHANNELS.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
@@ -380,12 +396,24 @@ async function submit(state) {
 
     const cohort = (cs.data && cs.data[0]) || { rates: [], median_rate: null, p25_rate: null, n: 0, tier: 4, tier_label: '' };
     const banks = br.error ? [] : (br.data || []);
-    const bestBankP25 = banks.length ? Math.min(...banks.map(b => Number(b.p25_rate))) : null;
+    // Best (cheapest) bank = the Door 3 transfer target; carry its processing fee.
+    let bestBankP25 = null, targetProcessingPct = null;
+    if (banks.length) {
+      const best = banks.reduce((a, b) => Number(b.p25_rate) < Number(a.p25_rate) ? b : a);
+      bestBankP25 = Number(best.p25_rate);
+      targetProcessingPct = best.processing_fee_pct != null ? Number(best.processing_fee_pct) : null;
+    }
     // Verified benchmark for this bank, or null when none is on file (then the
     // advertised line is simply omitted — no unsourced number is ever shown).
     const benchmark = (bm && !bm.error && bm.data && bm.data[0]) ? bm.data[0] : null;
+    // Per-lender fees, verified where available; null falls back to the labelled
+    // ASSUMPTION constants inside computeDoors.
+    const fees = {
+      conversionPct: benchmark && benchmark.conversion_fee_pct != null ? Number(benchmark.conversion_fee_pct) : null,
+      processingPct: targetProcessingPct,
+    };
 
-    lastResult = { input, cohort, bestBankP25, benchmark };
+    lastResult = { input, cohort, bestBankP25, benchmark, fees };
     renderResult(lastResult);
   } catch (e) {
     submitting = false; btn.disabled = false; btn.textContent = 'See what\'s achievable at your bank';
@@ -400,7 +428,7 @@ async function submit(state) {
 // ===========================================================================
 // RESULT
 // ===========================================================================
-function computeDoors(input, cohort, bestBankP25) {
+function computeDoors(input, cohort, bestBankP25, fees) {
   const principal = input.amount_lakh * 100000;
   const outstanding = outstandingBalance(principal, input.rate, input.loan_year);
   const yrs = yearsRemaining(input.loan_year);
@@ -408,24 +436,27 @@ function computeDoors(input, cohort, bestBankP25) {
 
   const cohortP25 = cohort.p25_rate == null ? null : Number(cohort.p25_rate);
 
+  // Fee rates: the lender's verified figure when we have it, else the labelled
+  // ASSUMPTION default. `feeVerified` lets the UI say whether it's the real fee.
+  const convPct = (fees && fees.conversionPct != null) ? fees.conversionPct : CONVERSION_FEE_PCT;
+  const procPct = (fees && fees.processingPct != null) ? fees.processingPct : BT_PROCESSING_PCT;
+  const convVerified = !!(fees && fees.conversionPct != null);
+  const procVerified = !!(fees && fees.processingPct != null);
+
   // Door 2 — convert spread with the same lender, target = cohort p25.
   let door2 = null;
-  if (cohortP25 != null && cohortP25 < input.rate) {
-    const cost = outstanding * CONVERSION_FEE_PCT;
-    const gross = iUser - interestOver(outstanding, cohortP25, yrs);
-    door2 = { target: cohortP25, cost, gross, net: gross - cost };
-  } else if (cohortP25 != null) {
-    door2 = { target: cohortP25, cost: outstanding * CONVERSION_FEE_PCT, gross: 0, net: 0, noGap: true };
+  if (cohortP25 != null) {
+    const cost = outstanding * convPct;
+    const gross = cohortP25 < input.rate ? iUser - interestOver(outstanding, cohortP25, yrs) : 0;
+    door2 = { target: cohortP25, cost, gross, net: gross - cost, feeVerified: convVerified, noGap: !(cohortP25 < input.rate) };
   }
 
   // Door 3 — balance transfer, target = best bank p25 across the registry.
   let door3 = null;
-  if (bestBankP25 != null && bestBankP25 < input.rate) {
-    const cost = outstanding * (BT_PROCESSING_PCT + BT_MOD_PCT) + BT_LEGAL_TECH;
-    const gross = iUser - interestOver(outstanding, bestBankP25, yrs);
-    door3 = { target: bestBankP25, cost, gross, net: gross - cost };
-  } else if (bestBankP25 != null) {
-    door3 = { target: bestBankP25, cost: outstanding * (BT_PROCESSING_PCT + BT_MOD_PCT) + BT_LEGAL_TECH, gross: 0, net: 0, noGap: true };
+  if (bestBankP25 != null) {
+    const cost = outstanding * (procPct + BT_MOD_PCT) + BT_LEGAL_TECH;
+    const gross = bestBankP25 < input.rate ? iUser - interestOver(outstanding, bestBankP25, yrs) : 0;
+    door3 = { target: bestBankP25, cost, gross, net: gross - cost, feeVerified: procVerified, noGap: !(bestBankP25 < input.rate) };
   }
 
   return { outstanding, yrs, iUser, cohortP25, door2, door3 };
@@ -433,9 +464,9 @@ function computeDoors(input, cohort, bestBankP25) {
 
 function renderResult(res) {
   window.scrollTo(0, 0);
-  const { input, cohort, bestBankP25, benchmark } = res;
+  const { input, cohort, bestBankP25, benchmark, fees } = res;
   const rates = (cohort.rates || []).map(Number);
-  const calc = computeDoors(input, cohort, bestBankP25);
+  const calc = computeDoors(input, cohort, bestBankP25, fees);
 
   // Truly thin: even the widest tier has < 4 reports.
   if (calc.cohortP25 == null) {
@@ -577,7 +608,7 @@ Thank you.`;
         <h3>Ask your bank to convert your spread</h3>
         <div class="dsub">In plain words: get your bank to put today's lower rate on your existing loan — no new loan, no longer tenure.</div>
         <div class="net">You'd save about <b>${inr(d.net)}</b> — after a one-time fee of roughly ${inr(d.cost)}.</div>
-        <div class="cost">That's ${inr(d.gross)} saved over the years left on your loan, minus the fee. Fees are estimates — check with your bank.</div>
+        <div class="cost">That's ${inr(d.gross)} saved over the years left on your loan, minus the fee. ${d.feeVerified ? "Fee is your bank's published figure — still confirm before you commit." : "Fee is an estimate — check with your bank."}</div>
         <div class="dbody">
           <div class="template">${esc(template)}</div>
           <div class="warning">If you simply ask for <b>"a lower rate,"</b> many lenders respond with a top-up — your existing loan is closed and reopened with a fresh tenure, a processing fee, and sometimes insurance you were never shown. You end up paying more over the life of the loan. Ask specifically for a <b>conversion to the current spread on your existing loan, with no change to tenure and no top-up.</b></div>
@@ -603,7 +634,7 @@ Thank you.`;
       <h3>Move to another lender</h3>
       <div class="dsub">Switch your loan to a cheaper bank. There's paperwork and some upfront cost, but the savings can be big.</div>
       <div class="net">You'd save about <b>${inr(d.net)}</b> — after roughly ${inr(d.cost)} in switching costs (processing, legal, valuation, registration).</div>
-      <div class="cost">That's ${inr(d.gross)} saved over the years left on your loan, minus those costs. Fees are estimates — check before you move.</div>
+      <div class="cost">That's ${inr(d.gross)} saved over the years left on your loan, minus those costs. ${d.feeVerified ? "Processing fee is the new lender's published figure; legal, valuation and stamp costs are estimates — confirm before you move." : "Fees are estimates — check before you move."}</div>
       <div class="dbody">
         <p style="font-size:13.5px;color:var(--muted);margin-bottom:4px">We can handle the paperwork. Leave your email and we'll come back.</p>
         <div class="door-cta" data-door-cta="Transfer"></div>
