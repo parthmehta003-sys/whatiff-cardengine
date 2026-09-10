@@ -38,11 +38,12 @@ borrower was treated unfairly.
 - **Per-lender verified fees + rates loaded** — **29 lenders**, each figure from the
   lender's own official page. **SBI, HDFC, ICICI, BoB, Union Bank, Yes Bank, PNB
   Housing, Kotak, IDFC First** hardened against user-supplied official PDFs/
-  screenshots (MITCs, ROI schedules, schedules of charges, rate & fee pages). This
-  was the last big task. NB: **PNB Housing** (HFC) and **Punjab National Bank**
+  screenshots (MITCs, ROI schedules, schedules of charges/GSFC, rate & fee pages).
+  This was the last big task. NB: **PNB Housing** (HFC) and **Punjab National Bank**
   (bank) are two separate lenders/rows — the PNBHFL MITC verified PNB Housing only.
-  Kotak's *rate* (7.60%) is confirmed; its fees remain GSFC-sourced (the fee
-  screenshot wasn't legible — upload the Kotak GSFC PDF to re-verify fees).
+  Kotak: rate 7.60% + fees fully verified from its GSFC (conversion 0.5% POS cap
+  ₹10k → flat 10000; PF is an "up to 2%" ceiling so processing_fee_pct is NULL →
+  Door 3 uses the 0.5% estimate).
 
 ### The fees/rates work (most recent, commit `11279b7`)
 
