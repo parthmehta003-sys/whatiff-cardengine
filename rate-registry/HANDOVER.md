@@ -74,7 +74,12 @@ borrower was treated unfairly.
    - **HDFC conversion fee** — ✅ RESOLVED from the official MITC (user-supplied PDF):
      0.50% of principal outstanding, cap ₹50k, whichever lower → stored as
      `conversion_fee_pct = 0.005` (not flat ₹5k). PF 0.5% confirmed.
-   - **Bank of Baroda processing** — pages render "50%"/"25%" (stripped decimals for 0.50%/0.25%); left NULL rather than infer.
+   - **Bank of Baroda** — ✅ RESOLVED from the official rates & charges page
+     (user screenshot). The "50%"/"25%" render was stripped decimals for
+     0.50%/0.25% (min ₹8,500; max ₹15k ≤50L / ₹25k >50L) — confirmed. Door 3 is a
+     takeover, and BoB's takeover PF is a **flat ₹8,500** → stored in the new
+     `processing_fee_flat` column (migration 0004). Advertised floor corrected
+     7.20 → **7.25%** ("From 7.25%" floating).
    - **Home First rate 8.00%** — single read, marked provisional; re-verify.
    - **Repco 8.75%** — low confidence (marketing/branches page); re-verify against official ROI PDF.
 3. **Repo rate — ✅ RESOLVED at 5.25%.** Confirmed against RBI's 19-Aug-2026 MPC
@@ -90,7 +95,7 @@ borrower was treated unfairly.
 ## Run order (Supabase SQL editor) — MATTERS
 
 ```
-0001_rate_registry.sql  →  0002_lenders_and_fees.sql  →  0003_conversion_flat_fee.sql  →  seed_benchmarks.sql
+0001_rate_registry.sql → 0002_lenders_and_fees.sql → 0003_conversion_flat_fee.sql → 0004_processing_flat_fee.sql → seed_benchmarks.sql
 ```
 
 All under `rate-registry/supabase/`. `seed_benchmarks.sql` re-run is safe (it
@@ -110,7 +115,8 @@ template for future refreshes.
 | `supabase/migrations/0001_rate_registry.sql` | whole DB: schema, RLS, RPCs, triggers |
 | `supabase/migrations/0002_lenders_and_fees.sql` | widens allowed-lender check constraints to 30; adds `conversion_fee_pct`, `processing_fee_pct`, `fee_source_url` |
 | `supabase/migrations/0003_conversion_flat_fee.sql` | adds `conversion_fee_flat`; rebuilds `bank_benchmark` |
-| `supabase/seed_benchmarks.sql` | 29 verified lender rows (see corrections above) |
+| `supabase/migrations/0004_processing_flat_fee.sql` | adds `processing_fee_flat` (Door-3 takeover); rebuilds `bank_benchmark` + `bank_rates` |
+| `supabase/seed_benchmarks.sql` | 29 verified lender rows + a trailing UPDATE for BoB's flat takeover fee (see corrections above) |
 | `README.md` | setup, deploy, security note, fees explanation |
 
 ---

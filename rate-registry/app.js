@@ -397,11 +397,12 @@ async function submit(state) {
     const cohort = (cs.data && cs.data[0]) || { rates: [], median_rate: null, p25_rate: null, n: 0, tier: 4, tier_label: '' };
     const banks = br.error ? [] : (br.data || []);
     // Best (cheapest) bank = the Door 3 transfer target; carry its processing fee.
-    let bestBankP25 = null, targetProcessingPct = null;
+    let bestBankP25 = null, targetProcessingPct = null, targetProcessingFlat = null;
     if (banks.length) {
       const best = banks.reduce((a, b) => Number(b.p25_rate) < Number(a.p25_rate) ? b : a);
       bestBankP25 = Number(best.p25_rate);
       targetProcessingPct = best.processing_fee_pct != null ? Number(best.processing_fee_pct) : null;
+      targetProcessingFlat = best.processing_fee_flat != null ? Number(best.processing_fee_flat) : null;
     }
     // Verified benchmark for this bank, or null when none is on file (then the
     // advertised line is simply omitted — no unsourced number is ever shown).
@@ -413,6 +414,7 @@ async function submit(state) {
       conversionFlat: benchmark && benchmark.conversion_fee_flat != null ? Number(benchmark.conversion_fee_flat) : null,
       conversionPct: benchmark && benchmark.conversion_fee_pct != null ? Number(benchmark.conversion_fee_pct) : null,
       processingPct: targetProcessingPct,
+      processingFlat: targetProcessingFlat,
     };
 
     lastResult = { input, cohort, bestBankP25, benchmark, fees };
@@ -443,12 +445,17 @@ function computeDoors(input, cohort, bestBankP25, fees) {
   // The conversion (Door 2) fee is a flat rupee amount for many lenders.
   const convFlat = (fees && fees.conversionFlat != null) ? fees.conversionFlat : null;
   const convPct  = (fees && fees.conversionPct != null) ? fees.conversionPct : null;
+  const procFlat = (fees && fees.processingFlat != null) ? fees.processingFlat : null;
   const procPct  = (fees && fees.processingPct != null) ? fees.processingPct : BT_PROCESSING_PCT;
   const convVerified = convFlat != null || convPct != null;
-  const procVerified = !!(fees && fees.processingPct != null);
+  const procVerified = !!(fees && (fees.processingPct != null || fees.processingFlat != null));
   const convCost = (bal) => convFlat != null ? convFlat
                           : convPct != null ? bal * convPct
                           : bal * CONVERSION_FEE_PCT;
+  // Door-3 processing is the target lender's flat takeover fee when it charges
+  // one (e.g. Bank of Baroda Rs 8,500), else a % of the balance. MOD and
+  // legal/valuation are added separately in the door.
+  const procCost = (bal) => procFlat != null ? procFlat : bal * procPct;
 
   // Door 2 — convert spread with the same lender, target = cohort p25.
   let door2 = null;
@@ -461,7 +468,7 @@ function computeDoors(input, cohort, bestBankP25, fees) {
   // Door 3 — balance transfer, target = best bank p25 across the registry.
   let door3 = null;
   if (bestBankP25 != null) {
-    const cost = outstanding * (procPct + BT_MOD_PCT) + BT_LEGAL_TECH;
+    const cost = procCost(outstanding) + outstanding * BT_MOD_PCT + BT_LEGAL_TECH;
     const gross = bestBankP25 < input.rate ? iUser - interestOver(outstanding, bestBankP25, yrs) : 0;
     door3 = { target: bestBankP25, cost, gross, net: gross - cost, feeVerified: procVerified, noGap: !(bestBankP25 < input.rate) };
   }

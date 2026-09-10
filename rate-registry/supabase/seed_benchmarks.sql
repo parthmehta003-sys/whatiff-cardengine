@@ -53,9 +53,9 @@ insert into public.benchmarks
   ('Kotak Mahindra','2026-09-10',5.25,NULL,NULL,7.60, NULL,10000,0.005,
    'https://www.kotak.bank.in/en/personal-banking/loans/home-loan/interest-rates.html','https://www.kotak.bank.in/content/dam/Kotak/gsfcfiles/loan/hf-gsfc.pdf','2026-09-10',
    'Rate 7.60% starting (rate schedule/homeloans.kotak.com say 7.70 — 10bps conflict). No RLLR/EBLR. Conversion 0.5% POS cap 10000 — stored flat ~10000. PF 0.5%+taxes salaried (1% self-employed) + Rs 5000 login.'),
-  ('Bank of Baroda','2025-12-06',5.25,7.90,8.75,7.20, NULL,NULL,NULL,
+  ('Bank of Baroda','2025-12-06',5.25,7.90,8.75,7.25, NULL,NULL,NULL,
    'https://bankofbaroda.bank.in/interest-rate-and-service-charges/retail-loans-interest-rates','https://bankofbaroda.bank.in/loans/home-loan/baroda-home-loan','2026-09-10',
-   'Rate 7.20% = BRLLR 7.90 minus 0.70. PF DELIBERATELY NULL: pages render "50%"/"25%" min 8500 max 15000 (stripped decimals for 0.50%/0.25% — not inferred). Conversion fee not published.'),
+   'Rate "From 7.25%" floating (BRLLR - 0.70; page BRLLR ~7.90-7.95, +0.05% risk premium without credit insurance). PROCESSING RESOLVED from official rates & charges page (w.e.f. 01.04.2025): the "50%"/"25%" render was stripped decimals for 0.50%/0.25% (min 8500; max 15000 <=50L / 25000 >50L) — confirmed. Door 3 is a TAKEOVER, and BoB takeover PF is a FLAT Rs 8,500 -> stored in processing_fee_flat (see UPDATE below), not the capped %. Conversion fee not published.'),
   ('Canara Bank','2026-03-12',5.25,8.00,8.75,7.15, NULL,NULL,0.005,
    'https://www.canarabank.bank.in/pages/rates-of-interest-for-retail-lending-schemes-linked-to-rllr','https://www.canarabank.bank.in/pages/housing-loan','2026-09-10',
    'Rate 7.15% = RLLR 8.00 minus 0.85 concession (CRG-PRIME women, >1Cr). PF 0.5% (min 1500 max 10000)+GST; festival 50% waiver excluded. Conversion fee not published.'),
@@ -125,3 +125,9 @@ insert into public.benchmarks
   ('Sundaram Home Finance','2026-01-01',5.25,NULL,NULL,10.65, 0.005,NULL,0.0075,
    'https://www.sundaramhome.in/uploads/downloads/Annual_Percentage_rate_on_Loans.pdf','https://www.sundaramhome.in/uploads/downloads/Fee_and_Other_Charges_-_Prime_-_01-01-2026.pdf','2026-09-10',
    'Rate 10.65 onwards salaried (HTML page carries no rates). SH-PLR 17.60 (no RLLR). Conversion = Re-pricing/Switch 0.5% of outstanding+GST. PF up to 0.75%+GST housing.');
+
+-- Flat processing (takeover) fees — set in the 0004 column so Door 3 uses the real
+-- rupee cost of a balance transfer, not a % (which would overstate it). Bank of
+-- Baroda: flat Rs 8,500 for a takeover (its fresh-loan PF is a capped 0.50%/0.25%,
+-- not what a transferring borrower pays).
+update public.benchmarks set processing_fee_flat = 8500 where bank = 'Bank of Baroda';

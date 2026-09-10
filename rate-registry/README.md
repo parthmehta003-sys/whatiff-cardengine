@@ -49,8 +49,11 @@ are deliberately not built yet.
    `conversion_fee_flat` (rupee) column so lenders that charge a small **flat**
    conversion fee aren't modelled as a % of the loan (see "Fees" below). Run
    after 0002.
-5. Optionally run `supabase/seed_benchmarks.sql` to load the verified benchmark
-   rates and fees. **Run order matters: 0001 → 0002 → 0003 → seed.**
+5. Then run `supabase/migrations/0004_processing_flat_fee.sql` — same idea for
+   Door 3: adds `processing_fee_flat` (rupee) for lenders that charge a flat
+   **takeover** fee (e.g. Bank of Baroda ₹8,500). Run after 0003.
+6. Optionally run `supabase/seed_benchmarks.sql` to load the verified benchmark
+   rates and fees. **Run order matters: 0001 → 0002 → 0003 → 0004 → seed.**
 
 That creates both tables (`rates`, `outcomes`), enables RLS with **no direct
 table access for the browser at all**, and creates the write RPCs
@@ -176,7 +179,11 @@ cap that behaves like one); storing those as a % overstates Door 2 badly
 `conversion_fee_flat` if set, else `conversion_fee_pct` × outstanding, else the
 `ASSUMPTION` default. "Up to X%" **ceilings** are never stored as typical fees —
 they're left NULL so the door falls back to a labelled estimate rather than
-killing every recommendation. When a lender's fee is
+killing every recommendation. **Door 3 is a balance transfer**, so where a lender
+charges a flat **takeover** fee (e.g. Bank of Baroda ₹8,500), migration 0004's
+**`processing_fee_flat`** (rupees) holds it and Door 3 prefers it: flat →
+`processing_fee_pct` × outstanding → the `ASSUMPTION` default (MOD and
+legal/valuation are added on top either way). When a lender's fee is
 **NULL**, the app falls back to the labelled `ASSUMPTION` constants in `app.js`
 and the door says the fee is an *estimate*; when a verified fee is present, the
 door says it's the lender's *published figure*. So the site works before you fill
