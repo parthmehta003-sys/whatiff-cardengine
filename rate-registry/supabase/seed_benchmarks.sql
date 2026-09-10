@@ -38,9 +38,9 @@ delete from public.benchmarks where bank in (
 insert into public.benchmarks
   (bank, effective_from, repo_rate, rllr, mclr, advertised_floor,
    conversion_fee_pct, conversion_fee_flat, processing_fee_pct, source_url, fee_source_url, as_of, note) values
-  ('SBI','2026-04-01',5.25,7.50,8.70,7.25, NULL,5000,0.0035,
+  ('SBI','2026-04-01',5.25,7.50,8.70,7.25, NULL,5000,NULL,
    'https://sbi.bank.in/web/interest-rates/interest-rates/loan-schemes-interest-rates/home-loans-interest-rates-current','https://homeloans.sbi.bank.in/downloads/Processing-Fee-Card-Rates.pdf','2026-09-10',
-   'Rate 7.25% onwards w.e.f. 01.04.2026. RLLR 7.50+CRP; EBLR 7.90+CRP+BSP. Conversion FLAT Rs 5000+GST. PF 0.35% (min 5000 max 15000)+GST.'),
+   'Rate 7.25% onwards w.e.f. 01.04.2026. RLLR 7.50+CRP; EBLR 7.90+CRP+BSP. PROCESSING RESOLVED from official SBI Home Loan MITC (user-supplied): mostly FLAT — Rs 6500 (25-75L), Rs 10000 (>75L), 0.25% min Rs 1000 (<=25L). Stored flat 6500 (modal 25-75L band, see UPDATE); processing_fee_pct NULL (the prior 0.35% card-rate is superseded by the MITC). CONVERSION: MITC documents only the fixed->floating switch (0.56% of outstanding; "no fixed option now") — the Door-2 floating rate-reduction fee is not in the MITC, so kept the ~Rs 5000 flat from SBI''s fee schedule. Foreclosure NIL (MITC).'),
   ('HDFC Bank','2026-09-10',5.25,NULL,NULL,7.75, 0.005,NULL,0.005,
    'https://homeloans.hdfc.bank.in/ps/home-loans-in-india/interest-rates','https://www.hdfc.com/content/dam/housing-development-finance-corporation/pdf/most-important-terms-and-conditions.pdf','2026-09-10',
    'CONVERSION RESOLVED from official HDFC MITC Sr.13: switch-to-lower-rate on variable loans = 0.50% of principal outstanding, cap Rs 50,000, WHICHEVER LOWER (NOT the flat 5k previously stored; the 0.25%/5k figure is not in the MITC). Cap rarely binds under ~1cr outstanding, so stored as 0.5%. PF (MITC Sr.1 resident housing salaried/SEP): up to 0.50% or Rs 3000 whichever higher. RATE: official T&C confirms special housing = Repo + 2.45-3.30% (standard +3.15-3.70%); advertised_floor kept at freshly-observed 7.75%. The T&C illustrative "8.70-9.55%" bakes in Repo 6.25% but RBI 19-Aug-2026 MPC confirms Repo 5.25%, so that PDF text is stale.'),
@@ -126,8 +126,12 @@ insert into public.benchmarks
    'https://www.sundaramhome.in/uploads/downloads/Annual_Percentage_rate_on_Loans.pdf','https://www.sundaramhome.in/uploads/downloads/Fee_and_Other_Charges_-_Prime_-_01-01-2026.pdf','2026-09-10',
    'Rate 10.65 onwards salaried (HTML page carries no rates). SH-PLR 17.60 (no RLLR). Conversion = Re-pricing/Switch 0.5% of outstanding+GST. PF up to 0.75%+GST housing.');
 
--- Flat processing (takeover) fees — set in the 0004 column so Door 3 uses the real
--- rupee cost of a balance transfer, not a % (which would overstate it). Bank of
--- Baroda: flat Rs 8,500 for a takeover (its fresh-loan PF is a capped 0.50%/0.25%,
--- not what a transferring borrower pays).
+-- Flat processing fees — set in the 0004 column so Door 3 uses the real rupee cost
+-- of a balance transfer, not a % (which would overstate it). Each is the lender's
+-- own published figure for a typical (25-75L) home loan:
+--   Bank of Baroda — flat Rs 8,500 takeover (its fresh-loan PF is a capped
+--     0.50%/0.25%, not what a transferring borrower pays).
+--   SBI — flat Rs 6,500 for 25-75L (Rs 10,000 above 75L; 0.25% min 1000 up to
+--     25L), per the official SBI Home Loan MITC.
 update public.benchmarks set processing_fee_flat = 8500 where bank = 'Bank of Baroda';
+update public.benchmarks set processing_fee_flat = 6500 where bank = 'SBI';

@@ -36,8 +36,9 @@ borrower was treated unfairly.
   the top-up warning + template verbatim — do not water those down).
 - **Lender universe expanded** to banks + home-loan NBFCs/HFCs (see dropdown below).
 - **Per-lender verified fees + rates loaded** — **29 lenders**, each figure from the
-  lender's own official page (HDFC & IDFC First hardened against user-supplied
-  official PDFs/screenshots). This was the last big task.
+  lender's own official page. **SBI, HDFC, BoB, IDFC First** hardened against
+  user-supplied official PDFs/screenshots (MITCs, rate & fee pages). This was the
+  last big task.
 
 ### The fees/rates work (most recent, commit `11279b7`)
 
@@ -80,6 +81,10 @@ borrower was treated unfairly.
      takeover, and BoB's takeover PF is a **flat ₹8,500** → stored in the new
      `processing_fee_flat` column (migration 0004). Advertised floor corrected
      7.20 → **7.25%** ("From 7.25%" floating).
+   - **SBI** — ✅ hardened from the official Home Loan MITC (user PDF): processing
+     fee is FLAT (₹6,500 for 25–75L, ₹10,000 >75L, 0.25% ≤25L) → `processing_fee_flat
+     = 6500`, superseding the old 0.35% card rate. Conversion kept at ₹5,000 flat
+     (MITC only covers the fixed→floating switch at 0.56%).
    - **Home First rate 8.00%** — single read, marked provisional; re-verify.
    - **Repco 8.75%** — low confidence (marketing/branches page); re-verify against official ROI PDF.
 3. **Repo rate — ✅ RESOLVED at 5.25%.** Confirmed against RBI's 19-Aug-2026 MPC
