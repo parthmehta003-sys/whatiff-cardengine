@@ -407,8 +407,10 @@ async function submit(state) {
     // advertised line is simply omitted — no unsourced number is ever shown).
     const benchmark = (bm && !bm.error && bm.data && bm.data[0]) ? bm.data[0] : null;
     // Per-lender fees, verified where available; null falls back to the labelled
-    // ASSUMPTION constants inside computeDoors.
+    // ASSUMPTION constants inside computeDoors. A conversion fee may be a flat
+    // rupee amount (common) or a % of the loan.
     const fees = {
+      conversionFlat: benchmark && benchmark.conversion_fee_flat != null ? Number(benchmark.conversion_fee_flat) : null,
       conversionPct: benchmark && benchmark.conversion_fee_pct != null ? Number(benchmark.conversion_fee_pct) : null,
       processingPct: targetProcessingPct,
     };
@@ -438,15 +440,20 @@ function computeDoors(input, cohort, bestBankP25, fees) {
 
   // Fee rates: the lender's verified figure when we have it, else the labelled
   // ASSUMPTION default. `feeVerified` lets the UI say whether it's the real fee.
-  const convPct = (fees && fees.conversionPct != null) ? fees.conversionPct : CONVERSION_FEE_PCT;
-  const procPct = (fees && fees.processingPct != null) ? fees.processingPct : BT_PROCESSING_PCT;
-  const convVerified = !!(fees && fees.conversionPct != null);
+  // The conversion (Door 2) fee is a flat rupee amount for many lenders.
+  const convFlat = (fees && fees.conversionFlat != null) ? fees.conversionFlat : null;
+  const convPct  = (fees && fees.conversionPct != null) ? fees.conversionPct : null;
+  const procPct  = (fees && fees.processingPct != null) ? fees.processingPct : BT_PROCESSING_PCT;
+  const convVerified = convFlat != null || convPct != null;
   const procVerified = !!(fees && fees.processingPct != null);
+  const convCost = (bal) => convFlat != null ? convFlat
+                          : convPct != null ? bal * convPct
+                          : bal * CONVERSION_FEE_PCT;
 
   // Door 2 — convert spread with the same lender, target = cohort p25.
   let door2 = null;
   if (cohortP25 != null) {
-    const cost = outstanding * convPct;
+    const cost = convCost(outstanding);
     const gross = cohortP25 < input.rate ? iUser - interestOver(outstanding, cohortP25, yrs) : 0;
     door2 = { target: cohortP25, cost, gross, net: gross - cost, feeVerified: convVerified, noGap: !(cohortP25 < input.rate) };
   }

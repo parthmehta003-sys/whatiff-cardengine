@@ -1,46 +1,123 @@
--- Reference benchmarks — verified against each lender's OWN official pages over
--- two web-search passes (benchmark bases: 2026-09-07; advertised home-loan rates
--- from product pages: 2026-09-09). RUN THIS AFTER 0001_rate_registry.sql.
+-- WhatIff reference benchmarks — 28 lenders, verified from each lender's OWN
+-- official pages (seven-batch web-search pass, 2026-09-10). Repo 5.25% (RBI,
+-- last changed 05-Dec-2025, held Apr & Aug 2026 MPC).
 --
--- SPOT-CHECK BEFORE RELYING ON IT: open each source_url and confirm the number.
+-- RUN ORDER: 0001 -> 0002 -> 0003 -> this file. (This uses the fee columns from
+-- 0002/0003.) Re-run safe: it clears these lenders' rows first.
 --
--- Conventions used here:
---   * advertised_floor = the LOWEST rate the lender genuinely advertises to ANY
---     real customer segment (incl. pre-approved / govt-employee / top-CIBIL
---     concessions). This is deliberate: it keeps the sub-floor exclusion in
---     submit_rate from wrongly dropping a real borrower's low rate, and matches
---     the product's "a rate almost nobody gets" framing. Conditions are in note.
---   * rllr / repo_rate / mclr are BASES (actual rate = base + credit-risk
---     premium). They are secondary; advertised_floor drives the UI and the floor.
---   * repo_rate 5.25% corroborated across lenders (e.g. SBI RLLR 7.50 = 5.25 + 2.25).
+-- SANITY-CHECK CORRECTIONS applied on load (do not silently "improve" these back):
+--  * "Up to X%" fee CEILINGS were NOT stored as typical fees — they'd show a
+--    lakh-rupee fee and kill every recommendation. So processing_fee_pct is NULL
+--    for Bajaj (7% ceiling), Piramal (5%), Tata (3%), Godrej (2%); and ICICI is
+--    0.5% (its rates-page figure), NOT the 2% fee-schedule ceiling.
+--  * FLAT conversion fees are stored in conversion_fee_flat (rupees), not as a %:
+--    SBI 5000, HDFC ~5000 (0.25% cap 5k), ICICI 3000, Axis ~3000 (tiered),
+--    Kotak ~10000 (0.5% cap 10k), Union 10000, LIC 3000.
+--  * Conversion fees that are a SWITCH (fixed<->floating) or a % of the RATE
+--    DELTA (not the loan) are NULL — they are not the Door-2 rate-reduction fee:
+--    Aadhar (3% switch), Sammaan (% of rate delta), Tata (no floating repricing
+--    fee published).
+--  * advertised_floor = the LOWEST genuinely-advertised rate (house convention):
+--    ICICI 7.55 (pre-approved) not 8.50 card floor; Tata 8.00 (lowest of its
+--    three live figures) not 8.95. Both noted.
+--  * NULL advertised_floor (JS-rendered / not found): Axis, Yes, IndusInd, LIC —
+--    they show no advertised line and skip the floor check until filled.
+-- IDFC First produced nothing verifiable and is intentionally absent.
 --
--- Re-verify flags (left in place, values are plausible but single-source or messy):
---   * ICICI rllr 8.95 looks high vs peers; harmless (advertised_floor drives floor/UI).
---   * PNB 7.50 and IDFC 7.75: home-loan pages 406'd / client-rendered on re-check.
---   * Tata Capital & LIC Housing advertised_floor = NULL: contradictory / wrong-
---     product sources — no benchmark line or floor check until verified.
---   * SBI advertised 7.25% is effective 01-04-2026 (a few months stale but current).
---
--- Re-run safely: clears prior rows for these banks first.
+-- Fees left NULL fall back to the app's ASSUMPTION estimate (labelled as such).
 
 delete from public.benchmarks where bank in (
-  'SBI','HDFC Bank','ICICI Bank','Axis Bank','Kotak Mahindra','LIC Housing',
-  'Bank of Baroda','PNB Housing','Bajaj Housing','IDFC First','Canara Bank',
-  'Union Bank','Tata Capital','Godrej Housing');
+  'SBI','HDFC Bank','ICICI Bank','Axis Bank','Kotak Mahindra','Bank of Baroda',
+  'IDFC First','Canara Bank','Union Bank','Punjab National Bank','Bank of India',
+  'IDBI Bank','Yes Bank','IndusInd Bank','Federal Bank','Indian Bank',
+  'LIC Housing','PNB Housing','Bajaj Housing','Tata Capital','Godrej Housing',
+  'Aadhar Housing Finance','Aavas Financiers','Home First Finance','Repco Home Finance',
+  'Can Fin Homes','Sammaan Capital','Piramal Finance','Sundaram Home Finance');
 
 insert into public.benchmarks
-  (bank, effective_from, repo_rate, rllr, mclr, advertised_floor, source_url, as_of, note) values
-  ('SBI', '2026-04-01', 5.25, 7.50, 8.70, 7.25, 'https://sbi.bank.in/web/interest-rates/interest-rates/loan-schemes-interest-rates/home-loans-interest-rates-current', '2026-09-09', 'Home loan 7.25% onwards (w.e.f. 01-04-2026). RLLR base 7.50 + CRP; EBLR base 7.90 + CRP + BSP. CIBIL slab card published as image.'),
-  ('HDFC Bank', '2026-09-09', 5.25, 7.75, NULL, 7.75, 'https://homeloans.hdfc.bank.in/checklist/home-loan-interest-rates', '2026-09-09', 'Starting 7.75% p.a., salaried and self-employed; Repo 5.25% + 2.50% spread. Page title claims 7.15% but that figure is absent from the body.'),
-  ('ICICI Bank', '2026-09-09', 5.25, 8.95, 8.40, 7.55, 'https://www.icici.bank.in/personal-banking/loans/home-loan/interest-rates', '2026-09-09', 'Advertised 7.55% for pre-approved customers via the digital journey; standard rate-card floor is 8.50% salaried (valid till 30-09-2026). Using the lower advertised figure per convention. I-EBLR 8.95 looks high vs peers — re-verify.'),
-  ('Axis Bank', '2026-09-09', 5.25, NULL, 8.90, 8.00, 'https://www.axis.bank.in/loans/home-loan/interest-rates-charges', '2026-09-09', 'Starting 8.00% for CIBIL 751+; quoted as Repo + 2.75% to Repo + 3.60%. 1-yr MCLR 8.90%.'),
-  ('Kotak Mahindra', '2026-09-09', 5.25, NULL, NULL, 7.60, 'https://www.kotak.bank.in/en/personal-banking/loans/home-loan/interest-rates.html', '2026-09-09', 'Product page advertises starting @7.60% salaried; internal rate schedule shows 7.70%. Using the advertised figure.'),
-  ('LIC Housing', '2026-09-09', 5.25, NULL, NULL, NULL, 'https://www.lichousing.com/housing-loan', '2026-09-09', 'HFC. Home-loan rate could not be verified — product pages render rates client-side ("Loading..."); prior 8.40% came from a plot-loan page (wrong product). advertised_floor NULL until verified.'),
-  ('Bank of Baroda', '2026-09-09', 5.25, 7.90, 8.75, 7.20, 'https://bankofbaroda.bank.in/loans/home-loan', '2026-09-09', 'Home loan starting @7.20% = BRLLR 7.90% (w.e.f. 06-12-2025) minus lowest spread 0.70%; varies by loan limit and CIBIL. 1-yr MCLR 8.75%.'),
-  ('PNB Housing', '2026-09-09', 5.25, NULL, NULL, 7.50, 'https://www.pnbhousing.com/home-loan/interest-rates', '2026-09-09', 'HFC; floating linked to PNBHFR. 7.50% from the rate page (first pass); re-check page returned HTTP 406. Single-source — re-verify.'),
-  ('Bajaj Housing', '2026-09-09', 5.25, NULL, NULL, 7.25, 'https://www.bajajhousingfinance.in/home-loan-interest-rates', '2026-09-09', 'HFC. Starting 7.25% p.a. salaried (range to 10.25%); self-employed floor 7.70%. Floating reference (BHPLR) 14.95%.'),
-  ('IDFC First', '2026-09-09', 5.25, NULL, NULL, 7.75, 'https://www.idfcfirst.bank.in/personal-banking/loans/home-loan/home-loan-interest-rates', '2026-09-09', '7.75% from the home-loan page (first pass); re-check served rates client-side and could not confirm. Single-source — re-verify.'),
-  ('Canara Bank', '2026-09-09', 5.25, 8.00, NULL, 7.15, 'https://www.canarabank.bank.in/rates-of-interest-for-retail-lending-schemes-linked-to-rllr', '2026-09-09', 'Effective 7.15% for women borrowers, CRG-PRIME grade, loans above Rs 100 lakh; RLLR 8.00% (w.e.f. 12-03-2026). Disclosure page shows 7.15%-10.00%.'),
-  ('Union Bank', '2026-09-09', 5.25, 8.00, 8.80, 7.15, 'https://www.unionbankofindia.bank.in/pdf/retail_roi.pdf', '2026-09-09', 'Rate-card floor 7.15% for Government/PSU employees, CIC 750+; EBLR 8.00% minus 0.85%. HTML product page separately claims 8.60%. 1-yr MCLR 8.80%.'),
-  ('Tata Capital', '2026-09-09', 5.25, NULL, NULL, NULL, 'https://www.tatacapital.com/home-loan/rates-and-charges.html', '2026-09-09', 'Own pages give three contradictory figures (7.50% / 8.00% / 8.75%). advertised_floor NULL until resolved — no benchmark line or floor check.'),
-  ('Godrej Housing', '2026-09-09', 5.25, NULL, NULL, 7.65, 'https://www.godrejcapital.com/home-loan/interest-rate', '2026-09-09', 'HFC. Rate-table floor 7.65% salaried resident/NRI, 7.90% self-employed. Page headline claims 7.60% but is contradicted by its own table.');
+  (bank, effective_from, repo_rate, rllr, mclr, advertised_floor,
+   conversion_fee_pct, conversion_fee_flat, processing_fee_pct, source_url, fee_source_url, as_of, note) values
+  ('SBI','2026-04-01',5.25,7.50,8.70,7.25, NULL,5000,0.0035,
+   'https://sbi.bank.in/web/interest-rates/interest-rates/loan-schemes-interest-rates/home-loans-interest-rates-current','https://homeloans.sbi.bank.in/downloads/Processing-Fee-Card-Rates.pdf','2026-09-10',
+   'Rate 7.25% onwards w.e.f. 01.04.2026. RLLR 7.50+CRP; EBLR 7.90+CRP+BSP. Conversion FLAT Rs 5000+GST. PF 0.35% (min 5000 max 15000)+GST.'),
+  ('HDFC Bank','2026-09-10',5.25,NULL,NULL,7.75, NULL,5000,0.005,
+   'https://homeloans.hdfc.bank.in/ps/home-loans-in-india/interest-rates','https://homeloans.hdfc.bank.in/checklist/documents-charges','2026-09-10',
+   'Rate 7.75% starting (Repo 5.25 + 2.50). No RLLR/EBLR label. Conversion CONFLICT: charges page 0.5% cap 50k vs /conversion-fees 0.25% cap 5k — stored the ~5k flat. PF up to 0.5% or Rs 3000.'),
+  ('ICICI Bank','2026-09-10',5.25,NULL,8.35,7.55, NULL,3000,0.005,
+   'https://www.icici.bank.in/personal-banking/loans/home-loan/home-loan-interest-rates','https://www.icici.bank.in/personal-banking/loans/home-loan/service-charges','2026-09-10',
+   'advertised_floor 7.55 = pre-approved digital rate; standard rate-card floor 8.50 (till 30.09.2026). Benchmark I-EBLR 8.95 (EBLR, so rllr NULL). Conversion floating-to-floating FLAT Rs 3000+GST. PF 0.5% on rates page (fee schedule ceiling up to 2% NOT used).'),
+  ('Axis Bank','2026-09-10',5.25,NULL,NULL,NULL, NULL,3000,0.01,
+   'https://www.axis.bank.in/docs/default-source/default-document-library/home-loan-fees-charges.pdf?sfvrsn=454e11d6_7','https://www.axis.bank.in/docs/default-source/default-document-library/home-loan-fees-charges.pdf?sfvrsn=454e11d6_7','2026-09-10',
+   'advertised_floor NULL: all Axis rate pages JS-rendered, no advertised line found. source_url points at the official fees/charges PDF (the only Axis doc this row is sourced from). Conversion FLAT tiered (Rs 1000/2000/3000/5000 by slab) — stored ~3000 (30-75L). PF up to 1% or Rs 10000+GST.'),
+  ('Kotak Mahindra','2026-09-10',5.25,NULL,NULL,7.60, NULL,10000,0.005,
+   'https://www.kotak.bank.in/en/personal-banking/loans/home-loan/interest-rates.html','https://www.kotak.bank.in/content/dam/Kotak/gsfcfiles/loan/hf-gsfc.pdf','2026-09-10',
+   'Rate 7.60% starting (rate schedule/homeloans.kotak.com say 7.70 — 10bps conflict). No RLLR/EBLR. Conversion 0.5% POS cap 10000 — stored flat ~10000. PF 0.5%+taxes salaried (1% self-employed) + Rs 5000 login.'),
+  ('Bank of Baroda','2025-12-06',5.25,7.90,8.75,7.20, NULL,NULL,NULL,
+   'https://bankofbaroda.bank.in/interest-rate-and-service-charges/retail-loans-interest-rates','https://bankofbaroda.bank.in/loans/home-loan/baroda-home-loan','2026-09-10',
+   'Rate 7.20% = BRLLR 7.90 minus 0.70. PF DELIBERATELY NULL: pages render "50%"/"25%" min 8500 max 15000 (stripped decimals for 0.50%/0.25% — not inferred). Conversion fee not published.'),
+  ('Canara Bank','2026-03-12',5.25,8.00,8.75,7.15, NULL,NULL,0.005,
+   'https://www.canarabank.bank.in/pages/rates-of-interest-for-retail-lending-schemes-linked-to-rllr','https://www.canarabank.bank.in/pages/housing-loan','2026-09-10',
+   'Rate 7.15% = RLLR 8.00 minus 0.85 concession (CRG-PRIME women, >1Cr). PF 0.5% (min 1500 max 10000)+GST; festival 50% waiver excluded. Conversion fee not published.'),
+  ('Union Bank','2026-07-24',5.25,NULL,8.80,7.15, NULL,10000,0.005,
+   'https://www.unionbankofindia.bank.in/pdf/retail_roi.pdf','https://www.unionbankofindia.bank.in/pdf/service-charges-pertaining-to-domestic-rupee-advances.pdf','2026-09-10',
+   'Rate 7.15% for Govt/PSU employees CIC 750+ (HTML page says 8.60). EBLR 8.00 (never labelled RLLR). Conversion FLAT: Rs 10000+GST up to 50L, 15000 above — stored 10000. PF 0.5% max 15000+GST.'),
+  ('Punjab National Bank','2026-09-10',5.25,7.75,8.80,7.20, NULL,NULL,0.0035,
+   'https://pnb.bank.in/Retail-Advances-interst-rate-on-advances-linked-to-mclr.html','https://pnb.bank.in/service-charges-related-to-retail-advances.html','2026-09-10',
+   'Rate 7.20% for CIBIL 800+, >30L (RLLR+BSP-0.90; 7.75+0.35-0.90=7.20). RLLR base 7.75 (composite 8.10 w.e.f. 01.07.2026). PF 0.35% (min 2500 max 15000)+GST. Conversion fee not in retail schedule.'),
+  ('Bank of India','2026-06-01',5.25,8.10,NULL,7.10, NULL,NULL,0.0035,
+   'https://bankofindia.bank.in/documents/20121/28761619/FloatingROIwef01062026.pdf','https://bankofindia.bank.in/documents/20121/28761619/FloatingROIwef01062026.pdf','2026-09-10',
+   'Rate 7.10% for CIBIL 840+ (product page says 7.35). Benchmark RBLR 8.10 (branded RLLR). PF CONFLICT: schedule 0.35% (min 3500 max 30000) vs page 0.25% — stored schedule. MCLR pages 403.'),
+  ('IDBI Bank','2025-12-12',5.25,8.15,8.75,7.40, 0.005,NULL,NULL,
+   'https://www.idbi.bank.in/interest-rates.aspx','https://www.idbi.bank.in/pdf/soc/SOC-HOME-LOAN.pdf','2026-09-10',
+   'Rate 7.40% lowest across all home-loan slabs. RLLR 8.15. Conversion 0.5% of outstanding (cap 50000). PF is FLAT (Rs 10000-17500) so processing_fee_pct NULL. WARNING: SOC stamped effective 01.10.2026 (future-dated).'),
+  ('Yes Bank','2026-07-01',5.25,NULL,9.90,NULL, 0.005,NULL,0.015,
+   'https://www.yes.bank.in/sites/web/content/published/api/v1.1/assets/CONTAAFF46763FBC47088DF4A6653A18A42C/native/lending_rate.pdf','https://www.yes.bank.in/sites/web/content/published/api/v1.1/assets/CONTB09B05DE03A041B1953DF5E0E9C8124B/native/homeloan_pdf.pdf','2026-09-10',
+   'advertised_floor NULL: product pages JS-rendered. No RLLR/EBLR (only Repo 5.25 reference). Conversion rate-reduction 0.5% of outstanding+GST. PF 1.5% or Rs 10000+GST (a ceiling).'),
+  ('IndusInd Bank','2026-09-10',5.25,NULL,NULL,NULL, 0.005,NULL,0.01,
+   'https://www.indusind.bank.in/content/dam/indusind-corporate/Other/soc/SOC.pdf','https://www.indusind.bank.in/content/dam/indusind-corporate/schedule-of-charges/others/Schedule-of-Charges-Home-Loan.pdf','2026-09-10',
+   'advertised_floor NULL: all pages JS-rendered; SOC prices as EBLR+margin (no numeric EBLR). Conversion/repricing up to 0.5% POS (min 5000)+GST. PF up to 1%+GST (a ceiling).'),
+  ('Federal Bank','2026-09-07',5.25,NULL,9.00,7.35, 0.0025,NULL,0.005,
+   'https://www.federal.bank.in/retail-loans-interest-rates','https://www.federal.bank.in/documents/d/guest/retail-loan-charges-w-e-f-from-01-04-2026-1','2026-09-10',
+   'Rate 7.35% but ONLY for loans above Rs 35 lakh (below 35L is 1% higher). No RLLR/EBLR label. Conversion 0.25% (dated doc; older undated doc says Nil — conflict). PF 0.5% min 10000+GST.'),
+  ('Indian Bank','2026-08-14',5.25,NULL,8.85,7.15, NULL,NULL,NULL,
+   'https://indianbank.bank.in/en/interest-rates-on-personal-segment-loan-products','https://indianbank.bank.in/en/processing-fee-on-personal-segment-loan-products','2026-09-10',
+   'Rate 7.15% (IB Home Loan 7.15-8.55). No current RLLR/EBLR (only Base 9.55/BPLR 13.80). PF FLAT for core product (Rs 1500/2500/5000 by slab) so processing_fee_pct NULL. Conversion fee not in charges annexure.'),
+  ('LIC Housing','2026-09-10',5.25,NULL,NULL,NULL, NULL,3000,NULL,
+   'https://www.lichousing.com/lhplr-for-retail-loans','https://cdn.lichousing.com/2026/01/fees_and_other_charges.pdf','2026-09-10',
+   'advertised_floor NULL: all rate blocks render "Loading". Conversion FLAT Rs 3000+GST (IHL conversion). PF FLAT slabs (Rs 3000-50000) so processing_fee_pct NULL.'),
+  ('PNB Housing','2026-09-10',5.25,NULL,NULL,8.50, 0.005,NULL,0.01,
+   'https://www.pnbhousing.com/home-loan','https://www.pnbhousing.com/documents/d/guest/know-schedule-of_charges','2026-09-10',
+   'Rate 8.50% APR from product heading; /interest-rates returns HTTP 406 so PNBHFR slab table unread (homepage says from 8.25 — unresolved). Conversion floating rate-reduction 0.5% POS+GST. PF 1% min 10000+GST.'),
+  ('Bajaj Housing','2026-09-10',5.25,NULL,NULL,7.25, NULL,NULL,NULL,
+   'https://www.bajajhousingfinance.in/home-loan-interest-rates','https://www.bajajhousingfinance.in/documents/37350/3993180/MITC+-+Retail+(Secured+and+Unsecured)+-+English+(2).pdf','2026-09-10',
+   'Rate 7.25%-10.25% salaried. FEES NULL BY DESIGN: MITC gives only ceilings — Switch up to 4.5% POS, PF up to 7% — not typical charges. Falls back to estimate.'),
+  ('Tata Capital','2026-09-10',5.25,NULL,NULL,8.00, NULL,NULL,NULL,
+   'https://www.tatacapital.com/home-loan/interest-rates-and-charges.html','https://www.tatacapital.com/content/dam/tata-capital/tchfl/mitc/hl/TCHFL%20Home%20Loans%20MITC%20v19%20_%20English.pdf','2026-09-10',
+   'RATE DISPUTED at source: 8.95 (rates page), 8.00-13% (/home-loan.html, title "at 8%"), NRPLR 10.70 benchmark. Stored 8.00 (lowest advertised). FEES NULL: no floating-to-floating repricing fee published; PF is up to 3% ceiling.'),
+  ('Godrej Housing','2026-09-10',5.25,NULL,NULL,7.65, 0.01,NULL,NULL,
+   'https://www.godrejcapital.com/home-loan/interest-rate','https://godrejhf.com/information_and_policies/content/ghfl/ghfl-mitc-english-apr-2026.pdf','2026-09-10',
+   'Rate 7.65% onwards salaried/NRI (page H1 says 7.60 but its own table says 7.65). Benchmarks are GHF PLRs (no RLLR). Conversion = Repricing 1% POS. PF up to 2% (ceiling) so processing_fee_pct NULL.'),
+  ('Aadhar Housing Finance','2024-06-16',5.25,NULL,NULL,11.75, NULL,NULL,NULL,
+   'https://aadharhousing.com/ready-reckoner/services-and-charges','https://aadharhousing.com/ready-reckoner/services-and-charges','2026-09-10',
+   'Rate 11.75-16.50 salaried. RPLR 17.65 (no RLLR). Conversion is a fixed<->floating Switch 3% (NOT a rate-reduction) so NULL. No row named Processing Fee (admin charges only) so processing_fee_pct NULL.'),
+  ('Aavas Financiers','2026-06-01',5.25,NULL,NULL,8.50, 0.02,NULL,0.02,
+   'https://www.aavas.in/uploads/pdf/information-booklet-english-60546963.pdf','https://www.aavas.in/img/pdf/Schedule-of-Charges-in-English-01.pdf','2026-09-10',
+   'Rate 8.50 onwards. AFL PLR value not published. Conversion 2%+GST (all switch directions). PF 2%+GST on sanctioned. Both fees confirmed in two separate official docs — most internally consistent lender in the set.'),
+  ('Home First Finance','2026-01-01',5.25,NULL,NULL,8.00, 0.015,NULL,NULL,
+   'https://homefirstindia.com/policy/schedule-of-charges','https://homefirstindia.com/policy/schedule-of-charges','2026-09-10',
+   'Rate 8.00-17.50 PROVISIONAL (single read, could not re-confirm — re-verify). HFFC PLR 17.00. Conversion/repricing up to 1.5% POS. Fees are FLAT Login (Rs 2500) so processing_fee_pct NULL.'),
+  ('Repco Home Finance','2026-09-10',5.25,NULL,NULL,8.75, NULL,NULL,NULL,
+   'https://www.repcohome.com/products/branches',NULL,'2026-09-10',
+   'Rate 8.75% LOW CONFIDENCE: from a marketing/branches page, conditions unstated (a stale cache showed 9.15). Re-verify against the official ROI PDF. Fee PDFs URLs could not be obtained (href stripped) so both fees NULL.'),
+  ('Can Fin Homes','2026-09-10',5.25,NULL,NULL,8.95, 0.005,NULL,0.005,
+   'https://www.canfinhomes.com/pages/interestrates','https://www.canfinhomes.com/downloads/f99e1f47-388d-4aec-a225-69158bd9eb79.pdf','2026-09-10',
+   'Rate 8.95-10.10 floating salaried/professional (floor is best internal grade). Can Fin publishes NO benchmark. Conversion = IAC 0.5% of outstanding+GST (rate reduction before quarterly reset). PF 0.5% (min 5000 max 25000) direct channel; DSA/self-employed 0.75-1.25%.'),
+  ('Sammaan Capital','2026-09-10',5.25,NULL,NULL,8.75, NULL,NULL,0.005,
+   'https://www.sammaancapital.com/home-loan/interest-rate','https://www.sammaancapital.com/home-loan/fees-and-charges','2026-09-10',
+   'Formerly Indiabulls Housing. Rate 8.75 onwards. RMLR 12.60 (no RLLR). Conversion is a % of the RATE DELTA (25% onwards of the difference), NOT of the loan — unstorable, so NULL. PF 0.5% onwards (no cap stated).'),
+  ('Piramal Finance','2026-09-10',5.25,NULL,NULL,9.99, 0.01,NULL,NULL,
+   'https://www.piramalfinance.com/home-loan/home-loan-interest-rates','https://www.piramalfinance.com/schedule-of-charges','2026-09-10',
+   'Rate 9.99 onwards (same floor across all slabs). RPLR 20.92 / RFRR 16.65 (no RLLR). Conversion up to 1% POS. PF is up to 5% ceiling (outlier) so processing_fee_pct NULL.'),
+  ('Sundaram Home Finance','2026-01-01',5.25,NULL,NULL,10.65, 0.005,NULL,0.0075,
+   'https://www.sundaramhome.in/uploads/downloads/Annual_Percentage_rate_on_Loans.pdf','https://www.sundaramhome.in/uploads/downloads/Fee_and_Other_Charges_-_Prime_-_01-01-2026.pdf','2026-09-10',
+   'Rate 10.65 onwards salaried (HTML page carries no rates). SH-PLR 17.60 (no RLLR). Conversion = Re-pricing/Switch 0.5% of outstanding+GST. PF up to 0.75%+GST housing.');

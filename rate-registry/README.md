@@ -45,6 +45,12 @@ are deliberately not built yet.
 3. Then run `supabase/migrations/0002_lenders_and_fees.sql` — it widens the
    allowed-lender list to include home-loan NBFCs/HFCs and adds per-lender fee
    fields (see "Fees" below). Safe to run once, after 0001.
+4. Then run `supabase/migrations/0003_conversion_flat_fee.sql` — it adds a
+   `conversion_fee_flat` (rupee) column so lenders that charge a small **flat**
+   conversion fee aren't modelled as a % of the loan (see "Fees" below). Run
+   after 0002.
+5. Optionally run `supabase/seed_benchmarks.sql` to load the verified benchmark
+   rates and fees. **Run order matters: 0001 → 0002 → 0003 → seed.**
 
 That creates both tables (`rates`, `outcomes`), enables RLS with **no direct
 table access for the browser at all**, and creates the write RPCs
@@ -162,7 +168,15 @@ The three-door net-benefit maths needs two fees per lender, held on `benchmarks`
 - **`processing_fee_pct`** — a lender's home-loan processing fee for a *new* /
   balance-transfer loan. Drives **Door 3** (uses the cheapest target bank's figure).
 
-Both are fractions of the loan (e.g. `0.005` = 0.5%). When a lender's fee is
+Both are fractions of the loan (e.g. `0.005` = 0.5%). Many lenders, though,
+charge the conversion fee as a small **flat** rupee amount (or a % with a low
+cap that behaves like one); storing those as a % overstates Door 2 badly
+(a ₹5,000 fee shown as ₹20,000). So migration 0003 adds
+**`conversion_fee_flat`** (rupees) and the app prefers it: Door 2 uses
+`conversion_fee_flat` if set, else `conversion_fee_pct` × outstanding, else the
+`ASSUMPTION` default. "Up to X%" **ceilings** are never stored as typical fees —
+they're left NULL so the door falls back to a labelled estimate rather than
+killing every recommendation. When a lender's fee is
 **NULL**, the app falls back to the labelled `ASSUMPTION` constants in `app.js`
 and the door says the fee is an *estimate*; when a verified fee is present, the
 door says it's the lender's *published figure*. So the site works before you fill
