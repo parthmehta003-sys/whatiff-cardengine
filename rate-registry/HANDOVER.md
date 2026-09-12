@@ -48,7 +48,16 @@ borrower was treated unfairly.
   from clear salaried + self-employed rate tables — floor 7.15% (salaried, CIBIL
   >=825; SE 7.30%).)
   Flat processing (Door-3 takeover) fees: BoB ₹8,500, SBI ₹6,500, IDBI ₹0 (IDBI
-  waives inward-BT processing), LIC Housing ₹5,000. Indian Bank stays in the seed's delete list (not
+  waives inward-BT processing), LIC Housing ₹5,000.
+- **THIRD-PARTY FEE POLICY (user-set).** Where a lender doesn't publish a fee
+  officially, store the best third-party (aggregator) estimate rather than leaving
+  the door on the generic app assumption, and write "THIRD-PARTY ESTIMATE" in that
+  row's note (e.g. Godrej conversion ~1%). Percentage ceilings ("up to 3%/7%") are
+  still never stored (they'd make absurd door fees). The result screen carries a
+  standing **fee disclaimer** (`.fee-disclaimer` in app.js/style.css) stating fees
+  are estimates from official + third-party sources and must be verified with the
+  bank; per-door captions say the fee is the lender's "stated charge" (not
+  "published figure") so third-party data isn't over-claimed. Indian Bank stays in the seed's delete list (not
   re-inserted) so re-running the seed drops it from the live DB. (Canara: rate RLLR 8.00/floor 7.15 confirmed
   from the rate tables; its fees weren't in those screenshots, still web-sourced.) Bank of India (7.10%) is the cheapest floor in the table → the most
   common Door-3 target; its 0.35% PF is confirmed (note: BOI has a temporary NIL-PF

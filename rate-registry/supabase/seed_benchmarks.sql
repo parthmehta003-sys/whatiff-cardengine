@@ -27,6 +27,13 @@
 --
 -- Fees left NULL fall back to the app's ASSUMPTION estimate (labelled as such).
 --
+-- THIRD-PARTY FEE POLICY: where a lender does NOT publish a fee officially, store
+-- the best third-party (aggregator) estimate rather than leaving it to the generic
+-- app assumption, and say "THIRD-PARTY ESTIMATE" in that row's note. The site shows
+-- a standing disclaimer that all fee figures are estimates from official + third-
+-- party sources and must be verified with the bank. (Percentage "ceilings" like
+-- "up to 3%/7%" are still NOT stored — they would produce absurd door fees.)
+--
 -- 'Indian Bank' stays in the delete list but is NOT re-inserted below: it was
 -- removed from the registry, so re-running this seed drops it from the live DB.
 
@@ -98,9 +105,9 @@ insert into public.benchmarks
   ('Tata Capital','2026-09-10',5.25,NULL,NULL,8.00, NULL,12000,NULL,
    'https://www.tatacapital.com/home-loan/interest-rates-and-charges.html','https://www.tatacapital.com/content/dam/tata-capital/tchfl/mitc/hl/TCHFL%20Home%20Loans%20MITC%20v19%20_%20English.pdf','2026-09-10',
    'Verified from the official TCHFL Home Loan MITC (user-supplied). Benchmarks RPLR/NRPLR (NRPLR for loans onboarded w.e.f. 12-Apr-2024); MITC carries no numeric rate, so advertised_floor 8.00% kept from the rates page (dense rate card not re-read; page range ~8.00-8.95). CONVERSION corrected from NULL: MITC C-4 "Rate Switch Charges (Salaried & SENP)" = up to Rs 12,000 flat per instance (the Door-2 rate-reduction fee) -> stored flat 12000 (the "up to" cap; better than the % estimate). Fixed<->floating switches are separate (2% fixed->floating, 1% floating->fixed). PROCESSING "up to 3% of loan" is a ceiling -> processing_fee_pct NULL. Foreclosure NIL for floating home loans.'),
-  ('Godrej Housing','2026-09-10',5.25,NULL,NULL,7.65, NULL,NULL,NULL,
+  ('Godrej Housing','2026-09-10',5.25,NULL,NULL,7.65, 0.01,NULL,NULL,
    'https://www.godrejcapital.com/home-loan/interest-rate','https://www.godrejcapital.com/home-loan/interest-rate','2026-09-10',
-   'Rate CONFIRMED 7.65% from the official Godrej Capital page (Home Loan and Balance Transfer both "starting from 7.65% p.a."; Plot Loan 8.59%). Benchmarks are GHF PLRs (no RLLR/EBLR). FEES: Godrej does NOT publish a fee schedule on its official pages (user-confirmed) — only third-party aggregators (Google AI Overview/Paisabazaar) report Processing "up to 3%" (a ceiling) and foreclosure NIL for individual floating loans. No official or typical figure, so conversion AND processing are NULL (both fall back to the labelled estimate); the earlier unverified 1% repricing figure was removed.'),
+   'Rate CONFIRMED 7.65% from the official Godrej Capital page (Home Loan & Balance Transfer "from 7.65% p.a."; Plot Loan 8.59%; GHF PLR-linked). FEES = THIRD-PARTY ESTIMATE (project policy: Godrej publishes no official fee schedule, user-confirmed, so use best third-party data with this flag): conversion/repricing ~1% of POS stored from aggregator data; Processing "up to 3%" is a ceiling so processing_fee_pct NULL (app estimate); foreclosure NIL for individual floating. NOT lender-official — the site disclaimer marks all fees as estimates from official + third-party sources; verify with the lender.'),
   ('Aadhar Housing Finance','2024-06-16',5.25,NULL,NULL,11.75, NULL,NULL,NULL,
    'https://aadharhousing.com/ready-reckoner/services-and-charges','https://aadharhousing.com/ready-reckoner/services-and-charges','2026-09-10',
    'Rate 11.75-16.50 salaried. RPLR 17.65 (no RLLR). Conversion is a fixed<->floating Switch 3% (NOT a rate-reduction) so NULL. No row named Processing Fee (admin charges only) so processing_fee_pct NULL.'),

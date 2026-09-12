@@ -571,6 +571,7 @@ function renderResult(res) {
       ${doorHtml(1, rec, calc)}
       ${doorHtml(2, rec, calc)}
       ${doorHtml(3, rec, calc)}
+      <div class="fee-disclaimer">Fee figures are <b>estimates</b> — drawn from each lender's official documents where published, and from third-party sources where the lender doesn't publish them. Charges change and vary by profile, so <b>verify the exact fees with your bank</b> before acting.</div>
     </div>
     </div>
     </div>
@@ -622,7 +623,7 @@ Thank you.`;
         <h3>Ask your bank to convert your spread</h3>
         <div class="dsub">In plain words: get your bank to put today's lower rate on your existing loan — no new loan, no longer tenure.</div>
         <div class="net">You'd save about <b>${inr(d.net)}</b> — after a one-time fee of roughly ${inr(d.cost)}.</div>
-        <div class="cost">That's ${inr(d.gross)} saved over the years left on your loan, minus the fee. ${d.feeVerified ? "Fee is your bank's published figure — still confirm before you commit." : "Fee is an estimate — check with your bank."}</div>
+        <div class="cost">That's ${inr(d.gross)} saved over the years left on your loan, minus the fee. ${d.feeVerified ? "Fee is this lender's stated charge — confirm before you commit." : "Fee is a general estimate — check with your bank."}</div>
         <div class="dbody">
           <div class="template">${esc(template)}</div>
           <div class="warning">If you simply ask for <b>"a lower rate,"</b> many lenders respond with a top-up — your existing loan is closed and reopened with a fresh tenure, a processing fee, and sometimes insurance you were never shown. You end up paying more over the life of the loan. Ask specifically for a <b>conversion to the current spread on your existing loan, with no change to tenure and no top-up.</b></div>
@@ -648,7 +649,7 @@ Thank you.`;
       <h3>Move to another lender</h3>
       <div class="dsub">Switch your loan to a cheaper bank. There's paperwork and some upfront cost, but the savings can be big.</div>
       <div class="net">You'd save about <b>${inr(d.net)}</b> — after roughly ${inr(d.cost)} in switching costs (processing, legal, valuation, registration).</div>
-      <div class="cost">That's ${inr(d.gross)} saved over the years left on your loan, minus those costs. ${d.feeVerified ? "Processing fee is the new lender's published figure; legal, valuation and stamp costs are estimates — confirm before you move." : "Fees are estimates — check before you move."}</div>
+      <div class="cost">That's ${inr(d.gross)} saved over the years left on your loan, minus those costs. ${d.feeVerified ? "Processing fee is the new lender's stated charge; legal, valuation and stamp costs are estimates — confirm before you move." : "Fees are estimates — check before you move."}</div>
       <div class="dbody">
         <p style="font-size:13.5px;color:var(--muted);margin-bottom:4px">We can handle the paperwork. Leave your email and we'll come back.</p>
         <div class="door-cta" data-door-cta="Transfer"></div>
