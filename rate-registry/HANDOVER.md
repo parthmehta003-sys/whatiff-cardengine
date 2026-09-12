@@ -44,9 +44,9 @@ borrower was treated unfairly.
   advertised_floor (no NULLs). ALL 15 banks in the Banks group are now
   document-touched. (Canara: fees still web-sourced. PNB the bank: fees confirmed
   from its Services Charges page, but its rate card screenshot was unreadable so the
-  RLLR 7.75/floor 7.20 rate is kept from the prior fetch. LIC Housing: fees verified,
-  but floor 7.13% read from a dense/garbled rate table — flagged on the row to
-  re-confirm.)
+  RLLR 7.75/floor 7.20 rate is kept from the prior fetch. LIC Housing: fully verified
+  from clear salaried + self-employed rate tables — floor 7.15% (salaried, CIBIL
+  >=825; SE 7.30%).)
   Flat processing (Door-3 takeover) fees: BoB ₹8,500, SBI ₹6,500, IDBI ₹0 (IDBI
   waives inward-BT processing), LIC Housing ₹5,000. Indian Bank stays in the seed's delete list (not
   re-inserted) so re-running the seed drops it from the live DB. (Canara: rate RLLR 8.00/floor 7.15 confirmed
