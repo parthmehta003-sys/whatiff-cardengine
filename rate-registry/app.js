@@ -54,8 +54,8 @@ const BANK_GROUPS = [
   ] },
   { label: 'Housing finance / NBFCs', items: [
     'LIC Housing', 'PNB Housing', 'Bajaj Housing', 'Tata Capital', 'Godrej Housing',
-    'Aadhar Housing Finance', 'Aavas Financiers', 'Home First Finance', 'Repco Home Finance',
-    'Can Fin Homes', 'Sammaan Capital', 'Piramal Finance', 'Sundaram Home Finance',
+    'Aadhar Housing Finance', 'Home First Finance', 'Repco Home Finance',
+    'Piramal Finance', 'Sundaram Home Finance',
   ] },
   { label: 'Other', items: ['Other'] },
 ];

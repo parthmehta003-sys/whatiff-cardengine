@@ -17,8 +17,8 @@ declare
     'IDFC First','Canara Bank','Union Bank','Punjab National Bank','Bank of India',
     'IDBI Bank','Yes Bank','IndusInd Bank','Federal Bank',
     'LIC Housing','PNB Housing','Bajaj Housing','Tata Capital','Godrej Housing',
-    'Aadhar Housing Finance','Aavas Financiers','Home First Finance','Repco Home Finance',
-    'Can Fin Homes','Sammaan Capital','Piramal Finance','Sundaram Home Finance','Other'$list$;
+    'Aadhar Housing Finance','Home First Finance','Repco Home Finance',
+    'Piramal Finance','Sundaram Home Finance','Other'$list$;
 begin
   execute 'alter table public.rates      drop constraint if exists bank_allowed';
   execute 'alter table public.rates      add  constraint bank_allowed    check (bank in (' || lenders || '))';

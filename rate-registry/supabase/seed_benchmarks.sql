@@ -34,8 +34,10 @@
 -- party sources and must be verified with the bank. (Percentage "ceilings" like
 -- "up to 3%/7%" are still NOT stored — they would produce absurd door fees.)
 --
--- 'Indian Bank' stays in the delete list but is NOT re-inserted below: it was
--- removed from the registry, so re-running this seed drops it from the live DB.
+-- Removed lenders (Indian Bank, Aavas Financiers, Can Fin Homes, Sammaan Capital)
+-- stay in the delete list but are NOT re-inserted below, so re-running this seed
+-- drops them from the live DB. They are also out of the app.js dropdown and the
+-- 0002 allowed-lender constraint.
 
 delete from public.benchmarks where bank in (
   'SBI','HDFC Bank','ICICI Bank','Axis Bank','Kotak Mahindra','Bank of Baroda',
@@ -111,27 +113,18 @@ insert into public.benchmarks
   ('Aadhar Housing Finance','2026-09-10',5.25,NULL,NULL,11.75, NULL,NULL,0.015,
    'https://aadharhousing.com/ready-reckoner/services-and-charges','https://aadharhousing.com/ready-reckoner/services-and-charges','2026-09-10',
    'Verified from the official Aadhar Services & Charges page (user screenshots). Salaried Home Loan 11.75-16.50%, Self-Employed 12.75-17.00% -> advertised_floor 11.75% (RPLR 17.65, reducing to 17.50% w.e.f. 10-Feb-2026; the APR-disclosure Individual Housing Loan min 8.5%/mean 12.63% is an edge case, so the card floor 11.75% is used). PROCESSING = Administrative Charges: higher of ~Rs 5100 or 1.5% of sanction -> stored 1.5% (official; 1.5% binds for loans > ~3.4L). CONVERSION NULL: the 3% Switch fee is fixed<->floating and explicitly EXCLUDES ROI change/revision, so it is not the Door-2 rate-reduction (which is not separately priced). Foreclosure NIL for floating HL (own source & balance transfer).'),
-  ('Aavas Financiers','2026-06-01',5.25,NULL,NULL,8.50, 0.02,NULL,0.02,
-   'https://www.aavas.in/uploads/pdf/information-booklet-english-60546963.pdf','https://www.aavas.in/img/pdf/Schedule-of-Charges-in-English-01.pdf','2026-09-10',
-   'Rate 8.50 onwards. AFL PLR value not published. Conversion 2%+GST (all switch directions). PF 2%+GST on sanctioned. Both fees confirmed in two separate official docs — most internally consistent lender in the set.'),
   ('Home First Finance','2026-01-01',5.25,NULL,NULL,8.00, 0.015,NULL,NULL,
    'https://homefirstindia.com/policy/schedule-of-charges','https://homefirstindia.com/policy/schedule-of-charges','2026-09-10',
    'Verified from the official Home First Fees & Charges page (user screenshot). Home Loan floor 8.00% CONFIRMED (floating 8.00-17.50%; HFFC PLR 17.00% w.e.f. 01-Jan-2026) — was provisional. CONVERSION = Repricing Fee up to 1.5% of principal outstanding (the Door-2 rate-reduction) -> stored 0.015; the 2% fixed<->floating conversion is a separate type switch. PROCESSING is FLAT by price grid (Home Loan: Rs 8500 <=10L, Rs 16000 10-20L, Rs 26500 20L+) plus Rs 2500 login -> processing_fee_flat 16000 (10-20L, Home First''s typical ticket; see UPDATE); processing_fee_pct NULL. Foreclosure NIL (partial & full pre-payment).'),
   ('Repco Home Finance','2026-06-01',5.25,NULL,NULL,9.90, NULL,2000,0.01,
    'https://www.repcohome.com/','https://www.repcohome.com/','2026-09-10',
    'Verified from the official Repco Ready Reckoner (as on 01-Jun-2026) + Schedule of Charges (as on 01-Aug-2026, user-supplied). MLR 9.90% (01-Feb-2026). Home Loan floor 9.90% = MLR + 0 bps (Documented income, <=30L) — corrects the prior 8.75% low-confidence read. PROCESSING = Housing Loan 1.00% salaried (1.75% non-salaried; 2.00% non-documented) plus upfront Rs 5500/8000 -> stored 1% (salaried). CONVERSION = "Rate of Interest revision charges" (the Door-2 rate reduction) FLAT Rs 2000 (<=50L outstanding; Rs 5000 above) -> stored flat 2000; the floating->fixed switchover (Rs 3000/5000) is a separate type switch. Foreclosure NIL for all Housing loans.'),
-  ('Can Fin Homes','2026-09-10',5.25,NULL,NULL,8.95, 0.005,NULL,0.005,
-   'https://www.canfinhomes.com/pages/interestrates','https://www.canfinhomes.com/downloads/f99e1f47-388d-4aec-a225-69158bd9eb79.pdf','2026-09-10',
-   'Rate 8.95-10.10 floating salaried/professional (floor is best internal grade). Can Fin publishes NO benchmark. Conversion = IAC 0.5% of outstanding+GST (rate reduction before quarterly reset). PF 0.5% (min 5000 max 25000) direct channel; DSA/self-employed 0.75-1.25%.'),
-  ('Sammaan Capital','2026-09-10',5.25,NULL,NULL,8.75, NULL,NULL,0.005,
-   'https://www.sammaancapital.com/home-loan/interest-rate','https://www.sammaancapital.com/home-loan/fees-and-charges','2026-09-10',
-   'Formerly Indiabulls Housing. Rate 8.75 onwards. RMLR 12.60 (no RLLR). Conversion is a % of the RATE DELTA (25% onwards of the difference), NOT of the loan — unstorable, so NULL. PF 0.5% onwards (no cap stated).'),
   ('Piramal Finance','2026-09-10',5.25,NULL,NULL,9.99, 0.01,NULL,NULL,
    'https://www.piramalfinance.com/home-loan/home-loan-interest-rates','https://www.piramalfinance.com/schedule-of-charges','2026-09-10',
    'FEES CONFIRMED from the official Piramal Capital & Housing Finance MITC (formerly DHFL, user-supplied): Processing "up to 5% of loan" (an outlier ceiling) -> processing_fee_pct NULL (app estimate); Rate-of-Interest conversion charges (incl. floating-to-floating, the Door-2 fee) "up to 1% of principal outstanding" -> stored 0.01. MITC carries no numeric rate (RPLR/margin blank); advertised_floor 9.99% kept from the rates page (RPLR 20.92/RFRR 16.65; the screenshot hero teaser is not a credible NBFC floor). Foreclosure/pre-payment NIL for individual floating home loans (other products up to 3-5%).'),
   ('Sundaram Home Finance','2026-01-01',5.25,NULL,NULL,10.65, 0.005,NULL,0.0075,
    'https://www.sundaramhome.in/uploads/downloads/Annual_Percentage_rate_on_Loans.pdf','https://www.sundaramhome.in/uploads/downloads/Fee_and_Other_Charges_-_Prime_-_01-01-2026.pdf','2026-09-10',
-   'Rate 10.65 onwards salaried (HTML page carries no rates). SH-PLR 17.60 (no RLLR). Conversion = Re-pricing/Switch 0.5% of outstanding+GST. PF up to 0.75%+GST housing.');
+   'Verified from official Sundaram APR-on-Loans + Fee & Charges - Prime (both w.e.f. 01-01-2026, user-supplied). Housing floor 10.65% salaried (11.15% self-employed); SH-PLR 17.60% (no RLLR). CONVERSION = Re-pricing/Switch fee 0.50% of outstanding+GST (the Door-2 rate-reduction) -> 0.005. PROCESSING = Housing up to 0.75%+GST (min Rs 5000-10000; upfront Rs 5000) -> 0.0075. Foreclosure NIL for individual variable-rate housing loans.');
 
 -- Flat processing fees — set in the 0004 column so Door 3 uses the real rupee cost
 -- of a balance transfer, not a % (which would overstate it). Each is the lender's

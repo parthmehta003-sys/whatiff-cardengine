@@ -35,11 +35,13 @@ borrower was treated unfairly.
 - **Plain-language copy pass done** on landing list and result screen/doors (kept
   the top-up warning + template verbatim — do not water those down).
 - **Lender universe expanded** to banks + home-loan NBFCs/HFCs (see dropdown below).
-- **Per-lender verified fees + rates loaded** — **28 lenders** (Indian Bank was
-  removed at the user's request), each figure from the lender's own official page.
+- **Per-lender verified fees + rates loaded** — **25 lenders** (Indian Bank, Aavas
+  Financiers, Can Fin Homes, Sammaan Capital were removed at the user's request),
+  each figure from the lender's own official page. **All 25 are now
+  primary-source verified** (see below).
   **SBI, HDFC, ICICI, Axis, BoB, Canara, Union Bank, Bank of India, IDBI, Yes Bank,
   Federal, IndusInd, Punjab National Bank, PNB Housing, LIC Housing, Bajaj Housing,
-  Tata Capital, Godrej Housing, Aadhar, Home First, Repco, Piramal, Kotak, IDFC First** hardened against user-supplied official PDFs/screenshots (MITCs, ROI
+  Tata Capital, Godrej Housing, Aadhar, Home First, Repco, Piramal, Sundaram, Kotak, IDFC First** hardened against user-supplied official PDFs/screenshots (MITCs, ROI
   schedules, schedules of charges/GSFC, rate & fee pages). EVERY lender now has an
   advertised_floor (no NULLs). ALL 15 banks in the Banks group are now
   document-touched. (Canara: fees still web-sourced. PNB the bank: fees confirmed
@@ -153,7 +155,7 @@ template for future refreshes.
 | `supabase/migrations/0002_lenders_and_fees.sql` | widens allowed-lender check constraints to 30; adds `conversion_fee_pct`, `processing_fee_pct`, `fee_source_url` |
 | `supabase/migrations/0003_conversion_flat_fee.sql` | adds `conversion_fee_flat`; rebuilds `bank_benchmark` |
 | `supabase/migrations/0004_processing_flat_fee.sql` | adds `processing_fee_flat` (Door-3 takeover); rebuilds `bank_benchmark` + `bank_rates` |
-| `supabase/seed_benchmarks.sql` | 28 verified lender rows + trailing UPDATEs for flat Door-3 processing fees (BoB ₹8,500, SBI ₹6,500, IDBI ₹0). Indian Bank kept in the delete list but not re-inserted (removed). |
+| `supabase/seed_benchmarks.sql` | 25 verified lender rows + trailing UPDATEs for flat Door-3 processing fees (BoB ₹8,500, SBI ₹6,500, IDBI ₹0, LIC ₹5,000, Home First ₹16,000). Removed lenders (Indian Bank, Aavas, Can Fin, Sammaan) kept in the delete list but not re-inserted. |
 | `README.md` | setup, deploy, security note, fees explanation |
 
 ---
@@ -208,7 +210,7 @@ d921d2a Plain-language landing list + clearer purpose
 ## Lender dropdown (`BANK_GROUPS` in app.js)
 
 - **Banks:** SBI, HDFC Bank, ICICI Bank, Axis Bank, Kotak Mahindra, Bank of Baroda, IDFC First, Canara Bank, Union Bank, Punjab National Bank, Bank of India, IDBI Bank, Yes Bank, IndusInd Bank, Federal Bank (Indian Bank removed)
-- **Housing finance / NBFCs:** LIC Housing, PNB Housing, Bajaj Housing, Tata Capital, Godrej Housing, Aadhar Housing Finance, Aavas Financiers, Home First Finance, Repco Home Finance, Can Fin Homes, Sammaan Capital, Piramal Finance, Sundaram Home Finance
+- **Housing finance / NBFCs:** LIC Housing, PNB Housing, Bajaj Housing, Tata Capital, Godrej Housing, Aadhar Housing Finance, Home First Finance, Repco Home Finance, Piramal Finance, Sundaram Home Finance (Aavas, Can Fin, Sammaan removed)
 - **Other**
 
-All 28 dropdown lenders now have a benchmark row.
+All 25 dropdown lenders have a benchmark row, and all are primary-source verified.
