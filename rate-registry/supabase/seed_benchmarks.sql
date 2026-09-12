@@ -20,9 +20,9 @@
 --  * advertised_floor = the LOWEST genuinely-advertised rate (house convention):
 --    ICICI 7.55 (pre-approved) not 8.50 card floor; Tata 8.00 (lowest of its
 --    three live figures) not 8.95. Both noted.
---  * NULL advertised_floor (JS-rendered / not found): IndusInd, LIC —
---    they show no advertised line and skip the floor check until filled.
---    (Axis 8.00 and Yes 8.65 now filled from user-supplied official pages.)
+--  * NULL advertised_floor (not found): LIC Housing only — rate blocks render
+--    "Loading"; skips the floor check until filled. (Axis 8.00, Yes 8.65 and
+--    IndusInd 7.60 now filled from user-supplied official pages/disclosures.)
 -- Repo 5.25% confirmed against RBI's 19-Aug-2026 MPC minutes (held; next MPC
 --    05-07 Oct 2026). HDFC's undated T&C PDF implies 6.25% but is stale.
 --
@@ -75,9 +75,9 @@ insert into public.benchmarks
   ('Yes Bank','2026-07-01',5.25,NULL,9.90,8.65, 0.005,NULL,0.01,
    'https://www.yes.bank.in/sites/web/content/published/api/v1.1/assets/CONTAAFF46763FBC47088DF4A6653A18A42C/native/lending_rate.pdf','https://www.yes.bank.in/sites/web/content/published/api/v1.1/assets/CONTB09B05DE03A041B1953DF5E0E9C8124B/native/homeloan_pdf.pdf','2026-09-10',
    'Verified from Yes Bank official Home Loan Schedule of Charges (v HL_SOC_Jan 2026) + home-loan product page (user-supplied). Floor 8.65% onwards (from the product page; Yes standard-product floor not separately verified, may differ — Yes is a higher-rate lender so a false below-floor flag is unlikely). External benchmark linked to RBI Repo (no numeric EBLR published). CONVERSION confirmed 0.5%: SOC lists "Higher Floating rate to Lower Floating rate - 0.5% of outstanding" — the Door-2 fee. PF corrected to 1% (product page: 1% of loan or Rs 10000 whichever higher; SOC gives an "up to 1.5%" ceiling, not stored). Foreclosure NIL on floating; login fee Rs 5000.'),
-  ('IndusInd Bank','2026-09-10',5.25,NULL,NULL,NULL, 0.005,NULL,0.01,
+  ('IndusInd Bank','2026-09-10',5.25,NULL,NULL,7.60, 0.005,NULL,0.01,
    'https://www.indusind.bank.in/content/dam/indusind-corporate/Other/soc/SOC.pdf','https://www.indusind.bank.in/content/dam/indusind-corporate/schedule-of-charges/others/Schedule-of-Charges-Home-Loan.pdf','2026-09-10',
-   'advertised_floor NULL: all pages JS-rendered; SOC prices as EBLR+margin (no numeric EBLR). Conversion/repricing up to 0.5% POS (min 5000)+GST. PF up to 1%+GST (a ceiling).'),
+   'Verified from official IndusInd Home Loan APR disclosure (Q1 FY27) + Schedule of Charges + Rates-at-a-glance (Jun26). advertised_floor 7.60% = Bank ROI Min (Q1 FY27; avg 8.07%, max 10.00%); quick-glance notes the MAJORITY range is 8.00-15.00% with min cases below. Rate linked to External Benchmark (repo-linked; no numeric EBLR published). CONVERSION confirmed = Repricing 0.50% of POS (min Rs 5000) — the Door-2 rate-reduction fee. PF up to 1% + IMD up to Rs 2500. Foreclosure & part-prepay NIL on floating.'),
   ('Federal Bank','2026-09-07',5.25,NULL,9.00,7.65, NULL,NULL,0.005,
    'https://www.federal.bank.in/retail-loans-interest-rates','https://www.federal.bank.in/documents/d/guest/retail-loan-charges-w-e-f-from-01-04-2026-1','2026-09-10',
    'Verified from the official Federal Interest Rates page + Retail Loan Charges PDF (user-supplied); page shows Present Repo 5.25% (a 6th doc confirming). Repo-linked, no numeric benchmark label. Regular Home Loan: Term Loan from 7.95%, Overdraft from 7.65% (rates for >35L; <35L +1%) -> advertised_floor 7.65% (lowest REGULAR HL rate; the prior 7.35% was actually the distinct Home Loan Plot+Construction variant). PF 0.50% of limit, min Rs 10000 (bundles CIBIL/CERSAI/valuation/legal). CONVERSION corrected to NULL: the 0.25% charge is for switching FIXED<->FLOATING (a rate-TYPE switch), not the Door-2 floating rate-reduction fee, which Federal does not publish. Foreclosure NIL for floating individuals.'),
