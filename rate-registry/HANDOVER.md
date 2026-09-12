@@ -36,9 +36,12 @@ borrower was treated unfairly.
   the top-up warning + template verbatim — do not water those down).
 - **Lender universe expanded** to banks + home-loan NBFCs/HFCs (see dropdown below).
 - **Per-lender verified fees + rates loaded** — **29 lenders**, each figure from the
-  lender's own official page. **SBI, HDFC, ICICI, Axis, BoB, Union Bank, Yes Bank,
-  PNB Housing, Kotak, IDFC First** hardened against user-supplied official PDFs/
-  screenshots (MITCs, ROI schedules, schedules of charges/GSFC, rate & fee pages).
+  lender's own official page. **SBI, HDFC, ICICI, Axis, BoB, Union Bank, Bank of
+  India, Yes Bank, PNB Housing, Kotak, IDFC First** hardened against user-supplied
+  official PDFs/screenshots (MITCs, ROI schedules, schedules of charges/GSFC, rate
+  & fee pages). Bank of India (7.10%) is the cheapest floor in the table → the most
+  common Door-3 target; its 0.35% PF is confirmed (note: BOI has a temporary NIL-PF
+  takeover promo to 30.09.26; standard 0.35% stored for durability).
   This was the last big task. NB: **PNB Housing** (HFC) and **Punjab National Bank**
   (bank) are two separate lenders/rows — the PNBHFL MITC verified PNB Housing only.
   Kotak: rate 7.60% + fees fully verified from its GSFC (conversion 0.5% POS cap
