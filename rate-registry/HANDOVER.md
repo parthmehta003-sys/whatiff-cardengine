@@ -39,7 +39,7 @@ borrower was treated unfairly.
   removed at the user's request), each figure from the lender's own official page.
   **SBI, HDFC, ICICI, Axis, BoB, Canara, Union Bank, Bank of India, IDBI, Yes Bank,
   Federal, IndusInd, Punjab National Bank, PNB Housing, LIC Housing, Bajaj Housing,
-  Tata Capital, Godrej Housing, Aadhar, Home First, Repco, Kotak, IDFC First** hardened against user-supplied official PDFs/screenshots (MITCs, ROI
+  Tata Capital, Godrej Housing, Aadhar, Home First, Repco, Piramal, Kotak, IDFC First** hardened against user-supplied official PDFs/screenshots (MITCs, ROI
   schedules, schedules of charges/GSFC, rate & fee pages). EVERY lender now has an
   advertised_floor (no NULLs). ALL 15 banks in the Banks group are now
   document-touched. (Canara: fees still web-sourced. PNB the bank: fees confirmed

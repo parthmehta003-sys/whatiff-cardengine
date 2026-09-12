@@ -128,7 +128,7 @@ insert into public.benchmarks
    'Formerly Indiabulls Housing. Rate 8.75 onwards. RMLR 12.60 (no RLLR). Conversion is a % of the RATE DELTA (25% onwards of the difference), NOT of the loan — unstorable, so NULL. PF 0.5% onwards (no cap stated).'),
   ('Piramal Finance','2026-09-10',5.25,NULL,NULL,9.99, 0.01,NULL,NULL,
    'https://www.piramalfinance.com/home-loan/home-loan-interest-rates','https://www.piramalfinance.com/schedule-of-charges','2026-09-10',
-   'Rate 9.99 onwards (same floor across all slabs). RPLR 20.92 / RFRR 16.65 (no RLLR). Conversion up to 1% POS. PF is up to 5% ceiling (outlier) so processing_fee_pct NULL.'),
+   'FEES CONFIRMED from the official Piramal Capital & Housing Finance MITC (formerly DHFL, user-supplied): Processing "up to 5% of loan" (an outlier ceiling) -> processing_fee_pct NULL (app estimate); Rate-of-Interest conversion charges (incl. floating-to-floating, the Door-2 fee) "up to 1% of principal outstanding" -> stored 0.01. MITC carries no numeric rate (RPLR/margin blank); advertised_floor 9.99% kept from the rates page (RPLR 20.92/RFRR 16.65; the screenshot hero teaser is not a credible NBFC floor). Foreclosure/pre-payment NIL for individual floating home loans (other products up to 3-5%).'),
   ('Sundaram Home Finance','2026-01-01',5.25,NULL,NULL,10.65, 0.005,NULL,0.0075,
    'https://www.sundaramhome.in/uploads/downloads/Annual_Percentage_rate_on_Loans.pdf','https://www.sundaramhome.in/uploads/downloads/Fee_and_Other_Charges_-_Prime_-_01-01-2026.pdf','2026-09-10',
    'Rate 10.65 onwards salaried (HTML page carries no rates). SH-PLR 17.60 (no RLLR). Conversion = Re-pricing/Switch 0.5% of outstanding+GST. PF up to 0.75%+GST housing.');
