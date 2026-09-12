@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WhatIff — How did it go?</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="masthead"><div class="logo">WhatIff · Home Loan Registry</div></header>
+    <main id="fu"></main>
+    <div class="foot">Anonymous. Your answer helps the next borrower negotiate.</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="./config.js"></script>
+  <script>
+  /* Three-week follow-up. The email link carries ?o=<outcome_id>. Two buttons
+     (bank agreed / bank refused) plus an optional free-text field — the most
+     valuable data in the system, the negotiation playbook. Writes via the
+     record_followup RPC. */
+  (function () {
+    const CFG = window.WHATIFF_CONFIG || {};
+    const el = document.getElementById('fu');
+    const oid = parseInt(new URLSearchParams(location.search).get('o'), 10);
+    let sb = null;
+    if (CFG.SUPABASE_URL && CFG.SUPABASE_ANON_KEY && !CFG.SUPABASE_URL.includes('YOUR-PROJECT') &&
+        window.supabase && window.supabase.createClient) {
+      sb = window.supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY);
+    }
+    if (!sb || !oid) {
+      el.innerHTML = `<div class="card"><div class="thin" style="padding:24px 4px">This link looks incomplete. Please use the link from your email.</div></div>`;
+      return;
+    }
+
+    function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+    function form() {
+      el.innerHTML = `
+        <div class="card">
+          <div class="section-title">Did your bank move on the rate?</div>
+          <div class="section-sub">One tap. Then, if you're willing, tell the next borrower what actually worked.</div>
+          <div class="seg" id="fu-res">
+            <div class="opt" data-res="Agreed">Bank agreed</div>
+            <div class="opt" data-res="Refused">Bank refused</div>
+          </div>
+          <div class="field" style="margin-top:16px">
+            <label for="fu-rate">New rate, if you got one (%)</label>
+            <input id="fu-rate" type="number" inputmode="decimal" step="0.01" min="6" max="15" placeholder="optional" />
+          </div>
+          <div class="field">
+            <label for="fu-notes">What did you actually say to them?</label>
+            <textarea id="fu-notes" rows="4" placeholder="optional — the exact words that worked (or didn't)"
+              style="width:100%;padding:12px 13px;background:var(--page);border:1px solid var(--line);border-radius:11px;color:var(--text)"></textarea>
+          </div>
+          <button class="btn" id="fu-submit">Send</button>
+          <div class="form-error" id="fu-err"></div>
+        </div>`;
+      let result = null;
+      document.querySelectorAll('#fu-res .opt').forEach(o => o.addEventListener('click', () => {
+        document.querySelectorAll('#fu-res .opt').forEach(x => x.classList.remove('on'));
+        o.classList.add('on'); result = o.dataset.res;
+      }));
+      document.getElementById('fu-submit').addEventListener('click', async () => {
+        const err = document.getElementById('fu-err');
+        if (!result) { err.textContent = 'Tap agreed or refused first.'; return; }
+        const nr = parseFloat(document.getElementById('fu-rate').value);
+        const notes = document.getElementById('fu-notes').value.trim() || null;
+        const btn = document.getElementById('fu-submit');
+        btn.disabled = true; btn.textContent = 'Sending…';
+        const r = await sb.rpc('record_followup', {
+          p_outcome_id: oid, p_result: result,
+          p_new_rate: (nr >= 6 && nr <= 15) ? Math.round(nr * 100) / 100 : null,
+          p_notes: notes,
+        });
+        if (r.error) { btn.disabled = false; btn.textContent = 'Send'; err.textContent = 'Could not save. Please try again.'; return; }
+        el.innerHTML = `<div class="card"><div class="thin" style="padding:24px 4px"><b>Thank you.</b><br/>That's exactly the kind of thing the next borrower needs.</div></div>`;
+      });
+    }
+    form();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+# Netlify config for the WhatIff home-loan registry.
+#
+# In the Netlify UI set the site's "Base directory" to `rate-registry` so this
+# file (and package.json) is picked up. Set these Environment variables under
+# Site settings -> Environment variables:
+#   SUPABASE_URL, SUPABASE_ANON_KEY   (both public; RLS protects the data)
+#   SITE_URL                          (optional, e.g. https://whatiff.in — used
+#                                      only for canonical URLs in the static
+#                                      aggregate pages)
+#
+# The build step (1) writes config.js from those env vars so no key is
+# committed, and (2) pre-renders the crawlable /rates/ aggregate pages. It is
+# resilient: with no creds or an empty registry it still produces a valid site.
+
+[build]
+  publish = "."
+  command = "npm install && npm run build"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

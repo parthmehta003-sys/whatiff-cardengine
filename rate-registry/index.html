@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Banks advertise a rate almost nobody gets. See what borrowers actually got at your bank — what's achievable, not just what's advertised." />
+  <title>WhatIff — Are you overpaying on your home loan?</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./style.css" />
+
+  <!-- Analytics (Umami Cloud, free tier). Counts visitors automatically; the
+       app fires "Submission" and "DoorOpen" custom events via umami.track(). -->
+  <script defer src="https://cloud.umami.is/script.js"
+          data-website-id="e44be5c0-cc95-4d56-bb1f-28c4d316de70"></script>
+</head>
+<body>
+  <div class="wrap">
+    <header class="masthead">
+      <div class="brand">
+        <span class="brandmark">W</span>
+        <span class="brandword">WhatIff<b>.</b></span>
+      </div>
+      <nav class="mast-right">
+        <span class="tally" id="tally"></span>
+        <button class="btn nav-cta" id="nav-cta" type="button">Add your rate</button>
+      </nav>
+    </header>
+
+    <!-- Two states (landing+form, result) swap in place here. No routing. -->
+    <main id="app" aria-live="polite"></main>
+
+    <div class="foot" id="foot"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="./config.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
