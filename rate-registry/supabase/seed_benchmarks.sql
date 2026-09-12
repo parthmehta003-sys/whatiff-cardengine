@@ -20,9 +20,8 @@
 --  * advertised_floor = the LOWEST genuinely-advertised rate (house convention):
 --    ICICI 7.55 (pre-approved) not 8.50 card floor; Tata 8.00 (lowest of its
 --    three live figures) not 8.95. Both noted.
---  * NULL advertised_floor (not found): LIC Housing only — rate blocks render
---    "Loading"; skips the floor check until filled. (Axis 8.00, Yes 8.65 and
---    IndusInd 7.60 now filled from user-supplied official pages/disclosures.)
+--  * advertised_floor: every lender now has one (LIC Housing 7.13 filled from its
+--    rate page; caveat noted on that row). No lender skips the floor check.
 -- Repo 5.25% confirmed against RBI's 19-Aug-2026 MPC minutes (held; next MPC
 --    05-07 Oct 2026). HDFC's undated T&C PDF implies 6.25% but is stale.
 --
@@ -87,9 +86,9 @@ insert into public.benchmarks
   ('IDFC First','2026-09-10',5.25,NULL,NULL,7.75, NULL,NULL,NULL,
    'https://www.idfcfirstbank.com/personal-banking/loans/home-loan/home-loan-interest-rates','https://www.idfcfirstbank.com/personal-banking/loans/home-loan/fees-and-charges','2026-09-10',
    'Rate "ROI starting from 7.75%" (official product rates page, user-supplied screenshots 2026-09-10). EBR-linked (External Benchmark Rate), reset every 3 months; no numeric EBR published so rllr NULL. FEES NULL BY DESIGN (both are "up to" ceilings, per house convention): Switch/repricing fee (Door 2) up to 2% of principal outstanding; Processing fee (Door 3) up to 3% of loan amount (IMD/admin Rs 6500 is part of PF). Foreclosure NIL on floating. Both door fees fall back to labelled estimate.'),
-  ('LIC Housing','2026-09-10',5.25,NULL,NULL,NULL, NULL,3000,NULL,
+  ('LIC Housing','2026-09-10',5.25,NULL,NULL,7.13, NULL,3000,NULL,
    'https://www.lichousing.com/lhplr-for-retail-loans','https://cdn.lichousing.com/2026/01/fees_and_other_charges.pdf','2026-09-10',
-   'advertised_floor NULL: all rate blocks render "Loading". Conversion FLAT Rs 3000+GST (IHL conversion). PF FLAT slabs (Rs 3000-50000) so processing_fee_pct NULL.'),
+   'Verified from LIC HFL Home Loan rate page + Fees & Other Charges PDF (updated Jan 2026, user-supplied). advertised_floor 7.13% = salaried, best CIBIL, up to Rs 2cr (LHPLR-based; self-employed floor ~7.35%). CAVEAT: the rate-table screenshot was dense and its band labels rendered garbled — 7.13% is the best read of the top-left cell, bounded above by the clearer self-employed 7.35%; worth confirming the exact digit. CONVERSION confirmed = IHL Rewriting/conversion fee FLAT Rs 3000 (the 0.25% entry is floating->fixed, a type switch). PROCESSING is FLAT by slab: Rs 3000 (<=25L), 5000 (25-50L), 7500 (50L-1Cr), 15000 (1-5Cr) -> processing_fee_flat 5000 (modal 25-50L band, see UPDATE); processing_fee_pct NULL. Foreclosure NIL for floating individuals.'),
   ('PNB Housing','2026-09-10',5.25,NULL,NULL,8.50, 0.005,NULL,0.01,
    'https://www.pnbhousing.com/home-loan','https://www.pnbhousing.com/documents/d/guest/know-schedule-of_charges','2026-09-10',
    'PNB Housing Finance (PNBHFL) — NOT Punjab National Bank (separate row). FEES CONFIRMED from the official MITC / Schedule of Charges v31.0.0 (eff 01-Jan-2026): PF 1% of loan +GST (min Rs 10000); CONVERSION = "ROI Change Floating-to-Floating (reduction in rate) 0.5% of POS +GST" — the Door-2 fee (distinct from the 3% fixed-switch). Floating benchmark is PNBRRR (no numeric published). Prepayment NIL for individual floating loans. Rate 8.50% from product heading (homepage says from 8.25; /interest-rates 406, slab table unread).'),
@@ -137,6 +136,9 @@ insert into public.benchmarks
 --   IDBI — Rs 0: its SOC charges NIL processing for an INWARD balance transfer
 --     (a fresh loan is a flat Rs 10,000/15,000, but Door 3 is a BT), so a transfer
 --     to IDBI carries no processing fee (MOD + legal still apply on top in Door 3).
+--   LIC Housing — flat Rs 5,000 for the 25-50L IHL slab (Rs 3000 <=25L, 7500
+--     50L-1Cr, 15000 1-5Cr), per the LIC HFL Fees & Charges schedule.
 update public.benchmarks set processing_fee_flat = 8500 where bank = 'Bank of Baroda';
 update public.benchmarks set processing_fee_flat = 6500 where bank = 'SBI';
 update public.benchmarks set processing_fee_flat = 0    where bank = 'IDBI Bank';
+update public.benchmarks set processing_fee_flat = 5000 where bank = 'LIC Housing';

@@ -38,15 +38,17 @@ borrower was treated unfairly.
 - **Per-lender verified fees + rates loaded** — **28 lenders** (Indian Bank was
   removed at the user's request), each figure from the lender's own official page.
   **SBI, HDFC, ICICI, Axis, BoB, Canara, Union Bank, Bank of India, IDBI, Yes Bank,
-  Federal, IndusInd, Punjab National Bank, PNB Housing, Kotak, IDFC First** hardened
-  against user-supplied official PDFs/screenshots (MITCs, ROI schedules, schedules of
-  charges/GSFC, rate & fee pages). Only **LIC Housing** still lacks an advertised_floor
-  (its rate blocks render "Loading"). ALL 15 banks in the Banks group are now
+  Federal, IndusInd, Punjab National Bank, PNB Housing, LIC Housing, Kotak, IDFC
+  First** hardened against user-supplied official PDFs/screenshots (MITCs, ROI
+  schedules, schedules of charges/GSFC, rate & fee pages). EVERY lender now has an
+  advertised_floor (no NULLs). ALL 15 banks in the Banks group are now
   document-touched. (Canara: fees still web-sourced. PNB the bank: fees confirmed
   from its Services Charges page, but its rate card screenshot was unreadable so the
-  RLLR 7.75/floor 7.20 rate is kept from the prior fetch.)
+  RLLR 7.75/floor 7.20 rate is kept from the prior fetch. LIC Housing: fees verified,
+  but floor 7.13% read from a dense/garbled rate table — flagged on the row to
+  re-confirm.)
   Flat processing (Door-3 takeover) fees: BoB ₹8,500, SBI ₹6,500, IDBI ₹0 (IDBI
-  waives inward-BT processing). Indian Bank stays in the seed's delete list (not
+  waives inward-BT processing), LIC Housing ₹5,000. Indian Bank stays in the seed's delete list (not
   re-inserted) so re-running the seed drops it from the live DB. (Canara: rate RLLR 8.00/floor 7.15 confirmed
   from the rate tables; its fees weren't in those screenshots, still web-sourced.) Bank of India (7.10%) is the cheapest floor in the table → the most
   common Door-3 target; its 0.35% PF is confirmed (note: BOI has a temporary NIL-PF
