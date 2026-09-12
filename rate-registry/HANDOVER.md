@@ -39,7 +39,7 @@ borrower was treated unfairly.
   removed at the user's request), each figure from the lender's own official page.
   **SBI, HDFC, ICICI, Axis, BoB, Canara, Union Bank, Bank of India, IDBI, Yes Bank,
   Federal, IndusInd, Punjab National Bank, PNB Housing, LIC Housing, Bajaj Housing,
-  Tata Capital, Godrej Housing, Aadhar, Home First, Kotak, IDFC First** hardened against user-supplied official PDFs/screenshots (MITCs, ROI
+  Tata Capital, Godrej Housing, Aadhar, Home First, Repco, Kotak, IDFC First** hardened against user-supplied official PDFs/screenshots (MITCs, ROI
   schedules, schedules of charges/GSFC, rate & fee pages). EVERY lender now has an
   advertised_floor (no NULLs). ALL 15 banks in the Banks group are now
   document-touched. (Canara: fees still web-sourced. PNB the bank: fees confirmed
@@ -113,8 +113,11 @@ borrower was treated unfairly.
      fee is FLAT (₹6,500 for 25–75L, ₹10,000 >75L, 0.25% ≤25L) → `processing_fee_flat
      = 6500`, superseding the old 0.35% card rate. Conversion kept at ₹5,000 flat
      (MITC only covers the fixed→floating switch at 0.56%).
-   - **Home First rate 8.00%** — single read, marked provisional; re-verify.
-   - **Repco 8.75%** — low confidence (marketing/branches page); re-verify against official ROI PDF.
+   - **Home First rate 8.00%** — ✅ CONFIRMED from the official Fees & Charges page
+     (no longer provisional); processing filled flat ₹16,000.
+   - **Repco** — ✅ RESOLVED from official Ready Reckoner + Schedule of Charges: the
+     old 8.75% was wrong; floor is **9.90%** (MLR + 0). Processing 1% (salaried),
+     conversion flat ₹2,000 (ROI-revision fee). No flagged/low-confidence rows remain.
 3. **Repo rate — ✅ RESOLVED at 5.25%.** Confirmed against RBI's 19-Aug-2026 MPC
    minutes (held; next MPC 05-07 Oct 2026), and independently by Union Bank's ROI
    PDF (EBLR 8.00 = Repo 5.25 + Spread 2.75). HDFC's undated T&C PDF implies 6.25%
