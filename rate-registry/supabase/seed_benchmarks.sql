@@ -27,6 +27,9 @@
 --    05-07 Oct 2026). HDFC's undated T&C PDF implies 6.25% but is stale.
 --
 -- Fees left NULL fall back to the app's ASSUMPTION estimate (labelled as such).
+--
+-- 'Indian Bank' stays in the delete list but is NOT re-inserted below: it was
+-- removed from the registry, so re-running this seed drops it from the live DB.
 
 delete from public.benchmarks where bank in (
   'SBI','HDFC Bank','ICICI Bank','Axis Bank','Kotak Mahindra','Bank of Baroda',
@@ -69,9 +72,9 @@ insert into public.benchmarks
   ('Bank of India','2026-07-01',5.25,8.10,NULL,7.10, NULL,NULL,0.0035,
    'https://bankofindia.bank.in/documents/20121/28761619/FloatingROIwef01072026.pdf','https://bankofindia.bank.in/documents/20121/28761619/FloatingROIwef01072026.pdf','2026-09-10',
    'CONFIRMED from the official BOI Floating ROI schedule (w.e.f. 01.07.2026, user-supplied). RBLR 8.10% (w.e.f. 01.01.2026, branded RLLR). Star Home Loan floor 7.10% = RBLR 8.10 - BSD 1.00 (Salaried, CIBIL 840+; hard min 7.10%; the 7.10 the site advertises). PF 0.35% of loan, Min Rs 3500 Max Rs 30000 (Star Diamond flat Rs 60000). NOTE: a temporary promo makes PF NIL for CIBIL 725+ and ALL takeovers for 01.07.26-30.09.26 — standard 0.35% stored for durability (promo expiring). No floating-to-floating conversion fee in the schedule (Door 2 -> labelled estimate).'),
-  ('IDBI Bank','2025-12-12',5.25,8.15,8.75,7.40, 0.005,NULL,NULL,
+  ('IDBI Bank','2025-12-12',5.25,8.15,8.75,7.40, NULL,5000,NULL,
    'https://www.idbi.bank.in/interest-rates.aspx','https://www.idbi.bank.in/pdf/soc/SOC-HOME-LOAN.pdf','2026-09-10',
-   'Rate 7.40% lowest across all home-loan slabs. RLLR 8.15. Conversion 0.5% of outstanding (cap 50000). PF is FLAT (Rs 10000-17500) so processing_fee_pct NULL. WARNING: SOC stamped effective 01.10.2026 (future-dated).'),
+   'Verified from official IDBI Home Loan rate page + SOC (w.e.f. 01.10.2026, user-supplied). Plain Vanilla Home Loan floor 7.40% (Salaried/SEP 7.40-10.00%). RLLR 8.15. CONVERSION: SOC 7 individual floating-rate conversion administrative cost is FLAT Rs 5000 (the 0.5% entries are fixed<->floating type switches, not the Door-2 rate-reduction) -> stored flat 5000. PROCESSING: fresh-loan PF is FLAT (Rs 10000 <=75L Salaried/SEP, Rs 15000 >75L) so processing_fee_pct NULL; but INWARD BALANCE TRANSFER = NIL and Door 3 IS a BT -> processing_fee_flat 0 (see UPDATE). Foreclosure NIL on floating individuals.'),
   ('Yes Bank','2026-07-01',5.25,NULL,9.90,8.65, 0.005,NULL,0.01,
    'https://www.yes.bank.in/sites/web/content/published/api/v1.1/assets/CONTAAFF46763FBC47088DF4A6653A18A42C/native/lending_rate.pdf','https://www.yes.bank.in/sites/web/content/published/api/v1.1/assets/CONTB09B05DE03A041B1953DF5E0E9C8124B/native/homeloan_pdf.pdf','2026-09-10',
    'Verified from Yes Bank official Home Loan Schedule of Charges (v HL_SOC_Jan 2026) + home-loan product page (user-supplied). Floor 8.65% onwards (from the product page; Yes standard-product floor not separately verified, may differ — Yes is a higher-rate lender so a false below-floor flag is unlikely). External benchmark linked to RBI Repo (no numeric EBLR published). CONVERSION confirmed 0.5%: SOC lists "Higher Floating rate to Lower Floating rate - 0.5% of outstanding" — the Door-2 fee. PF corrected to 1% (product page: 1% of loan or Rs 10000 whichever higher; SOC gives an "up to 1.5%" ceiling, not stored). Foreclosure NIL on floating; login fee Rs 5000.'),
@@ -81,9 +84,6 @@ insert into public.benchmarks
   ('Federal Bank','2026-09-07',5.25,NULL,9.00,7.65, NULL,NULL,0.005,
    'https://www.federal.bank.in/retail-loans-interest-rates','https://www.federal.bank.in/documents/d/guest/retail-loan-charges-w-e-f-from-01-04-2026-1','2026-09-10',
    'Verified from the official Federal Interest Rates page + Retail Loan Charges PDF (user-supplied); page shows Present Repo 5.25% (a 6th doc confirming). Repo-linked, no numeric benchmark label. Regular Home Loan: Term Loan from 7.95%, Overdraft from 7.65% (rates for >35L; <35L +1%) -> advertised_floor 7.65% (lowest REGULAR HL rate; the prior 7.35% was actually the distinct Home Loan Plot+Construction variant). PF 0.50% of limit, min Rs 10000 (bundles CIBIL/CERSAI/valuation/legal). CONVERSION corrected to NULL: the 0.25% charge is for switching FIXED<->FLOATING (a rate-TYPE switch), not the Door-2 floating rate-reduction fee, which Federal does not publish. Foreclosure NIL for floating individuals.'),
-  ('Indian Bank','2026-08-14',5.25,NULL,8.85,7.15, NULL,NULL,NULL,
-   'https://indianbank.bank.in/en/interest-rates-on-personal-segment-loan-products','https://indianbank.bank.in/en/processing-fee-on-personal-segment-loan-products','2026-09-10',
-   'Rate 7.15% (IB Home Loan 7.15-8.55). No current RLLR/EBLR (only Base 9.55/BPLR 13.80). PF FLAT for core product (Rs 1500/2500/5000 by slab) so processing_fee_pct NULL. Conversion fee not in charges annexure.'),
   ('IDFC First','2026-09-10',5.25,NULL,NULL,7.75, NULL,NULL,NULL,
    'https://www.idfcfirstbank.com/personal-banking/loans/home-loan/home-loan-interest-rates','https://www.idfcfirstbank.com/personal-banking/loans/home-loan/fees-and-charges','2026-09-10',
    'Rate "ROI starting from 7.75%" (official product rates page, user-supplied screenshots 2026-09-10). EBR-linked (External Benchmark Rate), reset every 3 months; no numeric EBR published so rllr NULL. FEES NULL BY DESIGN (both are "up to" ceilings, per house convention): Switch/repricing fee (Door 2) up to 2% of principal outstanding; Processing fee (Door 3) up to 3% of loan amount (IMD/admin Rs 6500 is part of PF). Foreclosure NIL on floating. Both door fees fall back to labelled estimate.'),
@@ -134,5 +134,9 @@ insert into public.benchmarks
 --     0.50%/0.25%, not what a transferring borrower pays).
 --   SBI — flat Rs 6,500 for 25-75L (Rs 10,000 above 75L; 0.25% min 1000 up to
 --     25L), per the official SBI Home Loan MITC.
+--   IDBI — Rs 0: its SOC charges NIL processing for an INWARD balance transfer
+--     (a fresh loan is a flat Rs 10,000/15,000, but Door 3 is a BT), so a transfer
+--     to IDBI carries no processing fee (MOD + legal still apply on top in Door 3).
 update public.benchmarks set processing_fee_flat = 8500 where bank = 'Bank of Baroda';
 update public.benchmarks set processing_fee_flat = 6500 where bank = 'SBI';
+update public.benchmarks set processing_fee_flat = 0    where bank = 'IDBI Bank';

@@ -50,7 +50,7 @@ const BANK_GROUPS = [
   { label: 'Banks', items: [
     'SBI', 'HDFC Bank', 'ICICI Bank', 'Axis Bank', 'Kotak Mahindra', 'Bank of Baroda',
     'IDFC First', 'Canara Bank', 'Union Bank', 'Punjab National Bank', 'Bank of India',
-    'IDBI Bank', 'Yes Bank', 'IndusInd Bank', 'Federal Bank', 'Indian Bank',
+    'IDBI Bank', 'Yes Bank', 'IndusInd Bank', 'Federal Bank',
   ] },
   { label: 'Housing finance / NBFCs', items: [
     'LIC Housing', 'PNB Housing', 'Bajaj Housing', 'Tata Capital', 'Godrej Housing',

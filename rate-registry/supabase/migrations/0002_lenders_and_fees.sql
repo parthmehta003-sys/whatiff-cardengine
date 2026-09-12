@@ -15,7 +15,7 @@ declare
   lenders text :=
     $list$'SBI','HDFC Bank','ICICI Bank','Axis Bank','Kotak Mahindra','Bank of Baroda',
     'IDFC First','Canara Bank','Union Bank','Punjab National Bank','Bank of India',
-    'IDBI Bank','Yes Bank','IndusInd Bank','Federal Bank','Indian Bank',
+    'IDBI Bank','Yes Bank','IndusInd Bank','Federal Bank',
     'LIC Housing','PNB Housing','Bajaj Housing','Tata Capital','Godrej Housing',
     'Aadhar Housing Finance','Aavas Financiers','Home First Finance','Repco Home Finance',
     'Can Fin Homes','Sammaan Capital','Piramal Finance','Sundaram Home Finance','Other'$list$;
