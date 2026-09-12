@@ -38,8 +38,8 @@ borrower was treated unfairly.
 - **Per-lender verified fees + rates loaded** — **28 lenders** (Indian Bank was
   removed at the user's request), each figure from the lender's own official page.
   **SBI, HDFC, ICICI, Axis, BoB, Canara, Union Bank, Bank of India, IDBI, Yes Bank,
-  Federal, IndusInd, Punjab National Bank, PNB Housing, LIC Housing, Kotak, IDFC
-  First** hardened against user-supplied official PDFs/screenshots (MITCs, ROI
+  Federal, IndusInd, Punjab National Bank, PNB Housing, LIC Housing, Bajaj Housing,
+  Kotak, IDFC First** hardened against user-supplied official PDFs/screenshots (MITCs, ROI
   schedules, schedules of charges/GSFC, rate & fee pages). EVERY lender now has an
   advertised_floor (no NULLs). ALL 15 banks in the Banks group are now
   document-touched. (Canara: fees still web-sourced. PNB the bank: fees confirmed
