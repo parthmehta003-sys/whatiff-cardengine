@@ -20,8 +20,9 @@
 --  * advertised_floor = the LOWEST genuinely-advertised rate (house convention):
 --    ICICI 7.55 (pre-approved) not 8.50 card floor; Tata 8.00 (lowest of its
 --    three live figures) not 8.95. Both noted.
---  * NULL advertised_floor (JS-rendered / not found): Axis, Yes, IndusInd, LIC —
+--  * NULL advertised_floor (JS-rendered / not found): IndusInd, LIC —
 --    they show no advertised line and skip the floor check until filled.
+--    (Axis 8.00 and Yes 8.65 now filled from user-supplied official pages.)
 -- Repo 5.25% confirmed against RBI's 19-Aug-2026 MPC minutes (held; next MPC
 --    05-07 Oct 2026). HDFC's undated T&C PDF implies 6.25% but is stale.
 --
@@ -47,9 +48,9 @@ insert into public.benchmarks
   ('ICICI Bank','2026-09-10',5.25,NULL,8.35,7.55, NULL,3000,0.005,
    'https://www.icici.bank.in/personal-banking/loans/home-loan/home-loan-interest-rates','https://www.icici.bank.in/personal-banking/loans/home-loan/service-charges','2026-09-10',
    'advertised_floor 7.55 = pre-approved digital rate; standard rate-card floor 8.50 (till 30.09.2026). Benchmark I-EBLR 8.95 (EBLR, so rllr NULL). Conversion floating-to-floating FLAT Rs 3000+GST. PF 0.5% on rates page (fee schedule ceiling up to 2% NOT used).'),
-  ('Axis Bank','2026-09-10',5.25,NULL,NULL,NULL, NULL,3000,0.01,
+  ('Axis Bank','2026-09-10',5.25,NULL,NULL,8.00, NULL,3000,0.01,
    'https://www.axis.bank.in/docs/default-source/default-document-library/home-loan-fees-charges.pdf?sfvrsn=454e11d6_7','https://www.axis.bank.in/docs/default-source/default-document-library/home-loan-fees-charges.pdf?sfvrsn=454e11d6_7','2026-09-10',
-   'advertised_floor NULL: all Axis rate pages JS-rendered, no advertised line found. source_url points at the official fees/charges PDF (the only Axis doc this row is sourced from). Conversion FLAT tiered (Rs 1000/2000/3000/5000 by slab) — stored ~3000 (30-75L). PF up to 1% or Rs 10000+GST.'),
+   'Rate floor 8.00% = Repo 5.25 + Spread 2.75 (CIBIL 751+; carded range 8.00-8.85%), from the official Axis Home Loan Interest Rates page (user screenshot; a 4th doc confirming Repo 5.25). Repo-linked floating, no numeric EBLR published. FEES CONFIRMED from official Axis Home Loan Fees & Charges + Schedule of Charges + Super Saver docs: CONVERSION = Higher-Floating-to-Lower-Floating admin charge, FLAT tiered by outstanding (<=10L 1000; 10-30L 2000; 30.01-75L 3000; >75L 5000) -> stored 3000 (30-75L band, the Door-2 fee). PF up to 1% or Rs 10000 whichever higher (+Rs 5000 upfront). Foreclosure NIL on floating. (Asha HL is higher: Repo+4.65% up = 10.15%+; Fixed HL 14%.)'),
   ('Kotak Mahindra','2026-09-10',5.25,NULL,NULL,7.60, NULL,10000,NULL,
    'https://www.kotak.bank.in/en/personal-banking/loans/home-loan/interest-rates.html','https://www.kotak.bank.in/content/dam/Kotak/gsfcfiles/loan/hf-gsfc.pdf','2026-09-10',
    'Rate 7.60% CONFIRMED (official Home Loan Interest Rates page: "From 7.60%* p.a."). Floating EBLR/repo-linked (hybrid = Repo + spread). FEES from the official Kotak Home Loan GSFC (user-supplied): CONVERSION confirmed = Switch (Floating->Floating, to repo-linked benchmark) 0.5% of POS capped at Rs 10,000 -> stored flat 10000 (the cap binds for any outstanding >~20L, so flat is faithful). PROCESSING corrected: the GSFC gives only "Upto 2%" (a ceiling) + Rs 5000 non-refundable login — no verified typical figure (the prior 0.5%/1% was unsourced), so processing_fee_pct is NULL and Door 3 uses the labelled 0.5% estimate. Prepayment NIL for individual floating loans.'),

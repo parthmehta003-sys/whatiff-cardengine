@@ -36,8 +36,8 @@ borrower was treated unfairly.
   the top-up warning + template verbatim — do not water those down).
 - **Lender universe expanded** to banks + home-loan NBFCs/HFCs (see dropdown below).
 - **Per-lender verified fees + rates loaded** — **29 lenders**, each figure from the
-  lender's own official page. **SBI, HDFC, ICICI, BoB, Union Bank, Yes Bank, PNB
-  Housing, Kotak, IDFC First** hardened against user-supplied official PDFs/
+  lender's own official page. **SBI, HDFC, ICICI, Axis, BoB, Union Bank, Yes Bank,
+  PNB Housing, Kotak, IDFC First** hardened against user-supplied official PDFs/
   screenshots (MITCs, ROI schedules, schedules of charges/GSFC, rate & fee pages).
   This was the last big task. NB: **PNB Housing** (HFC) and **Punjab National Bank**
   (bank) are two separate lenders/rows — the PNBHFL MITC verified PNB Housing only.
