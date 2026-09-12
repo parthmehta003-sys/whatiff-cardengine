@@ -116,7 +116,7 @@ insert into public.benchmarks
    'Rate 8.50 onwards. AFL PLR value not published. Conversion 2%+GST (all switch directions). PF 2%+GST on sanctioned. Both fees confirmed in two separate official docs — most internally consistent lender in the set.'),
   ('Home First Finance','2026-01-01',5.25,NULL,NULL,8.00, 0.015,NULL,NULL,
    'https://homefirstindia.com/policy/schedule-of-charges','https://homefirstindia.com/policy/schedule-of-charges','2026-09-10',
-   'Rate 8.00-17.50 PROVISIONAL (single read, could not re-confirm — re-verify). HFFC PLR 17.00. Conversion/repricing up to 1.5% POS. Fees are FLAT Login (Rs 2500) so processing_fee_pct NULL.'),
+   'Verified from the official Home First Fees & Charges page (user screenshot). Home Loan floor 8.00% CONFIRMED (floating 8.00-17.50%; HFFC PLR 17.00% w.e.f. 01-Jan-2026) — was provisional. CONVERSION = Repricing Fee up to 1.5% of principal outstanding (the Door-2 rate-reduction) -> stored 0.015; the 2% fixed<->floating conversion is a separate type switch. PROCESSING is FLAT by price grid (Home Loan: Rs 8500 <=10L, Rs 16000 10-20L, Rs 26500 20L+) plus Rs 2500 login -> processing_fee_flat 16000 (10-20L, Home First''s typical ticket; see UPDATE); processing_fee_pct NULL. Foreclosure NIL (partial & full pre-payment).'),
   ('Repco Home Finance','2026-09-10',5.25,NULL,NULL,8.75, NULL,NULL,NULL,
    'https://www.repcohome.com/products/branches',NULL,'2026-09-10',
    'Rate 8.75% LOW CONFIDENCE: from a marketing/branches page, conditions unstated (a stale cache showed 9.15). Re-verify against the official ROI PDF. Fee PDFs URLs could not be obtained (href stripped) so both fees NULL.'),
@@ -145,7 +145,10 @@ insert into public.benchmarks
 --     to IDBI carries no processing fee (MOD + legal still apply on top in Door 3).
 --   LIC Housing — flat Rs 5,000 for the 25-50L IHL slab (Rs 3000 <=25L, 7500
 --     50L-1Cr, 15000 1-5Cr), per the LIC HFL Fees & Charges schedule.
+--   Home First — flat Rs 16,000 for the 10-20L grid (Rs 8500 <=10L, 26500 20L+)
+--     plus Rs 2500 login, per the Home First Fees & Charges page.
 update public.benchmarks set processing_fee_flat = 8500 where bank = 'Bank of Baroda';
 update public.benchmarks set processing_fee_flat = 6500 where bank = 'SBI';
 update public.benchmarks set processing_fee_flat = 0    where bank = 'IDBI Bank';
 update public.benchmarks set processing_fee_flat = 5000 where bank = 'LIC Housing';
+update public.benchmarks set processing_fee_flat = 16000 where bank = 'Home First Finance';
