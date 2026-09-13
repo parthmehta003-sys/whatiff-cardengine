@@ -57,6 +57,10 @@ are deliberately not built yet.
 7. Run `supabase/migrations/0005_widen_amount_range.sql` — widens the accepted
    loan amount to ₹2 lakh–₹20 crore. Independent of the others; run any time
    after 0001.
+8. Run `supabase/migrations/0006_abuse_hardening.sql` — abuse hardening: a
+   24-hour rate-limit window, a robust median/MAD outlier test, and session
+   revocation after repeated out-of-range reports (see "Anti-abuse" below).
+   Independent of 0002–0005; run any time after 0001.
 
 That creates both tables (`rates`, `outcomes`), enables RLS with **no direct
 table access for the browser at all**, and creates the write RPCs
@@ -193,6 +197,35 @@ door says it's the lender's *published figure*. So the site works before you fil
 these in, and gets more accurate as you do. Gather them the same way as rates —
 from each lender's own fee schedule / MITC — via the fetch prompt; MOD (stamp)
 and legal/valuation stay as constants (state-based / roughly fixed).
+
+### Anti-abuse & data quality (migration 0006)
+
+There is **no sign-up and no auth**, so a "person" is only a client-generated
+`session_id` in `localStorage`. Anything keyed on that alone is bypassable by
+clearing storage or opening a private window — so the defence is layered and
+doesn't trust the session id:
+
+- **One live report per person, by construction.** `submit_rate` *supersedes*
+  earlier submissions from the same session + loan type — resubmitting corrects
+  the prior report instead of adding a new one. A session therefore ends up with
+  exactly one live report per loan type. That is the "once" guarantee; it's
+  enforced, not trusted.
+- **24-hour rate-limit window.** A generous burst ceiling (8 inserts / session /
+  24h) stops a single session scripting a flood. Honest corrections resubmit and
+  are deduped/superseded, so they rarely reach it.
+- **Robust outlier test (median + MAD).** A row is dropped from every aggregate
+  when its rate sits more than `3.5 × 1.4826 × MAD` from the bank's **median**.
+  The median and MAD (not the mean/SD) are used precisely because a burst of
+  coordinated fakes can't drag the centre to hide itself. Needs ≥ 4 clean reports
+  before any aggregate shows at all, so a stray row can never move a number alone.
+- **Session revocation.** A session that accrues 3+ flagged (outlier/below-floor)
+  reports is written to `banned_sessions` and refused further submissions.
+
+What this deliberately does **not** claim: a hard "one real human, once" bound.
+That needs an identity signal we don't collect (phone/email OTP, or a login). If
+abuse ever justifies the signup friction, add it; until then 0006 raises the cost
+without pretending to be unbypassable. The `abuse_ban_threshold()` function and
+the constants in `enforce_rate_limit()` are the tuning knobs.
 
 ## 6. Before launch
 

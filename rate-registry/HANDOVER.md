@@ -95,6 +95,34 @@ borrower was treated unfairly.
 
 ---
 
+### Anti-abuse hardening (migration 0006 — LinkedIn feedback)
+
+Answered the registry feedback (Rujhan Arora: "IP limits are easy to bypass;
+how do you think about fake/spam over time?"; the "checks vs regional/bank
+median" and "revoke access after too many reports" asks) in
+`0006_abuse_hardening.sql`. **App-side:** `app.js` now shows friendly messages
+for the `session_revoked` and (reworded) 24h rate-limit errors. Three layers:
+
+1. **One live report per person, by construction** — `submit_rate` already
+   supersedes prior reports from the same session+loan_type, so a session ends
+   up with exactly one live report per loan type. That's the "once" guarantee.
+2. **24h rate-limit window** — replaced 5/hr with an 8-inserts/24h burst ceiling
+   (honest corrections dedupe/supersede, so they don't reach it).
+3. **Robust outlier test** — replaced mean/SD with **median + MAD**
+   (`|rate−median| > 3.5×1.4826×MAD`), because the mean/SD are themselves
+   poisoned by the fakes; the median resists it. **Session revocation:** a
+   session with ≥3 flagged (outlier/below_floor) reports is written to the new
+   `banned_sessions` table and refused (`session_revoked`). Threshold =
+   `abuse_ban_threshold()` (=3), the tuning knob.
+
+Verified on local Postgres 16: 0001→0006 apply clean; outlier flagged, session
+banned at exactly 3 flags then blocked, 9th/24h blocked, idempotent resubmit
+still returns without inserting. **Honest caveat (documented in the migration +
+README):** no auth means a "person" is a localStorage `session_id` — all
+per-session limits are bypassable by clearing storage. A hard "one human, once"
+needs an identity signal (phone/email OTP or login) we don't collect yet; 0006
+raises cost without pretending to be unbypassable.
+
 ## ⚠️ Open items / TODO for next session
 
 1. **Seed 40–50 REAL borrower rates.** The site launches empty and hides aggregates
@@ -135,11 +163,14 @@ borrower was treated unfairly.
 
 ```
 0001_rate_registry.sql → 0002_lenders_and_fees.sql → 0003_conversion_flat_fee.sql → 0004_processing_flat_fee.sql → seed_benchmarks.sql
+0005_widen_amount_range.sql   (independent; ₹2L–₹20Cr amount range)
+0006_abuse_hardening.sql      (independent; 24h rate limit, median/MAD outliers, session revocation)
 ```
 
 All under `rate-registry/supabase/`. `seed_benchmarks.sql` re-run is safe (it
 `delete`s those lenders' rows first). `seed_benchmarks.example.sql` is the blank
-template for future refreshes.
+template for future refreshes. **0005 and 0006 are independent of 0002–0005 and
+each other — run any time after 0001.**
 
 ---
 
@@ -155,6 +186,8 @@ template for future refreshes.
 | `supabase/migrations/0002_lenders_and_fees.sql` | widens allowed-lender check constraints to 30; adds `conversion_fee_pct`, `processing_fee_pct`, `fee_source_url` |
 | `supabase/migrations/0003_conversion_flat_fee.sql` | adds `conversion_fee_flat`; rebuilds `bank_benchmark` |
 | `supabase/migrations/0004_processing_flat_fee.sql` | adds `processing_fee_flat` (Door-3 takeover); rebuilds `bank_benchmark` + `bank_rates` |
+| `supabase/migrations/0005_widen_amount_range.sql` | widens `amt_allowed` to 2–2000 lakh (₹2L–₹20Cr) |
+| `supabase/migrations/0006_abuse_hardening.sql` | anti-abuse: 24h rate-limit window (replaces 5/hr), median/MAD outlier test (replaces mean/SD), `banned_sessions` + revocation at 3 flagged reports; adds `session_revoked` error |
 | `supabase/seed_benchmarks.sql` | 25 verified lender rows + trailing UPDATEs for flat Door-3 processing fees (BoB ₹8,500, SBI ₹6,500, IDBI ₹0, LIC ₹5,000, Home First ₹16,000). Removed lenders (Indian Bank, Aavas, Can Fin, Sammaan) kept in the delete list but not re-inserted. |
 | `README.md` | setup, deploy, security note, fees explanation |
 
