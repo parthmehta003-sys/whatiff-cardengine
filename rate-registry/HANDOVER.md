@@ -38,6 +38,14 @@ borrower was treated unfairly.
   is now per bank+band (a whole low-score band would otherwise be flagged as
   fraud against the bank-wide median). Form requires a band; 'Not sure' is the
   escape hatch; nullable in DB so old rows/Business are unaffected.
+- **Ticket-size band added (0008)** as a cohort dimension, derived from the loan
+  amount already collected (no new question). Bands ≤₹30L / ₹30-75L / ₹75L-₹2Cr /
+  >₹2Cr (`amount_band(int)`). Full cohort ladder now: bank → CIBIL → ticket →
+  employment → year → channel (score and size, the two hard pricing levers,
+  survive longest). Testing surfaced a false-positive: tight rate clusters make
+  MAD ~0 so a legit larger-ticket cluster got flagged as outliers → fixed with a
+  **0.75-point absolute-deviation floor** on the outlier test (flag only if far by
+  MAD *and* ≥0.75 off the band median). Gross typos (13.5) still caught.
 - **Design redesign done** to match whatiff.in (hero brand card, coins, full-width
   `landing-grid` / `result-grid`).
 - **Plain-language copy pass done** on landing list and result screen/doors (kept
@@ -174,6 +182,7 @@ raises cost without pretending to be unbypassable.
 0005_widen_amount_range.sql   (independent; ₹2L–₹20Cr amount range)
 0006_abuse_hardening.sql      (independent; 24h rate limit, median/MAD outliers, session revocation)
 0007_cibil_band.sql           (independent; CIBIL band cohort dimension; APPLY BEFORE deploying app.js)
+0008_ticket_band.sql          (after 0007; ticket-size band cohort dim from amount + 0.75 outlier floor; APPLY BEFORE deploying app.js)
 ```
 
 All under `rate-registry/supabase/`. `seed_benchmarks.sql` re-run is safe (it
@@ -198,6 +207,7 @@ each other — run any time after 0001.**
 | `supabase/migrations/0005_widen_amount_range.sql` | widens `amt_allowed` to 2–2000 lakh (₹2L–₹20Cr) |
 | `supabase/migrations/0006_abuse_hardening.sql` | anti-abuse: 24h rate-limit window (replaces 5/hr), median/MAD outlier test (replaces mean/SD), `banned_sessions` + revocation at 3 flagged reports; adds `session_revoked` error |
 | `supabase/migrations/0007_cibil_band.sql` | adds `cibil_band` column + check; rebuilds `submit_rate` (13-arg, +`p_cibil_band`) and `cohort_stats` (6-arg, +`p_cibil_band`, 5 tiers with CIBIL as a dimension); makes the outlier test **per bank+band** (else a low-score band is wrongly flagged as fraud). Must be applied BEFORE the app.js that sends `p_cibil_band`. |
+| `supabase/migrations/0008_ticket_band.sql` | adds `amount_band(int)` helper + rebuilds `cohort_stats` (7-arg, +`p_amount_lakh`, 6 tiers with ticket size as a dimension, derived from the amount already collected — no new form field); adds a **0.75-point absolute floor** to the outlier test so legit ticket/category variation within a score band isn't flagged as fraud (found in testing: tight rate clusters make MAD tiny → hypersensitive). Must be applied BEFORE the app.js that sends `p_amount_lakh`. |
 | `supabase/seed_benchmarks.sql` | 25 verified lender rows + trailing UPDATEs for flat Door-3 processing fees (BoB ₹8,500, SBI ₹6,500, IDBI ₹0, LIC ₹5,000, Home First ₹16,000). Removed lenders (Indian Bank, Aavas, Can Fin, Sammaan) kept in the delete list but not re-inserted. |
 | `README.md` | setup, deploy, security note, fees explanation |
 

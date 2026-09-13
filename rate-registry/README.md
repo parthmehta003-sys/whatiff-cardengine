@@ -68,6 +68,12 @@ are deliberately not built yet.
    the app sends the new `p_cibil_band` argument, so an old DB would reject the
    call during the gap. Run after 0001 (and after 0006, whose `submit_rate` and
    outlier function it carries forward).
+10. Run `supabase/migrations/0008_ticket_band.sql` — adds a **ticket-size band**
+    (derived from the loan amount already collected, no new question) as a cohort
+    dimension, and adds a 0.75-point absolute floor to the outlier test so
+    legitimate ticket variation isn't flagged as fraud. **Apply BEFORE deploying
+    the matching `app.js`** (it sends the new `p_amount_lakh` arg to
+    `cohort_stats`). Run after 0007.
 
 That creates both tables (`rates`, `outcomes`), enables RLS with **no direct
 table access for the browser at all**, and creates the write RPCs
@@ -208,15 +214,19 @@ and legal/valuation stay as constants (state-based / roughly fixed).
 ### Cohorts (how "someone like you" is defined)
 
 A submission is compared against the tightest matching group that has ≥ 4 active
-reports, widening outward when a cell is thin (`cohort_stats`). Since migration
-0007 the dimensions, tightest first, are **bank → employment → CIBIL band → year
-→ channel**, dropped weakest-signal-first (channel, then year, then employment)
-so the **score band survives longest** before the final bank-wide fallback. That
-ordering is deliberate: for floating home loans the rate is largely national and
-the spread below RLLR is driven mostly by the **credit score**, so the score band
-is what actually explains "same profile, different rate" — and it's actionable.
-City was considered and rejected: low rate-signal, it worsens sparsity, and being
-unverifiable it just hands a spammer a target.
+reports, widening outward when a cell is thin (`cohort_stats`). Since migrations
+0007–0008 the dimensions, tightest first, are **bank → CIBIL band → ticket-size
+band → employment → year → channel**, dropped weakest-signal-first (channel, then
+year, then employment) so the two hard pricing levers — **credit score and loan
+size** — survive longest before the bank-wide fallback. That ordering is
+deliberate: for floating home loans the rate is largely national and the spread
+below RLLR is driven mostly by the borrower's **credit score** and the **ticket
+slab** the bank prices in, so those two are what actually explain "same profile,
+different rate" — and both are things the borrower can act on. The ticket band is
+derived from the loan amount already collected (no extra question); its brackets
+are ≤₹30L / ₹30–75L / ₹75L–₹2Cr / >₹2Cr. City was considered and rejected: low
+rate-signal, it worsens sparsity, and being unverifiable it just hands a spammer
+a target.
 
 ### Anti-abuse & data quality (migration 0006)
 
@@ -233,14 +243,17 @@ doesn't trust the session id:
 - **24-hour rate-limit window.** A generous burst ceiling (8 inserts / session /
   24h) stops a single session scripting a flood. Honest corrections resubmit and
   are deduped/superseded, so they rarely reach it.
-- **Robust outlier test (median + MAD), per score band.** A row is dropped from
-  every aggregate when its rate sits more than `3.5 × 1.4826 × MAD` from the
-  median of **its own bank + CIBIL band** (migration 0007 made this band-aware;
-  judging against the whole bank would flag a legitimately-higher-rate low-score
-  group as fraud). The median and MAD (not the mean/SD) are used precisely because
-  a burst of coordinated fakes can't drag the centre to hide itself. Needs ≥ 4
-  clean reports before any aggregate shows at all, so a stray row can never move a
-  number alone.
+- **Robust outlier test (median + MAD), per score band, with an absolute floor.**
+  A row is dropped from every aggregate only when its rate is *both* more than
+  `3.5 × 1.4826 × MAD` from the median of **its own bank + CIBIL band** (migration
+  0007 made this band-aware; judging against the whole bank would flag a
+  legitimately-higher-rate low-score group as fraud) *and* at least **0.75 points**
+  off that median (migration 0008; ordinary within-band spread from ticket size,
+  employer category, timing and negotiation is under 0.75, so it isn't mistaken
+  for fraud, while a real typo/fake is points away). The median and MAD (not the
+  mean/SD) are used precisely because a burst of coordinated fakes can't drag the
+  centre to hide itself. Needs ≥ 4 clean reports before any aggregate shows at
+  all, so a stray row can never move a number alone.
 - **Session revocation.** A session that accrues 3+ flagged (outlier/below-floor)
   reports is written to `banned_sessions` and refused further submissions.
 

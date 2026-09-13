@@ -404,6 +404,7 @@ async function submit(state) {
       sb.rpc('cohort_stats', {
         p_loan_type: 'Home', p_bank: bank, p_year: loan_year,
         p_channel: channel, p_employment: employment, p_cibil_band: cibil_band,
+        p_amount_lakh: amount_lakh,
       }),
       sb.rpc('bank_rates', { p_loan_type: 'Home' }),
       sb.rpc('bank_benchmark', { p_bank: bank }),
