@@ -54,6 +54,9 @@ are deliberately not built yet.
    **takeover** fee (e.g. Bank of Baroda ₹8,500). Run after 0003.
 6. Optionally run `supabase/seed_benchmarks.sql` to load the verified benchmark
    rates and fees. **Run order matters: 0001 → 0002 → 0003 → 0004 → seed.**
+7. Run `supabase/migrations/0005_widen_amount_range.sql` — widens the accepted
+   loan amount to ₹2 lakh–₹20 crore. Independent of the others; run any time
+   after 0001.
 
 That creates both tables (`rates`, `outcomes`), enables RLS with **no direct
 table access for the browser at all**, and creates the write RPCs
