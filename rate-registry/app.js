@@ -426,7 +426,8 @@ async function submit(state) {
   } catch (e) {
     submitting = false; btn.disabled = false; btn.textContent = 'See what\'s achievable at your bank';
     const msg = String(e && e.message || e);
-    if (msg.includes('rate_limit_exceeded')) showError("You've shared a lot in the last hour — take a break and come back later.");
+    if (msg.includes('session_revoked')) showError("This device has been blocked from posting after several out-of-range entries. If you think that's a mistake, reach out and we'll take a look.");
+    else if (msg.includes('rate_limit_exceeded')) showError("You've shared a lot in the last day — take a break and come back later.");
     else showError('Something went wrong saving that. Please try again.');
     return;
   }
