@@ -61,8 +61,12 @@ const BANK_GROUPS = [
 ];
 const BANKS = BANK_GROUPS.flatMap(g => g.items);
 const AMOUNTS = [
+  { v: 2, label: '₹2 lakh' }, { v: 5, label: '₹5 lakh' }, { v: 10, label: '₹10 lakh' },
   { v: 20, label: '₹20 lakh' }, { v: 35, label: '₹35 lakh' }, { v: 50, label: '₹50 lakh' },
   { v: 75, label: '₹75 lakh' }, { v: 100, label: '₹1 crore' }, { v: 150, label: '₹1.5 crore' },
+  { v: 200, label: '₹2 crore' }, { v: 300, label: '₹3 crore' }, { v: 500, label: '₹5 crore' },
+  { v: 750, label: '₹7.5 crore' }, { v: 1000, label: '₹10 crore' }, { v: 1500, label: '₹15 crore' },
+  { v: 2000, label: '₹20 crore' },
 ];
 const RATE_TYPES = ['Floating', 'Fixed'];
 const CHANNELS = ['Branch', 'Agent or DSA', 'Online', 'Builder tie-up', "Don't remember"];
@@ -568,10 +572,8 @@ function renderResult(res) {
     <div class="result-col rc-doors">
     <div class="card">
       <div class="doors-title">What you can actually do about it</div>
-      ${doorHtml(1, rec, calc)}
-      ${doorHtml(2, rec, calc)}
-      ${doorHtml(3, rec, calc)}
-      <div class="fee-disclaimer">Fee figures are <b>estimates</b> — drawn from each lender's official documents where published, and from third-party sources where the lender doesn't publish them. Charges change and vary by profile, so <b>verify the exact fees with your bank</b> before acting.</div>
+      ${doorHtml(Number(rec.slice(4)), rec, calc)}
+      ${rec !== 'door1' ? `<div class="fee-disclaimer">Fee figures are <b>estimates</b> — drawn from each lender's official documents where published, and from third-party sources where the lender doesn't publish them. Charges change and vary by profile, so <b>verify the exact fees with your bank</b> before acting.</div>` : ''}
     </div>
     </div>
     </div>
@@ -589,7 +591,7 @@ function doorHtml(n, rec, calc) {
   if (n === 1) {
     return `
       <div class="door ${isRec ? 'rec' : ''}">
-        ${tag}<div class="dnum">Door 1</div>
+        ${tag}
         <h3>Nothing to do right now</h3>
         <div class="net none">The savings wouldn't cover the cost of switching right now. We'll tell you if that changes.</div>
       </div>`;
@@ -601,7 +603,7 @@ function doorHtml(n, rec, calc) {
     if (d.noGap) {
       return `
         <div class="door ${isRec ? 'rec' : ''}">
-          ${tag}<div class="dnum">Door 2</div>
+          ${tag}
           <h3>Ask your bank to convert your spread</h3>
           <div class="net none">Your rate already matches what others get at your bank.</div>
         </div>`;
@@ -619,7 +621,7 @@ one-time conversion fee before processing.
 Thank you.`;
     return `
       <div class="door ${isRec ? 'rec' : ''}" data-door="Conversion">
-        ${tag}<div class="dnum">Door 2</div>
+        ${tag}
         <h3>Ask your bank to convert your spread</h3>
         <div class="dsub">In plain words: get your bank to put today's lower rate on your existing loan — no new loan, no longer tenure.</div>
         <div class="net">You'd save about <b>${inr(d.net)}</b> — after a one-time fee of roughly ${inr(d.cost)}.</div>
@@ -638,14 +640,14 @@ Thank you.`;
   if (d.noGap) {
     return `
       <div class="door ${isRec ? 'rec' : ''}">
-        ${tag}<div class="dnum">Door 3</div>
+        ${tag}
         <h3>Move to another lender</h3>
         <div class="net none">No other bank here is currently cheaper than your rate.</div>
       </div>`;
   }
   return `
     <div class="door ${isRec ? 'rec' : ''}" data-door="Transfer">
-      ${tag}<div class="dnum">Door 3</div>
+      ${tag}
       <h3>Move to another lender</h3>
       <div class="dsub">Switch your loan to a cheaper bank. There's paperwork and some upfront cost, but the savings can be big.</div>
       <div class="net">You'd save about <b>${inr(d.net)}</b> — after roughly ${inr(d.cost)} in switching costs (processing, legal, valuation, registration).</div>
