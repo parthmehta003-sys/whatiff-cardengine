@@ -27,12 +27,17 @@
 --
 -- Fees left NULL fall back to the app's ASSUMPTION estimate (labelled as such).
 --
--- THIRD-PARTY FEE POLICY: where a lender does NOT publish a fee officially, store
--- the best third-party (aggregator) estimate rather than leaving it to the generic
--- app assumption, and say "THIRD-PARTY ESTIMATE" in that row's note. The site shows
--- a standing disclaimer that all fee figures are estimates from official + third-
--- party sources and must be verified with the bank. (Percentage "ceilings" like
--- "up to 3%/7%" are still NOT stored — they would produce absurd door fees.)
+-- THIRD-PARTY FEE POLICY: where a lender does NOT publish a usable fee officially
+-- (only a ceiling like "up to 7%", a rate-type-switch fee, or nothing), fill it
+-- with a market-typical third-party (aggregator) estimate rather than leaving it to
+-- the generic app assumption, so every lender shows a specific number. These fills
+-- are applied in the "THIRD-PARTY FEE ESTIMATES" UPDATE block at the very bottom
+-- (guarded so they never overwrite an official value); a row's own note still
+-- explains WHY there was no official figure. The site shows a standing disclaimer
+-- that all fees are estimates from official + third-party sources and must be
+-- verified with the bank. Percentage ceilings ("up to 3%/7%") are never stored as
+-- the value itself — they would produce absurd door fees; the typical estimate is
+-- used instead.
 --
 -- Removed lenders (Indian Bank, Aavas Financiers, Can Fin Homes, Sammaan Capital)
 -- stay in the delete list but are NOT re-inserted below, so re-running this seed
@@ -145,3 +150,25 @@ update public.benchmarks set processing_fee_flat = 6500 where bank = 'SBI';
 update public.benchmarks set processing_fee_flat = 0    where bank = 'IDBI Bank';
 update public.benchmarks set processing_fee_flat = 5000 where bank = 'LIC Housing';
 update public.benchmarks set processing_fee_flat = 16000 where bank = 'Home First Finance';
+
+-- THIRD-PARTY FEE ESTIMATES — fill remaining NULL fees so every lender shows a
+-- specific number instead of the generic app assumption. These are NOT the
+-- lender's official published figure (those rows publish only a ceiling, a
+-- rate-type-switch fee, or nothing); they are market-typical values from
+-- third-party aggregators (Paisabazaar/BankBazaar/etc.). The site shows a
+-- standing disclaimer that all fees are estimates from official + third-party
+-- sources and must be verified with the bank. The "is null" guards mean these
+-- never overwrite an official value loaded above.
+--
+-- Conversion (Door 2, rate reduction): market-standard ~0.5% of outstanding.
+update public.benchmarks set conversion_fee_pct = 0.005
+  where bank in ('Aadhar Housing Finance','Bajaj Housing','Bank of Baroda','Bank of India',
+                 'Canara Bank','Federal Bank','IDFC First','Punjab National Bank','Union Bank')
+    and conversion_fee_pct is null and conversion_fee_flat is null;
+-- Processing (Door 3): aggregator-typical — banks ~0.5%, NBFC/HFCs ~1%.
+update public.benchmarks set processing_fee_pct = 0.005
+  where bank in ('Kotak Mahindra','IDFC First')
+    and processing_fee_pct is null and processing_fee_flat is null;
+update public.benchmarks set processing_fee_pct = 0.01
+  where bank in ('Bajaj Housing','Godrej Housing','Tata Capital','Piramal Finance')
+    and processing_fee_pct is null and processing_fee_flat is null;
