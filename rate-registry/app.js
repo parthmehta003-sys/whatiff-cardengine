@@ -71,6 +71,11 @@ const AMOUNTS = [
 const RATE_TYPES = ['Floating', 'Fixed'];
 const CHANNELS = ['Branch', 'Agent or DSA', 'Online', 'Builder tie-up', "Don't remember"];
 const EMPLOYMENT = ['Salaried', 'Self-employed'];
+// CIBIL score bands — the dimension that most explains "same profile, different
+// rate" (banks price the spread below RLLR mainly off the score). Must match the
+// cibil_allowed check constraint in migration 0007 exactly. 'Not sure' is the
+// escape hatch so the field is answerable without looking a score up.
+const CIBIL_BANDS = ['800+', '750-799', '700-749', 'Below 700', 'Not sure'];
 const YEARS = (() => { const a = []; for (let y = 2026; y >= 2015; y--) a.push(y); return a; })();
 
 const REF_PRINCIPAL = 5000000; // ₹50 lakh, for the landing list
@@ -283,13 +288,14 @@ function formHtml() {
   const yearOpts = YEARS.map(y => `<option value="${y}">${y}</option>`).join('');
   const amtOpts = AMOUNTS.map(a => `<option value="${a.v}">${esc(a.label)}</option>`).join('');
   const chanOpts = CHANNELS.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  const cibilOpts = CIBIL_BANDS.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
   const typeOpts = RATE_TYPES.map(t => `<div class="opt" data-type="${t}">${t}</div>`).join('');
   const empOpts = EMPLOYMENT.map(e => `<div class="opt" data-emp="${e}">${e}</div>`).join('');
 
   return `
     <div class="card" id="addrate">
       <div class="form-title">Add your rate</div>
-      <div class="form-sub">Seven questions, under a minute. Anonymous — no phone, no email.</div>
+      <div class="form-sub">Eight questions, under a minute. Anonymous — no phone, no email.</div>
 
       <div class="field">
         <label for="f-bank">Your bank</label>
@@ -318,6 +324,10 @@ function formHtml() {
       <div class="field">
         <label>Employment</label>
         <div class="seg" id="f-emp">${empOpts}</div>
+      </div>
+      <div class="field">
+        <label for="f-cibil">Credit score (CIBIL) when you took the loan</label>
+        <select id="f-cibil"><option value="" disabled selected>Choose a band</option>${cibilOpts}</select>
       </div>
 
       <button class="btn" id="f-submit">See what's achievable at your bank</button>
@@ -354,6 +364,7 @@ async function submit(state) {
   const rate_type = state.rate_type;
   const channel = document.getElementById('f-chan').value;
   const employment = state.employment;
+  const cibil_band = document.getElementById('f-cibil').value;
 
   if (!bank) return showError('Pick your bank.');
   if (!(rate >= 6 && rate <= 15)) return showError('Enter a rate between 6% and 15%.');
@@ -362,9 +373,10 @@ async function submit(state) {
   if (!rate_type) return showError('Pick floating or fixed.');
   if (!channel) return showError('Pick how you got the loan.');
   if (!employment) return showError('Pick salaried or self-employed.');
+  if (!cibil_band) return showError('Pick your credit-score band.');
 
   const input = { loan_type: 'Home', bank, rate: Math.round(rate * 100) / 100,
-                  loan_year, amount_lakh, rate_type, channel, employment };
+                  loan_year, amount_lakh, rate_type, channel, employment, cibil_band };
 
   // Client-side duplicate prevention: identical payload → skip the insert and
   // re-show the existing result (Back never creates a second row).
@@ -380,7 +392,7 @@ async function submit(state) {
     const ins = await sb.rpc('submit_rate', {
       p_session_id: SESSION_ID, p_loan_type: 'Home', p_bank: bank, p_rate: input.rate,
       p_loan_year: loan_year, p_amount_lakh: amount_lakh, p_rate_type: rate_type,
-      p_channel: channel, p_employment: employment,
+      p_channel: channel, p_employment: employment, p_cibil_band: cibil_band,
     });
     if (ins.error) throw ins.error;
     currentRateId = ins.data;
@@ -391,7 +403,7 @@ async function submit(state) {
     const [cs, br, bm] = await Promise.all([
       sb.rpc('cohort_stats', {
         p_loan_type: 'Home', p_bank: bank, p_year: loan_year,
-        p_channel: channel, p_employment: employment,
+        p_channel: channel, p_employment: employment, p_cibil_band: cibil_band,
       }),
       sb.rpc('bank_rates', { p_loan_type: 'Home' }),
       sb.rpc('bank_benchmark', { p_bank: bank }),

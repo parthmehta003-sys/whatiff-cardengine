@@ -61,6 +61,13 @@ are deliberately not built yet.
    24-hour rate-limit window, a robust median/MAD outlier test, and session
    revocation after repeated out-of-range reports (see "Anti-abuse" below).
    Independent of 0002–0005; run any time after 0001.
+9. Run `supabase/migrations/0007_cibil_band.sql` — adds a **CIBIL score band** as
+   a cohort dimension (the dimension that most explains "same profile, different
+   rate"), threads it through `submit_rate`/`cohort_stats`, and makes the outlier
+   test score-band-aware. **Apply this BEFORE deploying the matching `app.js`** —
+   the app sends the new `p_cibil_band` argument, so an old DB would reject the
+   call during the gap. Run after 0001 (and after 0006, whose `submit_rate` and
+   outlier function it carries forward).
 
 That creates both tables (`rates`, `outcomes`), enables RLS with **no direct
 table access for the browser at all**, and creates the write RPCs
@@ -198,6 +205,19 @@ these in, and gets more accurate as you do. Gather them the same way as rates �
 from each lender's own fee schedule / MITC — via the fetch prompt; MOD (stamp)
 and legal/valuation stay as constants (state-based / roughly fixed).
 
+### Cohorts (how "someone like you" is defined)
+
+A submission is compared against the tightest matching group that has ≥ 4 active
+reports, widening outward when a cell is thin (`cohort_stats`). Since migration
+0007 the dimensions, tightest first, are **bank → employment → CIBIL band → year
+→ channel**, dropped weakest-signal-first (channel, then year, then employment)
+so the **score band survives longest** before the final bank-wide fallback. That
+ordering is deliberate: for floating home loans the rate is largely national and
+the spread below RLLR is driven mostly by the **credit score**, so the score band
+is what actually explains "same profile, different rate" — and it's actionable.
+City was considered and rejected: low rate-signal, it worsens sparsity, and being
+unverifiable it just hands a spammer a target.
+
 ### Anti-abuse & data quality (migration 0006)
 
 There is **no sign-up and no auth**, so a "person" is only a client-generated
@@ -213,11 +233,14 @@ doesn't trust the session id:
 - **24-hour rate-limit window.** A generous burst ceiling (8 inserts / session /
   24h) stops a single session scripting a flood. Honest corrections resubmit and
   are deduped/superseded, so they rarely reach it.
-- **Robust outlier test (median + MAD).** A row is dropped from every aggregate
-  when its rate sits more than `3.5 × 1.4826 × MAD` from the bank's **median**.
-  The median and MAD (not the mean/SD) are used precisely because a burst of
-  coordinated fakes can't drag the centre to hide itself. Needs ≥ 4 clean reports
-  before any aggregate shows at all, so a stray row can never move a number alone.
+- **Robust outlier test (median + MAD), per score band.** A row is dropped from
+  every aggregate when its rate sits more than `3.5 × 1.4826 × MAD` from the
+  median of **its own bank + CIBIL band** (migration 0007 made this band-aware;
+  judging against the whole bank would flag a legitimately-higher-rate low-score
+  group as fraud). The median and MAD (not the mean/SD) are used precisely because
+  a burst of coordinated fakes can't drag the centre to hide itself. Needs ≥ 4
+  clean reports before any aggregate shows at all, so a stray row can never move a
+  number alone.
 - **Session revocation.** A session that accrues 3+ flagged (outlier/below-floor)
   reports is written to `banned_sessions` and refused further submissions.
 

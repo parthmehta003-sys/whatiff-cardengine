@@ -28,8 +28,16 @@ borrower was treated unfairly.
 
 ## Current state (what's done)
 
-- **v2 built and deployed.** Home-loan form (7 fields), three-door output, tiered
-  cohort widening, outcomes/follow-up, static crawlable aggregate pages.
+- **v2 built and deployed.** Home-loan form (8 fields — CIBIL band added in 0007),
+  three-door output, tiered cohort widening, outcomes/follow-up, static crawlable
+  aggregate pages.
+- **CIBIL score band added (0007)** as a cohort dimension — chosen over city
+  (city is low rate-signal for national floating rates, worsens sparsity, and is
+  an unverifiable spam target). Cohort tiers: bank → employment → CIBIL → year →
+  channel, dropped weakest-first so the score band survives longest. Outlier test
+  is now per bank+band (a whole low-score band would otherwise be flagged as
+  fraud against the bank-wide median). Form requires a band; 'Not sure' is the
+  escape hatch; nullable in DB so old rows/Business are unaffected.
 - **Design redesign done** to match whatiff.in (hero brand card, coins, full-width
   `landing-grid` / `result-grid`).
 - **Plain-language copy pass done** on landing list and result screen/doors (kept
@@ -165,6 +173,7 @@ raises cost without pretending to be unbypassable.
 0001_rate_registry.sql → 0002_lenders_and_fees.sql → 0003_conversion_flat_fee.sql → 0004_processing_flat_fee.sql → seed_benchmarks.sql
 0005_widen_amount_range.sql   (independent; ₹2L–₹20Cr amount range)
 0006_abuse_hardening.sql      (independent; 24h rate limit, median/MAD outliers, session revocation)
+0007_cibil_band.sql           (independent; CIBIL band cohort dimension; APPLY BEFORE deploying app.js)
 ```
 
 All under `rate-registry/supabase/`. `seed_benchmarks.sql` re-run is safe (it
@@ -188,6 +197,7 @@ each other — run any time after 0001.**
 | `supabase/migrations/0004_processing_flat_fee.sql` | adds `processing_fee_flat` (Door-3 takeover); rebuilds `bank_benchmark` + `bank_rates` |
 | `supabase/migrations/0005_widen_amount_range.sql` | widens `amt_allowed` to 2–2000 lakh (₹2L–₹20Cr) |
 | `supabase/migrations/0006_abuse_hardening.sql` | anti-abuse: 24h rate-limit window (replaces 5/hr), median/MAD outlier test (replaces mean/SD), `banned_sessions` + revocation at 3 flagged reports; adds `session_revoked` error |
+| `supabase/migrations/0007_cibil_band.sql` | adds `cibil_band` column + check; rebuilds `submit_rate` (13-arg, +`p_cibil_band`) and `cohort_stats` (6-arg, +`p_cibil_band`, 5 tiers with CIBIL as a dimension); makes the outlier test **per bank+band** (else a low-score band is wrongly flagged as fraud). Must be applied BEFORE the app.js that sends `p_cibil_band`. |
 | `supabase/seed_benchmarks.sql` | 25 verified lender rows + trailing UPDATEs for flat Door-3 processing fees (BoB ₹8,500, SBI ₹6,500, IDBI ₹0, LIC ₹5,000, Home First ₹16,000). Removed lenders (Indian Bank, Aavas, Can Fin, Sammaan) kept in the delete list but not re-inserted. |
 | `README.md` | setup, deploy, security note, fees explanation |
 
