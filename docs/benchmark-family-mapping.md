@@ -250,18 +250,19 @@ re-runnable. Resolution is a pure function of
   written by the resolution service from `(lender, origination_year,
   rate_type_plain)`. Add `resolution_confidence` and `family_map_version` to the
   stored facts.
-- **0011:** the spread rule is single and explicit — **a report's spread =
-  `reported_rate − benchmark effective on that report's `report_date``**, looked up
-  in `benchmark_history` by `(lender, benchmark_family, latest effective_from ≤
-  report_date)`. The live/current spread is the special case where `report_date`
-  is today. This prevents manufacturing false spread changes when the benchmark
-  has since moved, and exploits that spread is stable across resets while the
-  headline rate is not.
+- **0011:** two separately-named normalized objects, each using the benchmark
+  **effective on the report's `report_date`** (design §4): `benchmark_spread =
+  reported_rate − lender_benchmark` (within-lender comparable; families RLLR/MCLR/
+  Base/PLR where that lender's series exists) and `repo_markup = reported_rate −
+  national_repo` (**RLLR family only** — repo-linked; a category error otherwise).
+  The live value is the special case where `report_date` is today. Stability
+  (corrected): `benchmark_spread` is relatively stable across repo resets;
+  `repo_markup` is **not** (a bank can revise its RLLR markup even when repo holds).
 - **Acceptance (all displayed numbers):** every rate the UI shows must carry its
   provenance — one of {peer-observed, advertised floor, Door-2 proxy,
-  benchmark-derived} — with the relevant `n`, `as_of`, `cohort_level`, `basis`,
-  `source_type`, and `resolution_confidence`. Three examples that must render as
-  visibly different epistemic objects: a peer-observed 8.35% (n, as_of, cohort);
-  an advertised-floor 7.75% (lender, as_of, basis=advertised_floor); a Door-2
-  proxy 7.62% (basis=cohort_spread_p25, n, benchmark). WhatIff never presents one
-  blended "true market rate".
+  benchmark_spread, repo_markup} — with the relevant `n`, `as_of`, `cohort_level`,
+  `basis`, `source_type`, and `resolution_confidence`. Examples that must render as
+  visibly different epistemic objects: peer-observed 8.35% (n, as_of, cohort);
+  advertised-floor 7.75% (lender, basis=advertised_floor); benchmark_spread +0.50%
+  (vs the lender's RLLR); repo_markup +2.75% (vs national repo). WhatIff never
+  presents one blended "true market rate".

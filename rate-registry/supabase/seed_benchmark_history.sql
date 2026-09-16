@@ -5,18 +5,20 @@
 -- with the one series every repo-linked lender needs and that can be reliably
 -- primary-sourced: the RBI policy repo rate.
 --
--- WHY REPO FIRST (and possibly repo ONLY, for the RLLR family) — the benchmark fork:
---   Only ~7 of the repo-linked banks publish a clean numeric RLLR (SBI, BoB,
---   Canara, PNB, Bank of India, IDBI; Union publishes EBLR; ICICI publishes
---   I-EBLR). HDFC Bank, Axis, Kotak, Yes, IndusInd, Federal and IDFC First publish
---   only "repo + spread" with no consolidated RLLR number. Keying spread off each
---   bank's RLLR therefore (a) has no series for half the banks and (b) is not
---   comparable across banks. Keying off the NATIONAL REPO instead — spread =
---   the borrower's all-in markup over the policy rate — needs one series, is
---   uniform across every repo-linked bank, and works at every cohort back-off
---   level. That decision is pending (see the migration/architecture docs); this
---   repo series is required under EITHER model, so it is safe to seed now. Per-
---   lender RLLR / PLR series follow in later batches once the model is confirmed.
+-- WHY REPO FIRST — the two normalized objects (docs/rate-architecture.md §4):
+--   WhatIff computes TWO separately-named things, never one generic "spread":
+--     * benchmark_spread = rate - the lender's own RLLR/PLR (within-lender
+--       comparable; needs that lender's dated series);
+--     * repo_markup      = rate - national repo (RLLR/repo-linked family ONLY;
+--       cross-bank comparable; the borrower's all-in markup over the policy rate).
+--   repo_markup is NOT a lender spread and is never computed for HFC (PLR) loans.
+--   The national repo series below powers repo_markup for all 15 repo-linked banks
+--   from a single sourced series. Only 8 banks publish a numeric RLLR, so their
+--   benchmark_spread additionally needs an RLLR history (a later batch);
+--   reconstructing that as repo + constant markup is only an approximation (a bank
+--   can revise its RLLR markup even when repo holds), so prefer published
+--   effective-dated RLLR points. This repo series is needed regardless, so it is
+--   correct to seed now.
 --
 -- SOURCE: RBI Monetary Policy Committee decisions. 2025 easing cycle = 125 bps
 -- across four cuts (6.50 -> 5.25); held through the 2026 MPCs; next MPC 05-07 Oct

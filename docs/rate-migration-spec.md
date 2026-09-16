@@ -145,44 +145,56 @@ unique (lender, benchmark_family, effective_from)
 
 ## 3. Migration 0011 — spread RPC
 
+0011 computes **two distinct, separately-named normalized objects** (design §4) —
+never one generic "spread":
+
 ```
-get_current_spread(p_report_id bigint) returns numeric
+get_benchmark_spread(p_report_id) returns numeric  -- rate − lender benchmark
+get_repo_markup(p_report_id)      returns numeric  -- rate − national repo (RLLR family only)
 ```
 
-**The single spread rule (applies to every report, current or historical):**
+**The as-of-report-date rule (applies to BOTH objects, every report):**
 
-> A report's spread = `reported_rate − benchmark effective on that report's
-> `report_date``, looked up in `benchmark_history` by
-> `(lender, benchmark_family, latest effective_from ≤ report_date)`.
+> A report's normalized value uses the benchmark **effective on that report's
+> `report_date`**, looked up in `benchmark_history` by
+> `(series, latest effective_from ≤ report_date)`.
 
-The live/current spread is just the special case where `report_date` is today.
-Using the *current* benchmark for an *older* report would manufacture a false
-spread change (a 9.1% report from six months ago, after a 100 bps move, would show
-a fabricated 100 bps swing). Because spread is stable across resets while the
-headline rate is not, the as-of-report-date spread is also a *better* estimate of
-that borrower's current spread than their stale headline rate.
+The live/current value is the special case where `report_date` is today. Using the
+*current* benchmark for an *older* report manufactures a false change (a 9.1% report
+from six months ago, after a 100 bps move, would show a fabricated swing).
 
-Logic (family invariant is hard — design §4):
+**Stability (corrected — design §4):** a contractual `benchmark_spread` (rate −
+RLLR) is *relatively* stable across repo resets, so it is a good estimate of a
+borrower's current pricing. `repo_markup` (rate − repo) is **not** stable — a bank
+can revise its RLLR markup even when repo holds — so it must not be treated as a
+stable per-borrower quantity.
+
+Logic:
 
 ```
 resolve (lender, benchmark_family, report_date) from rates
-if benchmark_family in (RLLR, MCLR, Base, PLR):    -- RLLR covers all bank repo-linked loans
-    b := active benchmark_history rate for (lender, family)
-         at report_date  (latest effective_from <= report_date)
-    if b is null: return null            -- series gap → no spread, never a guess
-    spread := reported_rate - b
-    -- guard (design §4): a small/negative spread is legitimate (concessions
-    -- below RLLR), but clamp only obvious impossibilities; never let a tiny
-    -- spread flow into an absurd door saving downstream
-    return spread
-else:                       -- Fixed | Unknown
-    return null             -- observed/peer layers only
+
+-- benchmark_spread: needs a dated series for THIS lender's own benchmark family
+if benchmark_family in (RLLR, MCLR, Base, PLR):
+    b := benchmark_asof(lender, benchmark_family, report_date)   -- lender's own series
+    benchmark_spread := (b is null) ? null : reported_rate - b   -- gap → null, never a guess
+else:  benchmark_spread := null            -- Fixed | Unknown → observed layer only
+
+-- repo_markup: REPO-LINKED ONLY (category error otherwise)
+if benchmark_family = RLLR:
+    r := benchmark_asof('National', 'Repo', report_date)
+    repo_markup := (r is null) ? null : reported_rate - r
+else:  repo_markup := null                 -- PLR/MCLR/Base/Fixed/Unknown → NULL
 ```
 
-- **No `reported_rate - repo` shortcut** for non-repo-linked loans.
-- Companion aggregate `get_spread_percentiles(cohort…)` computes P25/P50/P75 of
-  spread **within a single benchmark family** (never mix families), each member's
-  spread taken as-of its own `report_date` per the rule above.
+- **`repo_markup` is computed only for the `RLLR` family.** Never `reported_rate −
+  repo` for a PLR/MCLR/Base loan.
+- Guard (design §4): small/negative `benchmark_spread` is legitimate (concessions
+  below RLLR); clamp only obvious impossibilities so a tiny value can't drive an
+  absurd door saving.
+- Companion aggregates `get_benchmark_spread_percentiles` / `get_repo_markup_
+  percentiles` compute P25/P50/P75 **within a single family** (never mix), each
+  member's value taken as-of its own `report_date`.
 
 ---
 
@@ -209,10 +221,18 @@ else:                            continue to next level
 -- at the most general level; if even loan_type has < 4, return no-cohort.
 ```
 
+**Normalization by node (design §4 comparability):** `benchmark_spread` is
+comparable only *within a lender*; `repo_markup` is comparable *across* repo-linked
+banks. So the metric must match the node:
+- bank-scoped nodes (`bank`, `bank × year`, …) → `rate`, `benchmark_spread`, and
+  (for RLLR banks) `repo_markup` are all valid;
+- the cross-bank node (`loan_type`, all banks) → `rate` or `repo_markup` only;
+  **never** `benchmark_spread` (mixing different lenders' RLLR levels is meaningless).
+
 Return shape (so the frontend can explain the number — non-negotiable #4):
 
 ```
-metric            -- rate | spread
+metric            -- rate | benchmark_spread | repo_markup
 p25, median, p75
 n
 as_of             -- max verified/report date in the cohort
@@ -225,8 +245,9 @@ Correctness constraints:
 - **Exclude the user's own live report** from the cohort it is compared against
   (the supersede rule means one live row per session; don't let the user inflate
   their own peer set at small n).
-- Compute both `rate` and `spread` percentile sets; `spread` set is family-scoped
-  and omitted for `Unknown`/`Fixed`.
+- Compute `rate`, `benchmark_spread`, and (RLLR-family, repo-linked only)
+  `repo_markup` percentile sets, each family-scoped; the normalized sets are omitted
+  for `Unknown`/`Fixed`, and `benchmark_spread` is omitted at the cross-bank node.
 
 ---
 
@@ -313,8 +334,10 @@ carries its epistemic type and supporting fields:
 - **Advertised lender floor** — `lender`, `as_of`, `basis = advertised_floor`.
 - **Door-2 proxy** — `basis` (advertised_floor | cohort_spread_p25 |
   published_grid), `n`, the `benchmark` used.
-- **Benchmark-derived** — `lender`, `benchmark_family`, `as_of`,
-  `resolution_confidence`.
+- **`benchmark_spread`** — `lender`, `benchmark_family`, the lender-benchmark
+  `as_of`, `resolution_confidence` (within-lender comparison).
+- **`repo_markup`** — `national_repo` value + `as_of` (RLLR family only; all-in
+  markup over policy, explicitly not a lender spread).
 
 These are different epistemic objects and the UI must render them as visibly
 different — WhatIff never collapses them into one blended "true market rate"
@@ -344,10 +367,11 @@ different — WhatIff never collapses them into one blended "true market rate"
 - `0010`: `bank_benchmark()` and the `submit_rate` floor check return **identical**
   results on seed data before vs after redefinition (spot-check several banks);
   history is append-only (no UPDATEs in normal capture).
-- `0011`: `Unknown`/`Fixed` return NULL spread; spread uses the benchmark
-  as-of `report_date` (an older report is not re-based to today's benchmark);
-  live report matches `reported_rate − current benchmark`; series gap → NULL, not
-  a guess; no `rate − repo` path exists for non-repo families.
+- `0011`: `benchmark_spread` and `repo_markup` are separate outputs; both use the
+  benchmark as-of `report_date` (older reports not re-based to today); `repo_markup`
+  is computed **only** for RLLR family (NULL for PLR/MCLR/Base/Fixed/Unknown);
+  `benchmark_spread` NULL for Fixed/Unknown and on any series gap (never a guess);
+  no `rate − repo` path exists for non-repo-linked families.
 - `0012`: back-off returns one coherent level; `n ≥ 4` floor never violated;
   user's own row excluded; `cohort_level`/`n`/`as_of` always populated.
 - `0013`/`app.js`: Door 2 target no longer equals cohort P25; `basis` +

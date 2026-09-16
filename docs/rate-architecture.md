@@ -73,36 +73,59 @@ can break — and careful readers are the whole audience.
 
 ## 4. Benchmark-family rule (hard data invariant)
 
-Spread is only meaningful against the *matching* benchmark. This is an invariant,
-not a heuristic:
+**`benchmark_family` classifies the loan; it does not by itself name what we
+subtract.** There are two distinct normalized objects, and they must never be
+collapsed into one generic "spread":
+
+- **`benchmark_spread` = `reported_rate − lender_benchmark`** — the borrower's
+  pricing relative to their *own lender's contractual benchmark* (RLLR for a
+  repo-linked bank, PLR for an HFC, MCLR for an MCLR loan). Comparable **within a
+  lender**. Needs a dated series for *that lender's* benchmark.
+- **`repo_markup` = `reported_rate − national_repo`** — the borrower's *all-in
+  markup over the policy rate*. Comparable **across all repo-linked banks**. Needs
+  only the one national repo series.
+
+These are economically different. If repo = 5.25, a bank's RLLR = 7.50, and the
+borrower pays 8.00: `benchmark_spread` = 0.50 (concession vs the lender's floor),
+`repo_markup` = 2.75 (which also bundles the bank's structural RLLR markup + credit
+premium). Both are legitimate, displayed facts; each is labelled for what it is.
+
+Which object applies, per family:
 
 ```
-RLLR      → the bank's repo-linked series   (canonical family for all bank
-                                             repo-linked loans; "EBLR" is the
-                                             RBI regulatory category / alias,
-                                             NOT a separate stored value)
-MCLR      → applicable MCLR
-Base Rate → Base Rate
-PLR/RPLR  → corresponding lender benchmark
-Fixed     → NO spread calculation (observed layer only)
-Unknown   → NO spread calculation (observed layer only)
+RLLR   → benchmark_spread vs the bank's RLLR series (where published), AND
+         repo_markup vs national repo (always available)   [repo-linked]
+MCLR   → benchmark_spread vs that bank's MCLR series only   (NOT repo-linked → no repo_markup)
+Base   → benchmark_spread vs Base Rate only                 (NOT repo-linked → no repo_markup)
+PLR    → benchmark_spread vs the lender's PLR series only    (NOT repo-linked → no repo_markup)
+Fixed  → NEITHER (observed layer only)
+Unknown→ NEITHER (observed layer only)
 ```
+
+> **`repo_markup` is repo-linked-only.** Computing `reported_rate − repo` for a
+> `PLR`/`MCLR`/`Base`/`Fixed`/`Unknown` loan is a category error — those prices are
+> not repo-linked, so the number is not an "all-in markup over policy" in any
+> actionable sense. Guard it: `repo_markup` is computed **only** for the `RLLR`
+> family.
 
 > **Canonicalization (join-safety).** The resolver emits `RLLR` for bank
-> repo-linked loans and never `EBLR`. `benchmark_history` must store that series
-> under the same `RLLR` key, or the read-time join returns NULL silently (no
-> spread, no error). `EBLR` is therefore documented as an alias only and is **not**
-> a distinct `benchmark_family` value anywhere in the schema.
+> repo-linked loans and never `EBLR`. `benchmark_history` must store both the RLLR
+> series and the national repo series under keys the reader expects, or the join
+> returns NULL silently. `EBLR` is an alias only, **not** a stored `benchmark_family`.
 
-**Never** compute `reported_rate − repo_rate` unless the loan is actually
-repo-linked. Fixed-rate and unknown-type loans live in the observed/peer layers
-only and are excluded from every spread and pass-through calculation.
+**Stability caveat (corrected):** a contractual `benchmark_spread` (rate − RLLR) is
+*relatively* stable across **repo** resets, because rate and RLLR move together, so
+the concession stays roughly constant. `repo_markup` (rate − repo) is **not** stable
+in the same way — a bank can revise its own RLLR markup / credit-risk premium even
+when the RBI repo doesn't move, which shifts `repo_markup` without any borrower
+action. So `benchmark_spread` is the object we may treat as a stable estimate of a
+borrower's current pricing; `repo_markup` we may not.
 
-**EBLR simplification (validated):** for a *current* EBLR loan,
-`reported_rate − current_applicable_benchmark = current spread`. All past resets
-are already baked into the reported figure, so we do **not** need to reconstruct
-the historical rate path to get today's spread. Historical benchmarks are needed
-only for pass-through analysis (§8), not for the live spread.
+**RLLR history is still required** for `benchmark_spread` on the banks that publish
+an RLLR. Reconstructing it as `repo + constant markup` is an approximation that the
+stability caveat above says can be wrong wherever the bank revised its markup mid-
+window; prefer published historical RLLR effective-dated points, and flag any
+reconstructed value.
 
 **Spread guards:** banks advertise *below* RLLR (concessions), so
 `advertised_floor` is not a hard floor and a computed spread can be small or

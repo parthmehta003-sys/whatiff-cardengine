@@ -14,11 +14,14 @@ re-scrape.
    stale `bm_bank_allowed` CHECK in migration `0001`. The app actually supports the
    25 lenders seeded in `seed_benchmarks.sql` (the 4 removed lenders — Indian Bank,
    Aavas, Can Fin, Sammaan — are dropped and excluded). All 25 are mapped below.
-2. **The benchmark fork is settled by the data toward repo-as-benchmark.** Only 8
-   of the 15 banks publish a usable numeric repo-linked benchmark (RLLR/EBLR); the
-   rest publish only "repo + spread". Keying the RLLR family off the **national
-   repo series** (spread = all-in markup over repo) gives every repo-linked bank a
-   working, cross-comparable spread from one series. Recommended; pending sign-off.
+2. **The benchmark fork is resolved into two objects, not one** (design §4). Only 8
+   of the 15 banks publish a usable numeric RLLR; the rest publish only "repo +
+   spread". So WhatIff computes two separately-named normalized values:
+   `benchmark_spread` (rate − the lender's own RLLR/PLR, within-lender comparable —
+   needs that lender's series) and `repo_markup` (rate − national repo, RLLR family
+   only, cross-bank comparable — needs just the one repo series, already seeded).
+   `repo_markup` is **not** relabelled as a spread, and is never computed for HFC
+   (`PLR`) loans.
 
 ## Legend
 
@@ -29,30 +32,32 @@ re-scrape.
 - **Numeric benchmark on file:** the lender's own published benchmark figure, if
   any, from the seed (`as_of` 2026-09-10). "repo + spread" = repo-linked but no
   consolidated RLLR number published.
-- **Series feasible?** whether a spread can actually be computed today: **repo** =
-  yes via the national repo series (banks); **PLR pt** = only a single current PLR
-  point exists (no back-series); **none** = no numeric benchmark → `Unknown` in
-  practice.
+- **Normalized value feasible?** what can actually be computed today:
+  **repo_markup** = yes for every repo-linked bank via the national repo series;
+  **+RLLR** = the bank also publishes an RLLR, so `benchmark_spread` is feasible
+  once its RLLR *history* is collected; **PLR pt** = only a single current PLR point
+  (no series) → current-only, low confidence; **none** = no numeric benchmark →
+  `Unknown` in practice.
 
 ## Banks (repo-linked; post-2019 floating → `RLLR`, keyed to national repo)
 
-| Lender | Type | Numeric benchmark on file | Advertised floor | Series feasible? |
+| Lender | Type | Numeric benchmark on file | Advertised floor | Normalized feasible? |
 |---|---|---|---|---|
-| SBI | Bank | RLLR 7.50 (repo+CRP) | 7.25 | repo |
-| HDFC Bank | Bank¹ | repo + 2.45–3.30 | 7.75 | repo |
-| ICICI Bank | Bank | I-EBLR 8.95 | 7.55 | repo |
-| Axis Bank | Bank | repo + 2.75 | 8.00 | repo |
-| Kotak Mahindra | Bank | repo + spread (no number) | 7.60 | repo |
-| Bank of Baroda | Bank | BRLLR 7.90 | 7.25 | repo |
-| Canara Bank | Bank | RLLR 8.00 | 7.15 | repo |
-| Union Bank | Bank | EBLR 8.00 (repo+2.75) | 7.15 | repo |
-| Punjab National Bank | Bank | RLLR 7.75 | 7.20 | repo |
-| Bank of India | Bank | RBLR 8.10 (branded RLLR) | 7.10 | repo |
-| IDBI Bank | Bank | RLLR 8.15 | 7.40 | repo |
-| Yes Bank | Bank | repo + spread (no number) | 8.65 | repo |
-| IndusInd Bank | Bank | repo + spread (no number) | 7.60 | repo |
-| Federal Bank | Bank | repo + spread (no number) | 7.65 | repo |
-| IDFC First | Bank | EBR-linked (no number) | 7.75 | repo |
+| SBI | Bank | RLLR 7.50 (repo+CRP) | 7.25 | repo_markup +RLLR |
+| HDFC Bank | Bank¹ | repo + 2.45–3.30 | 7.75 | repo_markup |
+| ICICI Bank | Bank | I-EBLR 8.95 | 7.55 | repo_markup +RLLR |
+| Axis Bank | Bank | repo + 2.75 | 8.00 | repo_markup |
+| Kotak Mahindra | Bank | repo + spread (no number) | 7.60 | repo_markup |
+| Bank of Baroda | Bank | BRLLR 7.90 | 7.25 | repo_markup +RLLR |
+| Canara Bank | Bank | RLLR 8.00 | 7.15 | repo_markup +RLLR |
+| Union Bank | Bank | EBLR 8.00 (repo+2.75) | 7.15 | repo_markup +RLLR |
+| Punjab National Bank | Bank | RLLR 7.75 | 7.20 | repo_markup +RLLR |
+| Bank of India | Bank | RBLR 8.10 (branded RLLR) | 7.10 | repo_markup +RLLR |
+| IDBI Bank | Bank | RLLR 8.15 | 7.40 | repo_markup +RLLR |
+| Yes Bank | Bank | repo + spread (no number) | 8.65 | repo_markup |
+| IndusInd Bank | Bank | repo + spread (no number) | 7.60 | repo_markup |
+| Federal Bank | Bank | repo + spread (no number) | 7.65 | repo_markup |
+| IDFC First | Bank | EBR-linked (no number) | 7.75 | repo_markup |
 
 ¹ **HDFC merger special case** (mapping doc §6.1): a pre-2023 "HDFC" home loan was
 originated by HDFC Ltd (HFC, RPLR) → `PLR`; 2023 straddles the 01-Jul-2023 merger
@@ -61,7 +66,7 @@ above is the post-merger bank product.
 
 ## HFCs / NBFCs (PLR-linked, any vintage → `PLR`; never repo-linked)
 
-| Lender | Type | PLR/benchmark on file | Advertised floor | Series feasible? |
+| Lender | Type | PLR/benchmark on file | Advertised floor | Normalized feasible? |
 |---|---|---|---|---|
 | LIC Housing | HFC | LHPLR (no number in seed) | 7.15 | none → Unknown |
 | PNB Housing | HFC | PNBRRR (no number) | 8.50 | none → Unknown |
@@ -77,18 +82,23 @@ above is the post-merger bank product.
 ² Tata NRPLR applies to loans onboarded w.e.f. 12-Apr-2024; RPLR before. Both are
 PLR-family; neither publishes a numeric series.
 
-## What this means for the MVP spread layer
+## What this means for the MVP normalized layer
 
-- **All 15 banks** get a working spread now via the **national repo series**
-  (`rate-registry/supabase/seed_benchmark_history.sql`, batch 1) — no per-bank RLLR
-  needed under the recommended model.
+- **All 15 banks** get `repo_markup` now via the **national repo series**
+  (`rate-registry/supabase/seed_benchmark_history.sql`, batch 1) — cross-bank
+  comparable, no per-bank data needed.
+- **The 8 RLLR-publishing banks** (SBI, ICICI, BoB, Canara, Union, PNB, BoI, IDBI)
+  additionally get `benchmark_spread` once their RLLR **history** is collected (a
+  later batch); reconstructing that history as `repo + constant markup` is only an
+  approximation (design §4 stability caveat) — prefer published effective-dated RLLR
+  points and flag any reconstructed value.
 - **HFCs with no numeric benchmark** (LIC Housing, PNB Housing, Bajaj, Tata,
-  Godrej) → `Unknown` → peer-observed layer only, no spread. Exactly the "HFC
-  without a series → Unknown" outcome the mapping doc specified.
+  Godrej) → `Unknown` → peer-observed layer only. No `repo_markup` for any HFC
+  (`PLR` is not repo-linked). Exactly the "HFC without a series → Unknown" outcome.
 - **HFCs with a current PLR point** (Aadhar, Home First, Repco, Piramal, Sundaram)
-  can compute a *current-only* spread (single point, no back-series) — low
-  confidence for any non-current report; treat as `Unknown` for older reports until
-  a PLR series is collected.
+  can compute a *current-only* `benchmark_spread` (single point, no back-series) —
+  low confidence for any non-current report; treat as `Unknown` for older reports
+  until a PLR series is collected.
 
 ## Verification status per lender
 
