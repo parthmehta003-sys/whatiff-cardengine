@@ -480,20 +480,33 @@ function computeDoors(input, cohort, bestBankP25, fees) {
   // legal/valuation are added separately in the door.
   const procCost = (bal) => procFlat != null ? procFlat : bal * procPct;
 
-  // Door 2 — convert spread with the same lender, target = cohort p25.
+  // Confidence from cohort depth (ties to the 0012 DISPLAY_THRESHOLD idea).
+  const cohortConf = cohort.n >= 30 ? 'high' : cohort.n >= 8 ? 'medium' : 'low';
+
+  // Door 2 — reprice with the SAME lender. Target basis is EXPOSED, not silent
+  // (docs/rate-migration-spec.md §7.1). Basis 'cohort_p25' = the better-priced
+  // quarter of similar borrowers at this bank; within one lender this equals
+  // "benchmark + cohort spread P25", so it upgrades cleanly to a benchmark-derived
+  // basis once an RLLR series exists. We use cohort P25 (realised, non-overstating)
+  // rather than the bank's advertised floor, which is best-case marketing.
   let door2 = null;
   if (cohortP25 != null) {
     const cost = convCost(outstanding);
     const gross = cohortP25 < input.rate ? iUser - interestOver(outstanding, cohortP25, yrs) : 0;
-    door2 = { target: cohortP25, cost, gross, net: gross - cost, feeVerified: convVerified, noGap: !(cohortP25 < input.rate) };
+    door2 = { target: cohortP25, cost, gross, net: gross - cost, feeVerified: convVerified,
+              noGap: !(cohortP25 < input.rate), basis: 'cohort_p25', confidence: cohortConf };
   }
 
-  // Door 3 — balance transfer, target = best bank p25 across the registry.
+  // Door 3 — balance transfer to a competing lender. Counterfactual, its own cost
+  // stack + eligibility. Basis exposed: the cheapest lender in our data for this
+  // profile (a realised p25), subject to the switching costs and eligibility.
   let door3 = null;
   if (bestBankP25 != null) {
     const cost = procCost(outstanding) + outstanding * BT_MOD_PCT + BT_LEGAL_TECH;
     const gross = bestBankP25 < input.rate ? iUser - interestOver(outstanding, bestBankP25, yrs) : 0;
-    door3 = { target: bestBankP25, cost, gross, net: gross - cost, feeVerified: procVerified, noGap: !(bestBankP25 < input.rate) };
+    door3 = { target: bestBankP25, cost, gross, net: gross - cost, feeVerified: procVerified,
+              noGap: !(bestBankP25 < input.rate), basis: 'best_bank_p25',
+              confidence: procVerified ? 'medium' : 'low' };
   }
 
   return { outstanding, yrs, iUser, cohortP25, door2, door3 };
@@ -604,6 +617,18 @@ function renderResult(res) {
   wireBack();
 }
 
+// Provenance line for a door's target rate — the basis is EXPOSED, never a bare
+// number (docs/rate-migration-spec.md §6a / §7). Kept subordinate; the saving and
+// net benefit stay the headline.
+function doorBasisLine(d) {
+  const t = (d && d.target != null) ? d.target.toFixed(2) + '%' : '';
+  if (d.basis === 'cohort_p25')
+    return `<div class="door-basis">Target ${t} — what the better-priced quarter of similar borrowers at your bank report. A peer estimate, not a quote.</div>`;
+  if (d.basis === 'best_bank_p25')
+    return `<div class="door-basis">Target ${t} — the cheapest lender in our data for a profile like yours, subject to eligibility and the costs above.</div>`;
+  return '';
+}
+
 function doorHtml(n, rec, calc) {
   const isRec = rec === `door${n}`;
   const tag = isRec ? `<div class="dtag">Recommended</div>` : '';
@@ -646,6 +671,7 @@ Thank you.`;
         <div class="dsub">In plain words: get your bank to put today's lower rate on your existing loan — no new loan, no longer tenure.</div>
         <div class="net">You'd save about <b>${inr(d.net)}</b> — after a one-time fee of roughly ${inr(d.cost)}.</div>
         <div class="cost">That's ${inr(d.gross)} saved over the years left on your loan, minus the fee. ${d.feeVerified ? "Fee is this lender's stated charge — confirm before you commit." : "Fee is a general estimate — check with your bank."}</div>
+        ${doorBasisLine(d)}
         <div class="dbody">
           <div class="template">${esc(template)}</div>
           <div class="warning">If you simply ask for <b>"a lower rate,"</b> many lenders respond with a top-up — your existing loan is closed and reopened with a fresh tenure, a processing fee, and sometimes insurance you were never shown. You end up paying more over the life of the loan. Ask specifically for a <b>conversion to the current spread on your existing loan, with no change to tenure and no top-up.</b></div>
@@ -672,6 +698,7 @@ Thank you.`;
       <div class="dsub">Switch your loan to a cheaper bank. There's paperwork and some upfront cost, but the savings can be big.</div>
       <div class="net">You'd save about <b>${inr(d.net)}</b> — after roughly ${inr(d.cost)} in switching costs (processing, legal, valuation, registration).</div>
       <div class="cost">That's ${inr(d.gross)} saved over the years left on your loan, minus those costs. ${d.feeVerified ? "Processing fee is the new lender's stated charge; legal, valuation and stamp costs are estimates — confirm before you move." : "Fees are estimates — check before you move."}</div>
+      ${doorBasisLine(d)}
       <div class="dbody">
         <p style="font-size:13.5px;color:var(--muted);margin-bottom:4px">Want the exact numbers for your loan — what you'd save and what to ask a new lender for? Leave your email and we'll send you the calculation. We're not a broker and we're not paid by any lender.</p>
         <div class="door-cta" data-door-cta="Transfer"></div>
