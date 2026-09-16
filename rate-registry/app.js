@@ -556,19 +556,38 @@ function renderResult(res) {
     ? `<div class="cohort-note widen">Not enough reports for your exact situation yet, so this compares you with ${esc(cohort.tier_label)}.</div>`
     : `<div class="cohort-note">${cohortLine}</div>`;
 
+  // ---- Economic conclusion is the organizing principle (not the peer compare) ----
+  // Similar-borrowers range = cohort P25–P75 (the price band others actually report).
+  const p25 = calc.cohortP25;
+  const p75 = cohort.p75_rate != null ? Number(cohort.p75_rate)
+            : (rates.length ? Math.max(...rates) : p25);
+  const simRange = p25.toFixed(2) === p75.toFixed(2)
+    ? `${p25.toFixed(2)}%`
+    : `${p25.toFixed(2)}%–${p75.toFixed(2)}%`;
+
+  // "Above your bank's better-priced peers" drives state 1 vs state 2. It is a
+  // peer fact (rate vs cohort P25), never a repo_markup claim — no "overpaying".
+  const aboveBankPeers = calc.door2 ? !calc.door2.noGap : (input.rate > p25);
+  const recDoor = rec === 'door1' ? null : (rec === 'door2' ? calc.door2 : calc.door3);
+  let headline, headClass, actionLead = '';
+  if (rec === 'door1') {
+    headline = "There's probably nothing worth changing.";
+    headClass = 'neutral';
+  } else {
+    headline = aboveBankPeers
+      ? 'It may be worth acting on your loan.'
+      : 'Your rate is competitive, but switching could still save you money.';
+    headClass = 'act';
+    const verb = rec === 'door3' ? 'by switching lenders' : 'by asking your bank to reprice';
+    actionLead = `<div class="action-lead">You could save about <b>${inr(recDoor.net)}</b> ${verb}.</div>`;
+  }
+  const doorsTitle = rec === 'door1' ? 'The economics right now' : 'What you can do about it';
+
   app.innerHTML = `
+    <div class="result-headline ${headClass}">${headline}</div>
+
     <div class="result-grid">
     <div class="result-col">
-    <div class="card">
-      <div class="result-lead">
-        <div class="frame"><b>${nLess}</b> out of 10 people who borrowed from ${esc(input.bank)} report a lower rate than yours.</div>
-        ${pictographHtml(nLess)}
-        <div class="caveat">Rates depend on your credit score, employer, salary and how you applied — so yours may be different for good reasons. This shows what's possible at your bank, not that you were charged unfairly.</div>
-      </div>
-      ${widenLine}
-      ${cohort.tier > 1 ? `<div class="cohort-note">${cohortLine}</div>` : ''}
-    </div>
-
     <div class="card">
       <div class="emi-pair">
         <div class="emi-box">
@@ -577,18 +596,28 @@ function renderResult(res) {
           <div class="sub">${inr(userEmi)} a month</div>
         </div>
         <div class="emi-box ach">
-          <div class="lbl">Others get at ${esc(input.bank)}</div>
-          <div class="val">${calc.cohortP25.toFixed(2)}%</div>
-          <div class="sub">${inr(achEmi)} a month</div>
+          <div class="lbl">Similar borrowers</div>
+          <div class="val">${simRange}</div>
+          <div class="sub">${cohort.n} report${cohort.n === 1 ? '' : 's'}${cohort.tier > 1 ? ' (widened)' : ''}</div>
         </div>
       </div>
       <div class="emi-diff">
         ${monthlyDiff > 0
-          ? `That's about <b>${inr(monthlyDiff)} a month</b> more than others at your bank — on what you still owe.`
-          : `You're already getting a rate as good as others at your bank — <b>nothing to chase here.</b>`}
+          ? `That's about <b>${inr(monthlyDiff)} a month</b> more than the better-priced quarter of similar borrowers — on what you still owe.`
+          : `You're already priced as well as similar borrowers at your bank.`}
       </div>
       ${benchmarkLine(input, benchmark)}
       ${repoMarkupLine(input, repoMarkup)}
+    </div>
+
+    <div class="card">
+      <div class="result-lead">
+        <div class="frame"><b>${nLess}</b> out of 10 people who borrowed from ${esc(input.bank)} report a lower rate than yours.</div>
+        ${pictographHtml(nLess)}
+        <div class="caveat">Rates depend on your credit score, employer, salary and how you applied — so yours may be different for good reasons. This shows what's possible at your bank, not that you were charged unfairly.</div>
+      </div>
+      ${widenLine}
+      ${cohort.tier > 1 ? `<div class="cohort-note">${cohortLine}</div>` : ''}
     </div>
 
     <div class="card" style="padding:0;overflow:hidden">
@@ -604,7 +633,8 @@ function renderResult(res) {
 
     <div class="result-col rc-doors">
     <div class="card">
-      <div class="doors-title">What you can actually do about it</div>
+      ${actionLead}
+      <div class="doors-title">${doorsTitle}</div>
       ${doorHtml(Number(rec.slice(4)), rec, calc)}
       ${rec !== 'door1' ? `<div class="fee-disclaimer">Fee figures are <b>estimates</b> — drawn from each lender's official documents where published, and from third-party sources where the lender doesn't publish them. Charges change and vary by profile, so <b>verify the exact fees with your bank</b> before acting.</div>` : ''}
     </div>
