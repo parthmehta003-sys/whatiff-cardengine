@@ -23,19 +23,22 @@ new files are `0009`–`0013`. Every base table keeps the repo's RLS pattern
 |---|---|---|
 | 1 | **`DISPLAY_THRESHOLD = 30`** | Product display threshold, *not* an inference threshold. Keep `n ≥ 4` as the compute floor. Tail stats (P25/P75) at n=30 are softer than the median — the confidence model reflects this. |
 | 2 | **Benchmark capture: append-only, monthly baseline + event-driven** | Repo on every RBI change; lender RLLR/MCLR monthly, plus immediately after an RBI move or a new rate card. Store every observation; never overwrite. |
-| 3 | **`benchmark_family`: ask the user** (one lightweight question) | Do **not** infer from origination year as the primary mechanism (2019 MCLR→EBLR transition is exactly where inference is unsafe). `Unknown` is acceptable → observed/peer layers only, no spread. Doc-parsing can auto-populate later. **This is the one product decision to lock now, because it gates what the frontend captures.** |
+| 3 | **`benchmark_family`: resolved server-side, NOT asked** | The user is never asked the benchmark mechanism (EBLR/MCLR is jargon that breaks the product's premise). It is resolved from `(lender, origination_year, rate_type_plain)` per `docs/benchmark-family-mapping.md`. `Unknown` is acceptable → observed/peer layers only, no spread. **The mapping spec must be locked before implementation starts.** |
 | 4 | **Panel: deferred** | Keep the existing session model (migration `0006`). No auth introduced to build a research panel. Pass-through stays internal until a privacy-preserving anonymous `reporter_id` is designed. |
 
-### 0.1 The family question (frontend, lock now)
+### 0.1 Family resolution (server-side, no jargon to the user)
 
-> **How does your loan's interest rate change?**
-> ○ It changes when RBI / repo rates change
-> ○ It changes based on MCLR
-> ○ It's fixed
-> ○ I'm not sure
+`benchmark_family` is **not** a consumer input. `rate_family_input` is **removed
+from the MVP frontend.** The only rate question the user may see is plain-English
+fixed/floating:
 
-Answer → `rate_family_input`, resolved to internal `benchmark_family` at write
-time (§1.2). "I'm not sure" → `Unknown`.
+> **Does your interest rate stay the same for the whole loan, or can it change?**
+> ○ Stays the same ○ Can change ○ Not sure
+
+That yields `rate_type_plain`. The family is then resolved server-side from
+`(lender, origination_year, rate_type_plain)` — a deterministic, versioned lookup
+(institution type × vintage) defined in `docs/benchmark-family-mapping.md`. If it
+can't resolve confidently → `Unknown` → no spread. Never guess from year alone.
 
 ---
 
@@ -51,20 +54,24 @@ granular family is an *additional* column.
 ### 1.2 New stored-fact columns on `rates`
 
 ```
-benchmark_family    text    -- EBLR | RLLR | MCLR | Base | PLR | Fixed | Unknown
-benchmark_at_report numeric(5,2) NULL   -- audit snapshot (§1.3); NOT the live-spread source
-source_type         text    -- self_reported | document_verified | partner_verified
-benchmark_source    text NULL          -- provenance of benchmark_at_report (RBI | lender_card | lender_statement | user | partner)
+benchmark_family     text    -- EBLR | RLLR | MCLR | Base | PLR | Fixed | Unknown
+benchmark_at_report  numeric(5,2) NULL  -- audit snapshot (§1.3); NOT the live-spread source
+source_type          text    -- self_reported | document_verified | partner_verified
+benchmark_source     text NULL          -- provenance of benchmark_at_report (RBI | lender_card | lender_statement | user | partner)
+resolution_confidence text   -- high | medium | unknown (from the family resolver)
+family_map_version   text    -- e.g. '2026.09' (which mapping version resolved this row)
 ```
 
-- Add a CHECK constraint enumerating `benchmark_family` values.
+- Add a CHECK constraint enumerating `benchmark_family`, `source_type`, and
+  `resolution_confidence` values.
 - `source_type` defaults to `self_reported`.
-- **Resolution step (write time):** `benchmark_family` is resolved from
-  `(rate_family_input, lender, origination_year)`. The user question yields a
-  coarse input; "repo-linked" resolves to `EBLR` or `RLLR` per lender/vintage.
-  Record the mapping table in the migration comment. Backfill the coarse
-  `rate_type`: any family in `{EBLR,RLLR,MCLR,Base,PLR}` → `Floating`;
-  `Fixed` → `Fixed`; `Unknown` → leave `rate_type` as submitted.
+- **Resolution step (write time):** `benchmark_family` (+ `resolution_confidence`,
+  `family_map_version`) is resolved from `(lender, origination_year,
+  rate_type_plain)` per `docs/benchmark-family-mapping.md` — a deterministic,
+  versioned lookup on institution type × vintage. No `rate_family_input` is
+  captured from the user. Backfill the coarse `rate_type`: family in
+  `{EBLR,RLLR,MCLR,Base,PLR}` → `Floating`; `Fixed` → `Fixed`; `Unknown` → leave
+  `rate_type` as submitted (default `Floating` unless the user said fixed).
 - **Do not** add any derived column (`current_spread`, gaps, savings) to `rates`.
   Those are read-time only (design §5.2).
 
@@ -140,13 +147,27 @@ unique (lender, benchmark_family, effective_from)
 get_current_spread(p_report_id bigint) returns numeric
 ```
 
+**The single spread rule (applies to every report, current or historical):**
+
+> A report's spread = `reported_rate − benchmark effective on that report's
+> `report_date``, looked up in `benchmark_history` by
+> `(lender, benchmark_family, latest effective_from ≤ report_date)`.
+
+The live/current spread is just the special case where `report_date` is today.
+Using the *current* benchmark for an *older* report would manufacture a false
+spread change (a 9.1% report from six months ago, after a 100 bps move, would show
+a fabricated 100 bps swing). Because spread is stable across resets while the
+headline rate is not, the as-of-report-date spread is also a *better* estimate of
+that borrower's current spread than their stale headline rate.
+
 Logic (family invariant is hard — design §4):
 
 ```
 resolve (lender, benchmark_family, report_date) from rates
 if benchmark_family in (EBLR, RLLR, MCLR, Base, PLR):
-    b := active benchmark_history rate for (lender, family) at CURRENT date
-    if b is null: return null
+    b := active benchmark_history rate for (lender, family)
+         at report_date  (latest effective_from <= report_date)
+    if b is null: return null            -- series gap → no spread, never a guess
     spread := reported_rate - b
     -- guard (design §4): a small/negative spread is legitimate (concessions
     -- below RLLR), but clamp only obvious impossibilities; never let a tiny
@@ -157,11 +178,9 @@ else:                       -- Fixed | Unknown
 ```
 
 - **No `reported_rate - repo` shortcut** for non-repo-linked loans.
-- For a *current* EBLR loan, `reported_rate − current benchmark = current spread`
-  (all past resets already baked in — design §4). No historical reconstruction
-  needed for the live number.
 - Companion aggregate `get_spread_percentiles(cohort…)` computes P25/P50/P75 of
-  spread **within a single benchmark family** (never mix families).
+  spread **within a single benchmark family** (never mix families), each member's
+  spread taken as-of its own `report_date` per the rule above.
 
 ---
 
@@ -282,6 +301,23 @@ in `app.js`, not a migration.
 
 ---
 
+## 6a. Provenance acceptance criterion (every displayed number)
+
+For **every** rate the UI shows, the system must be able to answer "where did this
+number come from?" through metadata, not just internally. Each displayed rate
+carries its epistemic type and supporting fields:
+
+- **Peer observed** — `n`, `as_of`, `cohort_level`, `source_type`.
+- **Advertised lender floor** — `lender`, `as_of`, `basis = advertised_floor`.
+- **Door-2 proxy** — `basis` (advertised_floor | cohort_spread_p25 |
+  published_grid), `n`, the `benchmark` used.
+- **Benchmark-derived** — `lender`, `benchmark_family`, `as_of`,
+  `resolution_confidence`.
+
+These are different epistemic objects and the UI must render them as visibly
+different — WhatIff never collapses them into one blended "true market rate"
+(design §1). This is a release gate, not a nicety.
+
 ## 7. Out of scope here (explicit)
 
 - **Benchmark-capture pipeline** (design §11) — parallel workstream; only its
@@ -297,26 +333,34 @@ in `app.js`, not a migration.
 
 ## 8. Validation checklist (before each migration merges)
 
-- `0009`: family resolution mapping is exhaustive; coarse `rate_type` backfill
-  leaves the existing floor check behaving identically; CHECK constraints hold.
+- `0009`: family resolution follows `docs/benchmark-family-mapping.md` exactly
+  (institution × vintage, HDFC merger case, HFC→PLR, ambiguous→Unknown); no
+  `rate_family_input` reaches the backend; `resolution_confidence` +
+  `family_map_version` stored; coarse `rate_type` backfill leaves the existing
+  floor check behaving identically; CHECK constraints hold; boundary-year test
+  cases (mapping spec §10) pass.
 - `0010`: `bank_benchmark()` and the `submit_rate` floor check return **identical**
   results on seed data before vs after redefinition (spot-check several banks);
   history is append-only (no UPDATEs in normal capture).
-- `0011`: `Unknown`/`Fixed` return NULL spread; EBLR spot check matches
-  `reported_rate − current benchmark`; no `rate − repo` path exists for non-repo
-  families.
+- `0011`: `Unknown`/`Fixed` return NULL spread; spread uses the benchmark
+  as-of `report_date` (an older report is not re-based to today's benchmark);
+  live report matches `reported_rate − current benchmark`; series gap → NULL, not
+  a guess; no `rate − repo` path exists for non-repo families.
 - `0012`: back-off returns one coherent level; `n ≥ 4` floor never violated;
   user's own row excluded; `cohort_level`/`n`/`as_of` always populated.
 - `0013`/`app.js`: Door 2 target no longer equals cohort P25; `basis` +
   `confidence` populated on both doors; no door saving from a near-zero/negative
   spread; headline reframed to net-benefit.
+- **All displayed rates** carry provenance metadata per §6a (release gate).
 
 ---
 
 ## 9. Open decisions for implementation
 
-- Exact `(rate_family_input, lender, origination_year) → benchmark_family`
-  mapping table (esp. repo-linked → EBLR vs RLLR by lender/vintage).
+- The `(lender, origination_year, rate_type_plain) → benchmark_family` mapping is
+  **resolved** — see `docs/benchmark-family-mapping.md` (lock before code). What
+  remains is per-lender verification of each regime fact against that lender's own
+  disclosures during build.
 - Whether to keep both coarse `rate_type` and `benchmark_family` long-term, or
   derive the coarse one as a view once the floor check reads family directly.
 - `DISPLAY_THRESHOLD` per-statistic (single 30, or 30 for median / higher for
