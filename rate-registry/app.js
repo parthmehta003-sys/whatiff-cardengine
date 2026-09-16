@@ -400,7 +400,7 @@ async function submit(state) {
     outcomeId = null;
     if (window.umami) window.umami.track('Submission');
 
-    const [cs, br, bm] = await Promise.all([
+    const [cs, br, bm, rm] = await Promise.all([
       sb.rpc('cohort_stats', {
         p_loan_type: 'Home', p_bank: bank, p_year: loan_year,
         p_channel: channel, p_employment: employment, p_cibil_band: cibil_band,
@@ -408,6 +408,9 @@ async function submit(state) {
       }),
       sb.rpc('bank_rates', { p_loan_type: 'Home' }),
       sb.rpc('bank_benchmark', { p_bank: bank }),
+      // Pricing context: markup over the RBI policy repo rate. Non-null only for
+      // repo-linked (RLLR) loans; NULL for HFC/PLR/unresolved (then no line shows).
+      sb.rpc('get_repo_markup', { p_report_id: currentRateId }),
     ]);
     if (cs.error) throw cs.error;
 
@@ -434,7 +437,9 @@ async function submit(state) {
       processingFlat: targetProcessingFlat,
     };
 
-    lastResult = { input, cohort, bestBankP25, benchmark, fees };
+    const repoMarkup = (rm && !rm.error && rm.data != null) ? Number(rm.data) : null;
+
+    lastResult = { input, cohort, bestBankP25, benchmark, fees, repoMarkup };
     renderResult(lastResult);
   } catch (e) {
     submitting = false; btn.disabled = false; btn.textContent = 'See what\'s achievable at your bank';
@@ -496,7 +501,7 @@ function computeDoors(input, cohort, bestBankP25, fees) {
 
 function renderResult(res) {
   window.scrollTo(0, 0);
-  const { input, cohort, bestBankP25, benchmark, fees } = res;
+  const { input, cohort, bestBankP25, benchmark, fees, repoMarkup } = res;
   const rates = (cohort.rates || []).map(Number);
   const calc = computeDoors(input, cohort, bestBankP25, fees);
 
@@ -570,6 +575,7 @@ function renderResult(res) {
           : `You're already getting a rate as good as others at your bank — <b>nothing to chase here.</b>`}
       </div>
       ${benchmarkLine(input, benchmark)}
+      ${repoMarkupLine(input, repoMarkup)}
     </div>
 
     <div class="card" style="padding:0;overflow:hidden">
@@ -764,6 +770,20 @@ function benchmarkLine(input, b) {
     <div class="benchmark">
       ${esc(input.bank)} ${kind} <b>${shown.toFixed(2)}%</b> — you're paying ${input.rate.toFixed(2)}%.
       <span class="src">Published rate, ${src}${b.as_of ? ' · as of ' + esc(String(b.as_of)) : ''}.</span>
+    </div>`;
+}
+
+// Pricing context (subordinate): the borrower's markup over the RBI policy repo
+// rate. Rendered ONLY for repo-linked loans, where repo_markup is non-null; HFC/
+// PLR and unresolved loans pass null and show nothing (no empty box, no repo maths
+// forced onto a non-repo-linked loan). Descriptive context, never a verdict.
+function repoMarkupLine(input, repoMarkup) {
+  if (repoMarkup == null || !isFinite(repoMarkup)) return '';
+  const repo = input.rate - repoMarkup;   // exact: rate and markup are both 2-dp
+  return `
+    <div class="benchmark pricing-context">
+      <b>Pricing context</b><br>
+      Your interest rate is <b>${repoMarkup.toFixed(2)} percentage points</b> above the RBI policy repo rate of ${repo.toFixed(2)}%.
     </div>`;
 }
 
