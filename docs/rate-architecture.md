@@ -37,18 +37,21 @@ behavioural signal in the dataset.
 
 ## 2. Layer architecture
 
-| Layer | Question | Data | Nature |
-|---|---|---|---|
-| Observed | What are people actually paying? | Reported borrower rate | **Fact** |
-| Benchmark | What rate environment are they in? | Repo / RLLR / EBLR / MCLR / … | **Fact** |
-| Spread | How is their rate positioned vs their benchmark? | rate − applicable benchmark | Derived |
-| Peer | How does that compare with similar borrowers? | Percentiles of observed rate & spread | Derived |
-| Door 2 | Can their existing lender improve it? | Current rate + conversion economics | Counterfactual |
-| Door 3 | Could transferring improve it? | Competing lender + eligibility + switching costs | Counterfactual |
-| Actionable saving | What could they save by acting? | Door-specific calculation | Derived |
+| Layer | Calculation | Scope | Nature | MVP? |
+|---|---|---|---|---|
+| Peer observed rate | `reported_rate` | Cohort | Fact | **Yes** |
+| Repo markup | `reported_rate − national_repo` | Repo-linked banks, cross-bank | Derived | **Yes** |
+| Benchmark spread | `reported_rate − lender_benchmark` | Within lender | Derived | Fast follow |
+| Replacement rate | Counterfactual current pricing | Door 2 / Door 3 | Counterfactual | **Yes** |
+| Actionable saving | Stay cost − Act cost | Individual | Derived | **Yes** |
 
-Pipeline: **observed rate → benchmark family → current spread → peer distribution
-→ Door 2 counterfactual → Door 3 counterfactual → net actionable saving.**
+**None of these becomes the "true market rate."** `repo_markup` is context, not a
+diagnosis (§8.0). MVP ships on observed rate + `repo_markup` + doors; per-lender
+`benchmark_spread` history is a fast follow (§11), not a launch blocker.
+
+Pipeline: **observed rate → repo_markup (context) / benchmark_spread (where held) →
+peer distribution → Door 2 counterfactual → Door 3 counterfactual → net actionable
+saving.**
 
 ---
 
@@ -86,7 +89,9 @@ collapsed into one generic "spread":
   only the one national repo series.
 
 These are economically different. If repo = 5.25, a bank's RLLR = 7.50, and the
-borrower pays 8.00: `benchmark_spread` = 0.50 (concession vs the lender's floor),
+borrower pays 8.00: `benchmark_spread` = 0.50 (position vs the lender's benchmark,
+i.e. its RLLR reference rate — not its advertised floor, which is a different
+object: a published pricing floor, not the reference rate the loan is priced off),
 `repo_markup` = 2.75 (which also bundles the bank's structural RLLR markup + credit
 premium). Both are legitimate, displayed facts; each is labelled for what it is.
 
@@ -280,6 +285,31 @@ because it sidesteps the eligibility unknowns.
 ---
 
 ## 8. Metrics and their honesty limits
+
+### 8.0 `repo_markup` is descriptive, not diagnostic
+
+`repo_markup` normalizes and gives analytical context; it is **not** a measure of
+how much the borrower is overpaying. The product must never say *"your bank charges
+275 bps over RBI repo, therefore you're overpaying by 275 bps"* — that markup
+includes the bank's structural cost and credit premium, not just avoidable cost.
+The diagnostic question stays: *what are borrowers like you paying, and what would
+it cost you to act?* Overpayment is established by the peer distribution and the
+door economics, never by `repo_markup` alone.
+
+### 8.0.1 Canonical user-facing sequence (locked)
+
+Every result presents the layers in this order and role, so `repo_markup` stays
+context and the action stays the point:
+
+```
+You pay:                8.35%
+Similar borrowers:      7.85%–8.10%          (peer observed — the behavioural signal)
+Pricing context:        +X bps vs your lender's benchmark / +Y bps vs RBI repo   (context only)
+If you act:             est. new rate  X%     (Door 2 / Door 3 counterfactual)
+Potential saving:       ₹X/month · ₹X over remaining tenure
+Cost to act:            ₹X
+Net benefit:            ₹X                     (the decision)
+```
 
 ### 8.1 Master metric: cost of staying vs cost of acting
 
