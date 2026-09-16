@@ -607,7 +607,7 @@ function doorHtml(n, rec, calc) {
       <div class="door ${isRec ? 'rec' : ''}">
         ${tag}
         <h3>Nothing to do right now</h3>
-        <div class="net none">The savings wouldn't cover the cost of switching right now. We'll tell you if that changes.</div>
+        <div class="net none">The savings wouldn't cover the cost of switching right now. Worth checking again if RBI cuts rates or your bank changes its spread.</div>
       </div>`;
   }
 
@@ -667,7 +667,7 @@ Thank you.`;
       <div class="net">You'd save about <b>${inr(d.net)}</b> — after roughly ${inr(d.cost)} in switching costs (processing, legal, valuation, registration).</div>
       <div class="cost">That's ${inr(d.gross)} saved over the years left on your loan, minus those costs. ${d.feeVerified ? "Processing fee is the new lender's stated charge; legal, valuation and stamp costs are estimates — confirm before you move." : "Fees are estimates — check before you move."}</div>
       <div class="dbody">
-        <p style="font-size:13.5px;color:var(--muted);margin-bottom:4px">We can handle the paperwork. Leave your email and we'll come back.</p>
+        <p style="font-size:13.5px;color:var(--muted);margin-bottom:4px">Want the exact numbers for your loan — what you'd save and what to ask a new lender for? Leave your email and we'll send you the calculation. We're not a broker and we're not paid by any lender.</p>
         <div class="door-cta" data-door-cta="Transfer"></div>
       </div>
     </div>`;
@@ -682,10 +682,10 @@ function wireDoors() {
 
 function renderDoorCta(slot, door, done) {
   if (done) {
-    slot.innerHTML = `<div class="email-ok">✓ Got it. We'll be in touch.</div>`;
+    slot.innerHTML = `<div class="email-ok">✓ Got it — we'll email you.</div>`;
     return;
   }
-  const label = door === 'Conversion' ? 'Email me this template' : 'Email me — help me move';
+  const label = door === 'Conversion' ? 'Email me this template' : 'Email me the calculation';
   slot.innerHTML = `
     <div class="email-row">
       <input type="email" inputmode="email" placeholder="you@email.com" aria-label="Your email" />
