@@ -77,14 +77,22 @@ Spread is only meaningful against the *matching* benchmark. This is an invariant
 not a heuristic:
 
 ```
-EBLR      → EBLR benchmark
-RLLR      → RLLR benchmark
+RLLR      → the bank's repo-linked series   (canonical family for all bank
+                                             repo-linked loans; "EBLR" is the
+                                             RBI regulatory category / alias,
+                                             NOT a separate stored value)
 MCLR      → applicable MCLR
 Base Rate → Base Rate
 PLR/RPLR  → corresponding lender benchmark
 Fixed     → NO spread calculation (observed layer only)
 Unknown   → NO spread calculation (observed layer only)
 ```
+
+> **Canonicalization (join-safety).** The resolver emits `RLLR` for bank
+> repo-linked loans and never `EBLR`. `benchmark_history` must store that series
+> under the same `RLLR` key, or the read-time join returns NULL silently (no
+> spread, no error). `EBLR` is therefore documented as an alias only and is **not**
+> a distinct `benchmark_family` value anywhere in the schema.
 
 **Never** compute `reported_rate − repo_rate` unless the loan is actually
 repo-linked. Fixed-rate and unknown-type loans live in the observed/peer layers
@@ -112,7 +120,8 @@ must never produce an absurd door saving.
 ```
 reported_rate
 loan_type
-rate_type              -- EBLR / RLLR / MCLR / Base / PLR / Fixed / Unknown
+rate_type              -- RLLR / MCLR / Base / PLR / Fixed / Unknown  (EBLR is an
+                       --   alias of RLLR, not a separate stored value)
 benchmark_family       -- which benchmark this rate is linked to (§4)
 benchmark_at_report    -- the applicable benchmark value as of report_date
 lender

@@ -54,7 +54,8 @@ granular family is an *additional* column.
 ### 1.2 New stored-fact columns on `rates`
 
 ```
-benchmark_family     text    -- EBLR | RLLR | MCLR | Base | PLR | Fixed | Unknown
+benchmark_family     text    -- RLLR | MCLR | Base | PLR | Fixed | Unknown
+                             --   (canonical; EBLR is an alias of RLLR, never stored)
 benchmark_at_report  numeric(5,2) NULL  -- audit snapshot (§1.3); NOT the live-spread source
 source_type          text    -- self_reported | document_verified | partner_verified
 benchmark_source     text NULL          -- provenance of benchmark_at_report (RBI | lender_card | lender_statement | user | partner)
@@ -70,7 +71,7 @@ family_map_version   text    -- e.g. '2026.09' (which mapping version resolved t
   rate_type_plain)` per `docs/benchmark-family-mapping.md` — a deterministic,
   versioned lookup on institution type × vintage. No `rate_family_input` is
   captured from the user. Backfill the coarse `rate_type`: family in
-  `{EBLR,RLLR,MCLR,Base,PLR}` → `Floating`; `Fixed` → `Fixed`; `Unknown` → leave
+  `{RLLR,MCLR,Base,PLR}` → `Floating`; `Fixed` → `Fixed`; `Unknown` → leave
   `rate_type` as submitted (default `Floating` unless the user said fixed).
 - **Do not** add any derived column (`current_spread`, gaps, savings) to `rates`.
   Those are read-time only (design §5.2).
@@ -108,7 +109,8 @@ redefine the dependents to read from it.
 ```
 id              bigserial pk
 lender          text          -- 'SBI', ... ; reuse the bm_bank_allowed value set, or 'National' for repo
-benchmark_family text         -- EBLR | RLLR | MCLR | Base | PLR | Repo | AdvertisedFloor
+benchmark_family text         -- RLLR | MCLR | Base | PLR | Repo | AdvertisedFloor
+                              --   (must match resolver output exactly; no EBLR key)
 effective_from  date not null -- when this figure took effect
 benchmark_rate  numeric(5,2) not null
 source_url      text not null
@@ -164,7 +166,7 @@ Logic (family invariant is hard — design §4):
 
 ```
 resolve (lender, benchmark_family, report_date) from rates
-if benchmark_family in (EBLR, RLLR, MCLR, Base, PLR):
+if benchmark_family in (RLLR, MCLR, Base, PLR):    -- RLLR covers all bank repo-linked loans
     b := active benchmark_history rate for (lender, family)
          at report_date  (latest effective_from <= report_date)
     if b is null: return null            -- series gap → no spread, never a guess

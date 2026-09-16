@@ -84,8 +84,14 @@ HFCs/NBFCs. So classify every `bm_bank_allowed` lender first:
 | Godrej Housing | HFC | PLR / RPLR |
 | Other | Unknown | → `Unknown` (institution not identifiable) |
 
-**Rule:** HFC/NBFC loans of *any* vintage are PLR-family, never EBLR. Same
+**Rule:** HFC/NBFC loans of *any* vintage are PLR-family, never repo-linked. Same
 origination year → different family for a bank vs an HFC.
+
+**Canonical family name (join-safety):** the resolver emits **`RLLR`** for all
+bank repo-linked loans — never `EBLR`. `EBLR` is the RBI regulatory *category*;
+`RLLR` is the stored `benchmark_family`, and `benchmark_history` must key the
+bank repo-linked series under the same `RLLR` value. A mismatch (history seeded as
+`EBLR`, rows resolved as `RLLR`) makes the spread join return NULL silently.
 
 ---
 
