@@ -161,6 +161,22 @@ const DRAFT_KEY = 'whatiff_form_draft';
 function elVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
 function authMsg(msg) { const el = document.getElementById('auth-msg'); if (el) el.textContent = msg || ''; }
 
+// Eye icon for the show/hide password toggle (open = password currently visible).
+function eyeSvg(open) {
+  return open
+    ? `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10 10 0 0 1 12 20C5 20 1 12 1 12a18 18 0 0 1 5.06-5.94M9.9 4.24A9 9 0 0 1 12 4c7 0 11 8 11 8a18 18 0 0 1-2.16 3.19"/><path d="M1 1l22 22"/></svg>`
+    : `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>`;
+}
+function togglePassword() {
+  const inp = document.getElementById('auth-pass');
+  const btn = document.getElementById('auth-pass-toggle');
+  if (!inp || !btn) return;
+  const show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  btn.innerHTML = eyeSvg(show);
+  btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+}
+
 // Persist the in-progress form so a Google sign-in redirect doesn't lose it.
 function saveDraft() {
   try {
@@ -258,7 +274,10 @@ function authPanelHtml() {
       <button class="btn auth-google" id="auth-google" type="button">Continue with Google</button>
       <div class="auth-or"><span>or use email</span></div>
       <input id="auth-email" type="email" inputmode="email" placeholder="you@example.com" autocomplete="email" />
-      <input id="auth-pass" type="password" placeholder="Password (8+ characters)" autocomplete="current-password" />
+      <div class="pass-wrap">
+        <input id="auth-pass" type="password" placeholder="Password (8+ characters)" autocomplete="current-password" />
+        <button type="button" class="pass-toggle" id="auth-pass-toggle" aria-label="Show password">${eyeSvg(false)}</button>
+      </div>
       <div class="auth-btns">
         <button class="btn" id="auth-signin" type="button">Sign in</button>
         <button class="btn btn-ghost" id="auth-signup" type="button">Create account</button>
@@ -273,6 +292,7 @@ function wireAuth() {
   const g = document.getElementById('auth-google'); if (g) g.addEventListener('click', signInGoogle);
   const si = document.getElementById('auth-signin'); if (si) si.addEventListener('click', signInEmail);
   const su = document.getElementById('auth-signup'); if (su) su.addEventListener('click', signUpEmail);
+  const pt = document.getElementById('auth-pass-toggle'); if (pt) pt.addEventListener('click', togglePassword);
 }
 
 // ===========================================================================
