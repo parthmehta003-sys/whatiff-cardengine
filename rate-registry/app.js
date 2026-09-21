@@ -737,82 +737,102 @@ function renderResult(res) {
   // peer fact (rate vs cohort P25), never a repo_markup claim — no "overpaying".
   const aboveBankPeers = calc.door2 ? !calc.door2.noGap : (input.rate > p25);
   const recDoor = rec === 'door1' ? null : (rec === 'door2' ? calc.door2 : calc.door3);
-  let headline, headClass, actionLead = '';
+  let headline, headClass, heroLead;
   if (rec === 'door1') {
     headline = "There's probably nothing worth changing.";
     headClass = 'neutral';
+    heroLead = aboveBankPeers
+      ? `A lower rate exists for people like you, but the cost of switching would outweigh it right now.`
+      : `Your rate holds up well against people like you — no move here would pay for itself today.`;
   } else {
     headline = aboveBankPeers
       ? 'It may be worth acting on your loan.'
       : 'Your rate is competitive, but switching could still save you money.';
     headClass = 'act';
     const verb = rec === 'door3' ? 'by switching lenders' : 'by asking your bank to reprice';
-    actionLead = `<div class="action-lead">You could save about <b>${inr(recDoor.net)}</b> ${verb}.</div>`;
+    heroLead = `You could save about <b>${inr(recDoor.net)}</b> over what's left of your loan ${verb}.`;
   }
   const doorsTitle = rec === 'door1' ? 'The economics right now' : 'What you can do about it';
+  const amtLabel = (AMOUNTS.find(a => a.v === input.amount_lakh) || {}).label || ('₹' + input.amount_lakh + ' lakh');
+  const chips = [amtLabel, 'Taken ' + input.loan_year, input.employment, 'CIBIL ' + input.cibil_band, input.rate_type]
+    .map(c => `<span class="chip">${esc(c)}</span>`).join('');
+  const diffTile = monthlyDiff > 0
+    ? `<div class="kpi flag"><div class="k-lbl">You pay more</div><div class="k-val">${inr(monthlyDiff)}</div><div class="k-sub">a month, on what you owe</div></div>`
+    : `<div class="kpi"><div class="k-lbl">Vs peers</div><div class="k-val">On par</div><div class="k-sub">priced like similar borrowers</div></div>`;
+  const medianForPlot = Number(cohort.median_rate == null ? calc.cohortP25 : cohort.median_rate);
 
   app.innerHTML = `
-    <div class="result-headline ${headClass}">${headline}</div>
+    <div class="rgrid">
+      <div class="verdict ${headClass}">
+        <div class="reyebrow">Your result · ${esc(input.bank)} home loan</div>
+        <h1>${headline}</h1>
+        <p class="v-lead">${heroLead}</p>
+        <div class="chips">${chips}</div>
+        <div class="v-coin"></div><div class="v-coin two"></div>
+      </div>
 
-    <div class="result-grid">
-    <div class="result-col">
-    <div class="card">
-      <div class="emi-pair">
-        <div class="emi-box">
-          <div class="lbl">You pay</div>
-          <div class="val">${input.rate.toFixed(2)}%</div>
-          <div class="sub">${inr(userEmi)} a month</div>
+      <div class="kpis tnum">
+        <div class="kpi">
+          <div class="k-lbl">You pay</div>
+          <div class="k-val">${input.rate.toFixed(2)}%</div>
+          <div class="k-sub">${inr(userEmi)} a month</div>
         </div>
-        <div class="emi-box ach">
-          <div class="lbl">Similar borrowers</div>
-          <div class="val">${simRange}</div>
-          <div class="sub">${cohort.n} report${cohort.n === 1 ? '' : 's'}${cohort.tier > 1 ? ' (widened)' : ''}</div>
+        <div class="kpi">
+          <div class="k-lbl">Similar borrowers</div>
+          <div class="k-val">${simRange}</div>
+          <div class="k-sub">${cohort.n} report${cohort.n === 1 ? '' : 's'}${cohort.tier > 1 ? ' · widened' : ''}</div>
+        </div>
+        ${diffTile}
+        <div class="kpi">
+          <div class="k-lbl">Peers paying less</div>
+          <div class="k-val">${nLess} / 10</div>
+          <div class="k-sub">at ${esc(input.bank)} report lower</div>
         </div>
       </div>
-      <div class="emi-diff">
-        ${monthlyDiff > 0
-          ? `That's about <b>${inr(monthlyDiff)} a month</b> more than the better-priced quarter of similar borrowers — on what you still owe.`
-          : `You're already priced as well as similar borrowers at your bank.`}
-      </div>
-      ${benchmarkLine(input, benchmark)}
-      ${repoMarkupLine(input, repoMarkup)}
-    </div>
 
-    <div class="card">
-      <div class="result-lead">
-        <div class="frame"><b>${nLess}</b> out of 10 people who borrowed from ${esc(input.bank)} report a lower rate than yours.</div>
-        ${pictographHtml(nLess)}
-        <div class="caveat">Rates depend on your credit score, employer, salary and how you applied — so yours may be different for good reasons. This shows what's possible at your bank, not that you were charged unfairly.</div>
-      </div>
-      ${widenLine}
-      ${cohort.tier > 1 ? `<div class="cohort-note">${cohortLine}</div>` : ''}
-    </div>
-
-    <div class="card" style="padding:0;overflow:hidden">
-      <details class="dotwrap">
-        <summary>See everyone's rates</summary>
-        <div class="dotplot">
-          <div class="cap">Every rate people shared in this group. Yours is marked.</div>
-          ${dotPlotSvg(rates, input.rate, Number(cohort.median_rate == null ? calc.cohortP25 : cohort.median_rate))}
+      <section class="rband">
+        <div class="sec-head"><span class="reyebrow">${doorsTitle}</span></div>
+        <div class="action-wrap">
+          ${doorHtml(Number(rec.slice(4)), rec, calc)}
+          ${rec !== 'door1' ? `<div class="fee-disclaimer">Fee figures are <b>estimates</b> — from each lender's official documents where published, and third-party sources where they don't. Charges vary by profile, so <b>verify the exact fees with your bank</b> before acting.</div>` : ''}
         </div>
-      </details>
-    </div>
-    </div>
+      </section>
 
-    <div class="result-col rc-doors">
-    <div class="card">
-      ${actionLead}
-      <div class="doors-title">${doorsTitle}</div>
-      ${doorHtml(Number(rec.slice(4)), rec, calc)}
-      ${rec !== 'door1' ? `<div class="fee-disclaimer">Fee figures are <b>estimates</b> — drawn from each lender's official documents where published, and from third-party sources where the lender doesn't publish them. Charges change and vary by profile, so <b>verify the exact fees with your bank</b> before acting.</div>` : ''}
-    </div>
-    </div>
-    </div>
+      <section class="rband">
+        <div class="sec-head"><span class="reyebrow">The evidence</span><h2>Where you sit among people like you</h2></div>
+        <div class="evidence">
+          <div class="panel">
+            <h4>Every rate people like you reported</h4>
+            <div class="p-note">${cohort.tier > 1 ? esc(cohort.tier_label) : esc(cohortLine)} Yours is marked.</div>
+            <div class="dotplot">${dotPlotSvg(rates, input.rate, medianForPlot)}</div>
+            ${pictographHtml(nLess)}
+            <div class="p-note"><b>${nLess} out of 10</b> ${esc(input.bank)} borrowers report a lower rate than yours. Rates differ by credit score, employer and how you applied — so yours may differ for good reasons.</div>
+          </div>
+          <div class="panel">
+            <h4>The context</h4>
+            <div class="ctx">
+              ${repoMarkupLine(input, repoMarkup)}
+              ${benchmarkLine(input, benchmark)}
+              <div class="ctx-note"><span class="c-lbl">How close this match is</span><div class="c-val">Compared against <b>${cohort.n} ${esc(input.bank)} ${esc(input.employment.toLowerCase())} borrower${cohort.n === 1 ? '' : 's'}</b>${cohort.tier > 1 ? ' — widened to a broader group' : ' in your score and loan-size band'}. We never show a figure from fewer than four.</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-    ${backButtonHtml()}`;
+      <div class="closing">
+        <h3>This is what borrowers like you actually report — not a brochure rate.</h3>
+        <div class="c-btns">
+          <button class="btn cbtn" id="f-again" type="button">Add another rate</button>
+          <button class="btn btn-ghost cbtn" id="f-back" type="button">← Back to the registry</button>
+        </div>
+      </div>
+
+      <div class="r-footnote">Your rate is shared anonymously — your name is never shown to anyone. WhatIff shows what's achievable at your bank, not that you were charged unfairly.</div>
+    </div>`;
 
   wireDoors();
   wireBack();
+  const again = document.getElementById('f-again'); if (again) again.addEventListener('click', renderLanding);
 }
 
 // Provenance line for a door's target rate — the basis is EXPOSED, never a bare
