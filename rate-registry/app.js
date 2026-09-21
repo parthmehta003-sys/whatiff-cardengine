@@ -148,6 +148,132 @@ let currentRateId = null;   // returned by submit_rate; held in memory only, nev
 let lastPayload = null;     // for client-side duplicate prevention
 let lastResult = null;      // { input, cohort, bestBankP25 } to re-render on Back
 let outcomeId = null;       // outcomes row id once a door is opened
+let authUser = null;        // Supabase Auth user when signed in; identity for anti-spam only, never shown
+let formState = { rate_type: null, employment: null };  // segmented-control selections (module-level so drafts can save them)
+
+// ===========================================================================
+// AUTH — sign-in gates ONLY submitting a rate (reads stay open). Identity is
+// derived server-side from the login token; the UI never shows a name or email.
+// The whole point is anti-spam / anti-Sybil: one verified account = one identity.
+// ===========================================================================
+const DRAFT_KEY = 'whatiff_form_draft';
+
+function elVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+function authMsg(msg) { const el = document.getElementById('auth-msg'); if (el) el.textContent = msg || ''; }
+
+// Persist the in-progress form so a Google sign-in redirect doesn't lose it.
+function saveDraft() {
+  try {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({
+      bank: elVal('f-bank'), rate: elVal('f-rate'), year: elVal('f-year'),
+      amt: elVal('f-amt'), chan: elVal('f-chan'), cibil: elVal('f-cibil'),
+      rate_type: formState.rate_type, employment: formState.employment,
+    }));
+  } catch (e) {}
+}
+function loadDraft() { try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch (e) { return null; } }
+function clearDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch (e) {} }
+
+// Refill the form from a saved draft (used after the Google redirect returns).
+function restoreDraft() {
+  const d = loadDraft();
+  if (!d) return;
+  const set = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
+  set('f-bank', d.bank); set('f-rate', d.rate); set('f-year', d.year);
+  set('f-amt', d.amt); set('f-chan', d.chan); set('f-cibil', d.cibil);
+  if (d.rate_type) {
+    formState.rate_type = d.rate_type;
+    document.querySelectorAll('#f-type .opt').forEach(o => o.classList.toggle('on', o.dataset.type === d.rate_type));
+  }
+  if (d.employment) {
+    formState.employment = d.employment;
+    document.querySelectorAll('#f-emp .opt').forEach(o => o.classList.toggle('on', o.dataset.emp === d.employment));
+  }
+}
+
+async function signInGoogle() {
+  if (!sb) return;
+  saveDraft();
+  const { error } = await sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: location.origin + location.pathname },
+  });
+  if (error) authMsg(error.message);
+}
+async function signUpEmail() {
+  if (!sb) return;
+  const email = elVal('auth-email').trim(), pass = elVal('auth-pass');
+  if (!validEmail(email)) return authMsg('Enter a valid email address.');
+  if (pass.length < 8) return authMsg('Choose a password of at least 8 characters.');
+  authMsg('Creating your account…');
+  const { data, error } = await sb.auth.signUp({ email, password: pass });
+  if (error) return authMsg(error.message);
+  if (data && data.session) { authUser = data.user; onAuthed(); }        // email confirmation off
+  else authMsg('Almost there — check your email to confirm, then come back and submit.'); // confirmation on
+}
+async function signInEmail() {
+  if (!sb) return;
+  const email = elVal('auth-email').trim(), pass = elVal('auth-pass');
+  if (!validEmail(email)) return authMsg('Enter a valid email address.');
+  authMsg('Signing in…');
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (error) return authMsg('That email and password didn\'t match. Try again, or create an account.');
+  authUser = data.user; onAuthed();
+}
+async function signOut() {
+  if (!sb) return;
+  try { await sb.auth.signOut(); } catch (e) {}
+  authUser = null; refreshAuthUI();
+}
+
+// Called after a successful sign-in. The form values are still on screen (email
+// path) or restored (Google path), so we just reveal the submit button again.
+function onAuthed() {
+  clearDraft();
+  const panel = document.getElementById('auth-panel');
+  if (panel) panel.hidden = true;
+  refreshAuthUI();
+  showError('');
+  authMsg('');
+}
+
+// Reflect auth state in the form: a quiet "signed in (anonymous)" line, and
+// whether the sign-in panel or the submit button is the active affordance.
+function refreshAuthUI() {
+  const status = document.getElementById('auth-status');
+  if (status) {
+    status.innerHTML = authUser
+      ? `Signed in · your entry stays <b>anonymous</b> · <a href="#" id="auth-signout">sign out</a>`
+      : '';
+    const so = document.getElementById('auth-signout');
+    if (so) so.addEventListener('click', (e) => { e.preventDefault(); signOut(); });
+  }
+}
+
+function authPanelHtml() {
+  return `
+    <div class="auth-panel" id="auth-panel" hidden>
+      <div class="auth-lead"><b>Sign in to add your rate.</b> We use this only to keep out spam and fake numbers —
+        your rate is shared <b>anonymously</b> and your name is never shown to anyone.</div>
+      <button class="btn auth-google" id="auth-google" type="button">Continue with Google</button>
+      <div class="auth-or"><span>or use email</span></div>
+      <input id="auth-email" type="email" inputmode="email" placeholder="you@example.com" autocomplete="email" />
+      <input id="auth-pass" type="password" placeholder="Password (8+ characters)" autocomplete="current-password" />
+      <div class="auth-btns">
+        <button class="btn" id="auth-signin" type="button">Sign in</button>
+        <button class="btn btn-ghost" id="auth-signup" type="button">Create account</button>
+      </div>
+      <div class="auth-msg" id="auth-msg"></div>
+    </div>`;
+}
+
+function wireAuth() {
+  restoreDraft();
+  refreshAuthUI();
+  const g = document.getElementById('auth-google'); if (g) g.addEventListener('click', signInGoogle);
+  const si = document.getElementById('auth-signin'); if (si) si.addEventListener('click', signInEmail);
+  const su = document.getElementById('auth-signup'); if (su) su.addEventListener('click', signUpEmail);
+}
 
 // ===========================================================================
 // LANDING
@@ -167,7 +293,7 @@ async function renderLanding() {
   tallyEl.innerHTML = total > 0
     ? `<b>${total.toLocaleString('en-IN')}</b> rates shared so far`
     : `Be the first to share a rate`;
-  footEl.innerHTML = 'Anonymous. No login. Aggregates only — individual rates and contact details are never shown.';
+  footEl.innerHTML = 'Anonymous to everyone. Adding a rate needs a quick sign-in (spam control only) — your name is never shown. Aggregates only; individual rates and contact details are never displayed.';
 
   app.innerHTML = `
     <section class="hero-card">
@@ -175,7 +301,7 @@ async function renderLanding() {
         <h1>Are you paying more than you need to on your home loan?</h1>
         <p>Banks advertise a rate almost nobody gets. Borrowers are telling each other what they actually got — so you can see what's achievable at your bank, not just what's advertised.</p>
         <button class="btn hero-cta" id="hero-cta" type="button">See what's achievable <span class="arr">→</span></button>
-        <div class="hero-note"><b>Free.</b> No email needed to see your result.</div>
+        <div class="hero-note"><b>Free & anonymous.</b> Adding your rate takes a quick sign-in — spam control only, your name is never shown.</div>
       </div>
       <div class="hero-coins" aria-hidden="true">${coinsCluster()}</div>
     </section>
@@ -331,21 +457,24 @@ function formHtml() {
       </div>
 
       <button class="btn" id="f-submit">See what's achievable at your bank</button>
+      <div class="auth-status" id="auth-status"></div>
+      ${authPanelHtml()}
       <div class="form-error" id="f-error"></div>
     </div>`;
 }
 
 function wireForm() {
-  const state = { rate_type: null, employment: null };
+  formState = { rate_type: null, employment: null };
   document.querySelectorAll('#f-type .opt').forEach(el => el.addEventListener('click', () => {
     document.querySelectorAll('#f-type .opt').forEach(o => o.classList.remove('on'));
-    el.classList.add('on'); state.rate_type = el.dataset.type;
+    el.classList.add('on'); formState.rate_type = el.dataset.type;
   }));
   document.querySelectorAll('#f-emp .opt').forEach(el => el.addEventListener('click', () => {
     document.querySelectorAll('#f-emp .opt').forEach(o => o.classList.remove('on'));
-    el.classList.add('on'); state.employment = el.dataset.emp;
+    el.classList.add('on'); formState.employment = el.dataset.emp;
   }));
-  document.getElementById('f-submit').addEventListener('click', () => submit(state));
+  document.getElementById('f-submit').addEventListener('click', () => submit(formState));
+  wireAuth();
 }
 
 function showError(msg) { const el = document.getElementById('f-error'); if (el) el.textContent = msg; }
@@ -374,6 +503,14 @@ async function submit(state) {
   if (!channel) return showError('Pick how you got the loan.');
   if (!employment) return showError('Pick salaried or self-employed.');
   if (!cibil_band) return showError('Pick your credit-score band.');
+
+  // Gate ONLY submitting behind sign-in (reads stay open). Form is validated
+  // first, so we ask for sign-in once, at the end, on a complete entry.
+  if (!authUser) {
+    const panel = document.getElementById('auth-panel');
+    if (panel) { panel.hidden = false; panel.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    return showError('One last step — sign in to add your rate. Your entry stays anonymous.');
+  }
 
   const input = { loan_type: 'Home', bank, rate: Math.round(rate * 100) / 100,
                   loan_year, amount_lakh, rate_type, channel, employment, cibil_band };
@@ -444,7 +581,13 @@ async function submit(state) {
   } catch (e) {
     submitting = false; btn.disabled = false; btn.textContent = 'See what\'s achievable at your bank';
     const msg = String(e && e.message || e);
-    if (msg.includes('session_revoked')) showError("This device has been blocked from posting after several out-of-range entries. If you think that's a mistake, reach out and we'll take a look.");
+    if (msg.includes('auth_required')) {
+      authUser = null; refreshAuthUI();
+      const panel = document.getElementById('auth-panel');
+      if (panel) { panel.hidden = false; panel.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      showError('Your sign-in expired — please sign in again to add your rate.');
+    }
+    else if (msg.includes('session_revoked')) showError("This account has been blocked from posting after several out-of-range entries. If you think that's a mistake, reach out and we'll take a look.");
     else if (msg.includes('rate_limit_exceeded')) showError("You've shared a lot in the last day — take a break and come back later.");
     else showError('Something went wrong saving that. Please try again.');
     return;
@@ -876,4 +1019,24 @@ function renderLoadError(e) {
 }
 
 // ---------------------------------------------------------------------------
-renderLanding();
+// Boot: resolve any existing sign-in first (so submit is gated correctly and the
+// Google redirect is picked up), then render. Auth state is for anti-spam only —
+// it changes nothing a viewer sees.
+async function boot() {
+  if (sb) {
+    try {
+      const { data } = await sb.auth.getSession();
+      authUser = (data && data.session && data.session.user) || null;
+      sb.auth.onAuthStateChange((_evt, session) => {
+        authUser = (session && session.user) || null;
+        refreshAuthUI();
+        // Returning from the Google redirect: reveal the form again with the
+        // draft restored, and hide the sign-in panel.
+        const panel = document.getElementById('auth-panel');
+        if (authUser && panel && !panel.hidden) { restoreDraft(); onAuthed(); }
+      });
+    } catch (e) { authUser = null; }
+  }
+  renderLanding();
+}
+boot();

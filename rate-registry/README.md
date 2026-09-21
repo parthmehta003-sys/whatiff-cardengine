@@ -263,6 +263,19 @@ abuse ever justifies the signup friction, add it; until then 0006 raises the cos
 without pretending to be unbypassable. The `abuse_ban_threshold()` function and
 the constants in `enforce_rate_limit()` are the tuning knobs.
 
+### Sign-in to submit (migration 0014)
+
+Adding a rate requires a Supabase Auth sign-in — **Google or email/password** —
+purely as an anti-spam / anti-Sybil layer. **Reading the registry needs no login.**
+The identity is derived server-side from the login token (`auth.uid()` inside
+`submit_rate`, never sent by the client), and the **UI never shows a name or
+email** — every viewer still sees anonymous aggregates only. The rate limit, the
+"one live report per person" supersede, and revocation now key on the durable
+`user_id` instead of the bypassable `session_id`, so clearing localStorage or
+using incognito no longer resets anything. Requires enabling the Google + Email
+providers and setting the Site URL / redirect URLs in the Supabase dashboard —
+see `supabase/DEPLOY_0014_auth.md` for the exact steps.
+
 ## 6. Before launch
 
 The site launches empty and stays honest when thin: under 10 rows it hides the
