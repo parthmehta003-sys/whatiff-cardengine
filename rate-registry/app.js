@@ -223,9 +223,14 @@ async function signUpEmail() {
   if (pass.length < 8) return authMsg('Choose a password of at least 8 characters.');
   authMsg('Creating your account…');
   const { data, error } = await sb.auth.signUp({ email, password: pass });
-  if (error) return authMsg(error.message);
+  if (error) {
+    if (/already registered|already exists|user already/i.test(error.message || '')) {
+      return authMsg('You already have an account with this email — click "Sign in" instead.');
+    }
+    return authMsg(error.message || 'Could not create the account.');
+  }
   if (data && data.session) { authUser = data.user; onAuthed(); }        // email confirmation off
-  else authMsg('Almost there — check your email to confirm, then come back and submit.'); // confirmation on
+  else authMsg('Account created — click "Sign in" to continue.');         // no session returned
 }
 async function signInEmail() {
   if (!sb) return;
@@ -233,7 +238,7 @@ async function signInEmail() {
   if (!validEmail(email)) return authMsg('Enter a valid email address.');
   authMsg('Signing in…');
   const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
-  if (error) return authMsg('That email and password didn\'t match. Try again, or create an account.');
+  if (error) return authMsg(error.message || 'Could not sign in. Check your email and password.');
   authUser = data.user; onAuthed();
 }
 async function signOut() {
