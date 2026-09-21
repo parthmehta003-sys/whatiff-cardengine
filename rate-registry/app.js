@@ -480,8 +480,8 @@ function formHtml() {
         <select id="f-tenure"><option value="" disabled selected>Choose tenure</option>${tenureOpts}</select>
       </div>
       <div class="field">
-        <label for="f-out">Amount you still owe <span class="opt-tag">optional — in ₹ lakh</span></label>
-        <input id="f-out" type="number" inputmode="decimal" step="0.5" min="0" placeholder="e.g. 42 · leave blank and we'll estimate" />
+        <label for="f-out">Amount you still owe <span class="opt-tag">optional — in ₹ crore</span></label>
+        <input id="f-out" type="number" inputmode="decimal" step="0.05" min="0" placeholder="e.g. 0.45 · leave blank and we'll estimate" />
       </div>
       <div class="field">
         <label>Rate type</label>
@@ -540,14 +540,16 @@ async function submit(state) {
   const cibil_band = document.getElementById('f-cibil').value;
   const tenure_years = parseInt(document.getElementById('f-tenure').value, 10);
   const outRaw = document.getElementById('f-out').value.trim();
-  const outstanding_lakh = outRaw === '' ? null : parseFloat(outRaw);
+  // Field is in ₹ crore; convert to lakh (1 crore = 100 lakh) for the internal math.
+  const outstanding_cr = outRaw === '' ? null : parseFloat(outRaw);
+  const outstanding_lakh = outstanding_cr == null ? null : Math.round(outstanding_cr * 100 * 100) / 100;
 
   if (!bank) return showError('Pick your bank.');
   if (!(rate >= 6 && rate <= 15)) return showError('Enter a rate between 6% and 15%.');
   if (!loan_year) return showError('Pick the year you took the loan.');
   if (!amount_lakh) return showError('Pick a loan amount.');
   if (!tenure_years) return showError('Pick your loan tenure.');
-  if (outstanding_lakh != null && !(outstanding_lakh > 0 && outstanding_lakh <= amount_lakh))
+  if (outstanding_cr != null && !(outstanding_cr > 0 && outstanding_lakh <= amount_lakh))
     return showError('Amount still owed should be between 0 and your loan amount — or leave it blank.');
   if (!rate_type) return showError('Pick floating or fixed.');
   if (!channel) return showError('Pick how you got the loan.');
