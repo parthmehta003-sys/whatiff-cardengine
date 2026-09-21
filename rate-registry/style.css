@@ -477,3 +477,6 @@ details.dotwrap[open] > summary::after { content: '－'; }
   .kpi:nth-child(odd) { border-left: none; }
   .evidence { grid-template-columns: 1fr; }
 }
+
+/* Inline hint/optional tag inside a field label. */
+.field label .opt-tag { font-weight: 500; color: var(--muted); font-size: 12px; letter-spacing: 0; text-transform: none; }
