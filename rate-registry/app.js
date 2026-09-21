@@ -400,7 +400,7 @@ async function submit(state) {
     outcomeId = null;
     if (window.umami) window.umami.track('Submission');
 
-    const [cs, br, bm] = await Promise.all([
+    const [cs, br, bm, rm] = await Promise.all([
       sb.rpc('cohort_stats', {
         p_loan_type: 'Home', p_bank: bank, p_year: loan_year,
         p_channel: channel, p_employment: employment, p_cibil_band: cibil_band,
@@ -408,6 +408,9 @@ async function submit(state) {
       }),
       sb.rpc('bank_rates', { p_loan_type: 'Home' }),
       sb.rpc('bank_benchmark', { p_bank: bank }),
+      // Pricing context: markup over the RBI policy repo rate. Non-null only for
+      // repo-linked (RLLR) loans; NULL for HFC/PLR/unresolved (then no line shows).
+      sb.rpc('get_repo_markup', { p_report_id: currentRateId }),
     ]);
     if (cs.error) throw cs.error;
 
@@ -434,7 +437,9 @@ async function submit(state) {
       processingFlat: targetProcessingFlat,
     };
 
-    lastResult = { input, cohort, bestBankP25, benchmark, fees };
+    const repoMarkup = (rm && !rm.error && rm.data != null) ? Number(rm.data) : null;
+
+    lastResult = { input, cohort, bestBankP25, benchmark, fees, repoMarkup };
     renderResult(lastResult);
   } catch (e) {
     submitting = false; btn.disabled = false; btn.textContent = 'See what\'s achievable at your bank';
@@ -475,20 +480,33 @@ function computeDoors(input, cohort, bestBankP25, fees) {
   // legal/valuation are added separately in the door.
   const procCost = (bal) => procFlat != null ? procFlat : bal * procPct;
 
-  // Door 2 — convert spread with the same lender, target = cohort p25.
+  // Confidence from cohort depth (ties to the 0012 DISPLAY_THRESHOLD idea).
+  const cohortConf = cohort.n >= 30 ? 'high' : cohort.n >= 8 ? 'medium' : 'low';
+
+  // Door 2 — reprice with the SAME lender. Target basis is EXPOSED, not silent
+  // (docs/rate-migration-spec.md §7.1). Basis 'cohort_p25' = the better-priced
+  // quarter of similar borrowers at this bank; within one lender this equals
+  // "benchmark + cohort spread P25", so it upgrades cleanly to a benchmark-derived
+  // basis once an RLLR series exists. We use cohort P25 (realised, non-overstating)
+  // rather than the bank's advertised floor, which is best-case marketing.
   let door2 = null;
   if (cohortP25 != null) {
     const cost = convCost(outstanding);
     const gross = cohortP25 < input.rate ? iUser - interestOver(outstanding, cohortP25, yrs) : 0;
-    door2 = { target: cohortP25, cost, gross, net: gross - cost, feeVerified: convVerified, noGap: !(cohortP25 < input.rate) };
+    door2 = { target: cohortP25, cost, gross, net: gross - cost, feeVerified: convVerified,
+              noGap: !(cohortP25 < input.rate), basis: 'cohort_p25', confidence: cohortConf };
   }
 
-  // Door 3 — balance transfer, target = best bank p25 across the registry.
+  // Door 3 — balance transfer to a competing lender. Counterfactual, its own cost
+  // stack + eligibility. Basis exposed: the cheapest lender in our data for this
+  // profile (a realised p25), subject to the switching costs and eligibility.
   let door3 = null;
   if (bestBankP25 != null) {
     const cost = procCost(outstanding) + outstanding * BT_MOD_PCT + BT_LEGAL_TECH;
     const gross = bestBankP25 < input.rate ? iUser - interestOver(outstanding, bestBankP25, yrs) : 0;
-    door3 = { target: bestBankP25, cost, gross, net: gross - cost, feeVerified: procVerified, noGap: !(bestBankP25 < input.rate) };
+    door3 = { target: bestBankP25, cost, gross, net: gross - cost, feeVerified: procVerified,
+              noGap: !(bestBankP25 < input.rate), basis: 'best_bank_p25',
+              confidence: procVerified ? 'medium' : 'low' };
   }
 
   return { outstanding, yrs, iUser, cohortP25, door2, door3 };
@@ -496,7 +514,7 @@ function computeDoors(input, cohort, bestBankP25, fees) {
 
 function renderResult(res) {
   window.scrollTo(0, 0);
-  const { input, cohort, bestBankP25, benchmark, fees } = res;
+  const { input, cohort, bestBankP25, benchmark, fees, repoMarkup } = res;
   const rates = (cohort.rates || []).map(Number);
   const calc = computeDoors(input, cohort, bestBankP25, fees);
 
@@ -538,19 +556,38 @@ function renderResult(res) {
     ? `<div class="cohort-note widen">Not enough reports for your exact situation yet, so this compares you with ${esc(cohort.tier_label)}.</div>`
     : `<div class="cohort-note">${cohortLine}</div>`;
 
+  // ---- Economic conclusion is the organizing principle (not the peer compare) ----
+  // Similar-borrowers range = cohort P25–P75 (the price band others actually report).
+  const p25 = calc.cohortP25;
+  const p75 = cohort.p75_rate != null ? Number(cohort.p75_rate)
+            : (rates.length ? Math.max(...rates) : p25);
+  const simRange = p25.toFixed(2) === p75.toFixed(2)
+    ? `${p25.toFixed(2)}%`
+    : `${p25.toFixed(2)}%–${p75.toFixed(2)}%`;
+
+  // "Above your bank's better-priced peers" drives state 1 vs state 2. It is a
+  // peer fact (rate vs cohort P25), never a repo_markup claim — no "overpaying".
+  const aboveBankPeers = calc.door2 ? !calc.door2.noGap : (input.rate > p25);
+  const recDoor = rec === 'door1' ? null : (rec === 'door2' ? calc.door2 : calc.door3);
+  let headline, headClass, actionLead = '';
+  if (rec === 'door1') {
+    headline = "There's probably nothing worth changing.";
+    headClass = 'neutral';
+  } else {
+    headline = aboveBankPeers
+      ? 'It may be worth acting on your loan.'
+      : 'Your rate is competitive, but switching could still save you money.';
+    headClass = 'act';
+    const verb = rec === 'door3' ? 'by switching lenders' : 'by asking your bank to reprice';
+    actionLead = `<div class="action-lead">You could save about <b>${inr(recDoor.net)}</b> ${verb}.</div>`;
+  }
+  const doorsTitle = rec === 'door1' ? 'The economics right now' : 'What you can do about it';
+
   app.innerHTML = `
+    <div class="result-headline ${headClass}">${headline}</div>
+
     <div class="result-grid">
     <div class="result-col">
-    <div class="card">
-      <div class="result-lead">
-        <div class="frame"><b>${nLess}</b> out of 10 people who borrowed from ${esc(input.bank)} report a lower rate than yours.</div>
-        ${pictographHtml(nLess)}
-        <div class="caveat">Rates depend on your credit score, employer, salary and how you applied — so yours may be different for good reasons. This shows what's possible at your bank, not that you were charged unfairly.</div>
-      </div>
-      ${widenLine}
-      ${cohort.tier > 1 ? `<div class="cohort-note">${cohortLine}</div>` : ''}
-    </div>
-
     <div class="card">
       <div class="emi-pair">
         <div class="emi-box">
@@ -559,17 +596,28 @@ function renderResult(res) {
           <div class="sub">${inr(userEmi)} a month</div>
         </div>
         <div class="emi-box ach">
-          <div class="lbl">Others get at ${esc(input.bank)}</div>
-          <div class="val">${calc.cohortP25.toFixed(2)}%</div>
-          <div class="sub">${inr(achEmi)} a month</div>
+          <div class="lbl">Similar borrowers</div>
+          <div class="val">${simRange}</div>
+          <div class="sub">${cohort.n} report${cohort.n === 1 ? '' : 's'}${cohort.tier > 1 ? ' (widened)' : ''}</div>
         </div>
       </div>
       <div class="emi-diff">
         ${monthlyDiff > 0
-          ? `That's about <b>${inr(monthlyDiff)} a month</b> more than others at your bank — on what you still owe.`
-          : `You're already getting a rate as good as others at your bank — <b>nothing to chase here.</b>`}
+          ? `That's about <b>${inr(monthlyDiff)} a month</b> more than the better-priced quarter of similar borrowers — on what you still owe.`
+          : `You're already priced as well as similar borrowers at your bank.`}
       </div>
       ${benchmarkLine(input, benchmark)}
+      ${repoMarkupLine(input, repoMarkup)}
+    </div>
+
+    <div class="card">
+      <div class="result-lead">
+        <div class="frame"><b>${nLess}</b> out of 10 people who borrowed from ${esc(input.bank)} report a lower rate than yours.</div>
+        ${pictographHtml(nLess)}
+        <div class="caveat">Rates depend on your credit score, employer, salary and how you applied — so yours may be different for good reasons. This shows what's possible at your bank, not that you were charged unfairly.</div>
+      </div>
+      ${widenLine}
+      ${cohort.tier > 1 ? `<div class="cohort-note">${cohortLine}</div>` : ''}
     </div>
 
     <div class="card" style="padding:0;overflow:hidden">
@@ -585,7 +633,8 @@ function renderResult(res) {
 
     <div class="result-col rc-doors">
     <div class="card">
-      <div class="doors-title">What you can actually do about it</div>
+      ${actionLead}
+      <div class="doors-title">${doorsTitle}</div>
       ${doorHtml(Number(rec.slice(4)), rec, calc)}
       ${rec !== 'door1' ? `<div class="fee-disclaimer">Fee figures are <b>estimates</b> — drawn from each lender's official documents where published, and from third-party sources where the lender doesn't publish them. Charges change and vary by profile, so <b>verify the exact fees with your bank</b> before acting.</div>` : ''}
     </div>
@@ -598,6 +647,18 @@ function renderResult(res) {
   wireBack();
 }
 
+// Provenance line for a door's target rate — the basis is EXPOSED, never a bare
+// number (docs/rate-migration-spec.md §6a / §7). Kept subordinate; the saving and
+// net benefit stay the headline.
+function doorBasisLine(d) {
+  const t = (d && d.target != null) ? d.target.toFixed(2) + '%' : '';
+  if (d.basis === 'cohort_p25')
+    return `<div class="door-basis">Target ${t} — what the better-priced quarter of similar borrowers at your bank report. A peer estimate, not a quote.</div>`;
+  if (d.basis === 'best_bank_p25')
+    return `<div class="door-basis">Target ${t} — the cheapest lender in our data for a profile like yours, subject to eligibility and the costs above.</div>`;
+  return '';
+}
+
 function doorHtml(n, rec, calc) {
   const isRec = rec === `door${n}`;
   const tag = isRec ? `<div class="dtag">Recommended</div>` : '';
@@ -607,7 +668,7 @@ function doorHtml(n, rec, calc) {
       <div class="door ${isRec ? 'rec' : ''}">
         ${tag}
         <h3>Nothing to do right now</h3>
-        <div class="net none">The savings wouldn't cover the cost of switching right now. We'll tell you if that changes.</div>
+        <div class="net none">The savings wouldn't cover the cost of switching right now. Worth checking again if RBI cuts rates or your bank changes its spread.</div>
       </div>`;
   }
 
@@ -640,6 +701,7 @@ Thank you.`;
         <div class="dsub">In plain words: get your bank to put today's lower rate on your existing loan — no new loan, no longer tenure.</div>
         <div class="net">You'd save about <b>${inr(d.net)}</b> — after a one-time fee of roughly ${inr(d.cost)}.</div>
         <div class="cost">That's ${inr(d.gross)} saved over the years left on your loan, minus the fee. ${d.feeVerified ? "Fee is this lender's stated charge — confirm before you commit." : "Fee is a general estimate — check with your bank."}</div>
+        ${doorBasisLine(d)}
         <div class="dbody">
           <div class="template">${esc(template)}</div>
           <div class="warning">If you simply ask for <b>"a lower rate,"</b> many lenders respond with a top-up — your existing loan is closed and reopened with a fresh tenure, a processing fee, and sometimes insurance you were never shown. You end up paying more over the life of the loan. Ask specifically for a <b>conversion to the current spread on your existing loan, with no change to tenure and no top-up.</b></div>
@@ -666,8 +728,9 @@ Thank you.`;
       <div class="dsub">Switch your loan to a cheaper bank. There's paperwork and some upfront cost, but the savings can be big.</div>
       <div class="net">You'd save about <b>${inr(d.net)}</b> — after roughly ${inr(d.cost)} in switching costs (processing, legal, valuation, registration).</div>
       <div class="cost">That's ${inr(d.gross)} saved over the years left on your loan, minus those costs. ${d.feeVerified ? "Processing fee is the new lender's stated charge; legal, valuation and stamp costs are estimates — confirm before you move." : "Fees are estimates — check before you move."}</div>
+      ${doorBasisLine(d)}
       <div class="dbody">
-        <p style="font-size:13.5px;color:var(--muted);margin-bottom:4px">We can handle the paperwork. Leave your email and we'll come back.</p>
+        <p style="font-size:13.5px;color:var(--muted);margin-bottom:4px">Want the exact numbers for your loan — what you'd save and what to ask a new lender for? Leave your email and we'll send you the calculation. We're not a broker and we're not paid by any lender.</p>
         <div class="door-cta" data-door-cta="Transfer"></div>
       </div>
     </div>`;
@@ -682,10 +745,10 @@ function wireDoors() {
 
 function renderDoorCta(slot, door, done) {
   if (done) {
-    slot.innerHTML = `<div class="email-ok">✓ Got it. We'll be in touch.</div>`;
+    slot.innerHTML = `<div class="email-ok">✓ Got it — we'll email you.</div>`;
     return;
   }
-  const label = door === 'Conversion' ? 'Email me this template' : 'Email me — help me move';
+  const label = door === 'Conversion' ? 'Email me this template' : 'Email me the calculation';
   slot.innerHTML = `
     <div class="email-row">
       <input type="email" inputmode="email" placeholder="you@email.com" aria-label="Your email" />
@@ -764,6 +827,20 @@ function benchmarkLine(input, b) {
     <div class="benchmark">
       ${esc(input.bank)} ${kind} <b>${shown.toFixed(2)}%</b> — you're paying ${input.rate.toFixed(2)}%.
       <span class="src">Published rate, ${src}${b.as_of ? ' · as of ' + esc(String(b.as_of)) : ''}.</span>
+    </div>`;
+}
+
+// Pricing context (subordinate): the borrower's markup over the RBI policy repo
+// rate. Rendered ONLY for repo-linked loans, where repo_markup is non-null; HFC/
+// PLR and unresolved loans pass null and show nothing (no empty box, no repo maths
+// forced onto a non-repo-linked loan). Descriptive context, never a verdict.
+function repoMarkupLine(input, repoMarkup) {
+  if (repoMarkup == null || !isFinite(repoMarkup)) return '';
+  const repo = input.rate - repoMarkup;   // exact: rate and markup are both 2-dp
+  return `
+    <div class="benchmark pricing-context">
+      <b>Pricing context</b><br>
+      Your interest rate is <b>${repoMarkup.toFixed(2)} percentage points</b> above the RBI policy repo rate of ${repo.toFixed(2)}%.
     </div>`;
 }
 
