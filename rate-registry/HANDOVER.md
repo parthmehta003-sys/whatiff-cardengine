@@ -46,6 +46,19 @@ borrower was treated unfairly.
   MAD ~0 so a legit larger-ticket cluster got flagged as outliers → fixed with a
   **0.75-point absolute-deviation floor** on the outlier test (flag only if far by
   MAD *and* ≥0.75 off the band median). Gross typos (13.5) still caught.
+- **Auth / sign-in to submit (0014)** — adding a rate now requires Supabase Auth
+  (Google or email+password); reads stay open. Identity is derived server-side
+  from the JWT (`auth.uid()`) in `submit_rate` — the client never sends a user id,
+  so it can't be spoofed. `rates.user_id` + `banned_users`; the rate limit,
+  supersede, and revocation re-key onto `user_id` (session_id kept for analytics
+  only). **UI never shows a name/email** — anonymity to viewers is unchanged.
+  CRUCIAL detail: signed-in requests run as the `authenticated` role, so 0014
+  mirrors every anon EXECUTE grant onto `authenticated` (else even reads break).
+  Frontend: auth panel gates only the submit button; a saved form draft survives
+  the Google redirect. Needs dashboard config (providers + Site URL / redirect
+  URLs) — see `supabase/DEPLOY_0014_auth.md`. Verified on local Postgres with an
+  `auth.uid()` stub: anon→auth_required, identity bound, per-user supersede +
+  rate limit + ban, and the authenticated grant-mirror all pass.
 - **Design redesign done** to match whatiff.in (hero brand card, coins, full-width
   `landing-grid` / `result-grid`).
 - **Plain-language copy pass done** on landing list and result screen/doors (kept
@@ -183,6 +196,8 @@ raises cost without pretending to be unbypassable.
 0006_abuse_hardening.sql      (independent; 24h rate limit, median/MAD outliers, session revocation)
 0007_cibil_band.sql           (independent; CIBIL band cohort dimension; APPLY BEFORE deploying app.js)
 0008_ticket_band.sql          (after 0007; ticket-size band cohort dim from amount + 0.75 outlier floor; APPLY BEFORE deploying app.js)
+0009–0013                     (rate architecture: benchmark family/history, repo_markup, cohort normalization — shipped via deploy_0009_0013.sql; see DEPLOY_0009_0013.md)
+0014_auth_identity.sql        (after 0013; sign-in to submit — Google + email/pw; user_id identity, banned_users; grants mirrored to authenticated; APPLY + configure Auth providers BEFORE deploying app.js; see DEPLOY_0014_auth.md)
 ```
 
 All under `rate-registry/supabase/`. `seed_benchmarks.sql` re-run is safe (it
