@@ -170,11 +170,15 @@ Once you're above your peers, the question is *what to do*. We model three optio
 and **show only the single most worthwhile one** (so you never see a contradictory
 "do nothing… but you'd save ₹X").
 
-### 5.1 The balance we estimate first
-We don't know your exact outstanding balance, so we approximate it: amortise the
-**original** loan over a standard 20-year schedule at your current rate, for the
-years elapsed. Remaining tenure is `max(5, 20 − age of loan)`. This is an
-**approximation** (see §8). All three doors compute interest on this balance.
+### 5.1 The balance and remaining term
+Two facts drive the money math, and we now **ask** for them so it isn't a guess:
+- **Loan tenure** (required) → remaining years = `tenure − years since taken`, so
+  "how much is left" is real, not a fixed 20-year assumption. A loan at the end of
+  its term shows "little left to save" rather than a fictional figure.
+- **Amount still owed** (optional) → if you enter it, we use your **actual**
+  outstanding. If you leave it blank, we estimate it by amortising the original
+  loan over your real tenure **assuming no prepayment**, and the result says so.
+All three doors compute interest on this balance over the remaining years.
 
 ### 5.2 The doors
 - **Door 1 — Do nothing.** Recommended when no move clears the benefit threshold.
@@ -235,10 +239,12 @@ one that was true at the relevant time. *(`0009`–`0013`, `benchmark_history`)*
 
 For the logic to be *legit*, these have to be stated plainly:
 
-1. **Outstanding balance is estimated, not known.** We assume a 20-year schedule
-   and no prepayments. Someone who prepaid heavily, or is on a very different
-   tenure, will have a different real balance — so the ₹ figures are indicative,
-   not exact.
+1. **Outstanding balance: entered or estimated.** We ask the loan tenure (so the
+   remaining term is real) and let you enter what you still owe. If you leave the
+   balance blank, we estimate it assuming **no prepayment** and label it as an
+   estimate — so someone who prepaid heavily should enter their real balance for
+   an accurate figure. The precise, prepayment-aware number is also available via
+   the "email me the calculation" step.
 2. **Fees vary and some are estimates.** We label which are verified vs estimated
    and always say "verify with your bank." A wrong fee would mislead a net-benefit
    figure, which is why every door shows its costs and the disclaimer.

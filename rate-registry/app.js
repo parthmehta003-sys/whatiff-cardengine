@@ -76,6 +76,9 @@ const EMPLOYMENT = ['Salaried', 'Self-employed'];
 // cibil_allowed check constraint in migration 0007 exactly. 'Not sure' is the
 // escape hatch so the field is answerable without looking a score up.
 const CIBIL_BANDS = ['800+', '750-799', '700-749', 'Below 700', 'Not sure'];
+// Original loan tenure (years). Used with the year-taken to get the ACTUAL years
+// remaining — so "you'd save X over the life of the loan" isn't a 20-year guess.
+const TENURES = [10, 15, 20, 25, 30];
 const YEARS = (() => { const a = []; for (let y = 2026; y >= 2015; y--) a.push(y); return a; })();
 
 const REF_PRINCIPAL = 5000000; // ₹50 lakh, for the landing list
@@ -110,13 +113,20 @@ function emi(principal, annualRate, years) {
   const p = Math.pow(1 + r, n);
   return principal * r * p / (p - 1);
 }
-function yearsRemaining(loanYear) { return Math.max(5, 20 - (2026 - loanYear)); }
+// Years left = the sanctioned tenure minus the years since it was taken (never
+// negative). We now ASK the tenure, so this is real, not a 20-year assumption.
+function yearsRemaining(loanYear, tenureYears) {
+  const t = tenureYears || 20;
+  return Math.max(0, t - (2026 - loanYear));
+}
 
-// Outstanding is estimated by amortising the ORIGINAL amount at the user's
-// current rate over a standard 20-year schedule — an approximation, since we
-// don't capture the real sanctioned tenure or any prepayments.
-function outstandingBalance(principal, annualRate, loanYear) {
-  const r = annualRate / 1200, nTotal = 240;
+// Outstanding balance. If the borrower told us what they still owe, use that.
+// Otherwise estimate it by amortising the ORIGINAL amount at their rate over the
+// ACTUAL sanctioned tenure for the months elapsed — an estimate that assumes no
+// prepayment, and is labelled as such in the result.
+function outstandingBalance(principal, annualRate, loanYear, tenureYears) {
+  const nTotal = (tenureYears || 20) * 12;
+  const r = annualRate / 1200;
   const elapsed = Math.max(0, Math.min(nTotal, (2026 - loanYear) * 12));
   if (r === 0) return principal * (1 - elapsed / nTotal);
   const powN = Math.pow(1 + r, nTotal), powE = Math.pow(1 + r, elapsed);
@@ -440,13 +450,14 @@ function formHtml() {
   const amtOpts = AMOUNTS.map(a => `<option value="${a.v}">${esc(a.label)}</option>`).join('');
   const chanOpts = CHANNELS.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
   const cibilOpts = CIBIL_BANDS.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  const tenureOpts = TENURES.map(t => `<option value="${t}">${t} years</option>`).join('');
   const typeOpts = RATE_TYPES.map(t => `<div class="opt" data-type="${t}">${t}</div>`).join('');
   const empOpts = EMPLOYMENT.map(e => `<div class="opt" data-emp="${e}">${e}</div>`).join('');
 
   return `
     <div class="card" id="addrate">
       <div class="form-title">Add your rate</div>
-      <div class="form-sub">Eight questions, under a minute. Anonymous — no phone, no email.</div>
+      <div class="form-sub">A minute, no phone, no email. Anonymous — your name is never shown.</div>
 
       <div class="field">
         <label for="f-bank">Your bank</label>
@@ -461,8 +472,16 @@ function formHtml() {
         <select id="f-year"><option value="" disabled selected>Choose a year</option>${yearOpts}</select>
       </div>
       <div class="field">
-        <label for="f-amt">Loan amount</label>
+        <label for="f-amt">Loan amount <span class="opt-tag">when you took it</span></label>
         <select id="f-amt"><option value="" disabled selected>Choose an amount</option>${amtOpts}</select>
+      </div>
+      <div class="field">
+        <label for="f-tenure">Loan tenure <span class="opt-tag">the term you signed up for</span></label>
+        <select id="f-tenure"><option value="" disabled selected>Choose tenure</option>${tenureOpts}</select>
+      </div>
+      <div class="field">
+        <label for="f-out">Amount you still owe <span class="opt-tag">optional — in ₹ lakh</span></label>
+        <input id="f-out" type="number" inputmode="decimal" step="0.5" min="0" placeholder="e.g. 42 · leave blank and we'll estimate" />
       </div>
       <div class="field">
         <label>Rate type</label>
@@ -519,11 +538,17 @@ async function submit(state) {
   const channel = document.getElementById('f-chan').value;
   const employment = state.employment;
   const cibil_band = document.getElementById('f-cibil').value;
+  const tenure_years = parseInt(document.getElementById('f-tenure').value, 10);
+  const outRaw = document.getElementById('f-out').value.trim();
+  const outstanding_lakh = outRaw === '' ? null : parseFloat(outRaw);
 
   if (!bank) return showError('Pick your bank.');
   if (!(rate >= 6 && rate <= 15)) return showError('Enter a rate between 6% and 15%.');
   if (!loan_year) return showError('Pick the year you took the loan.');
   if (!amount_lakh) return showError('Pick a loan amount.');
+  if (!tenure_years) return showError('Pick your loan tenure.');
+  if (outstanding_lakh != null && !(outstanding_lakh > 0 && outstanding_lakh <= amount_lakh))
+    return showError('Amount still owed should be between 0 and your loan amount — or leave it blank.');
   if (!rate_type) return showError('Pick floating or fixed.');
   if (!channel) return showError('Pick how you got the loan.');
   if (!employment) return showError('Pick salaried or self-employed.');
@@ -538,7 +563,8 @@ async function submit(state) {
   }
 
   const input = { loan_type: 'Home', bank, rate: Math.round(rate * 100) / 100,
-                  loan_year, amount_lakh, rate_type, channel, employment, cibil_band };
+                  loan_year, amount_lakh, rate_type, channel, employment, cibil_band,
+                  tenure_years, outstanding_lakh };
 
   // Client-side duplicate prevention: identical payload → skip the insert and
   // re-show the existing result (Back never creates a second row).
@@ -625,8 +651,15 @@ async function submit(state) {
 // ===========================================================================
 function computeDoors(input, cohort, bestBankP25, fees) {
   const principal = input.amount_lakh * 100000;
-  const outstanding = outstandingBalance(principal, input.rate, input.loan_year);
-  const yrs = yearsRemaining(input.loan_year);
+  const tenure = input.tenure_years || 20;
+  const yrs = yearsRemaining(input.loan_year, tenure);
+  const balanceEntered = input.outstanding_lakh != null;
+  const outstanding = balanceEntered
+    ? input.outstanding_lakh * 100000
+    : outstandingBalance(principal, input.rate, input.loan_year, tenure);
+  const balanceNote = balanceEntered
+    ? 'Based on the balance you entered.'
+    : `Estimated balance — assumes no prepayment on your ${tenure}-year loan.`;
   const iUser = interestOver(outstanding, input.rate, yrs);
 
   const cohortP25 = cohort.p25_rate == null ? null : Number(cohort.p25_rate);
@@ -677,7 +710,7 @@ function computeDoors(input, cohort, bestBankP25, fees) {
               confidence: procVerified ? 'medium' : 'low' };
   }
 
-  return { outstanding, yrs, iUser, cohortP25, door2, door3 };
+  return { outstanding, yrs, iUser, cohortP25, door2, door3, balanceEntered, balanceNote, tenure };
 }
 
 function renderResult(res) {
@@ -694,6 +727,21 @@ function renderResult(res) {
           <div class="frame">Your rate is saved. We just don't have enough reports for
             <b>${esc(input.bank)}</b> yet to show a fair comparison.</div>
           <div class="caveat">We won't show a number until at least four people have shared — so it actually means something. Check back in a few days.</div>
+        </div>
+      </div>
+      ${backButtonHtml()}`;
+    wireBack();
+    return;
+  }
+
+  // Loan essentially at its end — no move can pay for itself over what's left.
+  if (calc.yrs < 1) {
+    app.innerHTML = `
+      <div class="card">
+        <div class="result-lead">
+          <div class="frame">Your ${esc(input.bank)} loan is at the end of its ${calc.tenure}-year term —
+            there's little left to save by switching now.</div>
+          <div class="caveat">Repricing or a balance transfer only pays off when there are years of interest left to save. Your rate is still on record and counts toward the registry.</div>
         </div>
       </div>
       ${backButtonHtml()}`;
@@ -888,7 +936,7 @@ Thank you.`;
         <h3>Ask your bank to convert your spread</h3>
         <div class="dsub">In plain words: get your bank to put today's lower rate on your existing loan — no new loan, no longer tenure.</div>
         <div class="net">You'd save about <b>${inr(d.net)}</b> — after a one-time fee of roughly ${inr(d.cost)}.</div>
-        <div class="cost">That's ${inr(d.gross)} saved over the years left on your loan, minus the fee. ${d.feeVerified ? "Fee is this lender's stated charge — confirm before you commit." : "Fee is a general estimate — check with your bank."}</div>
+        <div class="cost">That's ${inr(d.gross)} saved over your remaining ~${Math.round(calc.yrs)} years, minus the fee. ${d.feeVerified ? "Fee is this lender's stated charge — confirm before you commit." : "Fee is a general estimate — check with your bank."} ${calc.balanceNote}</div>
         ${doorBasisLine(d)}
         <div class="dbody">
           <div class="template">${esc(template)}</div>
@@ -915,7 +963,7 @@ Thank you.`;
       <h3>Move to another lender</h3>
       <div class="dsub">Switch your loan to a cheaper bank. There's paperwork and some upfront cost, but the savings can be big.</div>
       <div class="net">You'd save about <b>${inr(d.net)}</b> — after roughly ${inr(d.cost)} in switching costs (processing, legal, valuation, registration).</div>
-      <div class="cost">That's ${inr(d.gross)} saved over the years left on your loan, minus those costs. ${d.feeVerified ? "Processing fee is the new lender's stated charge; legal, valuation and stamp costs are estimates — confirm before you move." : "Fees are estimates — check before you move."}</div>
+      <div class="cost">That's ${inr(d.gross)} saved over your remaining ~${Math.round(calc.yrs)} years, minus those costs. ${d.feeVerified ? "Processing fee is the new lender's stated charge; legal, valuation and stamp costs are estimates — confirm before you move." : "Fees are estimates — check before you move."} ${calc.balanceNote}</div>
       ${doorBasisLine(d)}
       <div class="dbody">
         <p style="font-size:13.5px;color:var(--muted);margin-bottom:4px">Want the exact numbers for your loan — what you'd save and what to ask a new lender for? Leave your email and we'll send you the calculation. We're not a broker and we're not paid by any lender.</p>
