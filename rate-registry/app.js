@@ -317,32 +317,45 @@ async function renderLanding() {
   if (!sb) return renderConfigError();
   app.innerHTML = `<div class="thin" style="padding:36px 4px">Loading the registry…</div>`;
 
-  let total = 0, banks = [];
+  let total = 0, banks = [], stats = null;
   try {
-    const [tc, br] = await Promise.all([sb.rpc('total_count'), sb.rpc('bank_rates', { p_loan_type: 'Home' })]);
-    if (tc.error) throw tc.error;
-    total = tc.data || 0;
+    const [st, br] = await Promise.all([sb.rpc('registry_stats'), sb.rpc('bank_rates', { p_loan_type: 'Home' })]);
+    if (st.error) throw st.error;
+    stats = (st.data && st.data[0]) || { n_rates: 0, tracked_lakh: 0, potential_saving_total: 0 };
+    total = stats.n_rates || 0;
     banks = br.error ? [] : (br.data || []);
   } catch (e) { return renderLoadError(e); }
 
   tallyEl.innerHTML = total > 0
-    ? `<b>${total.toLocaleString('en-IN')}</b> rates shared so far`
+    ? `<b>${total.toLocaleString('en-IN')}</b> rates shared`
     : `Be the first to share a rate`;
   footEl.innerHTML = 'Anonymous to everyone. Adding a rate needs a quick sign-in (spam control only) — your name is never shown. Aggregates only; individual rates and contact details are never displayed.';
 
   app.innerHTML = `
     <section class="hero-card">
       <div class="hero-copy">
-        <h1>Are you paying more than you need to on your home loan?</h1>
-        <p>Banks advertise a rate almost nobody gets. Borrowers are telling each other what they actually got — so you can see what's achievable at your bank, not just what's advertised.</p>
+        <div class="eyebrow">Anonymous home-loan rate registry</div>
+        <h1>Banks advertise a rate almost nobody gets.</h1>
+        <p>Borrowers are telling each other what they actually got — so you can see what's achievable at your bank, not just what's on the brochure, and which one move is worth making.</p>
         <button class="btn hero-cta" id="hero-cta" type="button">See what's achievable <span class="arr">→</span></button>
-        <div class="hero-note"><b>Free & anonymous.</b> Adding your rate takes a quick sign-in — spam control only, your name is never shown.</div>
+        <div class="hero-note"><b>Free.</b> No login to browse · your name is never shown.</div>
       </div>
       <div class="hero-coins" aria-hidden="true">${coinsCluster()}</div>
     </section>
+
+    ${trustStrip(stats)}
+
     <div class="landing-grid">
       ${listSection(total, banks)}
       ${formHtml()}
+    </div>
+
+    ${howItWorks()}
+
+    <div class="land-closing">
+      <h3>See what's achievable at your bank.</h3>
+      <p>It takes under a minute, it's free, and a lower rate might be one conversation away.</p>
+      <button class="btn hero-cta" id="closing-cta" type="button">Add your rate <span class="arr">→</span></button>
     </div>
   `;
   const scrollToForm = () => {
@@ -351,11 +364,58 @@ async function renderLanding() {
     const bank = document.getElementById('f-bank');
     if (bank) setTimeout(() => bank.focus({ preventScroll: true }), 400);
   };
-  const cta = document.getElementById('hero-cta');
-  if (cta) cta.addEventListener('click', scrollToForm);
-  const navCta = document.getElementById('nav-cta');
-  if (navCta) navCta.addEventListener('click', scrollToForm);
+  ['hero-cta', 'nav-cta', 'closing-cta'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', scrollToForm);
+  });
   wireForm();
+}
+
+// ₹ crore, sensibly rounded for a headline figure.
+function inrCrore(rupees) {
+  const cr = rupees / 1e7;
+  if (cr <= 0) return '₹0';
+  const val = cr >= 100 ? Math.round(cr).toLocaleString('en-IN')
+            : cr >= 10 ? cr.toFixed(0)
+            : cr >= 1 ? cr.toFixed(1)
+            : cr.toFixed(2);
+  return `₹${val} Cr`;
+}
+
+// The trust strip. Below 10 rows the real numbers are too small to impress, so
+// we show honest value-props until there's enough volume, then flip to live
+// stats (rates shared · loans tracked · potential savings IDENTIFIED, never
+// "saved"). Matches the leaderboard's own ≥10 threshold.
+function trustStrip(stats) {
+  const n = stats ? (stats.n_rates || 0) : 0;
+  if (n < 10) {
+    return `
+      <div class="trust">
+        <div class="t"><b>100% anonymous</b>Your name is never shown to anyone</div>
+        <div class="t"><b>25 lenders tracked</b>Rates verified against official rate cards</div>
+        <div class="t"><b>No login to browse</b>Sign in only to add your own rate</div>
+      </div>`;
+  }
+  const trackedCr = inrCrore((stats.tracked_lakh || 0) * 1e5);
+  const savedCr = inrCrore(stats.potential_saving_total || 0);
+  return `
+    <div class="trust tnum">
+      <div class="t"><b>${n.toLocaleString('en-IN')}</b>rates shared by borrowers</div>
+      <div class="t"><b>${trackedCr}</b>in home loans tracked</div>
+      <div class="t"><b>${savedCr}</b>in potential savings identified</div>
+    </div>`;
+}
+
+function howItWorks() {
+  return `
+    <section class="how">
+      <div class="shead"><span class="eyebrow">How it works</span><h2>Three steps, under a minute</h2></div>
+      <div class="steps">
+        <div class="step"><div class="num">STEP 1</div><h3>Share your rate</h3><p>Tell us your bank, rate and a few loan details. It's anonymous — a quick sign-in only keeps out spam, and your name is never shown.</p></div>
+        <div class="step"><div class="num">STEP 2</div><h3>See where you stand</h3><p>We compare you against borrowers like you — same bank, credit band and loan size — and show what the better-priced ones actually pay.</p></div>
+        <div class="step"><div class="num">STEP 3</div><h3>Know your one move</h3><p>Get the single most worthwhile action — reprice with your bank, or switch — with the real numbers and what to ask for.</p></div>
+      </div>
+    </section>`;
 }
 
 function listSection(total, banks) {
@@ -787,6 +847,11 @@ function renderResult(res) {
   // peer fact (rate vs cohort P25), never a repo_markup claim — no "overpaying".
   const aboveBankPeers = calc.door2 ? !calc.door2.noGap : (input.rate > p25);
   const recDoor = rec === 'door1' ? null : (rec === 'door2' ? calc.door2 : calc.door3);
+  // Record the identified potential saving (fire-and-forget) for the landing
+  // stat. Capped server-side; only ever "identified", never claimed as "saved".
+  if (recDoor && recDoor.net > 0 && currentRateId != null && sb) {
+    try { sb.rpc('record_potential', { p_rate_id: currentRateId, p_saving: Math.round(recDoor.net) }); } catch (e) {}
+  }
   let headline, headClass, heroLead;
   if (rec === 'door1') {
     headline = "There's probably nothing worth changing.";
