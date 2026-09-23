@@ -517,6 +517,7 @@ function formHtml() {
       <div class="form-title">Add your rate</div>
       <div class="form-sub">A minute, no phone, no email. Anonymous — your name is never shown.</div>
 
+      <div class="form-grid">
       <div class="field">
         <label for="f-bank">Your bank</label>
         <select id="f-bank"><option value="" disabled selected>Choose a bank</option>${bankOpts}</select>
@@ -556,6 +557,7 @@ function formHtml() {
       <div class="field">
         <label for="f-cibil">Credit score (CIBIL) when you took the loan</label>
         <select id="f-cibil"><option value="" disabled selected>Choose a band</option>${cibilOpts}</select>
+      </div>
       </div>
 
       <button class="btn" id="f-submit">See what's achievable at your bank</button>
