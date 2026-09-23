@@ -328,7 +328,7 @@ async function renderLanding() {
   tallyEl.innerHTML = total > 0
     ? `<b>${total.toLocaleString('en-IN')}</b> rates shared`
     : `Be the first to share a rate`;
-  footEl.innerHTML = 'Anonymous to everyone. Adding a rate needs a quick sign-in (spam control only) — your name is never shown. Aggregates only; individual rates and contact details are never displayed.';
+  footEl.innerHTML = "WhatIff is an independent, information-only service — not a bank, broker, DSA or loan agent. We don't arrange, facilitate or apply for loans, we don't refer you to any lender, and we're not paid by any lender. All figures are estimates shown for your information only and are not financial advice or a recommendation — verify with your bank and decide for yourself. Anonymous to everyone: your name is never shown, and only aggregates are displayed.";
 
   app.innerHTML = `
     <section class="hero-card">
