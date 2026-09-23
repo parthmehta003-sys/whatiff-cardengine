@@ -334,8 +334,8 @@ async function renderLanding() {
     <section class="hero-card">
       <div class="hero-copy">
         <div class="eyebrow">Anonymous home-loan rate registry</div>
-        <h1>The better rate isn't a secret. It's your leverage.</h1>
-        <p>The rate on the same loan can vary a lot from one borrower to the next — and most people never get to compare. WhatIff pools what borrowers actually got, so you can see the real rate for someone like you, and ask for it.</p>
+        <h1>Know the rate you should be getting.</h1>
+        <p>Banks know what every borrower pays; individual borrowers don't. Pooling real rates evens that up — so a better rate stops being a secret and becomes your leverage.</p>
         <button class="btn hero-cta" id="hero-cta" type="button">See what's achievable <span class="arr">→</span></button>
         <div class="hero-note"><b>Free.</b> No login to browse · your name is never shown.</div>
       </div>
