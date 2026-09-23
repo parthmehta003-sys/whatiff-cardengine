@@ -220,6 +220,7 @@ function restoreDraft() {
 async function signInGoogle() {
   if (!sb) return;
   saveDraft();
+  try { localStorage.setItem('whatiff_resume', '1'); } catch (e) {}
   const { error } = await sb.auth.signInWithOAuth({
     provider: 'google',
     options: { redirectTo: location.origin + location.pathname },
@@ -257,15 +258,15 @@ async function signOut() {
   authUser = null; refreshAuthUI();
 }
 
-// Called after a successful sign-in. The form values are still on screen (email
-// path) or restored (Google path), so we just reveal the submit button again.
+// Called after a successful email sign-in. Close the pop-up and continue the
+// submission the user was making — the form values are still on screen.
 function onAuthed() {
   clearDraft();
-  const panel = document.getElementById('auth-panel');
-  if (panel) panel.hidden = true;
+  closeAuth();
   refreshAuthUI();
   showError('');
   authMsg('');
+  submit(formState);
 }
 
 // Reflect auth state in the form: a quiet "signed in (anonymous)" line, and
@@ -281,23 +282,50 @@ function refreshAuthUI() {
   }
 }
 
+// The sign-in appears as a POP-UP when a logged-out user submits — not as a
+// static section. openAuth/closeAuth toggle the overlay.
+function openAuth() {
+  const o = document.getElementById('auth-overlay');
+  if (o) { o.hidden = false; try { document.body.style.overflow = 'hidden'; } catch (e) {} }
+  authMsg('');
+}
+function closeAuth() {
+  const o = document.getElementById('auth-overlay');
+  if (o) o.hidden = true;
+  try { document.body.style.overflow = ''; } catch (e) {}
+}
+// After returning from the Google redirect, resume the submission the user was
+// making (only when the form is present, so we don't fire before it renders).
+function resumeIfPending() {
+  if (!authUser) return;
+  let pending = false;
+  try { pending = !!localStorage.getItem('whatiff_resume'); } catch (e) {}
+  if (!pending || !document.getElementById('f-submit')) return;
+  try { localStorage.removeItem('whatiff_resume'); } catch (e) {}
+  restoreDraft();
+  submit(formState);
+}
+
 function authPanelHtml() {
   return `
-    <div class="auth-panel" id="auth-panel" hidden>
-      <div class="auth-lead"><b>Sign in to add your rate.</b> We use this only to keep out spam and fake numbers —
-        your rate is shared <b>anonymously</b> and your name is never shown to anyone.</div>
-      <button class="btn auth-google" id="auth-google" type="button">Continue with Google</button>
-      <div class="auth-or"><span>or use email</span></div>
-      <input id="auth-email" type="email" inputmode="email" placeholder="you@example.com" autocomplete="email" />
-      <div class="pass-wrap">
-        <input id="auth-pass" type="password" placeholder="Password (8+ characters)" autocomplete="current-password" />
-        <button type="button" class="pass-toggle" id="auth-pass-toggle" aria-label="Show password">${eyeSvg(false)}</button>
+    <div class="modal-overlay" id="auth-overlay" hidden>
+      <div class="modal auth-panel auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+        <button class="modal-close" id="auth-close" type="button" aria-label="Close">&times;</button>
+        <div class="auth-lead" id="auth-title"><b>Sign in to add your rate.</b> We use this only to keep out spam and fake numbers —
+          your rate is shared <b>anonymously</b> and your name is never shown to anyone.</div>
+        <button class="btn auth-google" id="auth-google" type="button">Continue with Google</button>
+        <div class="auth-or"><span>or use email</span></div>
+        <input id="auth-email" type="email" inputmode="email" placeholder="you@example.com" autocomplete="email" />
+        <div class="pass-wrap">
+          <input id="auth-pass" type="password" placeholder="Password (8+ characters)" autocomplete="current-password" />
+          <button type="button" class="pass-toggle" id="auth-pass-toggle" aria-label="Show password">${eyeSvg(false)}</button>
+        </div>
+        <div class="auth-btns">
+          <button class="btn" id="auth-signin" type="button">Sign in</button>
+          <button class="btn btn-ghost" id="auth-signup" type="button">Create account</button>
+        </div>
+        <div class="auth-msg" id="auth-msg"></div>
       </div>
-      <div class="auth-btns">
-        <button class="btn" id="auth-signin" type="button">Sign in</button>
-        <button class="btn btn-ghost" id="auth-signup" type="button">Create account</button>
-      </div>
-      <div class="auth-msg" id="auth-msg"></div>
     </div>`;
 }
 
@@ -308,6 +336,8 @@ function wireAuth() {
   const si = document.getElementById('auth-signin'); if (si) si.addEventListener('click', signInEmail);
   const su = document.getElementById('auth-signup'); if (su) su.addEventListener('click', signUpEmail);
   const pt = document.getElementById('auth-pass-toggle'); if (pt) pt.addEventListener('click', togglePassword);
+  const cl = document.getElementById('auth-close'); if (cl) cl.addEventListener('click', closeAuth);
+  const ov = document.getElementById('auth-overlay'); if (ov) ov.addEventListener('click', (e) => { if (e.target === ov) closeAuth(); });
 }
 
 // ===========================================================================
@@ -373,6 +403,7 @@ async function renderLanding() {
     if (el) el.addEventListener('click', scrollToForm);
   });
   wireForm();
+  resumeIfPending();   // continue a submission interrupted by the Google redirect
 }
 
 // ₹ crore, sensibly rounded for a headline figure.
@@ -623,12 +654,8 @@ async function submit(state) {
   if (!cibil_band) return showError('Pick your credit-score band.');
 
   // Gate ONLY submitting behind sign-in (reads stay open). Form is validated
-  // first, so we ask for sign-in once, at the end, on a complete entry.
-  if (!authUser) {
-    const panel = document.getElementById('auth-panel');
-    if (panel) { panel.hidden = false; panel.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-    return showError('One last step — sign in to add your rate. Your entry stays anonymous.');
-  }
+  // first, so the sign-in pop-up opens once, at the end, on a complete entry.
+  if (!authUser) { saveDraft(); openAuth(); return; }
 
   const input = { loan_type: 'Home', bank, rate: Math.round(rate * 100) / 100,
                   loan_year, amount_lakh, rate_type, channel, employment, cibil_band,
@@ -701,10 +728,8 @@ async function submit(state) {
     submitting = false; btn.disabled = false; btn.textContent = 'See what\'s achievable at your bank';
     const msg = String(e && e.message || e);
     if (msg.includes('auth_required')) {
-      authUser = null; refreshAuthUI();
-      const panel = document.getElementById('auth-panel');
-      if (panel) { panel.hidden = false; panel.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-      showError('Your sign-in expired — please sign in again to add your rate.');
+      authUser = null; refreshAuthUI(); openAuth();
+      authMsg('Your sign-in expired — please sign in again to add your rate.');
     }
     else if (msg.includes('session_revoked')) showError("This account has been blocked from posting after several out-of-range entries. If you think that's a mistake, reach out and we'll take a look.");
     else if (msg.includes('rate_limit_exceeded')) showError("You've shared a lot in the last day — take a break and come back later.");
@@ -1204,10 +1229,9 @@ async function boot() {
       sb.auth.onAuthStateChange((_evt, session) => {
         authUser = (session && session.user) || null;
         refreshAuthUI();
-        // Returning from the Google redirect: reveal the form again with the
-        // draft restored, and hide the sign-in panel.
-        const panel = document.getElementById('auth-panel');
-        if (authUser && panel && !panel.hidden) { restoreDraft(); onAuthed(); }
+        // Returning from the Google redirect: continue the pending submission
+        // once the form is on the page.
+        resumeIfPending();
       });
     } catch (e) { authUser = null; }
   }

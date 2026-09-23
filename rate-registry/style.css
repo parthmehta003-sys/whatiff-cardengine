@@ -575,3 +575,13 @@ details.dotwrap[open] > summary::after { content: '－'; }
   background: none; border: none; font-size: 26px; line-height: 1; color: var(--muted); cursor: pointer; }
 .modal-close:hover { color: var(--ink); }
 @media (max-width: 480px) { .modal { padding: 24px 20px; } }
+
+/* Sign-in is a pop-up: the auth panel is now a modal box inside .modal-overlay.
+   Overrides the old inline-panel box styling; the inner element styles
+   (.auth-panel .auth-lead / input / .auth-or / .auth-btns / .auth-google) stay. */
+.auth-panel.auth-modal {
+  position: relative; margin: 0; width: 100%; max-width: 420px; max-height: 88vh; overflow-y: auto;
+  padding: 30px 28px; background: var(--card); border: 1px solid var(--line);
+  border-radius: 20px; box-shadow: var(--shadow-lg);
+}
+.auth-modal .auth-lead { margin-top: 2px; padding-right: 26px; }
