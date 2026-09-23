@@ -344,11 +344,11 @@ async function renderLanding() {
 
     ${trustStrip(stats)}
 
+    ${howItWorks()}
+
     <div class="form-solo">
       ${formHtml()}
     </div>
-
-    ${howItWorks()}
 
     <div class="land-closing">
       <h3>See what's achievable at your bank.</h3>
