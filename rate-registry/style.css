@@ -539,3 +539,39 @@ details.dotwrap[open] > summary::after { content: '－'; }
 .door-table .net-row td:last-child { color: var(--good); font-size: 21px; letter-spacing: -.01em; }
 .door-line { font-size: 13px; color: var(--muted); line-height: 1.5; margin: 0 0 8px; }
 .door-cta-prompt { font-size: 13.5px; color: var(--muted); line-height: 1.5; margin: 6px 0 8px; }
+
+/* ===========================================================================
+   Legal pages (privacy / terms), footer links, and the disclaimer modal.
+=========================================================================== */
+.legal { max-width: 720px; margin: 8px auto 40px; }
+.legal h1 { font-size: 30px; font-weight: 800; letter-spacing: -.02em; color: var(--ink); margin-bottom: 6px; }
+.legal .legal-meta { color: var(--muted); font-size: 13px; margin-bottom: 22px; }
+.legal h2 { font-size: 18px; font-weight: 800; color: var(--ink); margin: 26px 0 8px; letter-spacing: -.01em; }
+.legal p, .legal li { font-size: 15px; color: var(--text); line-height: 1.65; }
+.legal p { margin-bottom: 12px; }
+.legal ul { margin: 0 0 12px; padding-left: 20px; }
+.legal li { margin-bottom: 8px; }
+.legal a { color: var(--ink); }
+.legal .legal-foot { margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.legal-page-foot { margin-top: 20px; }
+
+/* Footer links */
+.foot-links { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; margin-bottom: 10px; }
+.foot-links a { color: var(--muted); font-size: 13px; font-weight: 600; text-decoration: none; }
+.foot-links a:hover { color: var(--ink); text-decoration: underline; }
+.foot-note { font-size: 11.5px; color: var(--muted); text-align: center; line-height: 1.6; max-width: 68ch; margin: 0 auto; }
+
+/* Disclaimer modal */
+.modal-overlay { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center;
+  padding: 20px; background: rgba(20,18,31,.55); }
+.modal-overlay[hidden] { display: none; }
+.modal { position: relative; width: 100%; max-width: 560px; max-height: 85vh; overflow-y: auto;
+  background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 30px 32px; box-shadow: var(--shadow-lg); }
+.modal h2 { font-size: 22px; font-weight: 800; color: var(--ink); margin-bottom: 14px; letter-spacing: -.015em; }
+.modal-body p { font-size: 14px; color: var(--text); line-height: 1.6; margin-bottom: 12px; }
+.modal-body p:last-child { margin-bottom: 0; }
+.modal-body a { color: var(--ink); }
+.modal-close { position: absolute; top: 14px; right: 16px; width: 32px; height: 32px; padding: 0;
+  background: none; border: none; font-size: 26px; line-height: 1; color: var(--muted); cursor: pointer; }
+.modal-close:hover { color: var(--ink); }
+@media (max-width: 480px) { .modal { padding: 24px 20px; } }
