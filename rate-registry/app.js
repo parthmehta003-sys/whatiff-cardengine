@@ -908,7 +908,7 @@ function renderResult(res) {
       <section class="rband">
         <div class="sec-head"><span class="reyebrow">${doorsTitle}</span></div>
         <div class="action-wrap">
-          ${doorHtml(Number(rec.slice(4)), rec, calc)}
+          ${doorHtml(Number(rec.slice(4)), rec, calc, input)}
           ${rec !== 'door1' ? `<div class="fee-disclaimer">Fee figures are <b>estimates</b> — from each lender's official documents where published, and third-party sources where they don't. Charges vary by profile, so <b>verify the exact fees with your bank</b> before acting.</div>` : ''}
         </div>
       </section>
@@ -962,7 +962,7 @@ function doorBasisLine(d) {
   return '';
 }
 
-function doorHtml(n, rec, calc) {
+function doorHtml(n, rec, calc, input) {
   const isRec = rec === `door${n}`;
   const tag = isRec ? `<div class="dtag">Recommended</div>` : '';
 
@@ -1024,16 +1024,24 @@ Thank you.`;
         <div class="net none">No other bank here is currently cheaper than your rate.</div>
       </div>`;
   }
+  const yrs = Math.round(calc.yrs);
   return `
     <div class="door ${isRec ? 'rec' : ''}" data-door="Transfer">
       ${tag}
       <h3>Move to another lender</h3>
-      <div class="dsub">Switch your loan to a cheaper bank. There's paperwork and some upfront cost, but the savings can be big.</div>
-      <div class="net">You'd save about <b>${inr(d.net)}</b> — after roughly ${inr(d.cost)} in switching costs (processing, legal, valuation, registration).</div>
-      <div class="cost">That's ${inr(d.gross)} saved over your remaining ~${Math.round(calc.yrs)} years, minus those costs. ${d.feeVerified ? "Processing fee is the new lender's stated charge; legal, valuation and stamp costs are estimates — confirm before you move." : "Fees are estimates — check before you move."} ${calc.balanceNote}</div>
-      ${doorBasisLine(d)}
+      <table class="door-table tnum">
+        <tbody>
+          <tr><td>Your rate</td><td>${input.rate.toFixed(2)}%</td></tr>
+          <tr><td>Rate at the cheapest lender for you</td><td>${d.target.toFixed(2)}%</td></tr>
+          <tr><td>Interest saved over ~${yrs} year${yrs === 1 ? '' : 's'}</td><td>${inr(d.gross)}</td></tr>
+          <tr><td>Switching costs — processing, legal, valuation, stamp</td><td class="cost-val">− ${inr(d.cost)}</td></tr>
+          <tr class="net-row"><td>Net benefit</td><td>${inr(d.net)}</td></tr>
+        </tbody>
+      </table>
+      <p class="door-line">Switch your loan to a cheaper bank — there's paperwork and some upfront cost, but the savings can be big.</p>
+      <p class="door-line">${d.feeVerified ? "Processing fee is the new lender's stated charge; the rest are estimates" : "The costs are estimates"} — confirm before you move. ${calc.balanceNote} The target is the cheapest lender in our data for a profile like yours, subject to eligibility.</p>
       <div class="dbody">
-        <p style="font-size:13.5px;color:var(--muted);margin-bottom:4px">Want the exact numbers for your loan — what you'd save and what to ask a new lender for? Leave your email and we'll send you the calculation. We're not a broker and we're not paid by any lender.</p>
+        <p class="door-cta-prompt">Want the exact numbers for your loan and what to ask a new lender? Leave your email and we'll send the calculation — we're not a broker and not paid by any lender.</p>
         <div class="door-cta" data-door-cta="Transfer"></div>
       </div>
     </div>`;
