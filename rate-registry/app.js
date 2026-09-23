@@ -317,13 +317,12 @@ async function renderLanding() {
   if (!sb) return renderConfigError();
   app.innerHTML = `<div class="thin" style="padding:36px 4px">Loading the registry…</div>`;
 
-  let total = 0, banks = [], stats = null;
+  let total = 0, stats = null;
   try {
-    const [st, br] = await Promise.all([sb.rpc('registry_stats'), sb.rpc('bank_rates', { p_loan_type: 'Home' })]);
+    const st = await sb.rpc('registry_stats');
     if (st.error) throw st.error;
     stats = (st.data && st.data[0]) || { n_rates: 0, tracked_lakh: 0, potential_saving_total: 0 };
     total = stats.n_rates || 0;
-    banks = br.error ? [] : (br.data || []);
   } catch (e) { return renderLoadError(e); }
 
   tallyEl.innerHTML = total > 0
@@ -345,8 +344,7 @@ async function renderLanding() {
 
     ${trustStrip(stats)}
 
-    <div class="landing-grid">
-      ${listSection(total, banks)}
+    <div class="form-solo">
       ${formHtml()}
     </div>
 
