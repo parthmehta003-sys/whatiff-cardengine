@@ -520,3 +520,6 @@ details.dotwrap[open] > summary::after { content: '－'; }
   .trust .t { border-left: none; border-top: 1px solid var(--line); }
   .trust .t:first-child { border-top: none; }
 }
+
+/* Landing with the leaderboard removed — the form stands on its own, centered. */
+.form-solo { max-width: 600px; margin: 0 auto; }
