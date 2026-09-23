@@ -334,10 +334,10 @@ async function renderLanding() {
     <section class="hero-card">
       <div class="hero-copy">
         <div class="eyebrow">Anonymous home-loan rate registry</div>
-        <h1>Know the rate you should be getting.</h1>
+        <h1>See what borrowers like you actually pay.</h1>
         <p>Banks know what every borrower pays; individual borrowers don't. Pooling real rates evens that up — so a better rate stops being a secret and becomes your leverage.</p>
         <button class="btn hero-cta" id="hero-cta" type="button">See what's achievable <span class="arr">→</span></button>
-        <div class="hero-note"><b>Free.</b> No login to browse · your name is never shown.</div>
+        <div class="hero-note"><b>Free.</b> Your name is never shown.</div>
       </div>
       <div class="hero-coins" aria-hidden="true">${coinsCluster()}</div>
     </section>
