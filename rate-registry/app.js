@@ -334,8 +334,8 @@ async function renderLanding() {
     <section class="hero-card">
       <div class="hero-copy">
         <div class="eyebrow">Anonymous home-loan rate registry</div>
-        <h1>Banks advertise a rate almost nobody gets.</h1>
-        <p>Borrowers are telling each other what they actually got — so you can see what's achievable at your bank, not just what's on the brochure, and which one move is worth making.</p>
+        <h1>The better rate isn't a secret. It's your leverage.</h1>
+        <p>Banks quietly give some borrowers a lower rate and count on the rest not finding out. WhatIff pools what people actually got — so you can see the real rate for someone like you, and ask for it.</p>
         <button class="btn hero-cta" id="hero-cta" type="button">See what's achievable <span class="arr">→</span></button>
         <div class="hero-note"><b>Free.</b> No login to browse · your name is never shown.</div>
       </div>
