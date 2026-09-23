@@ -521,5 +521,10 @@ details.dotwrap[open] > summary::after { content: '－'; }
   .trust .t:first-child { border-top: none; }
 }
 
-/* Landing with the leaderboard removed — the form stands on its own, centered. */
-.form-solo { max-width: 600px; margin: 0 auto; }
+/* Landing with the leaderboard removed — the form spans the full content width,
+   its borders aligned with the hero, trust strip and other sections. Fields lay
+   out in two columns; the submit button and auth panel stay full width. */
+.form-solo { width: 100%; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 22px; }
+.form-grid .field { margin-bottom: 16px; }
+@media (max-width: 620px) { .form-grid { grid-template-columns: 1fr; } }
