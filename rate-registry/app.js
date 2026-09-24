@@ -69,7 +69,10 @@ const AMOUNTS = [
 ];
 const RATE_TYPES = ['Floating', 'Fixed'];
 const CHANNELS = ['Branch', 'Agent or DSA', 'Online', 'Builder tie-up', "Don't remember"];
-const EMPLOYMENT = ['Salaried', 'Self-employed'];
+// Salaried only. Self-employed home-loan pricing has too many borrower-specific
+// variables (income proof, business vintage, banking, program) to compare
+// apples-to-apples, so the registry is scoped to salaried borrowers for now.
+const EMPLOYMENT = ['Salaried'];
 // CIBIL score bands — the dimension that most explains "same profile, different
 // rate" (banks price the spread below RLLR mainly off the score). Must match the
 // cibil_allowed check constraint in migration 0007 exactly. 'Not sure' is the
@@ -157,7 +160,7 @@ let currentRateId = null;   // returned by submit_rate; held in memory only, nev
 let lastPayload = null;     // for client-side duplicate prevention
 let lastResult = null;      // { input, cohort, bestBankP25 } to re-render on Back
 let authUser = null;        // Supabase Auth user when signed in; identity for anti-spam only, never shown
-let formState = { rate_type: null, employment: null };  // segmented-control selections (module-level so drafts can save them)
+let formState = { rate_type: null };  // segmented-control selection (module-level so drafts can save it)
 
 // ===========================================================================
 // AUTH — sign-in gates ONLY submitting a rate (reads stay open). Identity is
@@ -192,7 +195,7 @@ function saveDraft() {
       bank: elVal('f-bank'), rate: elVal('f-rate'), year: elVal('f-year'),
       amt: elVal('f-amt'), chan: elVal('f-chan'), cibil: elVal('f-cibil'),
       tenure: elVal('f-tenure'), out: elVal('f-out'),
-      rate_type: formState.rate_type, employment: formState.employment,
+      rate_type: formState.rate_type,
     }));
   } catch (e) {}
 }
@@ -211,10 +214,6 @@ function restoreDraft() {
   if (d.rate_type) {
     formState.rate_type = d.rate_type;
     document.querySelectorAll('#f-type .opt').forEach(o => o.classList.toggle('on', o.dataset.type === d.rate_type));
-  }
-  if (d.employment) {
-    formState.employment = d.employment;
-    document.querySelectorAll('#f-emp .opt').forEach(o => o.classList.toggle('on', o.dataset.emp === d.employment));
   }
 }
 
@@ -548,12 +547,11 @@ function formHtml() {
   const cibilOpts = CIBIL_BANDS.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
   const tenureOpts = TENURES.map(t => `<option value="${t}">${t} years</option>`).join('');
   const typeOpts = RATE_TYPES.map(t => `<div class="opt" data-type="${t}">${t}</div>`).join('');
-  const empOpts = EMPLOYMENT.map(e => `<div class="opt" data-emp="${e}">${e}</div>`).join('');
 
   return `
     <div class="card" id="addrate">
       <div class="form-title">Add your rate</div>
-      <div class="form-sub">A minute, no phone, no email. Anonymous — your name is never shown.</div>
+      <div class="form-sub">A minute, no phone, no email. Anonymous — your name is never shown. <b>For now, WhatIff covers salaried home-loan borrowers</b> — self-employed loans vary too much to compare fairly yet.</div>
 
       <div class="form-grid">
       <div class="field">
@@ -587,10 +585,6 @@ function formHtml() {
       <div class="field">
         <label for="f-chan">How did you get the loan?</label>
         <select id="f-chan"><option value="" disabled selected>Choose one</option>${chanOpts}</select>
-      </div>
-      <div class="field">
-        <label>Employment</label>
-        <div class="seg" id="f-emp">${empOpts}</div>
       </div>
       <div class="field">
         <label for="f-cibil">Credit score (CIBIL) when you took the loan</label>
@@ -627,17 +621,13 @@ function syncOutUnit() {
 }
 
 function wireForm() {
-  formState = { rate_type: null, employment: null };
+  formState = { rate_type: null };
   const amtSel = document.getElementById('f-amt');
   if (amtSel) amtSel.addEventListener('change', syncOutUnit);
   syncOutUnit();
   document.querySelectorAll('#f-type .opt').forEach(el => el.addEventListener('click', () => {
     document.querySelectorAll('#f-type .opt').forEach(o => o.classList.remove('on'));
     el.classList.add('on'); formState.rate_type = el.dataset.type;
-  }));
-  document.querySelectorAll('#f-emp .opt').forEach(el => el.addEventListener('click', () => {
-    document.querySelectorAll('#f-emp .opt').forEach(o => o.classList.remove('on'));
-    el.classList.add('on'); formState.employment = el.dataset.emp;
   }));
   document.getElementById('f-submit').addEventListener('click', () => submit(formState));
   wireAuth();
@@ -658,7 +648,7 @@ async function submit(state) {
   const amount_lakh = parseInt(document.getElementById('f-amt').value, 10);
   const rate_type = state.rate_type;
   const channel = document.getElementById('f-chan').value;
-  const employment = state.employment;
+  const employment = 'Salaried';  // registry is salaried-only for now
   const cibil_band = document.getElementById('f-cibil').value;
   const tenure_years = parseInt(document.getElementById('f-tenure').value, 10);
   const outRaw = document.getElementById('f-out').value.trim();
@@ -677,7 +667,6 @@ async function submit(state) {
     return showError('Amount still owed should be between 0 and your loan amount — or leave it blank.');
   if (!rate_type) return showError('Pick floating or fixed.');
   if (!channel) return showError('Pick how you got the loan.');
-  if (!employment) return showError('Pick salaried or self-employed.');
   if (!cibil_band) return showError('Pick your credit-score band.');
 
   // Gate ONLY submitting behind sign-in (reads stay open). Form is validated
