@@ -787,7 +787,9 @@ function computeDoors(input, cohort, bestBankP25, fees) {
     const cost = convCost(outstanding);
     const gross = cohortP25 < input.rate ? iUser - interestOver(outstanding, cohortP25, yrs) : 0;
     door2 = { target: cohortP25, cost, gross, net: gross - cost, feeVerified: convVerified,
-              noGap: !(cohortP25 < input.rate), basis: 'cohort_p25', confidence: cohortConf };
+              noGap: !(cohortP25 < input.rate), basis: 'cohort_p25', confidence: cohortConf,
+              iTarget: interestOver(outstanding, cohortP25, yrs),
+              costs: { conversion: cost } };
   }
 
   // Door 3 — balance transfer to a competing lender. Counterfactual, its own cost
@@ -797,11 +799,14 @@ function computeDoors(input, cohort, bestBankP25, fees) {
   // not the advertised floor. Subject to the switching costs and eligibility.
   let door3 = null;
   if (bestBankP25 != null) {
-    const cost = procCost(outstanding) + outstanding * BT_MOD_PCT + BT_LEGAL_TECH;
+    const proc = procCost(outstanding), mod = outstanding * BT_MOD_PCT, legal = BT_LEGAL_TECH;
+    const cost = proc + mod + legal;
     const gross = bestBankP25 < input.rate ? iUser - interestOver(outstanding, bestBankP25, yrs) : 0;
     door3 = { target: bestBankP25, cost, gross, net: gross - cost, feeVerified: procVerified,
               noGap: !(bestBankP25 < input.rate), basis: 'best_bank_p25',
-              confidence: procVerified ? 'medium' : 'low' };
+              confidence: procVerified ? 'medium' : 'low',
+              iTarget: interestOver(outstanding, bestBankP25, yrs),
+              costs: { processing: proc, mod: mod, legal: legal } };
   }
 
   return { outstanding, yrs, iUser, cohortP25, door2, door3, balanceEntered, balanceNote, tenure };
@@ -982,6 +987,37 @@ function renderResult(res) {
   const again = document.getElementById('f-again'); if (again) again.addEventListener('click', renderLanding);
 }
 
+// The full working behind the "Show me the calculation in detail" button —
+// purely the numbers that produce the net benefit. No advice, no next steps: it
+// shows how the figure is arrived at and stops there.
+function calcDetail(d, calc, input) {
+  const yrs = Math.round(calc.yrs);
+  const emiNow = emi(calc.outstanding, input.rate, calc.yrs);
+  const emiNew = emi(calc.outstanding, d.target, calc.yrs);
+  const costRows = d.costs.conversion != null
+    ? `<tr><td>One-time conversion fee</td><td class="cost-val">− ${inr(d.costs.conversion)}</td></tr>`
+    : `<tr><td>New-lender processing fee</td><td class="cost-val">− ${inr(d.costs.processing)}</td></tr>
+       <tr><td>MOD / stamp duty</td><td class="cost-val">− ${inr(d.costs.mod)}</td></tr>
+       <tr><td>Legal &amp; valuation</td><td class="cost-val">− ${inr(d.costs.legal)}</td></tr>`;
+  return `
+    <p class="reveal-lead">How the net benefit is worked out:</p>
+    <table class="door-table tnum calc-detail"><tbody>
+      <tr><td>Outstanding balance used</td><td>${inr(calc.outstanding)}</td></tr>
+      <tr><td>Years left on the loan</td><td>~${yrs} year${yrs === 1 ? '' : 's'}</td></tr>
+      <tr><td>Your rate</td><td>${input.rate.toFixed(2)}%</td></tr>
+      <tr><td>Rate used for comparison</td><td>${d.target.toFixed(2)}%</td></tr>
+      <tr><td>Your EMI now</td><td>${inr(emiNow)}/mo</td></tr>
+      <tr><td>EMI at the lower rate</td><td>${inr(emiNew)}/mo</td></tr>
+      <tr><td>Monthly difference</td><td>${inr(emiNow - emiNew)}/mo</td></tr>
+      <tr><td>Total interest left at your rate</td><td>${inr(calc.iUser)}</td></tr>
+      <tr><td>Total interest at the lower rate</td><td>${inr(d.iTarget)}</td></tr>
+      <tr><td>Interest saved</td><td>${inr(d.gross)}</td></tr>
+      ${costRows}
+      <tr class="net-row"><td>Net benefit</td><td>${inr(d.net)}</td></tr>
+    </tbody></table>
+    <p class="reveal-note">${calc.balanceNote} All figures are estimates for information only; the exact numbers depend on your lender and profile.</p>`;
+}
+
 function doorHtml(n, rec, calc, input) {
   const isRec = rec === `door${n}`;
   const tag = isRec ? `<div class="dtag">Recommended</div>` : '';
@@ -1002,26 +1038,15 @@ function doorHtml(n, rec, calc, input) {
       return `
         <div class="door ${isRec ? 'rec' : ''}">
           ${tag}
-          <h3>Ask your bank to convert your spread</h3>
+          <h3>Reprice at your current bank</h3>
           <div class="net none">Your rate already matches what others get at your bank.</div>
         </div>`;
     }
-    const template =
-`Subject: Request to convert my home loan to the current spread
-
-Hello,
-
-I'd like to convert my existing home loan (account no. __________) to your
-current spread for my profile. Please keep the same tenure — no top-up, and no
-change to the outstanding schedule. Kindly confirm the revised rate and the
-one-time conversion fee before processing.
-
-Thank you.`;
     const yrs2 = Math.round(calc.yrs);
     return `
       <div class="door ${isRec ? 'rec' : ''}" data-door="Conversion">
         ${tag}
-        <h3>Ask your bank to convert your spread</h3>
+        <h3>Reprice at your current bank</h3>
         <table class="door-table tnum">
           <tbody>
             <tr><td>Your rate</td><td>${input.rate.toFixed(2)}%</td></tr>
@@ -1031,14 +1056,11 @@ Thank you.`;
             <tr class="net-row"><td>Net benefit</td><td>${inr(d.net)}</td></tr>
           </tbody>
         </table>
-        <p class="door-line">In plain words: get your bank to put today's lower rate on your existing loan — no new loan, no longer tenure.</p>
-        <p class="door-line">${d.feeVerified ? "The fee is this lender's stated charge" : "The fee is a general estimate"} — confirm before you commit. ${calc.balanceNote} The target rate is what the better-priced quarter of similar borrowers at your bank report — a peer figure, not an advertised rate.</p>
+        <p class="door-line">${d.feeVerified ? "The fee is this lender's stated charge" : "The fee is a general estimate"}. ${calc.balanceNote} The comparison rate is what the better-priced quarter of similar borrowers at your bank report — a peer figure, not an advertised rate.</p>
         <div class="dbody">
-          <div class="warning">If you simply ask for <b>"a lower rate,"</b> many lenders respond with a top-up — your existing loan is closed and reopened with a fresh tenure, a processing fee, and sometimes insurance you were never shown. You end up paying more over the life of the loan. Ask specifically for a <b>conversion to the current spread on your existing loan, with no change to tenure and no top-up.</b></div>
-          <button class="btn reveal-btn" type="button" data-reveal="Conversion">Show me the request to send my bank</button>
+          <button class="btn reveal-btn" type="button" data-reveal="Conversion">Show me the calculation in detail</button>
           <div class="reveal" data-reveal-for="Conversion" hidden>
-            <p class="reveal-lead">Send this to your bank in writing — email or the branch manager:</p>
-            <div class="template">${esc(template)}</div>
+            ${calcDetail(d, calc, input)}
           </div>
         </div>
       </div>`;
@@ -1051,7 +1073,7 @@ Thank you.`;
     return `
       <div class="door ${isRec ? 'rec' : ''}">
         ${tag}
-        <h3>Move to another lender</h3>
+        <h3>Transfer to another lender</h3>
         <div class="net none">No other bank here is currently cheaper than your rate.</div>
       </div>`;
   }
@@ -1059,7 +1081,7 @@ Thank you.`;
   return `
     <div class="door ${isRec ? 'rec' : ''}" data-door="Transfer">
       ${tag}
-      <h3>Move to another lender</h3>
+      <h3>Transfer to another lender</h3>
       <table class="door-table tnum">
         <tbody>
           <tr><td>Your rate</td><td>${input.rate.toFixed(2)}%</td></tr>
@@ -1069,19 +1091,11 @@ Thank you.`;
           <tr class="net-row"><td>Net benefit</td><td>${inr(d.net)}</td></tr>
         </tbody>
       </table>
-      <p class="door-line">Switch your loan to a cheaper bank — there's paperwork and some upfront cost, but the savings can be big.</p>
-      <p class="door-line">${d.feeVerified ? "Processing fee is the new lender's stated charge; the rest are estimates" : "The costs are estimates"} — confirm before you move. ${calc.balanceNote} The target rate is what the better-priced quarter of borrowers report at the most competitive lender in our data — a peer figure, not an advertised rate — subject to eligibility.</p>
+      <p class="door-line">${d.feeVerified ? "Processing fee is the new lender's stated charge; the rest are estimates" : "The costs are estimates"}. ${calc.balanceNote} The comparison rate is what the better-priced quarter of borrowers report at the most competitive lender in our data — a peer figure, not an advertised rate.</p>
       <div class="dbody">
-        <button class="btn reveal-btn" type="button" data-reveal="Transfer">Show me what to ask a new lender</button>
+        <button class="btn reveal-btn" type="button" data-reveal="Transfer">Show me the calculation in detail</button>
         <div class="reveal" data-reveal-for="Transfer" hidden>
-          <p class="reveal-lead">Before you switch, line these up — and get every number in writing:</p>
-          <ul class="reveal-list">
-            <li>Your current sanction letter and latest statement — they show your exact rate and outstanding.</li>
-            <li>Ask the new lender for the all-in rate for your profile <b>in writing</b> — the spread and what it's linked to (e.g. RLLR / repo).</li>
-            <li>Get every switching cost in writing: processing fee, MOD / stamp duty, and legal and valuation charges.</li>
-            <li>On a floating-rate loan, confirm there's <b>no foreclosure or prepayment penalty</b> — RBI does not allow one on floating-rate home loans.</li>
-            <li>Ask your current bank to convert to today's spread first — it's usually cheaper than moving.</li>
-          </ul>
+          ${calcDetail(d, calc, input)}
         </div>
       </div>
     </div>`;

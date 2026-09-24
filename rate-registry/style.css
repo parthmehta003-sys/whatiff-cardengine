@@ -346,6 +346,8 @@ input, select, button, textarea { font-family: inherit; font-size: 16px; }
 .reveal-list { margin: 8px 0 0; padding-left: 20px; }
 .reveal-list li { font-size: 13.5px; color: var(--text); line-height: 1.6; margin: 7px 0; }
 .reveal-list b { font-weight: 700; }
+.calc-detail td { font-size: 13.5px; padding: 9px 0; }
+.reveal-note { font-size: 12px; color: var(--muted); line-height: 1.55; margin: 10px 0 0; }
 
 /* ---- dot plot ---- */
 details.dotwrap { border: 1px solid var(--line); border-radius: 16px; background: var(--card); padding: 0 18px; box-shadow: var(--shadow); }
