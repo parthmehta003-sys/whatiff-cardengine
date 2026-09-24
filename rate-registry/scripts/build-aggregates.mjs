@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, 'rates');
-const SITE = process.env.SITE_URL || 'https://example.netlify.app';
+const SITE = process.env.SITE_URL || 'https://whatiff.in';
 const REF_PRINCIPAL = 5000000, REF_YEARS = 20;
 
 const URL = process.env.SUPABASE_URL;
