@@ -1102,17 +1102,23 @@ function doorHtml(n, calc, input) {
     </div>`;
 }
 
-// Reveal the door's actionable detail on-screen and count the click. This is the
-// high-intent signal we care about — the Umami "DoorOpen" event lets us see how
-// many people ask to act on a door (reprice or transfer). No email is collected.
+// Toggle the door's detailed calculation open/closed, and count each open. The
+// high-intent signal we care about is the open — the Umami "DoorOpen" event lets
+// us see how many people ask to see the detail (reprice or transfer). No email
+// is collected.
 function wireDoors() {
   document.querySelectorAll('[data-reveal]').forEach(btn => {
+    const door = btn.getAttribute('data-reveal');
+    const panel = document.querySelector(`[data-reveal-for="${door}"]`);
+    if (!panel) return;
+    const openLabel = btn.textContent;
+    btn.setAttribute('aria-expanded', 'false');
     btn.addEventListener('click', () => {
-      const door = btn.getAttribute('data-reveal');
-      const panel = document.querySelector(`[data-reveal-for="${door}"]`);
-      if (panel) panel.hidden = false;
-      btn.hidden = true;
-      if (window.umami) window.umami.track('DoorOpen', { door });
+      const opening = panel.hidden;
+      panel.hidden = !opening;
+      btn.setAttribute('aria-expanded', String(opening));
+      btn.textContent = opening ? 'Hide the detailed calculation' : openLabel;
+      if (opening && window.umami) window.umami.track('DoorOpen', { door });
     });
   });
 }
