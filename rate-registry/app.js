@@ -24,7 +24,6 @@ const CONVERSION_FEE_PCT = 0.005;  // fallback: convert/reset rate, % of outstan
 const BT_PROCESSING_PCT  = 0.005;  // fallback: new lender processing fee, % of outstanding (Door 3)
 const BT_LEGAL_TECH      = 7500;   // legal + technical valuation, rupees
 const BT_MOD_PCT         = 0.0015; // MOD registration, % of loan — varies by state
-const MIN_NET_BENEFIT    = 25000;  // below this, recommend doing nothing
 
 // ---------------------------------------------------------------------------
 // Config + client
@@ -447,7 +446,7 @@ function howItWorks() {
       <div class="steps">
         <div class="step"><div class="num">STEP 1</div><h3>Share your rate</h3><p>Tell us your bank, rate and a few loan details. It's anonymous — a quick sign-in only keeps out spam, and your name is never shown.</p></div>
         <div class="step"><div class="num">STEP 2</div><h3>See where you stand</h3><p>We compare you against borrowers like you — same bank, credit band and loan size — and show what the better-priced ones actually pay.</p></div>
-        <div class="step"><div class="num">STEP 3</div><h3>Know your one move</h3><p>Get the single most worthwhile action — reprice with your bank, or switch — with the real numbers and what to ask for.</p></div>
+        <div class="step"><div class="num">STEP 3</div><h3>See the options and the numbers</h3><p>See what repricing with your bank or transferring to another lender would each add up to — the full calculation, laid out so you can decide.</p></div>
       </div>
     </section>`;
 }
@@ -856,15 +855,13 @@ function renderResult(res) {
   const lessCount = rates.filter(r => r < input.rate).length;
   const nLess = rates.length ? Math.round((lessCount / rates.length) * 10) : 0;
 
-  // Which door to recommend: highest net that clears the floor, else Door 1.
-  const nets = [];
-  if (calc.door2 && !calc.door2.noGap) nets.push(['door2', calc.door2.net]);
-  if (calc.door3 && !calc.door3.noGap) nets.push(['door3', calc.door3.net]);
-  let rec = 'door1';
-  if (nets.length) {
-    nets.sort((a, b) => b[1] - a[1]);
-    if (nets[0][1] > MIN_NET_BENEFIT) rec = nets[0][0];
-  }
+  // Options that actually save money after their costs. We show every such
+  // option with its full numbers and let the reader decide — there is no single
+  // "recommended" move, and we never show an option whose costs outweigh it.
+  const shownDoors = [];
+  if (calc.door2 && !calc.door2.noGap && calc.door2.net > 0) shownDoors.push(2);
+  if (calc.door3 && !calc.door3.noGap && calc.door3.net > 0) shownDoors.push(3);
+  const bestNet = shownDoors.reduce((m, n) => Math.max(m, (n === 2 ? calc.door2 : calc.door3).net), 0);
 
   const cohortLine = `Based on ${cohort.n} ${esc(input.employment.toLowerCase())} borrower${cohort.n === 1 ? '' : 's'} who took a ${esc(input.bank)} loan in ${input.loan_year} through ${esc(input.channel.toLowerCase())}.`;
   const widenLine = cohort.tier > 1
@@ -880,31 +877,31 @@ function renderResult(res) {
     ? `${p25.toFixed(2)}%`
     : `${p25.toFixed(2)}%–${p75.toFixed(2)}%`;
 
-  // "Above your bank's better-priced peers" drives state 1 vs state 2. It is a
-  // peer fact (rate vs cohort P25), never a repo_markup claim — no "overpaying".
-  const aboveBankPeers = calc.door2 ? !calc.door2.noGap : (input.rate > p25);
-  const recDoor = rec === 'door1' ? null : (rec === 'door2' ? calc.door2 : calc.door3);
-  // Record the identified potential saving (fire-and-forget) for the landing
-  // stat. Capped server-side; only ever "identified", never claimed as "saved".
-  if (recDoor && recDoor.net > 0 && currentRateId != null && sb) {
-    try { sb.rpc('record_potential', { p_rate_id: currentRateId, p_saving: Math.round(recDoor.net) }); } catch (e) {}
+  // "A lower rate exists among peers" — a peer fact (rate vs cohort P25), never a
+  // repo_markup claim and never "overpaying".
+  const aboveBankPeers = calc.door2 ? !calc.door2.noGap : (input.rate > calc.cohortP25);
+  // Record the best identified potential saving for the landing stat. Internal
+  // metric only; capped server-side; never shown here as a recommendation.
+  if (bestNet > 0 && currentRateId != null && sb) {
+    try { sb.rpc('record_potential', { p_rate_id: currentRateId, p_saving: Math.round(bestNet) }); } catch (e) {}
   }
   let headline, headClass, heroLead;
-  if (rec === 'door1') {
-    headline = "There's probably nothing worth changing.";
+  if (!shownDoors.length) {
     headClass = 'neutral';
-    heroLead = aboveBankPeers
-      ? `A lower rate exists for people like you, but the cost of switching would outweigh it right now.`
-      : `Your rate holds up well against people like you — no move here would pay for itself today.`;
-  } else {
     headline = aboveBankPeers
-      ? 'It may be worth acting on your loan.'
-      : 'Your rate is competitive, but switching could still save you money.';
+      ? 'A lower rate is on record — but likely not worth a move today.'
+      : 'Your rate holds up well against people like you.';
+    heroLead = aboveBankPeers
+      ? `Some borrowers like you report a lower rate, but the cost of repricing or transferring would outweigh the saving on what's left of your loan.`
+      : `Your rate is in line with what similar borrowers report — there's little a move could save right now.`;
+  } else {
     headClass = 'act';
-    const verb = rec === 'door3' ? 'by switching lenders' : 'by asking your bank to reprice';
-    heroLead = `You could save about <b>${inr(recDoor.net)}</b> over what's left of your loan ${verb}.`;
+    headline = aboveBankPeers
+      ? 'A lower rate is on record for people like you.'
+      : 'Your rate is competitive — though a lower one is on record.';
+    heroLead = `Repricing with your bank or transferring to another lender could be worth up to about <b>${inr(bestNet)}</b> over what's left of your loan. Both options and their full costs are below — you decide.`;
   }
-  const doorsTitle = rec === 'door1' ? 'The economics right now' : 'What you can do about it';
+  const doorsTitle = shownDoors.length ? 'Your options, with the numbers' : 'The economics right now';
   const amtLabel = (AMOUNTS.find(a => a.v === input.amount_lakh) || {}).label || ('₹' + input.amount_lakh + ' lakh');
   const chips = [amtLabel, 'Taken ' + input.loan_year, input.employment, 'CIBIL ' + input.cibil_band, input.rate_type]
     .map(c => `<span class="chip">${esc(c)}</span>`).join('');
@@ -945,8 +942,10 @@ function renderResult(res) {
       <section class="rband">
         <div class="sec-head"><span class="reyebrow">${doorsTitle}</span></div>
         <div class="action-wrap">
-          ${doorHtml(Number(rec.slice(4)), rec, calc, input)}
-          ${rec !== 'door1' ? `<div class="fee-disclaimer">Fee figures are <b>estimates</b> — from each lender's official documents where published, and third-party sources where they don't. Charges vary by profile, so <b>verify the exact fees with your bank</b> before acting.</div>` : ''}
+          ${shownDoors.length
+            ? shownDoors.map(n => doorHtml(n, calc, input)).join('') +
+              `<div class="fee-disclaimer">Fee figures are <b>estimates</b> — from each lender's official documents where published, and third-party sources where they don't. Charges vary by profile, so <b>verify the exact fees with your bank</b>.</div>`
+            : doorHtml(1, calc, input)}
         </div>
       </section>
 
@@ -1018,9 +1017,11 @@ function calcDetail(d, calc, input) {
     <p class="reveal-note">${calc.balanceNote} All figures are estimates for information only; the exact numbers depend on your lender and profile.</p>`;
 }
 
-function doorHtml(n, rec, calc, input) {
-  const isRec = rec === `door${n}`;
-  const tag = isRec ? `<div class="dtag">Recommended</div>` : '';
+function doorHtml(n, calc, input) {
+  // No single option is recommended: every applicable door is shown equally,
+  // with its numbers, and the reader decides. No highlight, no "recommended" tag.
+  const isRec = false;
+  const tag = '';
 
   if (n === 1) {
     return `
