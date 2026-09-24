@@ -1,11 +1,11 @@
 # How WhatIff Works — End-to-End Logic
 
 *A plain-English audit of exactly what happens from the moment someone enters
-their rate to the recommendation they see. Written so you can confirm the logic
+their rate to the result they see. Written so you can confirm the logic
 is sound before trusting it with real users. Every claim below maps to real code
 — file references are given so you (or an engineer) can check each one.*
 
-Last updated: 2026-09-21.
+Last updated: 2026-09-24.
 
 ---
 
@@ -13,22 +13,25 @@ Last updated: 2026-09-21.
 
 WhatIff says one narrow, honest thing:
 
-> *A lower rate than yours may be achievable at your own bank; your situation may
-> differ for good reasons; it's worth ten minutes to find out.*
+> *Here is what borrowers like you actually report paying, and here is what each
+> option would add up to — you decide.*
 
-It does **not** claim anyone was cheated, that you're "overpaying," or that a
-specific saving is guaranteed. Every number is shown with its source, its sample
-size, and its costs. That restraint is a design rule, not an afterthought — it's
-why the copy says "what's possible at your bank, not that you were charged
-unfairly" (`app.js`, result screen).
+It **presents information; it does not advise, recommend, or facilitate.** It does
+**not** pick a "best move" for you, tell you to switch, claim anyone was cheated,
+say you're "overpaying," or guarantee a saving. Every number is shown with its
+source, its sample size, and its costs, and the decision is explicitly left to the
+reader. That restraint is a design rule, not an afterthought — it is also what
+keeps WhatIff clearly an information service and **not** a DSA, LSP, broker or
+adviser. *(`app.js`, result screen)*
 
 ---
 
 ## 1. What happens when a user submits a rate
 
-The form collects **8 facts**: bank, interest rate, year taken, loan amount, rate
-type (floating/fixed), how they got the loan (channel), employment type, and CIBIL
-band. Then:
+The form collects **10 facts**: bank, interest rate, year taken, loan amount, rate
+type (floating/fixed), how they got the loan (channel), employment type, CIBIL
+band, and the **original loan tenure** (all required), plus the **amount still
+owed** (optional). Then:
 
 ### 1.1 Sign-in is required (anti-spam identity)
 Adding a rate requires a signed-in account (Google or email/password). The
@@ -118,13 +121,19 @@ For the chosen group we compute:
 
 ## 3. What the result screen tells the user
 
-The screen is organized around an **economic conclusion first**, then the evidence.
+The screen states the facts first, then the evidence. It **presents the applicable
+options and their numbers — it does not recommend one** (see §5).
 
-1. **Headline (stay vs act).** One of three, decided by the door math (§5):
-   - *"There's probably nothing worth changing."* (do nothing)
-   - *"It may be worth acting on your loan."* (you're above your bank's
-     better-priced peers)
-   - *"Your rate is competitive, but switching could still save you money."*
+1. **Headline (a neutral statement of where you stand).** Decided by whether a
+   lower rate exists among peers and whether any option nets a positive benefit:
+   - *"A lower rate is on record for people like you."* (an option nets a positive
+     benefit)
+   - *"Your rate is competitive — though a lower one is on record."*
+   - *"A lower rate is on record — but likely not worth a move today."* / *"Your
+     rate holds up well against people like you."* (no option nets a positive
+     benefit)
+   The sub-line states what the best option could be worth and adds *"you decide"* —
+   never *"you should."*
 2. **You pay vs similar borrowers.** Your rate + EMI, next to the P25–P75 **range**
    for your cohort, and the ₹/month difference "on what you still owe."
 3. **"N out of 10 people at your bank report a lower rate than yours."** A plain
@@ -164,11 +173,12 @@ shown.
 
 ---
 
-## 5. The three "doors" — the money math
+## 5. The "doors" — the money math
 
-Once you're above your peers, the question is *what to do*. We model three options
-and **show only the single most worthwhile one** (so you never see a contradictory
-"do nothing… but you'd save ₹X").
+We model the options and **show every one that actually saves money after its
+costs, side by side, with no single one recommended** — the reader compares and
+decides. An option whose costs would outweigh its saving is not shown as an option
+at all (so you never see a "benefit" that is really a loss).
 
 ### 5.1 The balance and remaining term
 Two facts drive the money math, and we now **ask** for them so it isn't a guess:
@@ -181,21 +191,32 @@ Two facts drive the money math, and we now **ask** for them so it isn't a guess:
 All three doors compute interest on this balance over the remaining years.
 
 ### 5.2 The doors
-- **Door 1 — Do nothing.** Recommended when no move clears the benefit threshold.
-- **Door 2 — Reprice with your *same* bank** (a conversion/switch fee). Target =
-  your cohort's P25 (what similar borrowers at your bank actually get). Cost = the
-  lender's conversion fee (a flat ₹ figure for many banks, else a % , else a
+- **Reprice at your current bank** (a conversion/switch fee). Comparison rate =
+  your cohort's P25 — what the better-priced quarter of **similar borrowers at your
+  bank** report (a peer figure, profile-scoped, not an advertised rate). Cost = the
+  lender's conversion fee (a flat ₹ figure for many banks, else a %, else a
   labelled estimate).
-- **Door 3 — Balance transfer to the cheapest lender** in our data for your
-  profile. Cost stack = the new lender's processing/takeover fee **+** MOD/stamp
-  (~0.15% of loan) **+** ~₹7,500 legal/valuation.
+- **Transfer to another lender.** Comparison rate = the realised P25 at the **most
+  competitive lender in our data** — labelled *"best rate borrowers actually
+  report."* It is a **peer figure, not a quote and not the advertised floor**, and
+  (unlike the reprice door) it is drawn across all borrowers at that lender, so it
+  is **not** scoped to your exact profile — the copy says so. Cost stack = the new
+  lender's processing/takeover fee **+** MOD/stamp (~0.15% of loan) **+** ~₹7,500
+  legal/valuation.
+- **Neither** (the neutral state). When no option nets a positive benefit, the
+  screen shows *"the economics right now"* instead of an option — no move, no
+  contradiction.
 
-### 5.3 Net benefit and the recommendation
-For each door: **net = (interest saved over remaining tenure) − (all costs)**.
-The recommendation is the door with the **highest net benefit**, but only if it
-clears a **minimum of ₹25,000** — below that, the effort isn't worth it and Door 1
-is recommended. Every door always shows its **costs**, never a gross saving alone.
-*(`app.js` `computeDoors` + the recommendation block)*
+### 5.3 Net benefit — shown, not recommended
+For each option: **net = (interest saved over remaining tenure) − (all costs)**.
+An option is shown only when its **net is positive** (it genuinely saves money
+after costs); if both qualify, **both are shown, side by side, unranked**. There is
+**no "recommended" door, no highlight, and no minimum-benefit threshold** — the old
+₹25,000 cutoff and the single-recommendation logic were removed. Each option always
+shows its **costs**, never a gross saving alone, and a collapsible *"Show me the
+calculation in detail"* panel exposes the full working (outstanding, remaining
+term, both rates, EMI now vs. lower, total interest each way, itemised costs, net).
+*(`app.js` `computeDoors`, `renderResult`, `doorHtml`, `calcDetail`)*
 
 ### 5.4 Fee honesty
 Fees are the lender's **verified** figure where we have it (from their official
@@ -243,8 +264,9 @@ For the logic to be *legit*, these have to be stated plainly:
    remaining term is real) and let you enter what you still owe. If you leave the
    balance blank, we estimate it assuming **no prepayment** and label it as an
    estimate — so someone who prepaid heavily should enter their real balance for
-   an accurate figure. The precise, prepayment-aware number is also available via
-   the "email me the calculation" step.
+   an accurate figure. The full working (outstanding, remaining term, EMI now vs.
+   lower, total interest each way, itemised costs, net) is shown on-screen in the
+   collapsible "Show me the calculation in detail" panel — no email is collected.
 2. **Fees vary and some are estimates.** We label which are verified vs estimated
    and always say "verify with your bank." A wrong fee would mislead a net-benefit
    figure, which is why every door shows its costs and the disclaimer.
@@ -272,7 +294,7 @@ For the logic to be *legit*, these have to be stated plainly:
 | Cohort tiers & widening | `0008_ticket_band.sql` / `0012_cohort_normalization.sql` → `cohort_stats` |
 | Outlier / median-MAD defence | `0008` → `reclassify_bank_outliers` |
 | Rate limit & revocation | `0014` → `enforce_rate_limit`, `banned_users` |
-| Door math & recommendation | `app.js` → `computeDoors`, `renderResult` |
+| Door math & options shown (no recommendation) | `app.js` → `computeDoors`, `renderResult`, `doorHtml`, `calcDetail` |
 | Benchmark sourcing | `0009`–`0013`, `seed_benchmarks.sql`, `benchmark_history` |
 | No-raw-row security | `0001` (RLS + security-definer RPCs), `README.md` §Security |
 
@@ -280,8 +302,10 @@ For the logic to be *legit*, these have to be stated plainly:
 
 **Bottom line on soundness:** the comparison is peer-relative (not vs marketing
 floors), it refuses to show anything from thin data, it drops bad data with a
-method resistant to coordinated fakes, it always shows costs alongside savings,
-and it recommends action only above a real ₹25,000 threshold. Its honest weak
-points are the balance estimate, fee estimates, and self-reported data — all
-disclosed to the user rather than hidden. That combination is what makes it fair
-to put in front of real borrowers.
+method resistant to coordinated fakes, and it always shows costs alongside savings.
+It **presents every worthwhile option with its full numbers and leaves the decision
+to the reader — it makes no recommendation and facilitates nothing**, which keeps
+it an information service rather than an adviser or agent. Its honest weak points
+are the balance estimate, fee estimates, and self-reported data — all disclosed to
+the user rather than hidden. That combination is what makes it fair to put in front
+of real borrowers.
