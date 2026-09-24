@@ -676,6 +676,7 @@ async function submit(state) {
       p_session_id: SESSION_ID, p_loan_type: 'Home', p_bank: bank, p_rate: input.rate,
       p_loan_year: loan_year, p_amount_lakh: amount_lakh, p_rate_type: rate_type,
       p_channel: channel, p_employment: employment, p_cibil_band: cibil_band,
+      p_tenure_years: tenure_years, p_outstanding_lakh: outstanding_lakh,
     });
     if (ins.error) throw ins.error;
     currentRateId = ins.data;
