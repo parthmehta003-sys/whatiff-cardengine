@@ -793,8 +793,10 @@ function computeDoors(input, cohort, bestBankP25, fees) {
   }
 
   // Door 3 — balance transfer to a competing lender. Counterfactual, its own cost
-  // stack + eligibility. Basis exposed: the cheapest lender in our data for this
-  // profile (a realised p25), subject to the switching costs and eligibility.
+  // stack + eligibility. Basis exposed: the realised p25 (better-priced quarter)
+  // at the most competitive lender in our data — a peer figure across all
+  // borrowers at that bank (bank_rates is NOT profile-scoped), not a quote, and
+  // not the advertised floor. Subject to the switching costs and eligibility.
   let door3 = null;
   if (bestBankP25 != null) {
     const cost = procCost(outstanding) + outstanding * BT_MOD_PCT + BT_LEGAL_TECH;
@@ -990,7 +992,7 @@ function doorBasisLine(d) {
   if (d.basis === 'cohort_p25')
     return `<div class="door-basis">Target ${t} — what the better-priced quarter of similar borrowers at your bank report. A peer estimate, not a quote.</div>`;
   if (d.basis === 'best_bank_p25')
-    return `<div class="door-basis">Target ${t} — the cheapest lender in our data for a profile like yours, subject to eligibility and the costs above.</div>`;
+    return `<div class="door-basis">Target ${t} — what the better-priced quarter of borrowers report at the most competitive lender in our data. A peer estimate, not a quote — subject to eligibility and the costs above.</div>`;
   return '';
 }
 
@@ -1064,14 +1066,14 @@ Thank you.`;
       <table class="door-table tnum">
         <tbody>
           <tr><td>Your rate</td><td>${input.rate.toFixed(2)}%</td></tr>
-          <tr><td>Rate at the cheapest lender for you</td><td>${d.target.toFixed(2)}%</td></tr>
+          <tr><td>Best rate borrowers actually report</td><td>${d.target.toFixed(2)}%</td></tr>
           <tr><td>Interest saved over ~${yrs} year${yrs === 1 ? '' : 's'}</td><td>${inr(d.gross)}</td></tr>
           <tr><td>Switching costs — processing, legal, valuation, stamp</td><td class="cost-val">− ${inr(d.cost)}</td></tr>
           <tr class="net-row"><td>Net benefit</td><td>${inr(d.net)}</td></tr>
         </tbody>
       </table>
       <p class="door-line">Switch your loan to a cheaper bank — there's paperwork and some upfront cost, but the savings can be big.</p>
-      <p class="door-line">${d.feeVerified ? "Processing fee is the new lender's stated charge; the rest are estimates" : "The costs are estimates"} — confirm before you move. ${calc.balanceNote} The target is the cheapest lender in our data for a profile like yours, subject to eligibility.</p>
+      <p class="door-line">${d.feeVerified ? "Processing fee is the new lender's stated charge; the rest are estimates" : "The costs are estimates"} — confirm before you move. ${calc.balanceNote} The target rate is what the better-priced quarter of borrowers report at the most competitive lender in our data — a peer figure, not an advertised rate — subject to eligibility.</p>
       <div class="dbody">
         <p class="door-cta-prompt">Want the exact numbers for your loan and what to ask a new lender? Leave your email and we'll send the calculation — we're not a broker and not paid by any lender.</p>
         <div class="door-cta" data-door-cta="Transfer"></div>
