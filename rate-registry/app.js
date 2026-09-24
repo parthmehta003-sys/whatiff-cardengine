@@ -191,6 +191,7 @@ function saveDraft() {
     localStorage.setItem(DRAFT_KEY, JSON.stringify({
       bank: elVal('f-bank'), rate: elVal('f-rate'), year: elVal('f-year'),
       amt: elVal('f-amt'), chan: elVal('f-chan'), cibil: elVal('f-cibil'),
+      tenure: elVal('f-tenure'), out: elVal('f-out'),
       rate_type: formState.rate_type, employment: formState.employment,
     }));
   } catch (e) {}
@@ -205,6 +206,8 @@ function restoreDraft() {
   const set = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
   set('f-bank', d.bank); set('f-rate', d.rate); set('f-year', d.year);
   set('f-amt', d.amt); set('f-chan', d.chan); set('f-cibil', d.cibil);
+  set('f-tenure', d.tenure); set('f-out', d.out);
+  syncOutUnit();
   if (d.rate_type) {
     formState.rate_type = d.rate_type;
     document.querySelectorAll('#f-type .opt').forEach(o => o.classList.toggle('on', o.dataset.type === d.rate_type));
@@ -574,8 +577,8 @@ function formHtml() {
         <select id="f-tenure"><option value="" disabled selected>Choose tenure</option>${tenureOpts}</select>
       </div>
       <div class="field">
-        <label for="f-out">Amount you still owe <span class="opt-tag">optional — in ₹ crore</span></label>
-        <input id="f-out" type="number" inputmode="decimal" step="0.05" min="0" placeholder="e.g. 0.45 · leave blank and we'll estimate" />
+        <label for="f-out">Amount you still owe <span class="opt-tag" id="f-out-unit">optional — in ₹ lakh</span></label>
+        <input id="f-out" type="number" inputmode="decimal" step="1" min="0" placeholder="e.g. 28 · leave blank and we'll estimate" />
       </div>
       <div class="field">
         <label>Rate type</label>
@@ -602,8 +605,32 @@ function formHtml() {
     </div>`;
 }
 
+// The "amount you still owe" field uses the SAME unit as the loan amount: loans
+// shown in lakh take the balance in lakh, loans at/above ₹1 crore take it in
+// crore. The flip happens at 100 lakh, matching the AMOUNTS labels. A missing/NaN
+// amount falls back to lakh.
+function amountUnit(amountLakh) { return amountLakh >= 100 ? 'crore' : 'lakh'; }
+
+// Keep the outstanding field's unit label, placeholder and step in step with the
+// chosen loan amount.
+function syncOutUnit() {
+  const unit = amountUnit(parseInt(document.getElementById('f-amt').value, 10));
+  const tag = document.getElementById('f-out-unit');
+  const inp = document.getElementById('f-out');
+  if (tag) tag.textContent = `optional — in ₹ ${unit}`;
+  if (inp) {
+    inp.step = unit === 'crore' ? '0.05' : '1';
+    inp.placeholder = unit === 'crore'
+      ? "e.g. 0.45 · leave blank and we'll estimate"
+      : "e.g. 28 · leave blank and we'll estimate";
+  }
+}
+
 function wireForm() {
   formState = { rate_type: null, employment: null };
+  const amtSel = document.getElementById('f-amt');
+  if (amtSel) amtSel.addEventListener('change', syncOutUnit);
+  syncOutUnit();
   document.querySelectorAll('#f-type .opt').forEach(el => el.addEventListener('click', () => {
     document.querySelectorAll('#f-type .opt').forEach(o => o.classList.remove('on'));
     el.classList.add('on'); formState.rate_type = el.dataset.type;
@@ -635,16 +662,18 @@ async function submit(state) {
   const cibil_band = document.getElementById('f-cibil').value;
   const tenure_years = parseInt(document.getElementById('f-tenure').value, 10);
   const outRaw = document.getElementById('f-out').value.trim();
-  // Field is in ₹ crore; convert to lakh (1 crore = 100 lakh) for the internal math.
-  const outstanding_cr = outRaw === '' ? null : parseFloat(outRaw);
-  const outstanding_lakh = outstanding_cr == null ? null : Math.round(outstanding_cr * 100 * 100) / 100;
+  // The balance is entered in the SAME unit as the loan amount (lakh under ₹1 cr,
+  // crore at/above). Convert to lakh (1 crore = 100 lakh) for the internal math.
+  const outNum = outRaw === '' ? null : parseFloat(outRaw);
+  const outstanding_lakh = outNum == null ? null
+    : Math.round((amountUnit(amount_lakh) === 'crore' ? outNum * 100 : outNum) * 100) / 100;
 
   if (!bank) return showError('Pick your bank.');
   if (!(rate >= 6 && rate <= 15)) return showError('Enter a rate between 6% and 15%.');
   if (!loan_year) return showError('Pick the year you took the loan.');
   if (!amount_lakh) return showError('Pick a loan amount.');
   if (!tenure_years) return showError('Pick your loan tenure.');
-  if (outstanding_cr != null && !(outstanding_cr > 0 && outstanding_lakh <= amount_lakh))
+  if (outNum != null && !(outNum > 0 && outstanding_lakh <= amount_lakh))
     return showError('Amount still owed should be between 0 and your loan amount — or leave it blank.');
   if (!rate_type) return showError('Pick floating or fixed.');
   if (!channel) return showError('Pick how you got the loan.');
