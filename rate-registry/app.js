@@ -157,7 +157,6 @@ let submitting = false;
 let currentRateId = null;   // returned by submit_rate; held in memory only, never in the URL
 let lastPayload = null;     // for client-side duplicate prevention
 let lastResult = null;      // { input, cohort, bestBankP25 } to re-render on Back
-let outcomeId = null;       // outcomes row id once a door is opened
 let authUser = null;        // Supabase Auth user when signed in; identity for anti-spam only, never shown
 let formState = { rate_type: null, employment: null };  // segmented-control selections (module-level so drafts can save them)
 
@@ -681,7 +680,6 @@ async function submit(state) {
     if (ins.error) throw ins.error;
     currentRateId = ins.data;
     lastPayload = payloadKey;
-    outcomeId = null;
     if (window.umami) window.umami.track('Submission');
 
     const [cs, br, bm, rm] = await Promise.all([
@@ -1037,9 +1035,11 @@ Thank you.`;
         <p class="door-line">${d.feeVerified ? "The fee is this lender's stated charge" : "The fee is a general estimate"} — confirm before you commit. ${calc.balanceNote} The target rate is what the better-priced quarter of similar borrowers at your bank report — a peer figure, not an advertised rate.</p>
         <div class="dbody">
           <div class="warning">If you simply ask for <b>"a lower rate,"</b> many lenders respond with a top-up — your existing loan is closed and reopened with a fresh tenure, a processing fee, and sometimes insurance you were never shown. You end up paying more over the life of the loan. Ask specifically for a <b>conversion to the current spread on your existing loan, with no change to tenure and no top-up.</b></div>
-          <div class="template">${esc(template)}</div>
-          <p class="door-cta-prompt">Want this as a ready-to-send note with your numbers filled in? Leave your email and we'll send the template — we're not a broker and not paid by any lender.</p>
-          <div class="door-cta" data-door-cta="Conversion"></div>
+          <button class="btn reveal-btn" type="button" data-reveal="Conversion">Show me the request to send my bank</button>
+          <div class="reveal" data-reveal-for="Conversion" hidden>
+            <p class="reveal-lead">Send this to your bank in writing — email or the branch manager:</p>
+            <div class="template">${esc(template)}</div>
+          </div>
         </div>
       </div>`;
   }
@@ -1072,49 +1072,33 @@ Thank you.`;
       <p class="door-line">Switch your loan to a cheaper bank — there's paperwork and some upfront cost, but the savings can be big.</p>
       <p class="door-line">${d.feeVerified ? "Processing fee is the new lender's stated charge; the rest are estimates" : "The costs are estimates"} — confirm before you move. ${calc.balanceNote} The target rate is what the better-priced quarter of borrowers report at the most competitive lender in our data — a peer figure, not an advertised rate — subject to eligibility.</p>
       <div class="dbody">
-        <p class="door-cta-prompt">Want the exact numbers for your loan and what to ask a new lender? Leave your email and we'll send the calculation — we're not a broker and not paid by any lender.</p>
-        <div class="door-cta" data-door-cta="Transfer"></div>
+        <button class="btn reveal-btn" type="button" data-reveal="Transfer">Show me what to ask a new lender</button>
+        <div class="reveal" data-reveal-for="Transfer" hidden>
+          <p class="reveal-lead">Before you switch, line these up — and get every number in writing:</p>
+          <ul class="reveal-list">
+            <li>Your current sanction letter and latest statement — they show your exact rate and outstanding.</li>
+            <li>Ask the new lender for the all-in rate for your profile <b>in writing</b> — the spread and what it's linked to (e.g. RLLR / repo).</li>
+            <li>Get every switching cost in writing: processing fee, MOD / stamp duty, and legal and valuation charges.</li>
+            <li>On a floating-rate loan, confirm there's <b>no foreclosure or prepayment penalty</b> — RBI does not allow one on floating-rate home loans.</li>
+            <li>Ask your current bank to convert to today's spread first — it's usually cheaper than moving.</li>
+          </ul>
+        </div>
       </div>
     </div>`;
 }
 
+// Reveal the door's actionable detail on-screen and count the click. This is the
+// high-intent signal we care about — the Umami "DoorOpen" event lets us see how
+// many people ask to act on a door (reprice or transfer). No email is collected.
 function wireDoors() {
-  document.querySelectorAll('[data-door-cta]').forEach(slot => {
-    const door = slot.getAttribute('data-door-cta');
-    renderDoorCta(slot, door, false);
-  });
-}
-
-function renderDoorCta(slot, door, done) {
-  if (done) {
-    slot.innerHTML = `<div class="email-ok">✓ Got it — we'll email you.</div>`;
-    return;
-  }
-  const label = door === 'Conversion' ? 'Email me this template' : 'Email me the calculation';
-  slot.innerHTML = `
-    <div class="email-row">
-      <input type="email" inputmode="email" placeholder="you@email.com" aria-label="Your email" />
-      <button class="btn btn-sm" type="button">${label}</button>
-    </div>
-    <div class="form-error" style="text-align:left"></div>`;
-  const input = slot.querySelector('input');
-  const btn = slot.querySelector('button');
-  const err = slot.querySelector('.form-error');
-  btn.addEventListener('click', async () => {
-    const email = input.value.trim();
-    if (!validEmail(email)) { err.textContent = 'Enter a valid email.'; return; }
-    err.textContent = '';
-    btn.disabled = true; btn.textContent = 'Saving…';
-    try {
-      const r = await sb.rpc('record_outcome', { p_rate_id: currentRateId, p_door: door, p_email: email });
-      if (r.error) throw r.error;
-      outcomeId = r.data;
+  document.querySelectorAll('[data-reveal]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const door = btn.getAttribute('data-reveal');
+      const panel = document.querySelector(`[data-reveal-for="${door}"]`);
+      if (panel) panel.hidden = false;
+      btn.hidden = true;
       if (window.umami) window.umami.track('DoorOpen', { door });
-      renderDoorCta(slot, door, true);
-    } catch (e) {
-      btn.disabled = false; btn.textContent = label;
-      err.textContent = 'Could not save that. Please try again.';
-    }
+    });
   });
 }
 
