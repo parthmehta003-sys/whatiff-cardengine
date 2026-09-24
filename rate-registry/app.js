@@ -984,18 +984,6 @@ function renderResult(res) {
   const again = document.getElementById('f-again'); if (again) again.addEventListener('click', renderLanding);
 }
 
-// Provenance line for a door's target rate — the basis is EXPOSED, never a bare
-// number (docs/rate-migration-spec.md §6a / §7). Kept subordinate; the saving and
-// net benefit stay the headline.
-function doorBasisLine(d) {
-  const t = (d && d.target != null) ? d.target.toFixed(2) + '%' : '';
-  if (d.basis === 'cohort_p25')
-    return `<div class="door-basis">Target ${t} — what the better-priced quarter of similar borrowers at your bank report. A peer estimate, not a quote.</div>`;
-  if (d.basis === 'best_bank_p25')
-    return `<div class="door-basis">Target ${t} — what the better-priced quarter of borrowers report at the most competitive lender in our data. A peer estimate, not a quote — subject to eligibility and the costs above.</div>`;
-  return '';
-}
-
 function doorHtml(n, rec, calc, input) {
   const isRec = rec === `door${n}`;
   const tag = isRec ? `<div class="dtag">Recommended</div>` : '';
@@ -1031,17 +1019,26 @@ change to the outstanding schedule. Kindly confirm the revised rate and the
 one-time conversion fee before processing.
 
 Thank you.`;
+    const yrs2 = Math.round(calc.yrs);
     return `
       <div class="door ${isRec ? 'rec' : ''}" data-door="Conversion">
         ${tag}
         <h3>Ask your bank to convert your spread</h3>
-        <div class="dsub">In plain words: get your bank to put today's lower rate on your existing loan — no new loan, no longer tenure.</div>
-        <div class="net">You'd save about <b>${inr(d.net)}</b> — after a one-time fee of roughly ${inr(d.cost)}.</div>
-        <div class="cost">That's ${inr(d.gross)} saved over your remaining ~${Math.round(calc.yrs)} years, minus the fee. ${d.feeVerified ? "Fee is this lender's stated charge — confirm before you commit." : "Fee is a general estimate — check with your bank."} ${calc.balanceNote}</div>
-        ${doorBasisLine(d)}
+        <table class="door-table tnum">
+          <tbody>
+            <tr><td>Your rate</td><td>${input.rate.toFixed(2)}%</td></tr>
+            <tr><td>What similar borrowers at your bank report</td><td>${d.target.toFixed(2)}%</td></tr>
+            <tr><td>Interest saved over ~${yrs2} year${yrs2 === 1 ? '' : 's'}</td><td>${inr(d.gross)}</td></tr>
+            <tr><td>One-time conversion fee</td><td class="cost-val">− ${inr(d.cost)}</td></tr>
+            <tr class="net-row"><td>Net benefit</td><td>${inr(d.net)}</td></tr>
+          </tbody>
+        </table>
+        <p class="door-line">In plain words: get your bank to put today's lower rate on your existing loan — no new loan, no longer tenure.</p>
+        <p class="door-line">${d.feeVerified ? "The fee is this lender's stated charge" : "The fee is a general estimate"} — confirm before you commit. ${calc.balanceNote} The target rate is what the better-priced quarter of similar borrowers at your bank report — a peer figure, not an advertised rate.</p>
         <div class="dbody">
-          <div class="template">${esc(template)}</div>
           <div class="warning">If you simply ask for <b>"a lower rate,"</b> many lenders respond with a top-up — your existing loan is closed and reopened with a fresh tenure, a processing fee, and sometimes insurance you were never shown. You end up paying more over the life of the loan. Ask specifically for a <b>conversion to the current spread on your existing loan, with no change to tenure and no top-up.</b></div>
+          <div class="template">${esc(template)}</div>
+          <p class="door-cta-prompt">Want this as a ready-to-send note with your numbers filled in? Leave your email and we'll send the template — we're not a broker and not paid by any lender.</p>
           <div class="door-cta" data-door-cta="Conversion"></div>
         </div>
       </div>`;
