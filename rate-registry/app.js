@@ -551,7 +551,7 @@ function formHtml() {
   return `
     <div class="card" id="addrate">
       <div class="form-title">Add your rate</div>
-      <div class="form-sub">A minute, no phone, no email. Anonymous — your name is never shown. <b>For now, WhatIff covers salaried home-loan borrowers</b> — self-employed loans vary too much to compare fairly yet.</div>
+      <div class="form-sub">A minute, no phone, no email. Anonymous — your name is never shown. <b>For now, WhatIff covers salaried home-loan borrowers.</b></div>
 
       <div class="form-grid">
       <div class="field">
