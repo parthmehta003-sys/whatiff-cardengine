@@ -211,6 +211,18 @@ input, select, button, textarea { font-family: inherit; font-size: 16px; }
   outline: none; border-color: var(--lav2); box-shadow: 0 0 0 4px rgba(180,170,207,.28);
 }
 
+/* ---- tap chips (the whole form is chip-based; only rate + outstanding type) ---- */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips .chip {
+  padding: 9px 15px; border: 1px solid var(--line); border-radius: 999px;
+  background: #fff; color: var(--muted); font-family: inherit; font-weight: 700;
+  font-size: 13.5px; line-height: 1.1; cursor: pointer; user-select: none;
+  transition: border-color .12s, background .12s, color .12s;
+}
+.chips .chip:hover { border-color: var(--lav2); }
+.chips .chip.on { background: var(--ink); border-color: var(--ink); color: #fff; box-shadow: var(--shadow); }
+.chips .chip.more-toggle { color: var(--ink); border-style: dashed; }
+
 .seg { display: flex; gap: 10px; flex-wrap: wrap; }
 .seg .opt {
   flex: 1 1 auto; min-width: 100px; padding: 12px 10px; text-align: center;

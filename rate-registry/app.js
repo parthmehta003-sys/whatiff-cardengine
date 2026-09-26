@@ -160,7 +160,10 @@ let currentRateId = null;   // returned by submit_rate; held in memory only, nev
 let lastPayload = null;     // for client-side duplicate prevention
 let lastResult = null;      // { input, cohort, bestBankP25 } to re-render on Back
 let authUser = null;        // Supabase Auth user when signed in; identity for anti-spam only, never shown
-let formState = { rate_type: null };  // segmented-control selection (module-level so drafts can save it)
+// All chip selections (module-level so a draft can save them across the sign-in
+// redirect). Rate + outstanding are typed inputs, read straight from the DOM.
+let formState = { bank: null, rate_type: null, amount_lakh: null, cibil_band: null,
+                  loan_year: null, tenure_years: null, channel: null };
 
 // ===========================================================================
 // AUTH — sign-in gates ONLY submitting a rate (reads stay open). Identity is
@@ -189,14 +192,13 @@ function togglePassword() {
 }
 
 // Persist the in-progress form so a Google sign-in redirect doesn't lose it.
+// Chip selections live in formState; rate + outstanding are typed inputs.
+const CHIP_KEYS = ['bank', 'rate_type', 'amount_lakh', 'cibil_band', 'loan_year', 'tenure_years', 'channel'];
 function saveDraft() {
   try {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify({
-      bank: elVal('f-bank'), rate: elVal('f-rate'), year: elVal('f-year'),
-      amt: elVal('f-amt'), chan: elVal('f-chan'), cibil: elVal('f-cibil'),
-      tenure: elVal('f-tenure'), out: elVal('f-out'),
-      rate_type: formState.rate_type,
-    }));
+    const d = { rate: elVal('f-rate'), out: elVal('f-out') };
+    CHIP_KEYS.forEach(k => { d[k] = formState[k]; });
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
   } catch (e) {}
 }
 function loadDraft() { try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch (e) { return null; } }
@@ -207,14 +209,23 @@ function restoreDraft() {
   const d = loadDraft();
   if (!d) return;
   const set = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
-  set('f-bank', d.bank); set('f-rate', d.rate); set('f-year', d.year);
-  set('f-amt', d.amt); set('f-chan', d.chan); set('f-cibil', d.cibil);
-  set('f-tenure', d.tenure); set('f-out', d.out);
+  set('f-rate', d.rate); set('f-out', d.out);
+  CHIP_KEYS.forEach(key => {
+    const v = d[key];
+    if (v == null || v === '') return;
+    formState[key] = v;
+    const group = document.querySelector(`.chips[data-key="${key}"]`);
+    if (!group) return;
+    const chip = Array.from(group.querySelectorAll('.chip[data-val]'))
+      .find(c => c.getAttribute('data-val') === String(v));
+    if (!chip) return;
+    chip.classList.add('on');
+    if (chip.classList.contains('more-item')) {
+      group.querySelectorAll('.more-item').forEach(m => { m.hidden = false; });
+      const mt = group.querySelector('.more-toggle'); if (mt) mt.hidden = true;
+    }
+  });
   syncOutUnit();
-  if (d.rate_type) {
-    formState.rate_type = d.rate_type;
-    document.querySelectorAll('#f-type .opt').forEach(o => o.classList.toggle('on', o.dataset.type === d.rate_type));
-  }
 }
 
 async function signInGoogle() {
@@ -395,8 +406,6 @@ async function renderLanding() {
   const scrollToForm = () => {
     const t = document.getElementById('addrate');
     if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    const bank = document.getElementById('f-bank');
-    if (bank) setTimeout(() => bank.focus({ preventScroll: true }), 400);
   };
   ['hero-cta', 'nav-cta', 'closing-cta'].forEach(id => {
     const el = document.getElementById(id);
@@ -537,59 +546,48 @@ function coinsCluster() {
   return `<span class="glow"></span>${coins}`;
 }
 
-function formHtml() {
-  const bankOpts = BANK_GROUPS.map(g =>
-    `<optgroup label="${esc(g.label)}">${g.items.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join('')}</optgroup>`
-  ).join('');
-  const yearOpts = YEARS.map(y => `<option value="${y}">${y}</option>`).join('');
-  const amtOpts = AMOUNTS.map(a => `<option value="${a.v}">${esc(a.label)}</option>`).join('');
-  const chanOpts = CHANNELS.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
-  const cibilOpts = CIBIL_BANDS.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
-  const tenureOpts = TENURES.map(t => `<option value="${t}">${t} years</option>`).join('');
-  const typeOpts = RATE_TYPES.map(t => `<div class="opt" data-type="${t}">${t}</div>`).join('');
+// A tap-only chip group. `items` are {v, label}; the chosen value is tracked in
+// formState under `key` (see wireForm). No dropdowns, no typing — the only typed
+// fields are the rate and the optional outstanding, which are single numbers.
+function chipsHtml(key, items) {
+  return `<div class="chips" data-key="${key}">` +
+    items.map(it => `<button type="button" class="chip" data-val="${esc(String(it.v))}">${esc(it.label)}</button>`).join('') +
+    `</div>`;
+}
+// Bank has 25 options — show the common ones, hide the rest behind "More banks".
+function bankChipsHtml() {
+  const N = 8;
+  const chip = (b, cls, hidden) =>
+    `<button type="button" class="chip${cls}" data-val="${esc(b)}"${hidden ? ' hidden' : ''}>${esc(b)}</button>`;
+  return `<div class="chips" data-key="bank">` +
+    BANKS.slice(0, N).map(b => chip(b, '', false)).join('') +
+    BANKS.slice(N).map(b => chip(b, ' more-item', true)).join('') +
+    `<button type="button" class="chip more-toggle">More banks ▾</button>` +
+    `</div>`;
+}
 
+function formHtml() {
   return `
     <div class="card" id="addrate">
       <div class="form-title">Add your rate</div>
       <div class="form-sub">A minute, no phone, no email. Anonymous — your name is never shown. <b>For now, WhatIff covers salaried home-loan borrowers.</b></div>
 
-      <div class="form-grid">
-      <div class="field">
-        <label for="f-bank">Your bank</label>
-        <select id="f-bank"><option value="" disabled selected>Choose a bank</option>${bankOpts}</select>
-      </div>
-      <div class="field">
-        <label for="f-rate">Your interest rate (%)</label>
-        <input id="f-rate" type="number" inputmode="decimal" step="0.01" min="6" max="15" placeholder="e.g. 8.75" />
-      </div>
-      <div class="field">
-        <label for="f-year">Year you took it</label>
-        <select id="f-year"><option value="" disabled selected>Choose a year</option>${yearOpts}</select>
-      </div>
-      <div class="field">
-        <label for="f-amt">Loan amount <span class="opt-tag">when you took it</span></label>
-        <select id="f-amt"><option value="" disabled selected>Choose an amount</option>${amtOpts}</select>
-      </div>
-      <div class="field">
-        <label for="f-tenure">Loan tenure <span class="opt-tag">the term you signed up for</span></label>
-        <select id="f-tenure"><option value="" disabled selected>Choose tenure</option>${tenureOpts}</select>
-      </div>
-      <div class="field">
-        <label for="f-out">Amount you still owe <span class="opt-tag" id="f-out-unit">optional — in ₹ lakh</span></label>
-        <input id="f-out" type="number" inputmode="decimal" step="1" min="0" placeholder="e.g. 28 · leave blank and we'll estimate" />
-      </div>
-      <div class="field">
-        <label>Rate type</label>
-        <div class="seg" id="f-type">${typeOpts}</div>
-      </div>
-      <div class="field">
-        <label for="f-chan">How did you get the loan?</label>
-        <select id="f-chan"><option value="" disabled selected>Choose one</option>${chanOpts}</select>
-      </div>
-      <div class="field">
-        <label for="f-cibil">Credit score (CIBIL) when you took the loan</label>
-        <select id="f-cibil"><option value="" disabled selected>Choose a band</option>${cibilOpts}</select>
-      </div>
+      <div class="form-fields">
+        <div class="field"><label>Your bank</label>${bankChipsHtml()}</div>
+        <div class="field">
+          <label for="f-rate">Your interest rate (%)</label>
+          <input id="f-rate" type="number" inputmode="decimal" step="0.01" min="6" max="15" placeholder="e.g. 8.75" />
+        </div>
+        <div class="field"><label>Loan amount <span class="opt-tag">when you took it</span></label>${chipsHtml('amount_lakh', AMOUNTS)}</div>
+        <div class="field"><label>Credit score (CIBIL) when you took the loan</label>${chipsHtml('cibil_band', CIBIL_BANDS.map(c => ({ v: c, label: c })))}</div>
+        <div class="field"><label>Year you took it</label>${chipsHtml('loan_year', YEARS.map(y => ({ v: y, label: String(y) })))}</div>
+        <div class="field"><label>Loan tenure <span class="opt-tag">the term you signed up for</span></label>${chipsHtml('tenure_years', TENURES.map(t => ({ v: t, label: t + ' yr' })))}</div>
+        <div class="field"><label>Rate type</label>${chipsHtml('rate_type', RATE_TYPES.map(t => ({ v: t, label: t })))}</div>
+        <div class="field"><label>How did you get the loan?</label>${chipsHtml('channel', CHANNELS.map(c => ({ v: c, label: c })))}</div>
+        <div class="field">
+          <label for="f-out">Amount you still owe <span class="opt-tag" id="f-out-unit">optional — in ₹ lakh</span></label>
+          <input id="f-out" type="number" inputmode="decimal" step="1" min="0" placeholder="e.g. 28 · leave blank and we'll estimate" />
+        </div>
       </div>
 
       <button class="btn" id="f-submit">See what's achievable at your bank</button>
@@ -608,7 +606,7 @@ function amountUnit(amountLakh) { return amountLakh >= 100 ? 'crore' : 'lakh'; }
 // Keep the outstanding field's unit label, placeholder and step in step with the
 // chosen loan amount.
 function syncOutUnit() {
-  const unit = amountUnit(parseInt(document.getElementById('f-amt').value, 10));
+  const unit = amountUnit(parseInt(formState.amount_lakh, 10));
   const tag = document.getElementById('f-out-unit');
   const inp = document.getElementById('f-out');
   if (tag) tag.textContent = `optional — in ₹ ${unit}`;
@@ -621,14 +619,27 @@ function syncOutUnit() {
 }
 
 function wireForm() {
-  formState = { rate_type: null };
-  const amtSel = document.getElementById('f-amt');
-  if (amtSel) amtSel.addEventListener('change', syncOutUnit);
+  formState = { bank: null, rate_type: null, amount_lakh: null, cibil_band: null,
+                loan_year: null, tenure_years: null, channel: null };
+  // Every chip group: tap selects one value into formState[key]; the amount group
+  // also refreshes the outstanding unit. "More banks" reveals the hidden chips.
+  document.querySelectorAll('.chips[data-key]').forEach(group => {
+    const key = group.getAttribute('data-key');
+    group.querySelectorAll('.chip[data-val]').forEach(chip => {
+      chip.addEventListener('click', () => {
+        group.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+        chip.classList.add('on');
+        formState[key] = chip.getAttribute('data-val');
+        if (key === 'amount_lakh') syncOutUnit();
+      });
+    });
+    const more = group.querySelector('.more-toggle');
+    if (more) more.addEventListener('click', () => {
+      group.querySelectorAll('.more-item').forEach(m => { m.hidden = false; });
+      more.hidden = true;
+    });
+  });
   syncOutUnit();
-  document.querySelectorAll('#f-type .opt').forEach(el => el.addEventListener('click', () => {
-    document.querySelectorAll('#f-type .opt').forEach(o => o.classList.remove('on'));
-    el.classList.add('on'); formState.rate_type = el.dataset.type;
-  }));
   document.getElementById('f-submit').addEventListener('click', () => submit(formState));
   wireAuth();
 }
@@ -642,15 +653,15 @@ async function submit(state) {
   if (submitting) return;
   showError('');
 
-  const bank = document.getElementById('f-bank').value;
+  const bank = state.bank;
   const rate = parseFloat(document.getElementById('f-rate').value);
-  const loan_year = parseInt(document.getElementById('f-year').value, 10);
-  const amount_lakh = parseInt(document.getElementById('f-amt').value, 10);
+  const loan_year = parseInt(state.loan_year, 10);
+  const amount_lakh = parseInt(state.amount_lakh, 10);
   const rate_type = state.rate_type;
-  const channel = document.getElementById('f-chan').value;
+  const channel = state.channel;
   const employment = 'Salaried';  // registry is salaried-only for now
-  const cibil_band = document.getElementById('f-cibil').value;
-  const tenure_years = parseInt(document.getElementById('f-tenure').value, 10);
+  const cibil_band = state.cibil_band;
+  const tenure_years = parseInt(state.tenure_years, 10);
   const outRaw = document.getElementById('f-out').value.trim();
   // The balance is entered in the SAME unit as the loan amount (lakh under ₹1 cr,
   // crore at/above). Convert to lakh (1 crore = 100 lakh) for the internal math.
